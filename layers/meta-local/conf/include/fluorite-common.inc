@@ -8,7 +8,6 @@ IMAGE_INSTALL:append = " \
     vulkan-loader \
     mesa-vulkan-drivers \
     vulkan-tools \
-    vkcube \
 "
 
 DISTRO_FEATURES:append = " vulkan"
