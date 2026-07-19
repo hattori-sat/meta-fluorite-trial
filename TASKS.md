@@ -4,7 +4,7 @@ Last updated: 2026-07-19
 
 ## Current focus
 
-**[FLR-0019 — QEMU build-to-render iteration](work/tickets/FLR-0019-qemu-build-iteration.md)**
+**[FLR-0020 — Self-contained build workspace bootstrap](work/tickets/FLR-0020-self-contained-build-workspace.md)**
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -12,11 +12,11 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0019 | BitBake成果物からQEMU stable-render verdictまでを反復する | primary role + build-runner + target-validation checker | Do | vkcube packagecopy failureをbounded retryで再現/切り分けする |
+| FLR-0020 | meta-fluorite-trialだけでAGL/Yocto build workspaceを再構成する | primary role + build-runner + checker role | Plan | fixed manifest/lockからdry-run-first bootstrap contractを設計する |
 
 ## Next
 
-FLR-0019のみをIn Progressとする。FLR-0018はrunbook登録済み、FLR-0017は観測/MCP Check済み。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
+FLR-0020のみをIn Progressとする。FLR-0019はbuild environment blockerでWaiting、FLR-0018はrunbook登録済み、FLR-0017は観測/MCP Check済み。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |
@@ -37,6 +37,7 @@ FLR-0019のみをIn Progressとする。FLR-0018はrunbook登録済み、FLR-001
 | [FLR-0017](work/tickets/FLR-0017-qemu-evidence-mcp.md) | legacy QEMU contractをbounded evidence observerへ落とし込む | FLR-0002, FLR-0005, FLR-0008, FLR-0016 |
 | [FLR-0018](work/tickets/FLR-0018-qemu-launch-runbook.md) | QEMU launchをregistered Execution runbookへ固定する | FLR-0017 |
 | [FLR-0019](work/tickets/FLR-0019-qemu-build-iteration.md) | BitBake成果物からQEMU stable-render verdictまでを反復する | FLR-0018 |
+| [FLR-0020](work/tickets/FLR-0020-self-contained-build-workspace.md) | meta-fluorite-trialだけでAGL/Yocto build workspaceを再構成する | FLR-0019 |
 
 ## Waiting
 
@@ -51,6 +52,7 @@ FLR-0019のみをIn Progressとする。FLR-0018はrunbook登録済み、FLR-001
 - FLR-0017: legacy `docs/mac-qemu.md`のexplicit launch/readiness/crash evidenceをQEMU observerへ移す。
 - FLR-0018: current QEMU app-launch evidenceを固定Execution runbookへ移す。
 - FLR-0019: vkcube packagecopy failureを切り分け、成果物ができた場合のみscp/QEMUへ進む。
+- FLR-0020: `/AGL/trout` に依存しない fixed-manifest workspace bootstrap を設計する。
 
 - MCP explainability contractをdomain payloadと混ぜずに運用する。
 
