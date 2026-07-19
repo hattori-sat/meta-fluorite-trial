@@ -14,6 +14,7 @@ Repeat the bounded qemux86 cycle: effective metadata check, BitBake using the ex
 - Disk and inode capacity were healthy; no cache deletion or clean task was used.
 - Mini PC layer provenance is dirty, so any resulting artifact is not canonical until provenance is resolved.
 - `vkcube` is an optional Vulkan diagnostic package in `fluorite-common.inc`, not a Fluorite runtime dependency; its packagecopy failure blocks image assembly.
+- The bounded image run `run-7fbfa826928f4ca8` reproduced the same failure at exit 1: `vkcube:do_package` emitted pseudo/tar unknown-directory errors under `usr/share`.
 
 ## Inferences
 
@@ -42,11 +43,11 @@ Repeat the bounded qemux86 cycle: effective metadata check, BitBake using the ex
 
 ## Smallest next action
 
-The optional `vkcube` exclusion is insufficient to complete the cycle: isolate the BitBake worker environment causing the Flutter pub wait before changing Fluorite code. Keep Vulkan/mesa loader packages and Fluorite runtime unchanged; report vkcube and QEMU verdicts as deferred.
+Remove only the optional `vulkan-tools` image package, retain Vulkan/mesa loader packages and Fluorite runtime unchanged, then rerun the fixed image build. Treat Vulkan diagnostic coverage as deferred and do not report it as PASS.
 
 ## PDCA
 
 - Plan: use merged runbook and existing caches; no destructive clean tasks.
 - Do: metadata gate passed; package retry reproduced `vkcube:do_package`; image then reached Fluorite `do_compile` but stalled.
-- Check: direct offline pub and bundle commands pass, but no deploy artifact was generated; QEMU/scp gates remain blocked.
-- Act: preserve the environment-vs-worker hypothesis and stop further rebuilds until the bounded worker reproduction is explained.
+- Check: demo compile completed with exit 0, but image failed at `vkcube:do_package`; no deploy artifact was generated and QEMU/scp gates remain blocked.
+- Act: apply the smallest image-input exclusion, then repeat image build; do not change Fluorite code or clear caches.

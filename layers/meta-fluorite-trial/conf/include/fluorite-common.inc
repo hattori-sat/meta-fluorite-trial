@@ -7,7 +7,6 @@ IMAGE_INSTALL:append = " \
     window-management-client-grpc \
     vulkan-loader \
     mesa-vulkan-drivers \
-    vulkan-tools \
 "
 
 DISTRO_FEATURES:append = " vulkan"
