@@ -40,6 +40,7 @@ FLR-0023のみをIn Progressとする。FLR-0020はworkspace bootstrap設計、F
 | [FLR-0020](work/tickets/FLR-0020-self-contained-build-workspace.md) | meta-fluorite-trialだけでAGL/Yocto build workspaceを再構成する | FLR-0019 |
 | [FLR-0023](work/tickets/FLR-0023-project-owned-fluorite-layer.md) | meta-fluorite-trial layerをFluorite固有実装のsource of truthとしてBitBake入力を再構成する | FLR-0021, FLR-0022 |
 | [FLR-0024](work/tickets/FLR-0024-project-layer-naming.md) | legacy meta-localをmeta-fluorite-trial layerへ置き換える | FLR-0023 |
+| [FLR-0025](work/tickets/FLR-0025-bitbake-monitor-mcp.md) | bounded BitBake監視MCPを追加する | FLR-0024 |
 
 ## Waiting
 

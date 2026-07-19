@@ -242,6 +242,12 @@ process-local and disappear when the server restarts. This initial runtime has n
 resume or distributed process ownership; that remains explicitly UNKNOWN until a
 persistent supervisor is selected.
 
+SSH does not disable MCP. The fixed remote wrapper runs only the configured `agl`,
+`yocto`, and `command_runner` servers on the build role. It validates the remote
+repository revision and rejects arbitrary SSH arguments; the next monitor ticket
+adds durable, redacted completion records so a new chat can resume without replaying
+the full build transcript.
+
 Real metadata-write operations are async-only; synchronous execution is limited
 to short read-only runbooks so MCP host timeouts cannot orphan a long call. A
 non-zero environment setup result stops before the command is executed. The
