@@ -1,0 +1,34 @@
+From 4d36fb57d4ac9b9376105993e2e9feee69073c44 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 9 Mar 2026 12:10:00 +0900
+Subject: [PATCH] desktop: defer pending resolution until a background exists
+
+Upstream-Status: Pending
+
+After the gRPC proxy started sending `agl_shell.ready()`, NORMAL surfaces
+advanced from role NONE to role DESKTOP, but startup still failed when the
+compositor tried to activate a pending surface before any background had been
+registered on an output. In that state layout.c raises:
+
+  "No valid output found to activate surface by default"
+
+Desktop surfaces should stay pending until the shell has both entered the
+ready state and at least one background surface available on an output.
+---
+ src/desktop.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/desktop.c b/src/desktop.c
+index b327fe6..6fff485 100644
+--- a/src/desktop.c
++++ b/src/desktop.c
+@@ -389,7 +389,8 @@ desktop_committed(struct weston_desktop_surface *dsurface,
+ 	    !policy->api.surface_commited(surface, surface->ivi))
+ 		return;
+ 
+-	if (ivi->shell_client.ready && !surface->checked_pending) {
++	if (ivi->shell_client.ready && !surface->checked_pending &&
++	    ivi_layout_find_bg_output(ivi)) {
+ 		struct ivi_output *remote_output = NULL;
+ 		const char *app_id =	weston_desktop_surface_get_app_id(dsurface);
+ 		weston_log("Checking pending surface %p, app_id %s\n", surface,

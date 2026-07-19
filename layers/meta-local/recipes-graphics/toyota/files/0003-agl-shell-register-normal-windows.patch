@@ -1,0 +1,156 @@
+From 2d8689984d0c8c45f997149fd8aa4e2f19c4b44d Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 8 Mar 2026 21:20:00 +0900
+Subject: [PATCH] flutter-auto: force AGL normal activation for fluorite
+
+Upstream-Status: Pending
+
+This is an intentionally narrow experiment for the `fluorite` app only.
+
+`window_type = NORMAL` is documented as an AGL compositor window type, but
+`flutter-auto` skipped the AGL shell path for fluorite NORMAL windows in
+three places:
+
+- it never bound to `agl_shell` for fluorite NORMAL
+- the NORMAL branch never called `agl_shell_set_app_normal(app_id)`
+- it never explicitly activated the NORMAL app after registration
+
+This left the compositor seeing the surface in the pending list without
+resolving it into a visible normal application. For now, only special-case
+`app_id=fluorite`:
+
+- bind to `agl_shell` when the app id is `fluorite`
+- add helpers for `set_app_normal` and direct activation
+- for fluorite NORMAL windows, apply activation area first, then register the
+  app as normal, then explicitly activate it on the selected output
+
+This is not a generic fix. It is only meant to prove that forcing the AGL
+normal/activation path is enough to make fluorite visible.
+---
+diff -urN a/shell/wayland/display.cc b/shell/wayland/display.cc
+--- a/shell/wayland/display.cc	2026-03-08 21:23:47.850792715 +0900
++++ b/shell/wayland/display.cc	2026-03-08 21:23:47.870792715 +0900
+@@ -49,9 +49,7 @@
+   wayland_event_mask_update(ignore_wayland_event, m_wayland_event_mask);
+ 
+   for (auto const& cfg : configs) {
+-    // check if we actually need to bind to agl-shell
+-    if (WaylandWindow::WINDOW_NORMAL !=
+-        WaylandWindow::get_window_type(cfg.view.window_type)) {
++    if (cfg.app_id == "fluorite") {
+       m_agl.bind_to_agl_shell = true;
+       break;
+     }
+@@ -841,6 +839,32 @@
+   }
+ }
+ 
++void Display::AglShellDoAppNormal(const std::string& app_id) const {
++  if (!m_agl.shell)
++    return;
++
++  SPDLOG_DEBUG("Registering NORMAL app_id {} with agl-shell", app_id);
++  agl_shell_set_app_normal(m_agl.shell, app_id.c_str());
++  wl_display_flush(m_display);
++}
++
++void Display::AglShellDoActivateApp(const std::string& app_id,
++                                    const uint32_t index) const {
++  if (!m_agl.shell)
++    return;
++
++  if (index >= m_all_outputs.size()) {
++    SPDLOG_ERROR("Cannot activate app_id {} on invalid output index {}", app_id,
++                 index);
++    return;
++  }
++
++  SPDLOG_DEBUG("Activating NORMAL app_id {} on output index {}", app_id, index);
++  agl_shell_activate_app(m_agl.shell, app_id.c_str(),
++                         m_all_outputs[index]->output);
++  wl_display_flush(m_display);
++}
++
+ void Display::AglShellDoSetupActivationArea(uint32_t x,
+                                             uint32_t y,
+                                             uint32_t width,
+diff -urN a/shell/wayland/display.h b/shell/wayland/display.h
+--- a/shell/wayland/display.h	2026-03-08 21:23:47.850792715 +0900
++++ b/shell/wayland/display.h	2026-03-08 21:23:47.874792715 +0900
+@@ -189,6 +189,26 @@
+   void AglShellDoReady() const;
+ 
+   /**
++   * @brief AglShell: Register an application as a normal app window.
++   * @param[in] app_id the AGL/XDG app id for the window
++   * @return void
++   * @relation
++   * wayland, agl-shell
++   */
++  void AglShellDoAppNormal(const std::string& app_id) const;
++
++  /**
++   * @brief AglShell: Activate an application on the selected output.
++   * @param[in] app_id the AGL/XDG app id for the window
++   * @param[in] index the logical output index
++   * @return void
++   * @relation
++   * wayland, agl-shell
++   */
++  void AglShellDoActivateApp(const std::string& app_id,
++                             uint32_t index) const;
++
++  /**
+    * @brief AglShell: Set up an activation area where to display the client's
+    * window
+    * @return void
+diff -urN a/shell/wayland/window.cc b/shell/wayland/window.cc
+--- a/shell/wayland/window.cc	2026-03-08 21:23:47.850792715 +0900
++++ b/shell/wayland/window.cc	2026-03-08 21:23:47.874792715 +0900
+@@ -96,26 +96,37 @@
+ #if ENABLE_AGL_SHELL_CLIENT
+   switch (m_type) {
+     case WINDOW_NORMAL:
++      if (m_app_id == "fluorite") {
++        if (m_activation_area.x || m_activation_area.y ||
++            m_activation_area.width || m_activation_area.height) {
++          m_display->AglShellDoSetupActivationArea(
++              m_activation_area.x, m_activation_area.y,
++              m_activation_area.width, m_activation_area.height,
++              m_output_index);
++        }
++        m_display->AglShellDoAppNormal(m_app_id);
++        m_display->AglShellDoActivateApp(m_app_id, m_output_index);
++      }
+       break;
+     case WINDOW_BG:
+-      m_display->AglShellDoBackground(m_base_surface, 0);
++      m_display->AglShellDoBackground(m_base_surface, m_output_index);
+       if (m_activation_area.x || m_activation_area.y ||
+           m_activation_area.width || m_activation_area.height)
+         m_display->AglShellDoSetupActivationArea(
+             m_activation_area.x, m_activation_area.y, m_activation_area.width,
+-            m_activation_area.height, 0);
++            m_activation_area.height, m_output_index);
+       break;
+     case WINDOW_PANEL_TOP:
+-      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_TOP, 0);
++      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_TOP, m_output_index);
+       break;
+     case WINDOW_PANEL_BOTTOM:
+-      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_BOTTOM, 0);
++      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_BOTTOM, m_output_index);
+       break;
+     case WINDOW_PANEL_LEFT:
+-      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_LEFT, 0);
++      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_LEFT, m_output_index);
+       break;
+     case WINDOW_PANEL_RIGHT:
+-      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_RIGHT, 0);
++      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_RIGHT, m_output_index);
+       break;
+     default:
+       spdlog::critical("Invalid surface role type supplied");
+
+-- 
+2.34.1

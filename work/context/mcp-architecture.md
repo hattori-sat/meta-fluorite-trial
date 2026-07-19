@@ -1,77 +1,52 @@
 # MCP architecture boundaries
 
-## Objective
+## Decision
 
-Fluorite lab固有のYocto/QEMU/target状態を、小さく監査可能なtool contractでagentへ提供する。任意shellをMCPとして公開しない。
+調査と実行automationを、8個のbounded contextごとのstdio MCPへ分離する。server実装はpagination、redaction、evidence IDなどのtechnical kernelだけを共有し、domain vocabularyとpayloadは共有しない。
 
-## Server 1 — Source knowledge
+| Server | Owned meaning | Placement | Authority |
+| --- | --- | --- | --- |
+| `agl` | manifest、feature、image/packagegroup、compositor/service integration | Linux build roleへ固定SSH stdio | read-only |
+| `yocto` | layer、recipe、append、class、configuration、task log | Linux build roleへ固定SSH stdio | read-only |
+| `fluorite` | Dart scene、asset、interaction、startup contract | Mac repository | read-only |
+| `flutter_runtime` | Engine/embedder、launcher、thread、surface | Mac repository | read-only |
+| `filament` | Dart/native bridge、Filament engine、material/render asset | Mac repository | read-only |
+| `graphics` | Wayland、Vulkan、Mesa、DRM、GPU presentation path | Mac repository | read-only |
+| `target_validation` | Mac QEMU/Raspberry Piの既存validation evidence | Mac repository | read-only |
+| `command_runner` | Git管理された固定runbookのplan、実行、status、bounded log | Linux build roleへ固定SSH stdio | gated state change |
 
-Purpose: fixed revisionのAGL、Fluorite demo、Flutter/launcher、Filament、graphics sourceをbounded evidenceとして読む。
+AGLは車載distributionのintegrationを、Yoctoはbuild metadataの解決を所有するため、同一serverへ統合しない。詳しい用語とhandoffは[DDD operating model](../../docs/architecture/ddd.md)と[Domain registry](../../domains/README.md)を正とする。
 
-Candidate tools:
+## Host boundary
 
-- `list_components`
-- `get_component_revision`
-- `search_symbols`
-- `trace_references`
-- `get_recipe_relationship`
-- `get_patch_targets`
-- `read_evidence`
+CodexとMac QEMU検証はMac roleに置く。AGL source、Yocto build tree、BitBakeとbuild commandはLinux mini-PC roleに置く。
 
-Constraints: domain必須、source root allowlist、excerpt上限、pagination、revision付きevidence ID。詳細は[MCP context control](mcp-context-control.md)。
+`agl`、`yocto`、`command_runner`だけを`scripts/run-remote-mcp.sh`で固定SSH stdio接続する。他の5 serverは`scripts/run-mcp.sh`でMac上から起動する。remote wrapperはserver ID、SSH role alias、repository pathをallowlist検証し、任意remote commandを受け取らない。
 
-## Server 2 — AGL/Yocto observer
+Linux roleにはCodex CLIを導入しない。canonical clone、SSH、既存Python 3.10+だけをruntime contractとし、実pathと接続情報はGit-ignored role configurationに保存する。
 
-Purpose: build host上のAGL manifest/layerとYocto configuration、cache、build、artifactをread-onlyで観測する。
+## Execution boundary
 
-Candidate tools:
+最初の7 serverはcommandを起動せず、登録root内の既存source/log/evidenceだけを読む。状態変更は`command_runner`へ隔離し、次をすべて満たした場合だけ実行する。
 
-- `get_host_baseline`
-- `get_repo_revisions`
-- `get_recipe_resolution`
-- `get_layer_status`
-- `get_build_config`
-- `get_effective_bitbake_vars`
-- `get_cache_usage`
-- `get_build_processes`
-- `list_artifacts`
-- `get_image_manifest`
-- `tail_task_log`
+1. Git管理されたrunbook IDとfinite typed parameterである。
+2. Mac roleとLinux roleのexecution gateが両方有効である。
+3. `plan_runbook`が発行した未期限切れplan IDをconfirmationとして渡す。
+4. MCP hostがstate-changing toolを明示承認する。
 
-Constraints: allowlist path、output上限、secretと個人識別情報のredaction、command timeout、対象変数allowlist、全callのaudit record。responseの`host`は個別hostnameでなくrole IDを返す。
-
-## Server 3 — Target observer
-
-Purpose: QEMUまたはRaspberry Piから共通schemaでvalidation evidenceを取得する。
-
-Candidate tools:
-
-- `get_target_identity`
-- `get_boot_health`
-- `get_service_status`
-- `get_graphics_stack`
-- `get_vulkan_summary`
-- `get_flutter_fluorite_logs`
-- `get_input_devices`
-- `capture_validation_bundle`
-
-Constraints: targetごとの接続profile、journal取得範囲、PII/secret redaction、image identityとの紐付け。
-
-## State-changing tools — deferred and isolated
-
-`start_build`、`cancel_build`、`launch_qemu`、`stop_qemu`、target rebootはobserver serverへ入れない。read-only serverが安定した後、承認gate、idempotency、process ownership、timeoutを持つ別serverまたは別tool groupとして設計する。
-
-## Transport options
-
-1. Mac上のstdio MCPが固定SSH commandを実行する。
-   - 導入が小さく、既存鍵を再利用できる。
-   - Mac processがredactionとtimeoutを確実に担う必要がある。
-2. build host上でMCP serverを動かす。
-   - host-local観測を実装しやすい。
-   - deployment、versioning、remote transport、認証の管理が増える。
-
-PrototypeはOption 1を推奨する。ただし任意command parameterは受け取らず、固定されたqueryだけを公開する。
+`command`、任意`argv`、任意`cwd`、任意setup scriptはtool inputにしない。`repo sync`、`cleanall`、`cleansstate`、cache削除は公開しない。long-running operationは`start_runbook`、`get_run_status`、`read_run_log`、`cancel_run`でprocess ownershipを保つ。
 
 ## Evidence contract
 
-各responseに`observed_at`、`host`、`source_path`、`command_or_method`、`truncated`、`warnings`を含める。推論はMCP responseへ混ぜず、agentがticket上でfactsから導く。
+responseは`bounded_context`、`operation`、`observed_at`、domain固有`payload`、`unknowns`、`evidence_ids`、`truncated`、`warnings`、`next_queries`を持つ。MCPは原因推論を返さない。raw source/logはbounded readとopaque paginationで必要範囲だけ返し、ticket側でfacts、inferences、hypothesesを分離する。
+
+## Agent routing
+
+primary roleでは全serverをdefault disabledにする。custom investigatorは担当serverだけを有効化する。build runnerだけが`command_runner`を受け取り、PDCA checkerはexecution toolを持たない。設定のsource of truthは[project MCP configuration](../../.codex/config.toml)と[agent routing guide](../../docs/agents.md)である。
+
+## Compared paths
+
+1. Macからgeneric SSH/shellを公開する方式は導入が小さいが、任意command、巨大output、秘密情報、ownership喪失のriskが高い。
+2. context別MCPと固定SSH stdio方式はserver数が増えるが、語彙、root、権限、failure radiusを分離できる。
+
+2を採用した。host-local indexやpersistent supervisorが必要になるかは、実測前のためUNKNOWNである。

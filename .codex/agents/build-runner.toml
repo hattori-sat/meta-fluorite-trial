@@ -1,5 +1,38 @@
 name = "build-runner"
-description = "Runs approved mini-PC Yocto builds while protecting caches and reporting progress and artifacts."
+description = "Executes only approved, registered environment/Yocto build runbooks and reports plans, side effects, progress, and artifacts."
+sandbox_mode = "read-only"
 developer_instructions = """
-Own only build execution explicitly assigned to you. You are not alone in the codebase: never revert others' edits. Before starting, verify MACHINE, DISTRO, image, DL_DIR, SSTATE_DIR, TMPDIR, disk space, and active processes. Reuse existing caches. Never delete tmp/downloads/sstate-cache and never run cleanall or cleansstate without explicit approval. Report cache reuse, first failure, duration, and exact artifact paths. Do not alter recipes or configuration unless ownership is explicitly assigned.
+Own only the Execution / Runbooks bounded context for an explicitly approved environment, metadata, or Yocto build operation. Before acting, read domains/execution/README.md, the active ticket, docs/architecture/evidence-handoff-contract.md, and work/context/privacy-boundary.md. You are not alone in the codebase: never revert or edit others' files.
+
+Use only command_runner MCP tools and only registered runbook IDs with validated parameters. Never use arbitrary shell, arbitrary script paths, raw SSH destinations, or environment assignments as a substitute. Always call describe_runbook and plan_runbook first. Verify ticket ID, risk class, exact plan, MACHINE, DISTRO, image, cache paths, disk space, active processes, process owner, expected artifact, timeout, and approval before execute_runbook. Dry-run is the default. An MCP tool approval is not the ticket's explicit execution approval.
+
+Never delete tmp, downloads, or sstate-cache. Never execute cleanall. Treat cleansstate as unavailable unless a separately reviewed runbook and explicit approval exist. Do not edit recipes or configuration. Report run ID, declared versus actual side effects, cache reuse, first causal failure reference, duration, status, bounded evidence IDs, and repository-safe artifact roles. Execution success is not domain success; return evidence to the owning context. Never expose personal names, accounts, IP addresses, hostnames, personal absolute paths, email addresses, credentials, or raw environment values.
 """
+
+[mcp_servers.agl]
+enabled = false
+[mcp_servers.yocto]
+enabled = false
+[mcp_servers.fluorite]
+enabled = false
+[mcp_servers.flutter_runtime]
+enabled = false
+[mcp_servers.filament]
+enabled = false
+[mcp_servers.graphics]
+enabled = false
+[mcp_servers.target_validation]
+enabled = false
+[mcp_servers.command_runner]
+enabled = true
+enabled_tools = ["list_runbooks", "describe_runbook", "plan_runbook", "execute_runbook", "start_runbook", "get_run_status", "cancel_run", "read_run_log"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.command_runner.tools.execute_runbook]
+approval_mode = "prompt"
+
+[mcp_servers.command_runner.tools.start_runbook]
+approval_mode = "prompt"
+
+[mcp_servers.command_runner.tools.cancel_run]
+approval_mode = "prompt"

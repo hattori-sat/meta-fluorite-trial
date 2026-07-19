@@ -1,0 +1,60 @@
+From 190c59806ad7f82efea84f7184015c3fef7eb6df Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 29 Mar 2026 00:00:00 +0900
+Subject: [PATCH] layout: promote hidden desktop surface on activation
+
+Upstream-Status: Inappropriate [local debug/integration behavior]
+
+With the local shell patch stack, Fluorite NORMAL is intentionally routed
+through the hidden layer first so it can receive the compositor-driven resize
+before activation. When activation later completes, the surface is already
+mapped, so the existing code only updates the transform and never moves it from
+the hidden layer into the normal layer. The result is a successfully activated
+desktop surface that stays visually black.
+
+Treat "already mapped but still in the hidden layer" as a promotion case and
+move the surface into the normal layer, emitting the activation event as usual.
+---
+ src/layout.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/src/layout.c b/src/layout.c
+index ef326de..773d24b 100644
+--- a/src/layout.c
++++ b/src/layout.c
+@@ -320,6 +320,8 @@ ivi_layout_activate_complete(struct ivi_output *output,
+ 	const char *app_id = weston_desktop_surface_get_app_id(surf->dsurface);
+ 	bool update_previous = true;
+ 	struct weston_coord_global pos;
++	bool was_hidden = ivi_surf_in_hidden_layer(ivi, surf);
++	bool was_mapped = weston_surface_is_mapped(view->surface);
+ 
+ 	if (output_has_black_curtain(output)) {
+ 		if (!output->background) {
+@@ -403,20 +405,22 @@ ivi_layout_activate_complete(struct ivi_output *output,
+ 	if (update_previous)
+ 		output->previous_active = output->active;
+ 	output->active = surf;
+ 	surf->current_completed_output = output;
+ 
+-	if (!weston_surface_is_mapped(view->surface)) {
++	if (!was_mapped)
+ 		weston_surface_map(view->surface);
+-		weston_view_move_to_layer(view, &ivi->normal.view_list);
++
++	if (!was_mapped || was_hidden) {
++		weston_view_move_to_layer(view, &ivi->normal.view_list);
+ 
+ 		weston_log("Activation completed for app_id %s, role %s, output %s\n",
+ 				app_id,
+ 				ivi_layout_get_surface_role_name(surf), output->name);
+ 
+ 		shell_send_app_state(ivi, app_id, AGL_SHELL_APP_STATE_ACTIVATED);
+ 
+ 		if (ivi_seat)
+ 			ivi_shell_activate_surface(surf, ivi_seat, WESTON_ACTIVATE_FLAG_NONE);
+ 	} else {
+ 		weston_view_update_transform(view);
+ 	}
+-- 
+2.43.0

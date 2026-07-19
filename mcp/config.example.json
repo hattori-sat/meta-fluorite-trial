@@ -1,0 +1,93 @@
+{
+  "max_response_bytes": 131072,
+  "audit_file": "/role/path/to/local/mcp-audit.jsonl",
+  "domains": {
+    "agl": {
+      "identity": {
+        "subject_id": "agl-fixed-source",
+        "revision_or_image_id": null
+      },
+      "roots": {
+        "agl_manifest": "/role/path/to/agl/source/.repo/manifests",
+        "meta_agl": "/role/path/to/agl/source/meta-agl"
+      }
+    },
+    "yocto": {
+      "identity": {
+        "subject_id": "yocto-build-snapshot",
+        "revision_or_image_id": null
+      },
+      "roots": {
+        "poky_metadata": "/role/path/to/agl/source/external/poky/meta",
+        "project_metadata": "/role/path/to/agl/source/meta-local",
+        "task_logs": "/role/path/to/yocto/build/tmp/work"
+      }
+    },
+    "fluorite": {
+      "identity": {
+        "subject_id": "fluorite-source",
+        "revision_or_image_id": null
+      },
+      "roots": {
+        "fluorite_source": "/role/path/to/fluorite"
+      }
+    },
+    "flutter_runtime": {
+      "identity": {
+        "subject_id": "flutter-runtime-source-set",
+        "revision_or_image_id": null
+      },
+      "roots": {
+        "flutter_source": "/role/path/to/flutter-engine",
+        "launcher_source": "/role/path/to/ivi-launcher"
+      }
+    },
+    "filament": {
+      "identity": {
+        "subject_id": "filament-source-set",
+        "revision_or_image_id": null
+      },
+      "roots": {
+        "filament_source": "/role/path/to/filament",
+        "bridge_source": "/role/path/to/filament-bridge"
+      }
+    },
+    "graphics": {
+      "identity": {
+        "subject_id": "graphics-source-set",
+        "revision_or_image_id": null
+      },
+      "roots": {
+        "graphics_source": "/role/path/to/graphics"
+      }
+    },
+    "target_validation": {
+      "identity": {
+        "subject_id": "target-session",
+        "revision_or_image_id": null
+      },
+      "roots": {
+        "target_evidence": "/role/path/to/local/evidence"
+      }
+    },
+    "command_runner": {
+      "identity": {
+        "subject_id": "build-execution-snapshot",
+        "revision_or_image_id": null
+      },
+      "roots": {
+        "yocto_build": "/role/path/to/yocto/build"
+      }
+    }
+  },
+  "command_runner": {
+    "allow_execution": false,
+    "environment_profiles": {
+      "yocto": {
+        "setup_script": "/role/path/to/fixed-environment-wrapper.sh",
+        "source_arguments": [],
+        "environment": {}
+      }
+    }
+  }
+}

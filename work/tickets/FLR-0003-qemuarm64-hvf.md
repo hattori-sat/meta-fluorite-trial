@@ -10,7 +10,8 @@ Apple Silicon上のx86-64 TCGは低速でLLVM crashも観測されている。qe
 
 ## Success criteria
 
-- qemuarm64 imageを既存cacheでbuildできる。
+- qemuarm64 imageをmini PCの既存cacheでbuildできる。
+- image bundleをidentity/hash付きでMacへ渡せる。
 - HVFでbootし、virtio GPU、Wayland、Mesa/Vulkanを確認できる。
 - 同一sceneの起動時間、安定性、操作性をqemux86-64 baselineと比較できる。
 - primary pathをdecision recordで決定できる。

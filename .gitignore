@@ -1,5 +1,8 @@
 # Yocto outputs and caches
 build*/
+# Captured, sanitized source evidence is not a build output.
+!manifests/build-config/
+!manifests/build-config/*.aglsetup.conf
 tmp*/
 downloads/
 sstate-cache/
@@ -21,6 +24,7 @@ cooker-*.log
 .env.*
 !.env.example
 .fluorite.local.env
+.fluorite-mcp/
 local.env
 *.key
 *.pem
@@ -30,3 +34,7 @@ id_ed25519*
 # Editor / OS
 .DS_Store
 *.swp
+
+# Python local runtime
+__pycache__/
+*.py[cod]

@@ -1,0 +1,122 @@
+From 9b8f814d55fcfbd27e2e6d3cf8bf389490053f8f Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 29 Mar 2026 00:00:00 +0900
+Subject: [PATCH] wayland: keep fluorite normal scale at 1
+
+Upstream-Status: Inappropriate [local debug/integration behavior]
+
+The initial scale patch fixed the 320x180 activation mismatch by propagating
+the compositor output scale to the wl_surface. That worked for the smallest
+low-load configuration, but once Fluorite moved to a 640x360 logical window on
+the Raspberry Pi 4, the same scale-2 output produced a 1280x720 Vulkan
+swapchain. That is larger than needed for this experiment.
+
+Keep the output buffer scale behavior for the general shell/wayland path, but
+special-case the Fluorite NORMAL view to use scale 1 consistently for both the
+wl_surface and the Flutter engine pixel ratio. That keeps the
+compositor/app geometry aligned at 640x360 while preventing the swapchain from
+doubling to 1280x720 on scale-2 outputs.
+---
+ shell/wayland/window.cc | 38 ++++++++++++++++++++++++++++++++++----
+ 1 file changed, 34 insertions(+), 4 deletions(-)
+
+diff --git a/shell/wayland/window.cc b/shell/wayland/window.cc
+index 6f5a1cd..b613548 100644
+--- a/shell/wayland/window.cc
++++ b/shell/wayland/window.cc
+@@ -19,6 +19,34 @@
+ #include "display.h"
+ #include "engine.h"
+ 
++namespace {
++bool UseOutputBufferScaleForSurface(const std::string& app_id,
++                                    const WaylandWindow::window_type type) {
++  return !(type == WaylandWindow::WINDOW_NORMAL && app_id == "fluorite");
++}
++
++int32_t GetEffectiveBufferScale(const std::shared_ptr<Display>& display,
++                                const uint32_t output_index,
++                                const bool use_output_buffer_scale) {
++  if (!use_output_buffer_scale) {
++    return 1;
++  }
++  const auto buffer_scale = display->GetBufferScale(output_index);
++  return buffer_scale > 0 ? buffer_scale : 1;
++}
++
++void ApplySurfaceBufferScale(struct wl_surface* surface,
++                             const std::shared_ptr<Display>& display,
++                             const uint32_t output_index,
++                             const bool use_output_buffer_scale) {
++  if (surface) {
++    wl_surface_set_buffer_scale(
++        surface, GetEffectiveBufferScale(display, output_index,
++                                         use_output_buffer_scale));
++  }
++}
++}  // namespace
++
+ WaylandWindow::WaylandWindow(const size_t index,
+                              std::shared_ptr<Display> display,
+                              const std::string& type,
+@@ -54,6 +82,9 @@
+   SPDLOG_TRACE("({}) + WaylandWindow()", m_index);
+ 
+   m_base_surface = wl_compositor_create_surface(m_display->GetCompositor());
++  ApplySurfaceBufferScale(
++      m_base_surface, m_display, m_output_index,
++      UseOutputBufferScaleForSurface(m_app_id, m_type));
+   wl_surface_add_listener(m_base_surface, &m_base_surface_listener, this);
+ 
+ #if ENABLE_IVI_SHELL_CLIENT
+@@ -198,7 +229,14 @@
+                                               struct wl_output* /* output */) {
+   auto const* d = static_cast<WaylandWindow*>(data);
+ 
+-  const auto buffer_scale = d->m_display->GetBufferScale(d->m_output_index);
++  const auto use_output_buffer_scale =
++      UseOutputBufferScaleForSurface(d->m_app_id, d->m_type);
++  ApplySurfaceBufferScale(
++      d->m_base_surface, d->m_display, d->m_output_index,
++      use_output_buffer_scale);
++
++  const auto buffer_scale = GetEffectiveBufferScale(
++      d->m_display, d->m_output_index, use_output_buffer_scale);
+ 
+   const auto result =
+       d->m_flutter_engine->SetPixelRatio(d->m_pixel_ratio * buffer_scale);
+@@ -261,6 +299,10 @@
+     w->m_geometry.height = height;
+   }
+ 
++  ApplySurfaceBufferScale(
++      w->m_base_surface, w->m_display, w->m_output_index,
++      UseOutputBufferScaleForSurface(w->m_app_id, w->m_type));
++
+   w->m_backend->Resize(w->m_index, w->m_flutter_engine.get(),
+                        w->m_geometry.width, w->m_geometry.height);
+ 
+@@ -317,6 +359,10 @@
+     w->m_geometry.height = w->m_window_size.height;
+   }
+ 
++  ApplySurfaceBufferScale(
++      w->m_base_surface, w->m_display, w->m_output_index,
++      UseOutputBufferScaleForSurface(w->m_app_id, w->m_type));
++
+   w->m_backend->Resize(w->m_index, w->m_flutter_engine.get(),
+                        w->m_geometry.width, w->m_geometry.height);
+ }
+@@ -355,7 +401,9 @@
+       spdlog::error("Failed to set Flutter Engine Window Size");
+     }
+ 
+-    const auto buffer_scale = m_display->GetBufferScale(m_output_index);
++    const auto buffer_scale = GetEffectiveBufferScale(
++        m_display, m_output_index,
++        UseOutputBufferScaleForSurface(m_app_id, m_type));
+ 
+     result = m_flutter_engine->SetPixelRatio(m_pixel_ratio * buffer_scale);
+     if (result != kSuccess) {
+-- 
+2.43.0

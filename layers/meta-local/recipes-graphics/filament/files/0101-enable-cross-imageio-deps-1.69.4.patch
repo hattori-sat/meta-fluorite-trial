@@ -1,0 +1,33 @@
+From 351eb17fd8f7d79c4c2894a595712408bc19d8b5 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Tue, 3 Mar 2026 03:11:00 +0900
+Subject: [PATCH] build: include imageio dependencies for non-host builds
+
+imageio and its third-party dependencies are required by dependent projects in
+cross builds as well, but upstream only adds them in IS_HOST_PLATFORM block.
+---
+ CMakeLists.txt | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7a3a99f57..6da05310a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -956,6 +956,13 @@ if (WEBGL)
+     add_subdirectory(web/samples)
+ endif()
+ 
++if (NOT IS_HOST_PLATFORM)
++    add_subdirectory(${LIBRARIES}/imageio)
++    add_subdirectory(${EXTERNAL}/libpng/tnt)
++    add_subdirectory(${EXTERNAL}/libz/tnt)
++    add_subdirectory(${EXTERNAL}/tinyexr/tnt)
++endif()
++
+ if (IS_HOST_PLATFORM)
+     if (FILAMENT_SUPPORTS_OPENGL)
+         add_subdirectory(${LIBRARIES}/bluegl)
+-- 
+2.45.1
+
+

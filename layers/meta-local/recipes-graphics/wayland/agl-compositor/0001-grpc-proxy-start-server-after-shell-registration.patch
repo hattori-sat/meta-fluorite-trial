@@ -1,0 +1,54 @@
+From 4e80565073ce96e70d5799e510ace780d87aba94 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 8 Mar 2026 16:45:00 +0900
+Subject: [PATCH] grpc-proxy: start gRPC after shell registration
+
+Upstream-Status: Pending
+
+Starting the gRPC server before agl_shell registration allows clients to
+connect while m_aglShell is still unset. Move shell registration earlier so
+RPC handlers are live only after shell setup is complete.
+---
+ grpc-proxy/main-grpc.cpp | 21 ++++++++++-----------
+ 1 file changed, 10 insertions(+), 11 deletions(-)
+
+diff --git a/grpc-proxy/main-grpc.cpp b/grpc-proxy/main-grpc.cpp
+index db33032..8964946 100644
+--- a/grpc-proxy/main-grpc.cpp
++++ b/grpc-proxy/main-grpc.cpp
+@@ -415,9 +415,17 @@ int main(int argc, char **argv)
+ 	(void) argc;
+ 	(void) argv;
+ 	Shell *aglShell = nullptr;
+-	int ret = 0;
+ 
+-	// instantiante the grpc server
++	// this blocks until we detect that another shell client started
++	// running
++	struct shell_data *sh = register_shell_ext();
++	if (!sh) {
++		LOG("Failed to get register ag_shell_ext\n");
++		exit(EXIT_FAILURE);
++	}
++
++	int ret = 0;
++	// instantiate and expose gRPC only after shell is ready
+ 	std::string server_address(kDefaultGrpcServiceAddress);
+ 	GrpcServiceImpl service{aglShell};
+ 
+@@ -431,15 +439,6 @@ int main(int argc, char **argv)
+ 	std::shared_ptr<grpc::Server> server(builder.BuildAndStart());
+ 	std::thread thread(start_grpc_server, server);
+ 
+-	// this blocks until we detect that another shell client started
+-	// running
+-	struct shell_data *sh = register_shell_ext();
+-	if (!sh) {
+-		LOG("Failed to get register ag_shell_ext\n");
+-		thread.join();
+-		exit(EXIT_FAILURE);
+-	}
+-
+ 	std::shared_ptr<struct agl_shell> agl_shell{sh->shell, agl_shell_destroy};
+ 	aglShell = new Shell(agl_shell, sh);
+ 

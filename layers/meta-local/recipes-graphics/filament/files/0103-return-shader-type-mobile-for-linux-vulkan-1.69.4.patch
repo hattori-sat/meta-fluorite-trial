@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 8 Mar 2026 00:00:00 +0000
+Subject: [PATCH] Vulkan: return mobile shader model on Linux
+
+For Fluorite material compatibility on Linux+Vulkan targets.
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index c612aa2ac..61fd2f0bf 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -350,7 +350,7 @@ Driver* VulkanDriver::create(VulkanPlatform* platform, VulkanContext const& con
+ }
+ 
+ ShaderModel VulkanDriver::getShaderModel() const noexcept {
+-#if defined(__ANDROID__) || defined(FILAMENT_IOS)
++#if defined(__ANDROID__) || defined(FILAMENT_IOS) || defined(__linux__)
+     return ShaderModel::MOBILE;
+ #else
+     return ShaderModel::DESKTOP;
+-- 
+2.43.0
+

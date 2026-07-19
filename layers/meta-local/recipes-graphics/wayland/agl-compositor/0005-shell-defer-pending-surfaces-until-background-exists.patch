@@ -1,0 +1,93 @@
+From 6974aabdb9c2042601a01e8e2e38bbc755b452e8 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 9 Mar 2026 01:31:35 +0900
+Subject: [PATCH] shell: defer pending surfaces until background exists
+
+---
+ src/shell.c | 53 ++++++++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 42 insertions(+), 11 deletions(-)
+
+diff --git a/src/shell.c b/src/shell.c
+index d8a4a0a..7e0f7d8 100644
+--- a/src/shell.c
++++ b/src/shell.c
+@@ -1057,12 +1057,41 @@ shell_send_app_on_output(struct ivi_compositor *ivi, const char *app_id,
+ 	}
+ }
+ 
++static bool
++shell_has_background_output(struct ivi_compositor *ivi)
++{
++	struct ivi_output *output;
++
++	wl_list_for_each(output, &ivi->outputs, link) {
++		if (output->background &&
++		    output->background->role == IVI_SURFACE_ROLE_BACKGROUND)
++			return true;
++	}
++
++	return false;
++}
++
++static void
++shell_process_pending_surfaces(struct ivi_compositor *ivi)
++{
++	struct ivi_surface *surface, *tmp;
++	const char *app_id;
++
++	wl_list_for_each_safe(surface, tmp, &ivi->pending_surfaces, link) {
++		wl_list_remove(&surface->link);
++		wl_list_init(&surface->link);
++		ivi_check_pending_desktop_surface(surface);
++		surface->checked_pending = true;
++		app_id = weston_desktop_surface_get_app_id(surface->dsurface);
++		shell_send_app_state(ivi, app_id, AGL_SHELL_APP_STATE_STARTED);
++	}
++}
++
+ static void
+ shell_ready(struct wl_client *client, struct wl_resource *shell_res)
+ {
+ 	struct ivi_compositor *ivi = wl_resource_get_user_data(shell_res);
+ 	struct ivi_output *output;
+-	struct ivi_surface *surface, *tmp;
+ 
+ 	if (wl_resource_get_version(shell_res) >=
+ 	    AGL_SHELL_BOUND_OK_SINCE_VERSION &&
+@@ -1093,17 +1122,12 @@ shell_ready(struct wl_client *client, struct wl_resource *shell_res)
+ 		ivi_layout_init(ivi, output);
+ 	}
+ 
+-	wl_list_for_each_safe(surface, tmp, &ivi->pending_surfaces, link) {
+-		const char *app_id;
+-
+-		wl_list_remove(&surface->link);
+-		wl_list_init(&surface->link);
+-		ivi_check_pending_desktop_surface(surface);
+-		surface->checked_pending = true;
+-		app_id = weston_desktop_surface_get_app_id(surface->dsurface);
+-
+-		shell_send_app_state(ivi, app_id, AGL_SHELL_APP_STATE_STARTED);
++	if (!shell_has_background_output(ivi)) {
++		weston_log("Shell ready but no background exists yet, deferring pending surfaces\n");
++		return;
+ 	}
++
++	shell_process_pending_surfaces(ivi);
+ }
+ 
+ static void
+@@ -1166,6 +1190,13 @@ shell_set_background(struct wl_client *client,
+ 	weston_desktop_surface_set_size(dsurface,
+ 					output->output->width,
+ 					output->output->height);
++
++	if (ivi->shell_client.ready) {
++		ivi_set_background_surface(surface);
++		remove_black_curtain(output);
++		ivi_layout_init(ivi, output);
++		shell_process_pending_surfaces(ivi);
++	}
+ }
+ 
+ static void

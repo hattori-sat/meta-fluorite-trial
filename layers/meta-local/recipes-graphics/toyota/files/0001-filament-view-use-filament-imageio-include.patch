@@ -1,0 +1,24 @@
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc b/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc
+@@ -1,6 +1,6 @@
+ #include "hdr_loader.h"
+ 
+-#include <imageio/ImageDecoder.h>
++#include <filament/imageio/ImageDecoder.h>
+ 
+ namespace plugins::filament_view {
+ 
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc
+@@ -1,7 +1,7 @@
+ #include "texture_loader.h"
+ 
+ #include <filament/Texture.h>
+-#include <imageio/ImageDecoder.h>
++#include <filament/imageio/ImageDecoder.h>
+ 
+ namespace plugins::filament_view::scene::material::loader {
+ 
+

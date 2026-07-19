@@ -12,7 +12,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0001 | baselineと履歴が複数directoryへ分散している。canonical repositoryへ集約する | primary role + checker role | Do | `meta-local`、fixed manifest、confを取り込む |
+| FLR-0001 | baselineと履歴が複数directoryへ分散している。canonical repositoryへ集約する | primary role + checker role | Check | privacy再監査後にcommitし、dev/feature branchをpushする |
 
 ## Next
 
@@ -22,7 +22,7 @@ FLR-0001完了後の重点候補はFLR-0008。最終目的であるFluoriteの�
 | --- | --- | --- |
 | [FLR-0002](work/tickets/FLR-0002-mac-qemu-baseline.md) | Macで既存qemux86-64の再現可能な起動baselineを採る | FLR-0001 |
 | [FLR-0003](work/tickets/FLR-0003-qemuarm64-hvf.md) | qemuarm64 + HVFがMac検証の主経路になるか判定する | FLR-0002 |
-| [FLR-0004](work/tickets/FLR-0004-yocto-observer-mcp.md) | build hostのAGL/Yocto状態を安全に観測するread-only MCPを作る | FLR-0001 |
+| [FLR-0004](work/tickets/FLR-0004-yocto-observer-mcp.md) | build hostのYocto状態を安全に観測するread-only MCPを作る | FLR-0001 |
 | [FLR-0005](work/tickets/FLR-0005-target-validation-mcp.md) | QEMU/実機の証拠収集を標準化するvalidation MCPを作る | FLR-0002 |
 | [FLR-0006](work/tickets/FLR-0006-raspberrypi-build.md) | 固定baselineからRaspberry Pi 4 imageを再build・検証する | FLR-0003, FLR-0004 |
 | [FLR-0007](work/tickets/FLR-0007-agl-architecture.md) | AGLがimage、compositor、launcher、appを組み立てるprocessを固定revisionから理解する | FLR-0001 |
@@ -30,11 +30,13 @@ FLR-0001完了後の重点候補はFLR-0008。最終目的であるFluoriteの�
 | [FLR-0009](work/tickets/FLR-0009-flutter-engine-embedder.md) | Flutter Engineとivi launcherの描画・thread・surface契約を理解する | FLR-0007, FLR-0008 |
 | [FLR-0010](work/tickets/FLR-0010-filament-bridge.md) | Dart APIからnative filament_viewとFilamentまでのcall pathを特定する | FLR-0008 |
 | [FLR-0011](work/tickets/FLR-0011-vulkan-gpu-stack.md) | Filament/FlutterからVulkan、Mesa、GPUまでの実効経路をtarget別に特定する | FLR-0009, FLR-0010 |
-| [FLR-0012](work/tickets/FLR-0012-source-knowledge-mcp.md) | AGL/Fluorite/Flutter/Filament/graphics sourceをbounded evidenceとして読むMCPを作る | FLR-0007, FLR-0008 |
+| [FLR-0012](work/tickets/FLR-0012-source-knowledge-mcp.md) | component別MCPのshared contractを固定する | FLR-0007, FLR-0008 |
+| [FLR-0013](work/tickets/FLR-0013-agl-observer-mcp.md) | AGLのmanifest、feature、image組立をYoctoから分離して観測する | FLR-0001 |
+| [FLR-0014](work/tickets/FLR-0014-command-runner-mcp.md) | allowlist runbookだけを実行するcommand MCPを作る | FLR-0001, FLR-0004, FLR-0013 |
 
 ## Waiting
 
-- 現在のCodex projectはcanonical Git repositoryではない。次回以降はcanonical cloneをCodex projectとして開く。
+- push後、canonical cloneをproject rootにしたfresh Codex taskでcustom-agent/MCP routingをsmokeする。
 - 実機検証条件（Raspberry Pi 4、display、input、network）の詳細はUNKNOWN。
 - GitHub repository settingsで`Branch policy / validate-branch-flow`をrequired status checkにする。
 

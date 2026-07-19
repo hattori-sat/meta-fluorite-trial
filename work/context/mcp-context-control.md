@@ -2,67 +2,71 @@
 
 ## Objective
 
-AGL、Yocto、Fluorite、Flutter、Filament、Vulkanの大量source/logを会話contextへ直接流さず、問いに必要なbounded evidenceだけを返す。
+AGL、Yocto、Fluorite、Flutter runtime、Filament、graphics、target validation、executionの情報を混ぜず、active ticketの判定に必要なbounded evidenceだけをagentへ渡す。
 
-## Recommended boundaries
+## Context selection
 
-### Source knowledge MCP
+問いを最初に一つのbounded contextへ割り当てる。
 
-Read-only。固定revisionのsource、recipe、patch、documentationを対象にする。
+- image/feature/serviceの組立は`agl`。
+- recipe/task/package/overrideの解決は`yocto`。
+- scene/asset/interactionは`fluorite`。
+- embedder/thread/surface/plugin hostingは`flutter_runtime`。
+- bridge/engine/material/frameは`filament`。
+- Wayland/Vulkan/Mesa/DRM/device/presentationは`graphics`。
+- 特定artifactとsessionのboot/screen/log/input判定は`target_validation`。
+- 承認済みoperationのplanとprocess ownershipは`command_runner`。
 
-- component catalog
-- revision and provenance
-- symbol/reference search
-- recipe/patch relationship
-- dependency path
-- bounded source excerpt
-- evidence handle generation
+複数domainが必要な問いは一つの巨大queryにせず、evidence IDを保ったhandoffに分割する。同名語の意味は各[Domain README](../../domains/README.md)を優先する。
 
-Domainsは`agl`, `fluorite-demo`, `flutter-engine`, `ivi-launcher`, `filament-bridge`, `filament`, `graphics`で明示指定する。
+## Input discipline
 
-### AGL/Yocto observer MCP
-
-Read-only。build hostの実効configuration、layer、task、cache、artifactを対象にする。
-
-- layer and recipe resolution
-- `bitbake -e` allowlisted variables
-- package dependency and manifest
-- task/log status
-- artifact identity
-
-### Target observer MCP
-
-Read-onlyを基本とし、QEMU/Raspberry Piのboot、service、Wayland、Vulkan、Flutter、Filamentを共通schemaで観測する。
+- rootはlocal configurationのrole aliasから選び、absolute pathをtool inputにしない。
+- pathはroot相対とし、`..`、symlink escape、sensitive role-config directory、unsupported extensionを拒否する。source readはoversized fileを拒否し、task-log tailだけはbounded end-windowをstreamする。
+- searchはquery、file kind、page token、bounded limitだけを受け取る。
+- advertised object schemaをruntimeでも検証し、未定義fieldを無視せず拒否する。
+- executionはregistered runbook ID、finite enum parameter、fresh plan confirmationだけを受け取る。
+- network fetch、generic shell、generic SSH、free-form environment sourceをtool surfaceへ出さない。
 
 ## Response discipline
 
-toolはdefaultでsummaryだけを返す。raw source/logはevidence IDとして保存し、必要なrangeだけ別callで読む。
+default responseはsummaryとevidence IDだけを返す。source/log本文は明示的なread callでline/byte上限内だけを読む。
 
 Every response:
 
-- `domain`
-- `revision_or_image_id`
+- `bounded_context`
+- `operation`
 - `observed_at`
-- `facts`
+- domain-owned `payload`
 - `unknowns`
 - `evidence_ids`
 - `truncated`
+- `warnings`
 - `next_queries`
 
-MCPは原因推論を返さない。factsとsource locationを返し、原因分析はticket側で仮説・反証として行う。
+source occurrenceはfactだが、failureの原因であるとは限らない。原因、反証、countermeasureはticketへ記録し、MCP payloadへ混ぜない。
 
-## Tool-shape comparison
+## Host and privacy discipline
 
-### Generic shell/search tools
+- Mac-local server: `fluorite`、`flutter_runtime`、`filament`、`graphics`、`target_validation`。
+- Linux build-role server via fixed SSH stdio: `agl`、`yocto`、`command_runner`。
+- 実hostname、account、IP、credential、個人名をrepository、response、auditへ保存しない。
+- pathは`$AGL_ROOT`、`$YOCTO_BUILD_ROOT`などのrole aliasで返す。
+- stdoutはJSON-RPC専用とし、diagnosticはstderrへ分離する。
+- redaction後の値をerror messageへ再掲しない。
 
-実装は小さいが、任意command、巨大output、秘密情報、context汚染のriskが高い。
+## Execution and lifecycle discipline
 
-### Domain-specific bounded tools
+read-only serverとstate-changing serverを同じauthorityにしない。`command_runner`のreal executionにはdual host gate、plan confirmation、MCP approvalを要求する。async runは起動したprocess groupだけを所有し、status/log/cancelを同じserver processで扱う。
 
-実装量は増えるが、revision、path allowlist、output size、redaction、evidence linkを強制できる。本projectではこちらを採用する。
+server再起動後のresume、distributed ownership、persistent event streamは現在未実装でUNKNOWNである。generic auditの`ok`はhandlerがrequestを受理した時点を表し、正常終了時は別のcompletion lifecycle eventがplan/outcome digestを記録する。server異常終了時のcompletion欠落検出は未実装である。必要性を計測するまでdaemonや新しいremote runtimeを追加しない。
 
-## Initial transport
+## Verification
 
-Mac上でstdio MCPを動かし、build host観測だけ固定SSH commandへ委譲する。build hostへCodex CLIやMCP runtimeを直ちに導入しない。POSIX tools、Git、repo、BitBake、Pythonが既に使える範囲でprototypeする。
+- 全8 serverでinitialize、tools/list、bounded tools/callをprotocol smokeする。
+- AGLとYoctoが別tool surface・別agent accessであることをconfiguration testする。
+- traversal、symlink escape、oversize、pagination、redaction、stable evidence IDをunit testする。
+- runbook schema、unknown executable、dual gate、plan expiry、async status、bounded log、process cancellationをtestする。
+- Mac-to-build-role wrapperは3 serverのallowlist、role config validation、shell metacharacter rejectionをtestする。
 
-remote-side installationが必要になるのは、大量indexをhost-localで保持する、long-running event streamを扱う、またはSSH round-tripが測定上のbottleneckになった場合。
+実装と運用手順は[MCP runtime](../../mcp/README.md)、handoff schemaは[evidence contract](../../docs/architecture/evidence-handoff-contract.md)を正とする。

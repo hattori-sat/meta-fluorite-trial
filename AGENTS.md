@@ -19,6 +19,9 @@
 
 ## Safety
 
+- AGL/Yoctoのsource取得、environment初期化、parse、build、cacheはLinux build host roleだけで扱う。Macはartifactを受け取りQEMU検証を行う。
+- AGL sourceを新規取得・更新する前に公式`trout` manifest手順、fixed manifest、active ticket、approvalを照合する。
+- build hostからMacへ渡すartifactはrevision、image identity、SHA-256、package manifest、boot parameterをindex化し、timestampだけで選ばない。
 - `/mnt/yocto/**/{downloads,sstate-cache,tmp}` を削除しない。
 - `bitbake -c cleanall` を実行しない。
 - `bitbake -c cleansstate` は根拠と明示承認なしに実行しない。
@@ -34,8 +37,9 @@
 
 ## Validation
 
-- 設定変更後は対象build directoryで `bitbake -e agl-ivi-image-flutter` の実効値を確認する。
-- recipe/layer変更後は最小のparseまたは対象taskから検証し、長時間build開始前にユーザーへ知らせる。
+- host roleと検証目的を先に固定し、Linux `runqemu`の結果とmacOS QEMUの結果を同じstratumへ混ぜない。
+- 対象build directoryへ設定変更を適用した後は `bitbake -e agl-ivi-image-flutter` の実効値を確認する。
+- recipe/layerのfunctional content変更後は最小のparseまたは対象taskから検証し、長時間build開始前にユーザーへ知らせる。未適用のevidence snapshotやidentity metadataだけの変更は、非適用理由とruntime UNKNOWNをticketへ記録する。
 - PDCA checkerの判定が`FAIL`または`UNKNOWN`の場合、証拠不足を解消してからticketをDoneにする。
 - privacy checkが失敗した場合は全作業を止め、値を再掲せずredactしてから続行する。
 

@@ -10,7 +10,9 @@
 
 ## Success criteria
 
+- build runbookを追加する前に、ticket/source identity、実効`DL_DIR`/`SSTATE_DIR`/`TMPDIR`容量、外部BitBake process、environment setupをpreflightする。
+- real buildはasync start/status/log/cancelだけを使い、MCPの同期tool timeoutへ依存しない。
 - `raspberrypi4-64` imageを既存cache再利用でbuildする。
-- manifestとimage hashを記録する。
+- kernel/rootfs/disk image、boot parameter、package manifest、revision、byte size、SHA-256をartifact inventoryとして生成する。
 - boot、display、input、Wayland、Vulkan、Flutter、Fluoriteを検証する。
 - QEMUで得たcountermeasureが実機へ不要な副作用を持たないと確認する。

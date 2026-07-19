@@ -2,7 +2,7 @@
 
 巨大なimage、cache、full BitBake logはGitへ置かない。ここには次を保存する。
 
-- artifactの絶対pathまたは保管場所
+- repository-safeなartifact role locationまたはevidence ID（個人absolute pathは保存しない）
 - SHA-256
 - 作成日時とbuild identity
 - manifestや短いlog excerpt

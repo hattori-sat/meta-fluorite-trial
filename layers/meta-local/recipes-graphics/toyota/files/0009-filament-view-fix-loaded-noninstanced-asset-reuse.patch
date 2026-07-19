@@ -1,0 +1,34 @@
+From 8ec6683efdb91363ece82e61f55111fffc27e83b Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 30 Mar 2026 19:10:00 +0900
+Subject: [PATCH] filament-view: fix loaded non-instanced asset reuse
+
+When a model asset is already loaded and a later `ModelInstancingMode::none`
+instance reuses that asset path, the model is queued for add-to-scene without
+reattaching the already-loaded `FilamentAsset*`. That can later trigger the
+"asset is null, deferring load till later" warning path.
+
+Restore the already-loaded asset pointers before the deferred add step.
+---
+ .../plugins/filament_view/core/systems/derived/model_system.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/model_system.cc b/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/model_system.cc
+index 8678282..24bd7dc 100644
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -519,6 +519,12 @@ void ModelSystem::queueModelLoad(std::shared_ptr<Model> model) {
+       case AssetLoadingState::loaded:
+         // add model to asset's loading queue
+         _models[modelGuid] = std::move(model);
++        if (instanceMode == ModelInstancingMode::none && assetData.asset != nullptr) {
++          // Reuse the already-loaded asset for non-instanced models so the later
++          // add-to-scene path sees a valid asset instead of a null placeholder.
++          _models[modelGuid]->setAsset(assetData.asset);
++          _models[modelGuid]->setAssetInstance(assetData.asset->getInstance());
++        }
+         assetData.loadingInstances.emplace_back(modelGuid);
+         spdlog::trace("  Asset loaded: model queued for instancing.");
+         return;
+-- 
+2.34.1

@@ -1,0 +1,31 @@
+--- a/shell/backend/wayland_vulkan/wayland_vulkan.cc	2026-03-03 03:19:05.455909500 +0900
++++ b/shell/backend/wayland_vulkan/wayland_vulkan.cc	2026-03-03 03:24:26.223916523 +0900
+@@ -24,17 +24,24 @@
+ #include "config/common.h"
+ #include "engine.h"
+ 
++#include <stdexcept>
++#include <string>
++
++#include <cstdlib>
++
++
+ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+ 
+-const auto& d = vk::detail::defaultDispatchLoaderDynamic;
++const auto& d = vk::defaultDispatchLoaderDynamic;
+ 
+ #define S1(x) #x
+ #define S2(x) S1(x)
+ #define LOCATION __FILE__ " : " S2(__LINE__)
+ 
+-#define CHECK_VK_RESULT(x)                                         \
+-  do {                                                             \
+-    vk::detail::resultCheck(static_cast<vk::Result>(x), LOCATION); \
++#define CHECK_VK_RESULT(x)                           \
++  do {                                               \
++    const vk::Result _r = static_cast<vk::Result>(x);\
++    if (_r != vk::Result::eSuccess) std::abort();   \
+   } while (0)
+ 
+ WaylandVulkanBackend::WaylandVulkanBackend(wl_display* display,

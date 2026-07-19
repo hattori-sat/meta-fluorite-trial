@@ -1,0 +1,18 @@
+[global]
+app_id = "fluorite"
+
+[view]
+window_type = "NORMAL"
+output_index = 0
+width = 1280
+height = 720
+fullscreen = false
+pixel_ratio = 1.0
+# For IVI mode:
+# ivi_surface_id = 9001
+
+[window_activation_area]
+x = 0
+y = 0
+width = 1280
+height = 720
