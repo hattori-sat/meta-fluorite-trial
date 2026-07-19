@@ -4,7 +4,7 @@ Last updated: 2026-07-19
 
 ## Current focus
 
-**[FLR-0015 — Make MCP evidence explainable](work/tickets/FLR-0015-mcp-explainability.md)**
+**[FLR-0017 — QEMU Fluorite evidence observer](work/tickets/FLR-0017-qemu-evidence-mcp.md)**
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -12,11 +12,11 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0015 | MCP観測結果の根拠・限界・次行動をruntimeで明示する | primary role + checker role | Do | explainability contractをテストし、PRをdev-foundationへ出す |
+| FLR-0017 | legacy QEMU contractをbounded evidence observerへ落とし込む | primary role + target-validator + checker role | Plan | legacy launch/readiness/crash evidenceをcurrent validation contractへ分離する |
 
 ## Next
 
-FLR-0015を完了してからFLR-0008でFluoriteの成功状態を定義し、その後FLR-0007でAGL組立process、FLR-0009〜0011で下位描画stackを追う。PDCA Checkで順序は再評価する。
+FLR-0016はFLR-0008のBitBake観測を進めるための割込み。preflight完了後、FLR-0008、FLR-0007、FLR-0009〜0011の順序をPDCA Checkで再評価する。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |
@@ -33,6 +33,8 @@ FLR-0015を完了してからFLR-0008でFluoriteの成功状態を定義し、�
 | [FLR-0013](work/tickets/FLR-0013-agl-observer-mcp.md) | AGLのmanifest、feature、image組立をYoctoから分離して観測する | FLR-0001 |
 | [FLR-0014](work/tickets/FLR-0014-command-runner-mcp.md) | allowlist runbookだけを実行するcommand MCPを作る | FLR-0001, FLR-0004, FLR-0013 |
 | [FLR-0008](work/tickets/FLR-0008-fluorite-demo.md) | Fluorite 3D demoの成功状態とscene/native境界を固定する | FLR-0001, FLR-0015 |
+| [FLR-0016](work/tickets/FLR-0016-bitbake-preflight.md) | 既存 AGL checkout/cache を再利用する BitBake preflight を固定する | FLR-0001, FLR-0006, FLR-0007 |
+| [FLR-0017](work/tickets/FLR-0017-qemu-evidence-mcp.md) | legacy QEMU contractをbounded evidence observerへ落とし込む | FLR-0002, FLR-0005, FLR-0008, FLR-0016 |
 
 ## Waiting
 
@@ -42,6 +44,9 @@ FLR-0015を完了してからFLR-0008でFluoriteの成功状態を定義し、�
 - GitHub repository settingsで`Branch policy / validate-branch-flow`をrequired status checkにする。
 
 ## Inbox
+
+- FLR-0016: BitBake preflight中のMACHINE/conf/cache identityを確認する。
+- FLR-0017: legacy `docs/mac-qemu.md`のexplicit launch/readiness/crash evidenceをQEMU observerへ移す。
 
 - MCP explainability contractをdomain payloadと混ぜずに運用する。
 
