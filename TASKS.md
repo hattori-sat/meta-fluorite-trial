@@ -12,7 +12,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0017 | legacy QEMU contractをbounded evidence observerへ落とし込む | primary role + target-validator + checker role | Plan | approved launch profileとsession evidence bundleを定義する |
+| FLR-0017 | legacy QEMU contractをbounded evidence observerへ落とし込む | primary role + target-validator + checker role | Check | current artifactでapp/readiness/crash evidenceを採取済み。FLR-0018へExecutionをhandoff |
 
 ## Next
 
@@ -35,6 +35,7 @@ FLR-0017のみをIn Progressとする。FLR-0016はmetadata observation済みだ
 | [FLR-0008](work/tickets/FLR-0008-fluorite-demo.md) | Fluorite 3D demoの成功状態とscene/native境界を固定する | FLR-0001, FLR-0015 |
 | [FLR-0016](work/tickets/FLR-0016-bitbake-preflight.md) | 既存 AGL checkout/cache を再利用する BitBake preflight を固定する | FLR-0001, FLR-0006, FLR-0007 |
 | [FLR-0017](work/tickets/FLR-0017-qemu-evidence-mcp.md) | legacy QEMU contractをbounded evidence observerへ落とし込む | FLR-0002, FLR-0005, FLR-0008, FLR-0016 |
+| [FLR-0018](work/tickets/FLR-0018-qemu-launch-runbook.md) | QEMU launchをregistered Execution runbookへ固定する | FLR-0017 |
 
 ## Waiting
 
@@ -47,6 +48,7 @@ FLR-0017のみをIn Progressとする。FLR-0016はmetadata observation済みだ
 
 - FLR-0016: BitBake preflight中のMACHINE/conf/cache identityを確認する（Waiting、manifest provenance UNKNOWN）。
 - FLR-0017: legacy `docs/mac-qemu.md`のexplicit launch/readiness/crash evidenceをQEMU observerへ移す。
+- FLR-0018: current QEMU app-launch evidenceを固定Execution runbookへ移す。
 
 - MCP explainability contractをdomain payloadと混ぜずに運用する。
 
