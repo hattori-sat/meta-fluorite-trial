@@ -1,0 +1,51 @@
+From 7bde8b2166c49e62e4dcfdc9fe3dcd473bd1e319 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 29 Mar 2026 00:00:00 +0900
+Subject: [PATCH] desktop: allow black curtain for pending resolution
+
+Upstream-Status: Inappropriate [local debug/integration behavior]
+
+The local desktop pending-resolution path still requires a real background
+surface via `ivi_layout_find_bg_output()`. That leaves NORMAL apps stuck in the
+pending list when shell readiness is satisfied by the built-in black curtain
+fallback instead of a BG role client.
+
+Keep the defer behavior, but treat any mapped black curtain as sufficient
+background readiness so desktop pending resolution can proceed consistently
+with the shell-side fallback logic.
+---
+ src/desktop.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/src/desktop.c b/src/desktop.c
+index 6fff485..028b44f 100644
+--- a/src/desktop.c
++++ b/src/desktop.c
+@@ -384,13 +384,24 @@ desktop_committed(struct weston_desktop_surface *dsurface,
+ 	struct ivi_surface *surface =
+ 		weston_desktop_surface_get_user_data(dsurface);
+ 	struct ivi_policy *policy = surface->ivi->policy;
++	bool has_background_output = false;
++	struct ivi_output *output;
++
++	if (ivi_layout_find_bg_output(ivi)) {
++		has_background_output = true;
++	} else {
++		wl_list_for_each(output, &ivi->outputs, link) {
++			if (output_has_black_curtain(output))
++				has_background_output = true;
++		}
++	}
+ 
+ 	if (policy && policy->api.surface_commited &&
+ 	    !policy->api.surface_commited(surface, surface->ivi))
+ 		return;
+ 
+ 	if (ivi->shell_client.ready && !surface->checked_pending &&
+-	    ivi_layout_find_bg_output(ivi)) {
++	    has_background_output) {
+ 		struct ivi_output *remote_output = NULL;
+ 		const char *app_id =	weston_desktop_surface_get_app_id(dsurface);
+ 		weston_log("Checking pending surface %p, app_id %s\n", surface,
+-- 
+2.43.0

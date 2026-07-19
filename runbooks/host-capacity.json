@@ -1,0 +1,22 @@
+{
+  "schema": "fluorite.runbook/v1",
+  "id": "host-capacity",
+  "title": "Build-host capacity observation",
+  "description": "Read operating-system architecture and filesystem capacity through fixed commands.",
+  "risk": "read_only",
+  "parameters": {},
+  "steps": [
+    {
+      "id": "kernel-and-architecture",
+      "argv": ["uname", "-s", "-m"],
+      "root": "repository",
+      "timeout_seconds": 10
+    },
+    {
+      "id": "filesystem-capacity",
+      "argv": ["df", "-Pk", "."],
+      "root": "repository",
+      "timeout_seconds": 10
+    }
+  ]
+}

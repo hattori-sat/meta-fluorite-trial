@@ -1,0 +1,97 @@
+From 4a3aa4727935f89cc8fffd6a0b8ee2480a0927ae Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 30 Mar 2026 18:01:00 +0900
+Subject: [PATCH] app: allow runtime FPS cap via env
+
+Fluorite now reaches a stable 1280x720 swapchain on Raspberry Pi 4, but the
+scene still appears to stall after the first visible frame. There is currently
+no easy runtime control for the main loop cadence: App::Loop() always sleeps to
+the maximum output refresh rate reported by Wayland.
+
+Add a small runtime escape hatch so investigation can continue without another
+round of config/plumbing changes. When FLUTTER_AUTO_MAX_FPS is set to a
+positive number, the main loop caps itself to min(output refresh, requested
+FPS). This keeps the default behavior unchanged while making it easy to test
+whether lower cadence improves stability on Pi 4.
+
+Upstream-Status: Inappropriate [debug aid for local AGL investigation]
+Signed-off-by: Fluorite Integration Role
+---
+ shell/app.cc | 37 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 37 insertions(+)
+
+diff --git a/shell/app.cc b/shell/app.cc
+index 31b36e9..127c489 100644
+--- a/shell/app.cc
++++ b/shell/app.cc
+@@ -15,6 +15,8 @@
+ 
+ #include "app.h"
+ 
++#include <algorithm>
++#include <cstdlib>
+ #include <thread>
+ 
+ #include "config/common.h"
+@@ -22,6 +24,39 @@
+ #include "view/flutter_view.h"
+ #include "wayland/display.h"
+ 
++namespace {
++
++double GetRequestedMaxFps() {
++  const auto* value = getenv("FLUTTER_AUTO_MAX_FPS");
++  if (value == nullptr || value[0] == '\0') {
++    return 0.0;
++  }
++
++  char* end = nullptr;
++  const auto fps = std::strtod(value, &end);
++  if (end == value || fps <= 0.0) {
++    return 0.0;
++  }
++
++  return fps;
++}
++
++double GetEffectiveFrameRate(double refresh_rate) {
++  constexpr double kDefaultRefreshRate = 60.0;
++  auto effective_refresh_rate =
++      refresh_rate > 0.0 ? refresh_rate : kDefaultRefreshRate;
++
++  if (const auto requested_max_fps = GetRequestedMaxFps();
++      requested_max_fps > 0.0) {
++    effective_refresh_rate =
++        std::min(effective_refresh_rate, requested_max_fps);
++  }
++
++  return effective_refresh_rate;
++}
++
++}  // namespace
++
+ #if BUILD_BACKEND_HEADLESS_EGL
+ #include "backend/headless/headless.h"
+ #endif
+@@ -33,6 +68,9 @@ App::App(const std::vector<Configuration::Config>& configs)
+                                                   configs)) {
+   SPDLOG_DEBUG("+App::App");
+ 
++  if (const auto requested_max_fps = GetRequestedMaxFps(); requested_max_fps > 0.0)
++    SPDLOG_INFO("Capping frame rate to {} FPS via FLUTTER_AUTO_MAX_FPS", requested_max_fps);
++
+   size_t index = 0;
+   m_views.reserve(configs.size());
+   for (auto const& cfg : configs) {
+@@ -80,7 +118,8 @@ int App::Loop() const {
+ 
+   const auto elapsed = end_time - start_time;
+ 
+-  const auto frame_time = 1000.0 / m_wayland_display->GetMaxRefreshRate();
++  const auto frame_time =
++      1000.0 / GetEffectiveFrameRate(m_wayland_display->GetMaxRefreshRate());
+   if (const auto sleep_time = frame_time - elapsed; sleep_time > 0) {
+ #if BUILD_WATCHDOG
+     m_watch_dog->pet();
+-- 
+2.43.0

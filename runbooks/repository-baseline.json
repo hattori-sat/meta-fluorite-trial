@@ -1,0 +1,22 @@
+{
+  "schema": "fluorite.runbook/v1",
+  "id": "repository-baseline",
+  "title": "Canonical repository baseline",
+  "description": "Read the current revision and worktree state without changing Git state.",
+  "risk": "read_only",
+  "parameters": {},
+  "steps": [
+    {
+      "id": "revision",
+      "argv": ["git", "rev-parse", "HEAD"],
+      "root": "repository",
+      "timeout_seconds": 10
+    },
+    {
+      "id": "worktree-state",
+      "argv": ["git", "status", "--short", "--branch"],
+      "root": "repository",
+      "timeout_seconds": 10
+    }
+  ]
+}

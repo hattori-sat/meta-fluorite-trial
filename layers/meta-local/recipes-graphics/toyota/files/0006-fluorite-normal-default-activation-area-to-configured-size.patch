@@ -1,0 +1,70 @@
+From 367ca3db87ea508fe9f8765eca0f13fb5819b0de Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 29 Mar 2026 00:00:00 +0900
+Subject: [PATCH] wayland: default Fluorite NORMAL activation area to initial
+ requested size
+
+Upstream-Status: Inappropriate [local debug/integration behavior]
+
+Fluorite NORMAL registration is intentionally deferred until after the first
+configure so that agl-compositor sees the configured geometry. However, when
+no explicit activation area is configured, agl-compositor later falls back to
+the full output area during set_app_normal(), which effectively turns the app
+back into a full-size window and can re-trigger the Vulkan BO allocation issue
+we are trying to avoid on Raspberry Pi.
+
+For the local Fluorite NORMAL path only, reuse the initial requested size as
+the activation area when none was explicitly provided. This must use an
+immutable copy of the constructor-requested size, because the first xdg
+configure may already carry a compositor-driven maximized size and overwrite
+`m_window_size` before the deferred agl-shell registration runs.
+---
+ shell/wayland/window.cc |  9 +++++++++
+ shell/wayland/window.h  |  4 ++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/shell/wayland/window.cc b/shell/wayland/window.cc
+index 65cabbb..1b7aab4 100644
+--- a/shell/wayland/window.cc
++++ b/shell/wayland/window.cc
+@@ -66,6 +66,7 @@ WaylandWindow::WaylandWindow(const size_t index,
+       m_activation_area({activation_area_x, activation_area_y,
+                          activation_area_width, activation_area_height}),
+       m_window_size({width, height}),
++      m_initial_window_size({width, height}),
+       m_type(get_window_type(type)),
+       m_app_id(std::move(app_id)) {  // disable vsync
+   SPDLOG_TRACE("({}) + WaylandWindow()", m_index);
+@@ -169,6 +170,15 @@ WaylandWindow::WaylandWindow(const size_t index,
+       m_display->AglShellDoSetupActivationArea(
+           m_activation_area.x, m_activation_area.y, m_activation_area.width,
+           m_activation_area.height, m_output_index);
++    } else {
++      SPDLOG_DEBUG(
++          "Using initial requested size {}x{} as activation area for NORMAL "
++          "app_id {}",
++          m_initial_window_size.width, m_initial_window_size.height,
++          m_app_id);
++      m_display->AglShellDoSetupActivationArea(
++          0, 0, static_cast<uint32_t>(m_initial_window_size.width),
++          static_cast<uint32_t>(m_initial_window_size.height), m_output_index);
+     }
+     m_display->AglShellDoAppNormal(m_app_id);
+   }
+diff --git a/shell/wayland/window.h b/shell/wayland/window.h
+index ed0796f..3597ed6 100644
+--- a/shell/wayland/window.h
++++ b/shell/wayland/window.h
+@@ -157,6 +157,10 @@ class WaylandWindow {
+     int32_t width;
+     int32_t height;
+   } m_window_size{};
++  struct {
++    int32_t width;
++    int32_t height;
++  } m_initial_window_size{};
+ 
+   enum window_type m_type;
+   std::string m_app_id;
+-- 
+2.43.0

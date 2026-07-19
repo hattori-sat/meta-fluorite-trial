@@ -1,0 +1,37 @@
+From 8fe885595eb72fbdeede3abc49337a228d91b29f Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 9 Mar 2026 01:05:00 +0900
+Subject: [PATCH] layout: fall back to default output before background exists
+
+Upstream-Status: Pending
+
+For the fluorite NORMAL path we now reach DESKTOP role assignment, but startup
+still aborts if no background surface has been registered yet. In that case the
+compositor raises a protocol error even though a real output already exists.
+
+Prefer the current output, then the background output, and finally the default
+compositor output before aborting. This keeps NORMAL startup alive while the
+background is still catching up during boot.
+---
+ src/layout.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/layout.c b/src/layout.c
+index 7ef8adf..466f14b 100644
+--- a/src/layout.c
++++ b/src/layout.c
+@@ -642,6 +642,14 @@ ivi_layout_desktop_committed(struct ivi_surface *surf)
+ 		if (!r_output)
+ 			r_output = ivi_layout_find_bg_output(surf->ivi);
+ 
++		/* if the background is not up yet, still use a real output */
++		if (!r_output) {
++			struct weston_output *woutput =
++				get_default_output(surf->ivi->compositor);
++			if (woutput)
++				r_output = to_ivi_output(woutput);
++		}
++
+ 		/* if we couldn't still find an output by this point, there's
+ 		 * something wrong so we abort with a protocol error */
+ 		if (!r_output) {

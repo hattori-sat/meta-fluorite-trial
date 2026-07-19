@@ -1,0 +1,104 @@
+From 683606ce4ce81f467dc78dc19da871e1d0742480 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 30 Mar 2026 19:05:00 +0900
+Subject: [PATCH] filament_scene: minimize startup scene for pi stability test
+
+For the current Raspberry Pi 4 investigation, reduce startup rendering cost as
+aggressively as possible while still leaving a visible 3D scene:
+
+- keep only a single primitive shape at startup
+- remove GLB model preload entirely from startup
+- replace the HDR indirect light with a simple default indirect light
+- use a single non-shadow-casting point light
+
+This intentionally narrows the experiment to "can the Pi sustain a simple 3D
+scene without raster-thread aborts?" before reintroducing heavier assets.
+---
+ packages/filament_scene/example/lib/main.dart                |  4 +---
+ .../example/lib/shape_and_object_creators.dart              | 28 ++++++++++----------
+ 2 files changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index b44a30f..53232fe 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -265,9 +265,8 @@ class _MyAppState extends State<MyApp> {
+   Scene poGetScene() {
+     return Scene(
+       skybox: ColorSkybox(color: Colors.white),
+-      //skybox: HdrSkybox.asset("assets/envs/courtyard.hdr"),
+-      indirectLight: HdrIndirectLight.asset("assets/envs/courtyard.hdr"),
+-      //indirectLight: poGetDefaultIndirectLight(),
++      // Pi4 startup experiment: avoid loading the HDR environment cube map.
++      indirectLight: poGetDefaultIndirectLight(),
+       lights: poGetSceneLightsList(),
+     );
+   }
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 5089c8c..202e5e5 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -13,12 +13,10 @@ import 'package:fluorite_examples_demo/scenes/trainset_scene.dart';
+ ////////////////////////////////////////////////////////////////////////////////
+ // TODO(kerberjg): remove! Shapes will become components on scene entities, and this will go to init
+ List<Shape> poGetScenesShapes() {
+-  List<Shape> itemsToReturn = [];
+-
+-  // Startup experiment: keep only the default visible scene's shapes alive.
+-  itemsToReturn.addAll(PlaygroundSceneView.getSceneShapes());
+-
+-  return itemsToReturn;
++  final itemsToReturn = PlaygroundSceneView.getSceneShapes();
++  // Extreme startup experiment: keep only one primitive visible so we can
++  // validate raster stability before reintroducing more geometry.
++  return itemsToReturn.isEmpty ? <Shape>[] : <Shape>[itemsToReturn.first];
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+@@ -55,6 +53,24 @@ final EntityGUID centerPointLightGUID = generateGuid();
+ 
+ // TODO(kerberjg): this should be initialized as components on scene entities
+ List<Light> poGetSceneLightsList() {
++  lightsWeCanChangeParamsOn.clear();
++
++  // Pi4 startup experiment: a single direct light without shadows keeps the
++  // scene readable while avoiding the cost of the demo's full lighting rig.
++  return <Light>[
++    Light(
++      id: centerPointLightGUID,
++      type: LightType.point,
++      color: Colors.white,
++      intensity: 2.5,
++      castShadows: false,
++      castLight: true,
++      falloffRadius: 40,
++      position: Vector3(0, 6, 6),
++      direction: Vector3(0, -1, -1),
++    ),
++  ];
++
+   List<Light> itemsToReturn = [];
+ 
+   itemsToReturn.add(poGetDefaultPointLight(Colors.white, 6));
+@@ -321,16 +337,9 @@ List<Light> poGetSceneLightsList() {
+ List<String> radarConePieceGUID = [];
+ 
+ List<Model> poGetModelList() {
+-  // TODO(kerberjg): remove this, use scene files
+-  List<Model> itemsToReturn = [];
+-
+-  // 'primary objects'
+-  itemsToReturn.addAll(getBaseModels());
+-
+-  // Startup experiment: preload only the default visible scene.
+-  itemsToReturn.addAll(PlaygroundSceneView.getSceneModels());
+-
+-  return itemsToReturn;
++  // Pi4 startup experiment: remove all model preload and validate that the
++  // render path is stable with only primitive shapes.
++  return <Model>[];
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+-- 
+2.34.1

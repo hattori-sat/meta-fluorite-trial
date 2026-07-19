@@ -1,0 +1,123 @@
+From 5f8df39e3b1a0ecfe9ad4fb06dca6d0f4b2ed001 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 29 Mar 2026 20:45:00 +0900
+Subject: [PATCH] flutter-auto: defer fluorite NORMAL registration until
+ configured
+
+Upstream-Status: Pending
+
+The current fluorite-only NORMAL experiment registers the app as normal and
+immediately activates it right after the first empty wl_surface commit. That
+gets us onto the AGL path, but it still bypasses two pieces of logic already
+present in the runtime:
+
+- `App::App()` only sends `agl_shell.ready()` for BG windows
+- `Display` already has `app_state` / `app_on_output` listeners that activate
+  apps once the compositor reports `AGL_SHELL_APP_STATE_STARTED`
+
+On the compositor side `shell_set_app_normal()` has no pending fallback. If a
+NORMAL request arrives before the surface is fully visible to the desktop role
+path, the request is dropped silently. A direct `activate_app()` immediately
+after registration also duplicates the listener-driven activation path and can
+race ahead of compositor-side `STARTED`.
+
+For the fluorite experiment:
+
+- send `agl_shell.ready()` for NORMAL-only runs as well
+- wait for the initial xdg configure before registering fluorite as NORMAL
+- let the existing `app_state STARTED` listener perform activation instead of
+  forcing it immediately in the constructor
+
+This keeps the experiment aligned with the runtime's built-in activation flow
+while still preserving the fluorite-only scope.
+---
+diff --git a/shell/app.cc b/shell/app.cc
+index 16f38c8..4b58024 100644
+--- a/shell/app.cc
++++ b/shell/app.cc
+@@ -32,9 +32,6 @@ App::App(const std::vector<Configuration::Config>& configs)
+                                                   configs[0].cursor_theme,
+                                                   configs)) {
+   SPDLOG_DEBUG("+App::App");
+-#if ENABLE_AGL_SHELL_CLIENT
+-  bool found_view_with_bg = false;
+-#endif
+ 
+   size_t index = 0;
+   m_views.reserve(configs.size());
+@@ -43,20 +40,12 @@ App::App(const std::vector<Configuration::Config>& configs)
+     view->Initialize();
+     m_views.emplace_back(std::move(view));
+     index++;
+-
+-#if ENABLE_AGL_SHELL_CLIENT
+-    if (WaylandWindow::get_window_type(cfg.view.window_type) ==
+-        WaylandWindow::WINDOW_BG) {
+-      found_view_with_bg = true;
+-    }
+-#endif
+   }
+ 
+ #if ENABLE_AGL_SHELL_CLIENT
+-  // check that if we had a BG type and issue a ready() request for it,
+-  // otherwise we're going to assume that this is a NORMAL/REGULAR application.
+-  if (found_view_with_bg)
+-    m_wayland_display->AglShellDoReady();
++  // NORMAL-only applications need ready() as well. Repeated ready requests are
++  // ignored by the compositor once the shell is already marked ready.
++  m_wayland_display->AglShellDoReady();
+ #endif
+ 
+ #if BUILD_WATCHDOG
+diff --git a/shell/wayland/window.cc b/shell/wayland/window.cc
+index 3d4d52d..cb26bac 100644
+--- a/shell/wayland/window.cc
++++ b/shell/wayland/window.cc
+@@ -94,19 +94,11 @@ WaylandWindow::WaylandWindow(const size_t index,
+   wl_surface_commit(m_base_surface);
+ 
+ #if ENABLE_AGL_SHELL_CLIENT
++  const bool defer_fluorite_normal_registration =
++      m_type == WINDOW_NORMAL && m_app_id == "fluorite";
++
+   switch (m_type) {
+     case WINDOW_NORMAL:
+-      if (m_app_id == "fluorite") {
+-        if (m_activation_area.x || m_activation_area.y ||
+-            m_activation_area.width || m_activation_area.height) {
+-          m_display->AglShellDoSetupActivationArea(
+-              m_activation_area.x, m_activation_area.y,
+-              m_activation_area.width, m_activation_area.height,
+-              m_output_index);
+-        }
+-        m_display->AglShellDoAppNormal(m_app_id);
+-        m_display->AglShellDoActivateApp(m_app_id, m_output_index);
+-      }
+       break;
+     case WINDOW_BG:
+       m_display->AglShellDoBackground(m_base_surface, m_output_index);
+@@ -145,6 +137,22 @@ WaylandWindow::WaylandWindow(const size_t index,
+       continue;
+   }
+ 
++#if ENABLE_AGL_SHELL_CLIENT
++  if (defer_fluorite_normal_registration) {
++    SPDLOG_DEBUG(
++        "Registering configured NORMAL app_id {} with agl-shell after initial "
++        "configure ({}x{})",
++        m_app_id, m_geometry.width, m_geometry.height);
++    if (m_activation_area.x || m_activation_area.y ||
++        m_activation_area.width || m_activation_area.height) {
++      m_display->AglShellDoSetupActivationArea(
++          m_activation_area.x, m_activation_area.y, m_activation_area.width,
++          m_activation_area.height, m_output_index);
++    }
++    m_display->AglShellDoAppNormal(m_app_id);
++  }
++#endif
++
+   m_backend->CreateSurface(m_index, m_base_surface, m_geometry.width,
+                            m_geometry.height);
+ 
+-- 
+2.34.1

@@ -1,0 +1,59 @@
+From 1b20e8209fefb38e7722c6ea9d49df920bb7a399 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 30 Mar 2026 03:08:00 +0900
+Subject: [PATCH] filament_scene: limit startup preload to playground
+
+Fluorite currently serializes models and shapes for every demo scene at
+startup, even though only the Playground scene is initially visible. On the
+Pi4 path, hidden-scene assets such as `radar_cone.glb` are still loaded and
+can trip native model-system warnings before the default 3D scene has
+stabilized.
+
+For the current platform experiment, preload only the content needed for the
+default Playground scene. This keeps the startup hypothesis narrow:
+
+- if Playground becomes stable, hidden-scene preload was part of the problem
+- if it still stalls, the issue is in visible-scene or frame-loop handling
+
+This intentionally narrows startup scope and may make the other scene buttons
+incomplete for this build, but it keeps the experiment minimal and reversible.
+---
+ .../example/lib/shape_and_object_creators.dart      | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 445a4b3..748893a 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -14,13 +14,8 @@ import 'package:filament_scene/filament_scene.dart';
+ List<Shape> poGetScenesShapes() {
+   List<Shape> itemsToReturn = [];
+ 
+-  itemsToReturn.addAll(PlaygroundSceneView.getSceneShapes());
+-  itemsToReturn.addAll(RadarSceneView.getSceneShapes());
+-  itemsToReturn.addAll(SettingsSceneView.getSceneShapes());
+-  itemsToReturn.addAll(PlanetariumSceneView.getSceneShapes());
+-  itemsToReturn.addAll(TrainsetSceneView.getSceneShapes());
+-
+-  // NOTE: add other scenes if needed
++  // Startup experiment: keep only the default visible scene's shapes alive.
++  itemsToReturn.addAll(PlaygroundSceneView.getSceneShapes());
+ 
+   return itemsToReturn;
+ }
+@@ -332,11 +327,8 @@ List<Model> poGetModelList() {
+   // 'primary objects'
+   itemsToReturn.addAll(getBaseModels());
+ 
++  // Startup experiment: preload only the default visible scene.
+   itemsToReturn.addAll(PlaygroundSceneView.getSceneModels());
+-  itemsToReturn.addAll(RadarSceneView.getSceneModels());
+-  itemsToReturn.addAll(SettingsSceneView.getSceneModels());
+-  itemsToReturn.addAll(PlanetariumSceneView.getSceneModels());
+-  itemsToReturn.addAll(TrainsetSceneView.getSceneModels());
+ 
+   return itemsToReturn;
+ }
+-- 
+2.34.1
+

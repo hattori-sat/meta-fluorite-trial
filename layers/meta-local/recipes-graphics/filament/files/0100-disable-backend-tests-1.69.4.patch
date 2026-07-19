@@ -1,0 +1,42 @@
+diff --git a/filament/backend/CMakeLists.txt b/filament/backend/CMakeLists.txt
+--- a/filament/backend/CMakeLists.txt
++++ b/filament/backend/CMakeLists.txt
+@@ -565,8 +565,9 @@
+ # Test
+ # ==================================================================================================
+ option(INSTALL_BACKEND_TEST "Install the backend test library so it can be consumed on iOS" OFF)
++option(FILAMENT_BUILD_BACKEND_TESTS "Build backend test targets" OFF)
+ 
+-if (APPLE OR LINUX)
++if (FILAMENT_BUILD_BACKEND_TESTS AND (APPLE OR LINUX))
+     set(BACKEND_TEST_SRC
+         test/BackendTest.cpp
+         test/ShaderGenerator.cpp
+@@ -626,7 +627,7 @@
+ endif()
+ 
+ # TODO: Disabling IOS test due to breakage wrt glslang update
+-if (APPLE AND NOT IOS)
++if (FILAMENT_BUILD_BACKEND_TESTS AND APPLE AND NOT IOS)
+     # TODO: we should expand this test to Linux and other platforms.
+     list(APPEND BACKEND_TEST_SRC
+          test/test_RenderExternalImage.cpp)
+@@ -682,7 +683,7 @@
+     endif()
+ endif()
+ 
+-if (LINUX)
++if (FILAMENT_BUILD_BACKEND_TESTS AND LINUX)
+     add_executable(backend_test_linux test/linux_runner.cpp ${BACKEND_TEST_SRC})
+     target_link_libraries(backend_test_linux PRIVATE ${BACKEND_TEST_LIBS})
+     set_target_properties(backend_test_linux PROPERTIES FOLDER Tests)
+@@ -715,7 +716,7 @@
+ # ==================================================================================================
+ # Metal utils tests
+ 
+-if (APPLE AND NOT IOS)
++if (FILAMENT_BUILD_BACKEND_TESTS AND APPLE AND NOT IOS)
+ 
+ add_executable(metal_utils_test test/MetalTest.mm)
+ 
+

@@ -1,0 +1,37 @@
+From e45b2cb6d7f3e8b1704a5b4ce35db11a55b0a8e0 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 29 Mar 2026 22:15:00 +0900
+Subject: [PATCH] flutter-auto: restore agl_shell binding for BG and panel
+ views
+
+Upstream-Status: Pending
+
+Patch 0003 intentionally narrowed agl_shell binding so that the fluorite
+NORMAL experiment could bind to agl_shell. That also removed the original
+condition that bound agl_shell for non-NORMAL views.
+
+As a result, helper clients started with `--window-type BG` or panel roles but
+with an app id other than `fluorite` never bind to agl_shell. Their calls to
+`agl_shell_set_background()` or `agl_shell_set_panel()` become no-ops, the
+surface keeps role NONE, and the compositor leaves it in the pending list.
+
+Keep the fluorite NORMAL special case, but restore the original non-NORMAL
+binding rule so dedicated BG or panel helper clients can still claim their AGL
+roles.
+---
+diff --git a/shell/wayland/display.cc b/shell/wayland/display.cc
+--- a/shell/wayland/display.cc
++++ b/shell/wayland/display.cc
+@@ -48,7 +48,9 @@ Display::Display(const bool enable_cursor,
+   wayland_event_mask_update(ignore_wayland_event, m_wayland_event_mask);
+ 
+   for (auto const& cfg : configs) {
+-    if (cfg.app_id == "fluorite") {
++    if (cfg.app_id == "fluorite" ||
++        WaylandWindow::WINDOW_NORMAL !=
++            WaylandWindow::get_window_type(cfg.view.window_type)) {
+       m_agl.bind_to_agl_shell = true;
+       break;
+     }
+-- 
+2.34.1
