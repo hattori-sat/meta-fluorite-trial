@@ -11,6 +11,7 @@ SRC_URI = " \
     file://0003-filament_scene-minimize-startup-scene-for-pi.patch \
     file://0004-filament_scene-omit-native-unsupported-root-cameras.patch \
     file://0005-filament_scene-omit-typed-lighting-payloads.patch \
+    file://0006-filament_scene-omit-startup-shapes-probe.patch \
     file://config.toml \
 "
 
