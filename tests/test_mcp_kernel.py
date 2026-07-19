@@ -10,7 +10,7 @@ from unittest.mock import patch
 from mcp.bounded_io import DEFAULT_SKIPPED_DIRS, BoundedRoots
 from mcp.config import MCPConfig
 from mcp.errors import BoundaryViolation, ConfigurationError, MCPDomainError
-from mcp.kernel import AuditHook, EvidenceStore, decode_cursor, encode_cursor, paginate, redact
+from mcp.kernel import AuditHook, EvidenceStore, Kernel, decode_cursor, encode_cursor, paginate, redact
 
 
 class PrivacyTests(unittest.TestCase):
@@ -134,6 +134,22 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual("sufficient", configured["identity_status"])
         self.assertEqual([], configured["unknowns"])
         self.assertNotEqual(missing["evidence_ids"], configured["evidence_ids"])
+
+    def test_envelope_explainability_is_explicit_and_noncausal(self) -> None:
+        kernel = Kernel("agl", subject_id="agl-source", revision_or_image_id="sha256:source")
+        result = kernel.envelope(
+            "read_integration_evidence",
+            {"path": "meta-agl/conf/example.conf"},
+            unknowns=("active provider is not evaluated",),
+            next_queries=("search_integration_points",),
+        )
+
+        explanation = result["explainability"]
+        self.assertEqual("bounded_observation", explanation["classification"])
+        self.assertEqual(result["evidence_ids"], explanation["basis_evidence_ids"])
+        self.assertEqual([], explanation["causal_claims"])
+        self.assertIn("active provider is not evaluated", explanation["limitations"])
+        self.assertEqual(["search_integration_points"], explanation["next_actions"])
 
     def test_response_cap_preserves_resume_locator(self) -> None:
         kernel = MCPConfig(data={"max_response_bytes": 4096}).kernel("yocto")
