@@ -4,7 +4,7 @@ Last updated: 2026-07-19
 
 ## Current focus
 
-**[FLR-0020 — Self-contained build workspace bootstrap](work/tickets/FLR-0020-self-contained-build-workspace.md)**
+**[FLR-0023 — Project-owned Fluorite layer and build input](work/tickets/FLR-0023-project-owned-fluorite-layer.md)**
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -12,11 +12,11 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0020 | meta-fluorite-trialだけでAGL/Yocto build workspaceを再構成する | primary role + build-runner + checker role | Plan | fixed manifest/lockからdry-run-first bootstrap contractを設計する |
+| FLR-0023 | meta-localをFluorite固有実装のsource of truthとしてBitBake入力を再構成する | primary role + build-runner + checker role | Do | project-owned recipe/packagegroup/patchのmetadata gateを通す |
 
 ## Next
 
-FLR-0020のみをIn Progressとする。FLR-0019はbuild environment blockerでWaiting、FLR-0018はrunbook登録済み、FLR-0017は観測/MCP Check済み。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
+FLR-0023のみをIn Progressとする。FLR-0020はworkspace bootstrap設計、FLR-0021はlayer topology比較、FLR-0019はbuild environment blockerでWaiting、FLR-0018はrunbook登録済み、FLR-0017は観測/MCP Check済み。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |
@@ -38,6 +38,7 @@ FLR-0020のみをIn Progressとする。FLR-0019はbuild environment blockerでW
 | [FLR-0018](work/tickets/FLR-0018-qemu-launch-runbook.md) | QEMU launchをregistered Execution runbookへ固定する | FLR-0017 |
 | [FLR-0019](work/tickets/FLR-0019-qemu-build-iteration.md) | BitBake成果物からQEMU stable-render verdictまでを反復する | FLR-0018 |
 | [FLR-0020](work/tickets/FLR-0020-self-contained-build-workspace.md) | meta-fluorite-trialだけでAGL/Yocto build workspaceを再構成する | FLR-0019 |
+| [FLR-0023](work/tickets/FLR-0023-project-owned-fluorite-layer.md) | meta-localをFluorite固有実装のsource of truthとしてBitBake入力を再構成する | FLR-0021, FLR-0022 |
 
 ## Waiting
 

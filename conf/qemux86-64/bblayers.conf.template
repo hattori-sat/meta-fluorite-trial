@@ -121,8 +121,7 @@ AGL_META_PYTHON = "${METADIR}/external/meta-openembedded/meta-python"
 
 BBLAYERS =+ " \
    ${METADIR}/meta-agl/meta-agl-flutter \
-   ${METADIR}/self-install/meta-flutter \
-   ${METADIR}/self-install/meta-flutter/meta-flutter-apps \
+   ${METADIR}/external/meta-flutter \
 "
 
 #

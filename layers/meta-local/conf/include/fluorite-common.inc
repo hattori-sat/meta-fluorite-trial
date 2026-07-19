@@ -1,7 +1,7 @@
 # Shared image additions used by Fluorite validation builds.
 
 IMAGE_INSTALL:append = " \
-    packagegroup-toyota-connected-tcna-packages \
+    packagegroup-fluorite-demo \
     ivi-homescreen \
     agl-shell-activator \
     window-management-client-grpc \

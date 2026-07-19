@@ -8,22 +8,6 @@ Subject: [PATCH] filament_scene: reduce startup camera contention on rpi
  .../example/lib/shape_and_object_creators.dart      | 13 ++++---------
  2 files changed, 6 insertions(+), 11 deletions(-)
 
-diff --git a/packages/filament_scene/example/lib/scenes/playground_scene.dart b/packages/filament_scene/example/lib/scenes/playground_scene.dart
-index 5a132c0..0864c0d 100644
---- a/packages/filament_scene/example/lib/scenes/playground_scene.dart
-+++ b/packages/filament_scene/example/lib/scenes/playground_scene.dart
-@@ -251,8 +251,11 @@ class _PlaygroundSceneViewState extends StatefulSceneViewState {
- 
-   @override
-   void onCreate() {
--    PlaygroundSceneView._sceneCamera.setActive();
-+    // Keep the default Playground camera active on startup.
-+    // Without this, the single remaining scene camera is initialized but may
-+    // never become the active view camera, which leaves the 3D view blank.
-+    PlaygroundSceneView._sceneCamera.setActive();
-     widget.filament.queueFrameTask(widget.filament.setFogOptions(false));
-   }
- 
 diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
 index 445a4b3..78bed04 100644
 --- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
