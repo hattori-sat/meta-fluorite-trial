@@ -303,6 +303,20 @@ class CommandRunnerTests(unittest.TestCase):
         self.assertTrue(result["timed_out"])
         self.assertEqual("task_inactivity", result["timeout_kind"])
 
+    def test_capture_reports_live_bounded_tail_and_process_identity(self) -> None:
+        snapshots: list[dict[str, object]] = []
+        result = CommandRunner._capture(
+            ["/bin/sh", "-c", "printf first; sleep 1; printf last"],
+            Path.cwd(),
+            os.environ,
+            5,
+            progress=lambda item: snapshots.append(dict(item)),
+        )
+        self.assertEqual(0, result["return_code"])
+        self.assertGreaterEqual(len(snapshots), 1)
+        self.assertTrue(all(item["pid"] == result["pid"] for item in snapshots))
+        self.assertIn("last", snapshots[-1]["output"])
+
 
 if __name__ == "__main__":
     unittest.main()

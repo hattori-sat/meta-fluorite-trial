@@ -13,7 +13,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from .config import MCPConfig, repository_root
 from .errors import ConfigurationError, MCPDomainError
@@ -518,6 +518,7 @@ class CommandRunner:
         timeout: int,
         inactivity_timeout: int | None = None,
         cancellation: threading.Event | None = None,
+        progress: Callable[[Mapping[str, Any]], None] | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
         process = subprocess.Popen(
@@ -531,35 +532,56 @@ class CommandRunner:
         )
         process_pid = process.pid
         process_pgid = os.getpgid(process.pid)
-        chunks: list[bytes] = []
+        output_tail = bytearray()
         output_digest = hashlib.sha256()
-        retained = 0
         total = 0
         cap = 64 * 1024
+        output_lock = threading.Lock()
         last_activity = started
         observed_members: dict[int, dict[str, Any]] = {}
         next_process_scan = started
 
         def drain() -> None:
-            nonlocal retained, total, last_activity
+            nonlocal total, last_activity
             assert process.stdout is not None
             while True:
                 chunk = process.stdout.read(4096)
                 if not chunk:
                     return
-                total += len(chunk)
-                last_activity = time.monotonic()
-                output_digest.update(chunk)
-                if retained < cap:
-                    kept = chunk[: cap - retained]
-                    chunks.append(kept)
-                    retained += len(kept)
+                with output_lock:
+                    total += len(chunk)
+                    last_activity = time.monotonic()
+                    output_digest.update(chunk)
+                    output_tail.extend(chunk)
+                    if len(output_tail) > cap:
+                        del output_tail[: len(output_tail) - cap]
 
         reader = threading.Thread(target=drain, daemon=True)
         reader.start()
         timed_out = False
         timeout_kind: str | None = None
         cancelled = False
+        next_progress = started
+
+        def progress_snapshot() -> None:
+            if progress is None:
+                return
+            with output_lock:
+                current_output = bytes(output_tail).decode("utf-8", errors="replace")
+                current_total = total
+                current_digest = output_digest.copy().hexdigest()
+            progress(
+                {
+                    "pid": process_pid,
+                    "pgid": process_pgid,
+                    "duration_seconds": round(time.monotonic() - started, 3),
+                    "output": redact(current_output),
+                    "output_bytes": current_total,
+                    "output_sha256": current_digest,
+                    "truncated": current_total > len(output_tail),
+                    "observed_processes": list(observed_members.values())[:128],
+                }
+            )
 
         def terminate_group(sig: int) -> None:
             try:
@@ -573,6 +595,9 @@ class CommandRunner:
                 for member in CommandRunner._process_group_snapshot(process_pgid):
                     observed_members[member["pid"]] = member
                 next_process_scan = now + 1.0
+            if now >= next_progress:
+                progress_snapshot()
+                next_progress = now + 2.0
             if cancellation is not None and cancellation.is_set():
                 cancelled = True
                 terminate_group(signal.SIGTERM)
@@ -599,7 +624,11 @@ class CommandRunner:
         reader.join(timeout=2)
         if process.stdout is not None:
             process.stdout.close()
-        output = b"".join(chunks).decode("utf-8", errors="replace")
+        progress_snapshot()
+        with output_lock:
+            output = bytes(output_tail).decode("utf-8", errors="replace")
+            final_total = total
+            final_digest = output_digest.hexdigest()
         output, text_truncated = bounded_text(output, cap)
         return {
             "return_code": return_code,
@@ -610,9 +639,9 @@ class CommandRunner:
             "cancelled": cancelled,
             "duration_seconds": round(time.monotonic() - started, 3),
             "output": redact(output),
-            "output_bytes": total,
-            "output_sha256": output_digest.hexdigest(),
-            "truncated": text_truncated or total > retained,
+            "output_bytes": final_total,
+            "output_sha256": final_digest,
+            "truncated": text_truncated or final_total > len(output_tail),
             "observed_processes": list(observed_members.values())[:128],
         }
 
@@ -750,6 +779,32 @@ class CommandRunner:
                 record["status"] = "cancelled"
                 break
             command, environment = self._command(step, plan["parameters"])
+            active_step: dict[str, Any] = {
+                "id": step.step_id,
+                "argv": redact(self._render_argv(step, plan["parameters"])),
+                "working_root_role": step.root,
+                "timeout_seconds": step.timeout_seconds,
+                "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
+                "return_code": None,
+                "timed_out": False,
+                "timeout_kind": None,
+                "cancelled": False,
+                "duration_seconds": 0.0,
+                "output": "",
+                "output_bytes": 0,
+                "output_sha256": hashlib.sha256(b"").hexdigest(),
+                "truncated": False,
+                "pid": None,
+                "pgid": None,
+                "observed_processes": [],
+            }
+            record["steps"].append(active_step)
+            self._persist_record(record)
+
+            def update_progress(snapshot: Mapping[str, Any]) -> None:
+                active_step.update(snapshot)
+                self._persist_record(record)
+
             outcome = self._capture(
                 command,
                 self._resolve_root(step.root),
@@ -757,21 +812,17 @@ class CommandRunner:
                 step.timeout_seconds,
                 step.inactivity_timeout_seconds,
                 cancellation,
+                update_progress,
             )
-            outcome["id"] = step.step_id
-            outcome["argv"] = redact(self._render_argv(step, plan["parameters"]))
-            outcome["working_root_role"] = step.root
-            outcome["timeout_seconds"] = step.timeout_seconds
-            outcome["inactivity_timeout_seconds"] = step.inactivity_timeout_seconds
-            record["steps"].append(outcome)
+            active_step.update(outcome)
             self._persist_record(record)
-            if outcome["cancelled"]:
+            if active_step["cancelled"]:
                 record["status"] = "cancelled"
                 break
-            if outcome["timed_out"]:
+            if active_step["timed_out"]:
                 record["status"] = "timed_out"
                 break
-            if outcome["return_code"] != 0:
+            if active_step["return_code"] != 0:
                 record["status"] = "failed"
                 break
         else:

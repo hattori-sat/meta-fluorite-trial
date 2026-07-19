@@ -35,7 +35,9 @@ status/log calls. The catalog exposes fixed qemux86-64 metadata, Fluorite demo
 compile and AGL Flutter image-build profiles. They accept no target/task/path
 parameters, use independent wall-clock and task-output inactivity limits, own one
 new process group, and persist redacted status JSON by run/evidence ID. The catalog
-also exposes one fixed `qemux86-64-fluorite` target profile. It
+updates active PID/PGID, bounded process membership and the capped output tail while
+the step is running; callers do not need to wait for completion to observe progress.
+The catalog also exposes one fixed `qemux86-64-fluorite` target profile. It
 requires a configured `qemu_artifact` role root, fixed kernel/rootfs basenames,
 `-snapshot`, Cocoa display and a 120-second process bound. It does not expose
 arbitrary parse, dry-run, effective-environment target or image build. A record

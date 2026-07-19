@@ -72,3 +72,24 @@ Commit/push the fixed monitor, fast-forward the Mini PC, configure the Git-ignor
 ### Smallest next action
 
 Commit/push and synchronize the build role, then execute `yocto-metadata-gate` for FLR-0025.
+
+## Live Check — 2026-07-20
+
+### Facts
+
+- Commit `7547631` was pushed and both Mac and Mini PC were synchronized cleanly.
+- Metadata gate `run-55876289c4b14770` completed with exit 0 in 7.192 seconds; its output digest and durable record were persisted.
+- Three earlier metadata attempts failed before BitBake startup while narrowing the Git-ignored environment wrapper contract. No build/cache cleanup occurred.
+- Demo compile `run-54a3d817112d4cdd` started, but `running` status exposed no active step until completion. It was cancelled through MCP after 107.726 seconds; the owned process group exited with signal 15 and status `cancelled`.
+
+### Problem point
+
+The first implementation appended a step record only after `_capture` returned. Therefore PID/PGID and log data existed at completion but were unavailable during the interval when monitoring mattered.
+
+### Countermeasure
+
+Create the active step before process launch, update its PID/PGID, bounded process membership and capped output tail every two seconds, and atomically persist each snapshot. Retain full-stream byte count and digest while storing only the tail.
+
+### Smallest next action
+
+Verify, commit/push the live-status correction, synchronize the Mini PC, and restart the same incremental demo compile.
