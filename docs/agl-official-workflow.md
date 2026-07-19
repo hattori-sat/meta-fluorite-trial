@@ -12,7 +12,7 @@ MacでBitBakeを実行すること、mini PCのGUIをMac QEMU検証とみなす�
 ```mermaid
 flowchart LR
     O["Official AGL trout manifest"] --> B["Linux mini PC: repo + aglsetup"]
-    F["Fixed manifest + meta-local"] --> B
+    F["Fixed manifest + project layer"] --> B
     B --> Y["BitBake with existing caches"]
     Y --> A["Artifact bundle + hashes + manifests"]
     A --> M["Mac: QEMU launch"]
@@ -72,7 +72,7 @@ repo sync
 - do not run it against the existing baseline before a ticket records the current manifest and explicit approval;
 - compare the result with `manifests/agl-trout-fixed.xml` before building;
 - keep external `meta-vulkan` at `manifests/external-layers.lock`;
-- keep project-owned changes in `layers/meta-local`, not as unexplained edits inside upstream layers.
+- keep project-owned changes in `layers/meta-fluorite-trial`, not as unexplained edits inside upstream layers.
 
 The fixed XML in this repository is a captured input identity, not a replacement for understanding the official manifest flow. A future fresh-checkout runbook must prove how it consumes that XML without silently following newer branch heads.
 
@@ -95,7 +95,7 @@ The files under `conf/` are sanitized snapshots and evidence for comparison or r
 | Raspberry Pi machine | `raspberrypi4` is the `aglsetup.sh` machine argument | captured setup manifest records `raspberrypi4`; its fixed template sets `MACHINE = "raspberrypi4-64"` | preserve the alias-to-effective-machine translation and verify both identities |
 | Flutter demo image | official guide uses `agl-ivi-demo-flutter` | project uses `agl-ivi-image-flutter` plus Toyota Connected packages | trace image recipe/packagegroup provenance before changing target |
 | QEMU launch | official x86 flow assumes Linux `runqemu`, commonly KVM/VNC | validation host is Apple Silicon macOS | treat Mac QEMU command/device/acceleration as a separate Target Validation contract |
-| Project graphics | official demo does not define this Fluorite/Filament customization | `meta-local` enables Flutter Vulkan/Filament and compositor patches | verify package, runtime device, surface, presentation, and scene separately |
+| Project graphics | official demo does not define this Fluorite/Filament customization | `meta-fluorite-trial` enables Flutter Vulkan/Filament and compositor patches | verify package, runtime device, surface, presentation, and scene separately |
 
 These are facts about two different strata, not evidence that either side is wrong.
 

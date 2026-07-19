@@ -19,7 +19,7 @@
       },
       "roots": {
         "poky_metadata": "/role/path/to/agl/source/external/poky/meta",
-        "project_metadata": "/role/path/to/agl/source/meta-local",
+        "project_metadata": "/role/path/to/meta-fluorite-trial/layers/meta-fluorite-trial",
         "task_logs": "/role/path/to/yocto/build/tmp/work"
       }
     },
@@ -77,6 +77,7 @@
       },
       "roots": {
         "yocto_build": "/role/path/to/yocto/build",
+        "yocto_compile_logs": "/role/path/to/yocto/tmp/work/machine/flutter-engine/version/temp",
         "qemu_artifact": "/role/path/to/qemu/artifact"
       }
     }

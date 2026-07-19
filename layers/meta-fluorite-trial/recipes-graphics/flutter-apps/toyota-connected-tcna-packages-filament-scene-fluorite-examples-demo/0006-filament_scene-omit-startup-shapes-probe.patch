@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 20 Jul 2026 22:45:00 +0900
+Subject: [PATCH] filament_scene: omit startup shapes for payload isolation probe
+
+Temporarily remove startup shapes to distinguish a scene-level crash from a
+shape serialization/type contract crash. This is an isolation probe, not the
+target demo configuration.
+---
+ packages/filament_scene/example/lib/shape_and_object_creators.dart | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -19,1 +19,1 @@
+-  return itemsToReturn.isEmpty ? <Shape>[] : <Shape>[itemsToReturn.first];
++  return <Shape>[];
+
+-- 
+2.34.1

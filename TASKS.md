@@ -1,10 +1,10 @@
 # Task dashboard
 
-Last updated: 2026-07-19
+Last updated: 2026-07-20
 
 ## Current focus
 
-**[FLR-0018 — Registered QEMU launch runbook](work/tickets/FLR-0018-qemu-launch-runbook.md)**
+**[FLR-0025 — Bounded BitBake monitor MCP](work/tickets/FLR-0025-bitbake-monitor-mcp.md)**
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -12,11 +12,23 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0018 | QEMU launchをregistered Execution runbookへ固定する | primary role + build-runner + checker role | Do | dry-run/planでfixed argv、root、snapshot、timeout、side-effect境界を確認する |
+| FLR-0025 | fixed BitBake監視からartifact/QEMU/Fluorite確認までを完遂する | primary role + build-runner + checker role | Do → Check | pseudo/tar workaroundをMini PCへ同期し、image retry後にartifact hash→SCP→QEMUへ進む |
+
+## Active loop state
+
+| Phase | State | Evidence / next gate |
+| --- | --- | --- |
+| Monitor implementation | Check | clientと別SID/PGIDのCooker/Workerをlive確認。新規server group追跡・停止test PASS |
+| Git synchronization | Complete | Mac/origin/Mini PCは`157c1ed`。worktree cleanを再確認する |
+| Demo compile | Complete | bounded demo compile exit 0。image input変更はdemo recipe外 |
+| Image build | In Progress | pseudo/tar失敗をMini PCで再現し、project layer workaroundを追加。同期後に再実行 |
+| Artifact transfer | Blocked by image | kernel/rootfsのidentity、size、SHA-256確認後、Macのactive qemux86-64 artifact directoryへ置換 |
+| QEMU / Fluorite | Blocked by transfer | snapshot QEMU、`agl-driver` Wayland session、explicit `flutter-auto -b <bundle>`、readiness/render/crash判定 |
+| Failure loop | Ready | build/log/QEMU/app/renderの層を分離し、最小修正後にcompileから再開 |
 
 ## Next
 
-FLR-0018のみをIn Progressとする。FLR-0017は観測/MCP Check済みでExecutionへhandoff。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
+FLR-0025のみをIn Progressとする。FLR-0024はrenamed-layer metadata/patch gate済みで、FLR-0025のcompile/image acceptance待ち。FLR-0019のbuild-to-render loopはFLR-0025の固定監視runbookで再開する。devへの通常mergeはFluorite動作確認まで行わない。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |
@@ -36,6 +48,11 @@ FLR-0018のみをIn Progressとする。FLR-0017は観測/MCP Check済みでExec
 | [FLR-0016](work/tickets/FLR-0016-bitbake-preflight.md) | 既存 AGL checkout/cache を再利用する BitBake preflight を固定する | FLR-0001, FLR-0006, FLR-0007 |
 | [FLR-0017](work/tickets/FLR-0017-qemu-evidence-mcp.md) | legacy QEMU contractをbounded evidence observerへ落とし込む | FLR-0002, FLR-0005, FLR-0008, FLR-0016 |
 | [FLR-0018](work/tickets/FLR-0018-qemu-launch-runbook.md) | QEMU launchをregistered Execution runbookへ固定する | FLR-0017 |
+| [FLR-0019](work/tickets/FLR-0019-qemu-build-iteration.md) | BitBake成果物からQEMU stable-render verdictまでを反復する | FLR-0018 |
+| [FLR-0020](work/tickets/FLR-0020-self-contained-build-workspace.md) | meta-fluorite-trialだけでAGL/Yocto build workspaceを再構成する | FLR-0019 |
+| [FLR-0023](work/tickets/FLR-0023-project-owned-fluorite-layer.md) | meta-fluorite-trial layerをFluorite固有実装のsource of truthとしてBitBake入力を再構成する | FLR-0021, FLR-0022 |
+| [FLR-0024](work/tickets/FLR-0024-project-layer-naming.md) | legacy meta-localをmeta-fluorite-trial layerへ置き換える | FLR-0023 |
+| [FLR-0025](work/tickets/FLR-0025-bitbake-monitor-mcp.md) | bounded BitBake監視MCPを追加する | FLR-0024 |
 
 ## Waiting
 
@@ -49,6 +66,9 @@ FLR-0018のみをIn Progressとする。FLR-0017は観測/MCP Check済みでExec
 - FLR-0016: BitBake preflight中のMACHINE/conf/cache identityを確認する（Waiting、manifest provenance UNKNOWN）。
 - FLR-0017: legacy `docs/mac-qemu.md`のexplicit launch/readiness/crash evidenceをQEMU observerへ移す。
 - FLR-0018: current QEMU app-launch evidenceを固定Execution runbookへ移す。
+- FLR-0019: pseudo/tar packagecopy failureを切り分け、成果物ができた場合のみscp/QEMUへ進む。
+- FLR-0020: `/AGL/trout` に依存しない fixed-manifest workspace bootstrap を設計する。
+- FLR-0021: `meta-vulkan` add-layer有無ではなく、fixed manifestとactive meta-flutter layer topologyの不一致を比較する。
 
 - MCP explainability contractをdomain payloadと混ぜずに運用する。
 

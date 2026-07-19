@@ -13,7 +13,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from .config import MCPConfig, repository_root
 from .errors import ConfigurationError, MCPDomainError
@@ -28,6 +28,9 @@ _ALLOWED_PREFIXES = (("git", "status"), ("git", "rev-parse"), ("uname",), ("df",
 _FIXED_RUNBOOK_MANIFESTS = (
     "host-capacity.json",
     "repository-baseline.json",
+    "yocto-metadata-gate.json",
+    "yocto-demo-compile.json",
+    "yocto-image-build.json",
     "qemux86-64-fluorite.json",
 )
 
@@ -41,10 +44,23 @@ _QEMU_X86_64_ARGV = (
     "-device", "virtio-vga", "-device", "virtio-rng-pci", "-usb",
     "-device", "usb-tablet", "-device", "usb-kbd",
 )
+_YOCTO_METADATA_ARGV = ("bitbake", "-e", "agl-ivi-image-flutter")
+_YOCTO_DEMO_COMPILE_ARGV = (
+    "bitbake",
+    "toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo",
+    "-c",
+    "compile",
+)
+_YOCTO_IMAGE_ARGV = ("bitbake", "agl-ivi-image-flutter")
 
 
 def _command_is_allowlisted(argv: tuple[str, ...]) -> bool:
-    if argv == _QEMU_X86_64_ARGV:
+    if argv in (
+        _QEMU_X86_64_ARGV,
+        _YOCTO_METADATA_ARGV,
+        _YOCTO_DEMO_COMPILE_ARGV,
+        _YOCTO_IMAGE_ARGV,
+    ):
         return True
     if any(argv[: len(prefix)] == prefix for prefix in _ALLOWED_PREFIXES):
         return True
@@ -79,6 +95,8 @@ class Step:
     root: str
     environment_profile: str | None
     timeout_seconds: int
+    inactivity_timeout_seconds: int | None
+    activity_root: str | None
 
 
 @dataclass(frozen=True)
@@ -180,7 +198,11 @@ class RunbookRegistry:
         known_parameters = {parameter.name for parameter in parameter_specs}
         for index, value in enumerate(raw_steps):
             step = _mapping(value, f"{filename}.steps[{index}]")
-            if set(step) - {"id", "argv", "root", "environment_profile", "timeout_seconds"}:
+            if set(step) - {
+                "id", "argv", "root", "environment_profile", "timeout_seconds",
+                "inactivity_timeout_seconds",
+                "activity_root",
+            }:
                 raise ConfigurationError(f"{filename}.steps[{index}] has unsupported fields")
             argv_raw = step.get("argv")
             if not isinstance(argv_raw, list) or not argv_raw or not all(
@@ -203,8 +225,22 @@ class RunbookRegistry:
             if profile is not None and (not isinstance(profile, str) or not _SAFE_PROFILE.fullmatch(profile)):
                 raise ConfigurationError(f"{filename}.steps[{index}].environment_profile is invalid")
             timeout = step.get("timeout_seconds", 30)
-            if isinstance(timeout, bool) or not isinstance(timeout, int) or not 1 <= timeout <= 3600:
+            if isinstance(timeout, bool) or not isinstance(timeout, int) or not 1 <= timeout <= 21600:
                 raise ConfigurationError(f"{filename}.steps[{index}].timeout_seconds is invalid")
+            inactivity_timeout = step.get("inactivity_timeout_seconds")
+            if inactivity_timeout is not None and (
+                isinstance(inactivity_timeout, bool)
+                or not isinstance(inactivity_timeout, int)
+                or not 30 <= inactivity_timeout <= timeout
+            ):
+                raise ConfigurationError(
+                    f"{filename}.steps[{index}].inactivity_timeout_seconds is invalid"
+                )
+            activity_root = step.get("activity_root")
+            if activity_root is not None and (
+                not isinstance(activity_root, str) or not _SAFE_PROFILE.fullmatch(activity_root)
+            ):
+                raise ConfigurationError(f"{filename}.steps[{index}].activity_root is invalid")
             steps.append(
                 Step(
                     _string(step.get("id"), f"{filename}.steps[{index}].id"),
@@ -212,6 +248,8 @@ class RunbookRegistry:
                     _string(step.get("root", "repository"), f"{filename}.steps[{index}].root"),
                     profile,
                     timeout,
+                    inactivity_timeout,
+                    activity_root,
                 )
             )
         return Runbook(
@@ -278,6 +316,8 @@ class CommandRunner:
                     "root_role": step.root,
                     "environment_profile": step.environment_profile,
                     "timeout_seconds": step.timeout_seconds,
+                    "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
+                    "activity_root_role": step.activity_root,
                 }
                 for step in runbook.steps
             ],
@@ -361,6 +401,8 @@ class CommandRunner:
         steps = []
         for step in runbook.steps:
             self._resolve_root(step.root)
+            if step.activity_root is not None:
+                self._resolve_root(step.activity_root)
             profile = self._profile(step.environment_profile)
             argv = self._render_argv(step, parameters)
             steps.append(
@@ -371,6 +413,8 @@ class CommandRunner:
                     "environment_profile": step.environment_profile,
                     "environment_source": "fixed_profile" if profile else None,
                     "timeout_seconds": step.timeout_seconds,
+                    "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
+                    "activity_root_role": step.activity_root,
                 }
             )
         canonical = json.dumps(
@@ -455,14 +499,94 @@ class CommandRunner:
         return command, environment
 
     @staticmethod
+    def _process_group_snapshot(pgid: int) -> list[dict[str, Any]]:
+        proc = Path("/proc")
+        if not proc.is_dir():
+            return []
+        members: list[dict[str, Any]] = []
+        for entry in proc.iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                stat = (entry / "stat").read_text(encoding="utf-8")
+                close = stat.rfind(")")
+                fields = stat[close + 2 :].split()
+                member_pgid = int(fields[2])
+                if member_pgid != pgid:
+                    continue
+                command = stat[stat.find("(") + 1 : close]
+                members.append(
+                    {"pid": int(entry.name), "pgid": member_pgid, "command": command[:80]}
+                )
+            except (OSError, ValueError, IndexError):
+                continue
+        return sorted(members, key=lambda item: item["pid"])
+
+    @staticmethod
+    def _bitbake_process_snapshot() -> list[dict[str, Any]]:
+        proc = Path("/proc")
+        if not proc.is_dir():
+            return []
+        roles = {"KnottyUI": "client", "Cooker": "server", "Worker": "worker"}
+        processes: list[dict[str, Any]] = []
+        for entry in proc.iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                stat = (entry / "stat").read_text(encoding="utf-8")
+                close = stat.rfind(")")
+                command = stat[stat.find("(") + 1 : close]
+                role = roles.get(command)
+                if role is None:
+                    continue
+                fields = stat[close + 2 :].split()
+                processes.append(
+                    {
+                        "pid": int(entry.name),
+                        "ppid": int(fields[1]),
+                        "pgid": int(fields[2]),
+                        "sid": int(fields[3]),
+                        "command": command,
+                        "role": role,
+                    }
+                )
+            except (OSError, ValueError, IndexError):
+                continue
+        return sorted(processes, key=lambda item: item["pid"])
+
+    @staticmethod
+    def _task_activity_marker(root: Path | None) -> tuple[int, int, str] | None:
+        if root is None:
+            return None
+        newest: tuple[int, int, str] | None = None
+        try:
+            entries = root.iterdir()
+            for path in entries:
+                if not path.name.startswith(("log.do_", "run.do_")) or not path.is_file():
+                    continue
+                stat = path.stat()
+                marker = (stat.st_mtime_ns, stat.st_size, path.name)
+                if newest is None or marker > newest:
+                    newest = marker
+        except OSError:
+            return None
+        return newest
+
+    @staticmethod
     def _capture(
         command: list[str],
         cwd: Path,
         environment: Mapping[str, str],
         timeout: int,
+        inactivity_timeout: int | None = None,
         cancellation: threading.Event | None = None,
+        progress: Callable[[Mapping[str, Any]], None] | None = None,
+        activity_root: Path | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
+        preexisting_bitbake_pids = {
+            item["pid"] for item in CommandRunner._bitbake_process_snapshot()
+        }
         process = subprocess.Popen(
             command,
             cwd=cwd,
@@ -472,69 +596,169 @@ class CommandRunner:
             stderr=subprocess.STDOUT,
             start_new_session=True,
         )
-        chunks: list[bytes] = []
+        process_pid = process.pid
+        process_pgid = os.getpgid(process.pid)
+        output_tail = bytearray()
         output_digest = hashlib.sha256()
-        retained = 0
         total = 0
         cap = 64 * 1024
+        output_lock = threading.Lock()
+        last_activity = started
+        last_activity_source = "process_start"
+        observed_members: dict[int, dict[str, Any]] = {}
+        owned_server_pgids: set[int] = set()
+        next_process_scan = started
+        next_activity_scan = started
+        activity_marker = CommandRunner._task_activity_marker(activity_root)
 
         def drain() -> None:
-            nonlocal retained, total
+            nonlocal total, last_activity, last_activity_source
             assert process.stdout is not None
             while True:
-                chunk = process.stdout.read(4096)
+                chunk = os.read(process.stdout.fileno(), 4096)
                 if not chunk:
                     return
-                total += len(chunk)
-                output_digest.update(chunk)
-                if retained < cap:
-                    kept = chunk[: cap - retained]
-                    chunks.append(kept)
-                    retained += len(kept)
+                with output_lock:
+                    total += len(chunk)
+                    last_activity = time.monotonic()
+                    last_activity_source = "combined_stdout"
+                    output_digest.update(chunk)
+                    output_tail.extend(chunk)
+                    if len(output_tail) > cap:
+                        del output_tail[: len(output_tail) - cap]
 
         reader = threading.Thread(target=drain, daemon=True)
         reader.start()
         timed_out = False
+        timeout_kind: str | None = None
         cancelled = False
+        next_progress = started
 
-        def terminate_group(sig: int) -> None:
-            try:
-                os.killpg(process.pid, sig)
-            except ProcessLookupError:
+        def progress_snapshot() -> None:
+            if progress is None:
                 return
+            with output_lock:
+                current_output = bytes(output_tail).decode("utf-8", errors="replace")
+                current_total = total
+                current_digest = output_digest.copy().hexdigest()
+                current_activity = last_activity
+                current_activity_source = last_activity_source
+            progress(
+                {
+                    "pid": process_pid,
+                    "pgid": process_pgid,
+                    "duration_seconds": round(time.monotonic() - started, 3),
+                    "output": redact(current_output),
+                    "output_bytes": current_total,
+                    "output_sha256": current_digest,
+                    "truncated": current_total > len(output_tail),
+                    "observed_processes": list(observed_members.values())[:128],
+                    "last_activity_age_seconds": round(
+                        max(0.0, time.monotonic() - current_activity), 3
+                    ),
+                    "activity_source": current_activity_source,
+                }
+            )
+
+        def terminate_groups(sig: int) -> None:
+            for owned_pgid in sorted({process_pgid, *owned_server_pgids}):
+                try:
+                    os.killpg(owned_pgid, sig)
+                except ProcessLookupError:
+                    continue
 
         while process.poll() is None:
+            now = time.monotonic()
+            if now >= next_process_scan:
+                for member in CommandRunner._process_group_snapshot(process_pgid):
+                    observed_members[member["pid"]] = member
+                for member in CommandRunner._bitbake_process_snapshot():
+                    if member["pid"] in preexisting_bitbake_pids:
+                        continue
+                    observed_members[member["pid"]] = member
+                    if member["role"] in ("server", "worker"):
+                        owned_server_pgids.add(member["pgid"])
+                next_process_scan = now + 1.0
+            if now >= next_activity_scan:
+                current_marker = CommandRunner._task_activity_marker(activity_root)
+                if current_marker is not None and current_marker != activity_marker:
+                    with output_lock:
+                        last_activity = now
+                        last_activity_source = "task_log"
+                    activity_marker = current_marker
+                next_activity_scan = now + 0.25
+            if now >= next_progress:
+                progress_snapshot()
+                next_progress = now + 2.0
             if cancellation is not None and cancellation.is_set():
                 cancelled = True
-                terminate_group(signal.SIGTERM)
+                terminate_groups(signal.SIGTERM)
                 break
-            if time.monotonic() - started >= timeout:
+            if now - started >= timeout:
                 timed_out = True
-                terminate_group(signal.SIGTERM)
+                timeout_kind = "wall_clock"
+                terminate_groups(signal.SIGTERM)
+                break
+            with output_lock:
+                inactivity_age = now - last_activity
+            if inactivity_timeout is not None and inactivity_age >= inactivity_timeout:
+                timed_out = True
+                timeout_kind = "task_inactivity"
+                terminate_groups(signal.SIGTERM)
                 break
             time.sleep(0.05)
         if process.poll() is None:
             try:
                 return_code = process.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                terminate_group(signal.SIGKILL)
+                terminate_groups(signal.SIGKILL)
                 return_code = process.wait(timeout=5)
         else:
             return_code = int(process.returncode)
+        remaining_servers: list[dict[str, Any]] = []
+        if cancelled or timed_out:
+            shutdown_deadline = time.monotonic() + 5
+            while time.monotonic() < shutdown_deadline:
+                remaining_servers = [
+                    item for item in CommandRunner._bitbake_process_snapshot()
+                    if item["pid"] not in preexisting_bitbake_pids
+                    and item["pgid"] in owned_server_pgids
+                ]
+                if not remaining_servers:
+                    break
+                time.sleep(0.05)
+            if remaining_servers:
+                terminate_groups(signal.SIGKILL)
+                time.sleep(0.1)
+                remaining_servers = [
+                    item for item in CommandRunner._bitbake_process_snapshot()
+                    if item["pid"] not in preexisting_bitbake_pids
+                    and item["pgid"] in owned_server_pgids
+                ]
         reader.join(timeout=2)
         if process.stdout is not None:
             process.stdout.close()
-        output = b"".join(chunks).decode("utf-8", errors="replace")
+        progress_snapshot()
+        with output_lock:
+            output = bytes(output_tail).decode("utf-8", errors="replace")
+            final_total = total
+            final_digest = output_digest.hexdigest()
         output, text_truncated = bounded_text(output, cap)
         return {
             "return_code": return_code,
+            "pid": process_pid,
+            "pgid": process_pgid,
             "timed_out": timed_out,
+            "timeout_kind": timeout_kind,
             "cancelled": cancelled,
             "duration_seconds": round(time.monotonic() - started, 3),
             "output": redact(output),
-            "output_bytes": total,
-            "output_sha256": output_digest.hexdigest(),
-            "truncated": text_truncated or total > retained,
+            "output_bytes": final_total,
+            "output_sha256": final_digest,
+            "truncated": text_truncated or final_total > len(output_tail),
+            "observed_processes": list(observed_members.values())[:128],
+            "owned_server_pgids": sorted(owned_server_pgids),
+            "remaining_server_processes": remaining_servers[:128],
         }
 
     def _confirmed_plan(
@@ -586,6 +810,7 @@ class CommandRunner:
             "plan_digest": plan["plan_digest"],
             "created_at": observed_at(),
             "status": status,
+            "evidence_id": run_id,
             "steps": [],
         }
         with self._lock:
@@ -594,7 +819,7 @@ class CommandRunner:
                     (
                         key
                         for key, value in self._runs.items()
-                        if value["status"] in ("succeeded", "failed", "cancelled")
+                        if value["status"] in ("completed", "failed", "timed_out", "cancelled", "unknown")
                     ),
                     None,
                 )
@@ -603,7 +828,58 @@ class CommandRunner:
                 self._runs.pop(completed, None)
                 self._cancellations.pop(completed, None)
             self._runs[run_id] = record
+        self._persist_record(record)
         return record
+
+    def _persist_record(self, record: Mapping[str, Any]) -> None:
+        audit_path = self.config.audit_path()
+        if audit_path is None:
+            return
+        root = audit_path.parent / "run-records"
+        steps = []
+        for step in record.get("steps", []):
+            steps.append(
+                {
+                    key: step.get(key)
+                    for key in (
+                        "id", "return_code", "pid", "pgid", "timed_out", "timeout_kind",
+                        "cancelled", "duration_seconds", "output_bytes", "output_sha256",
+                        "truncated", "working_root_role", "timeout_seconds",
+                        "inactivity_timeout_seconds", "observed_processes",
+                        "activity_root_role", "activity_source", "last_activity_age_seconds",
+                    )
+                }
+            )
+        payload = redact(
+            {
+                "schema": "fluorite.run-status/v1",
+                "evidence_id": record["evidence_id"],
+                "run_id": record["run_id"],
+                "ticket_id": record["ticket_id"],
+                "runbook_id": record["runbook_id"],
+                "risk": record["risk"],
+                "plan_id": record["plan_id"],
+                "plan_digest": record["plan_digest"],
+                "status": record["status"],
+                "created_at": record["created_at"],
+                "started_at": record.get("started_at"),
+                "finished_at": record.get("finished_at"),
+                "steps": steps,
+            }
+        )
+        try:
+            root.mkdir(parents=True, exist_ok=True)
+            destination = root / f"{record['run_id']}.json"
+            temporary = root / f".{record['run_id']}.{uuid.uuid4().hex}.tmp"
+            temporary.write_text(
+                json.dumps(payload, sort_keys=True, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            os.replace(temporary, destination)
+        except OSError:
+            record.setdefault("audit_warnings", []).append(
+                "the durable run status could not be written"
+            )
 
     def _perform(
         self,
@@ -614,32 +890,66 @@ class CommandRunner:
     ) -> None:
         record["status"] = "running"
         record["started_at"] = observed_at()
+        self._persist_record(record)
         for step in runbook.steps:
             if cancellation is not None and cancellation.is_set():
                 record["status"] = "cancelled"
                 break
             command, environment = self._command(step, plan["parameters"])
+            active_step: dict[str, Any] = {
+                "id": step.step_id,
+                "argv": redact(self._render_argv(step, plan["parameters"])),
+                "working_root_role": step.root,
+                "timeout_seconds": step.timeout_seconds,
+                "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
+                "activity_root_role": step.activity_root,
+                "return_code": None,
+                "timed_out": False,
+                "timeout_kind": None,
+                "cancelled": False,
+                "duration_seconds": 0.0,
+                "output": "",
+                "output_bytes": 0,
+                "output_sha256": hashlib.sha256(b"").hexdigest(),
+                "truncated": False,
+                "pid": None,
+                "pgid": None,
+                "observed_processes": [],
+                "activity_source": "process_start",
+                "last_activity_age_seconds": 0.0,
+            }
+            record["steps"].append(active_step)
+            self._persist_record(record)
+
+            def update_progress(snapshot: Mapping[str, Any]) -> None:
+                active_step.update(snapshot)
+                self._persist_record(record)
+
             outcome = self._capture(
                 command,
                 self._resolve_root(step.root),
                 environment,
                 step.timeout_seconds,
+                step.inactivity_timeout_seconds,
                 cancellation,
+                update_progress,
+                self._resolve_root(step.activity_root) if step.activity_root else None,
             )
-            outcome["id"] = step.step_id
-            outcome["argv"] = redact(self._render_argv(step, plan["parameters"]))
-            outcome["working_root_role"] = step.root
-            outcome["timeout_seconds"] = step.timeout_seconds
-            record["steps"].append(outcome)
-            if outcome["cancelled"]:
+            active_step.update(outcome)
+            self._persist_record(record)
+            if active_step["cancelled"]:
                 record["status"] = "cancelled"
                 break
-            if outcome["timed_out"] or outcome["return_code"] != 0:
+            if active_step["timed_out"]:
+                record["status"] = "timed_out"
+                break
+            if active_step["return_code"] != 0:
                 record["status"] = "failed"
                 break
         else:
-            record["status"] = "succeeded"
+            record["status"] = "completed"
         record["finished_at"] = observed_at()
+        self._persist_record(record)
         record["audit_warnings"] = self._lifecycle_audit.emit(
             {
                 "schema": "fluorite.run-lifecycle/v1",
@@ -656,13 +966,21 @@ class CommandRunner:
                         "id": step["id"],
                         "working_root_role": step["working_root_role"],
                         "timeout_seconds": step["timeout_seconds"],
+                        "inactivity_timeout_seconds": step["inactivity_timeout_seconds"],
                         "return_code": step["return_code"],
                         "timed_out": step["timed_out"],
+                        "timeout_kind": step["timeout_kind"],
                         "cancelled": step["cancelled"],
                         "duration_seconds": step["duration_seconds"],
                         "output_bytes": step["output_bytes"],
                         "output_sha256": step["output_sha256"],
                         "truncated": step["truncated"],
+                        "pid": step["pid"],
+                        "pgid": step["pgid"],
+                        "observed_processes": step["observed_processes"],
+                        "activity_root_role": step["activity_root_role"],
+                        "activity_source": step["activity_source"],
+                        "last_activity_age_seconds": step["last_activity_age_seconds"],
                     }
                     for step in record["steps"]
                 ],
@@ -705,8 +1023,9 @@ class CommandRunner:
             try:
                 self._perform(record, runbook, plan, cancellation)
             except Exception:
-                record["status"] = "failed"
+                record["status"] = "unknown"
                 record["finished_at"] = observed_at()
+                self._persist_record(record)
 
         threading.Thread(
             target=run,
@@ -737,13 +1056,23 @@ class CommandRunner:
                     "id": step["id"],
                     "return_code": step["return_code"],
                     "timed_out": step["timed_out"],
+                    "timeout_kind": step["timeout_kind"],
                     "cancelled": step["cancelled"],
                     "duration_seconds": step["duration_seconds"],
                     "output_bytes": step["output_bytes"],
                     "output_sha256": step["output_sha256"],
                     "truncated": step["truncated"],
+                    "pid": step.get("pid"),
+                    "pgid": step.get("pgid"),
+                    "observed_processes": step.get("observed_processes", []),
+                    "owned_server_pgids": step.get("owned_server_pgids", []),
+                    "remaining_server_processes": step.get("remaining_server_processes", []),
+                    "activity_source": step.get("activity_source"),
+                    "last_activity_age_seconds": step.get("last_activity_age_seconds"),
                     "working_root_role": step["working_root_role"],
                     "timeout_seconds": step["timeout_seconds"],
+                    "inactivity_timeout_seconds": step["inactivity_timeout_seconds"],
+                    "activity_root_role": step.get("activity_root_role"),
                 }
                 for step in record["steps"]
             ],
@@ -780,3 +1109,36 @@ class CommandRunner:
             "next_cursor": page.next_cursor,
             "truncated": page.truncated or any(bool(step["truncated"]) for step in record["steps"]),
         }
+
+    def load_completion(self, run_id: str) -> dict[str, Any]:
+        path = self.config.audit_path()
+        if path is None:
+            raise MCPDomainError("completion record is unavailable", code="unknown_run")
+        durable = path.parent / "run-records" / f"{run_id}.json"
+        if durable.is_file():
+            try:
+                record = json.loads(durable.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                raise MCPDomainError("completion record is unavailable", code="unknown_run") from exc
+            if record.get("status") in ("queued", "running"):
+                record["status"] = "unknown"
+                record["recovery_note"] = (
+                    "supervisor restart interrupted final-state observation"
+                )
+            return record
+        if not path.is_file():
+            raise MCPDomainError("completion record is unavailable", code="unknown_run")
+        found = None
+        try:
+            for line in path.read_text(encoding="utf-8").splitlines():
+                try:
+                    event = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if event.get("schema") == "fluorite.run-lifecycle/v1" and event.get("run_id") == run_id:
+                    found = event
+        except OSError as exc:
+            raise MCPDomainError("completion record is unavailable", code="unknown_run") from exc
+        if found is None:
+            raise MCPDomainError("unknown run id", code="unknown_run")
+        return found

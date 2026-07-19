@@ -22,10 +22,13 @@ diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_s
 index b44a30f..53232fe 100644
 --- a/packages/filament_scene/example/lib/main.dart
 +++ b/packages/filament_scene/example/lib/main.dart
-@@ -265,9 +265,8 @@ class _MyAppState extends State<MyApp> {
+@@ -265,9 +265,10 @@ class _MyAppState extends State<MyApp> {
    Scene poGetScene() {
      return Scene(
-       skybox: ColorSkybox(color: Colors.white),
+-      skybox: ColorSkybox(color: Colors.white),
++      // Native flutter-auto 2.0 expects skybox color as a hex string, while
++      // the current Dart serializer emits Color.storage64 (List<double>).
++      // Omit the optional skybox until that serialization contract is aligned.
 -      //skybox: HdrSkybox.asset("assets/envs/courtyard.hdr"),
 -      indirectLight: HdrIndirectLight.asset("assets/envs/courtyard.hdr"),
 -      //indirectLight: poGetDefaultIndirectLight(),
@@ -55,7 +58,7 @@ index 5089c8c..202e5e5 100644
  }
  
  ////////////////////////////////////////////////////////////////////////////////
-@@ -55,6 +53,24 @@ final EntityGUID centerPointLightGUID = generateGuid();
+@@ -55,6 +53,26 @@ final EntityGUID centerPointLightGUID = generateGuid();
  
  // TODO(kerberjg): this should be initialized as components on scene entities
  List<Light> poGetSceneLightsList() {
@@ -67,7 +70,9 @@ index 5089c8c..202e5e5 100644
 +    Light(
 +      id: centerPointLightGUID,
 +      type: LightType.point,
-+      color: Colors.white,
++      // Native flutter-auto 2.0 expects color as a hex string, while the
++      // current Dart serializer emits Color.storage64 (List<double>).
++      // Omit it until the upstream serialization contract is aligned.
 +      intensity: 2.5,
 +      castShadows: false,
 +      castLight: true,

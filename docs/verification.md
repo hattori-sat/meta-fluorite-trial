@@ -49,7 +49,7 @@ git status --short
 取り込み元とのバイト対応をhashで固定したbaseline artifactには、取り込み元由来の行末空白が含まれる場合があります。これらを空白修正だけのために書き換えません。staged差分では、project-authored fileを`git diff --cached --check`で検査し、次のbyte-locked範囲を除外します。
 
 - `conf/*/*.template`
-- `layers/meta-local/**`
+- `layers/meta-fluorite-trial/**`
 - `manifests/agl-trout-fixed.xml`
 - `manifests/local-changes/**`
 

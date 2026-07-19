@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import tempfile
 import threading
 import time
@@ -19,17 +20,25 @@ class RunbookRegistryTests(unittest.TestCase):
         registry = RunbookRegistry()
         self.assertIn("repository-baseline", registry.runbooks)
         self.assertEqual(
-            {"host-capacity", "repository-baseline", "qemux86-64-fluorite"}, set(registry.runbooks)
+            {
+                "host-capacity", "repository-baseline", "qemux86-64-fluorite",
+                "yocto-metadata-gate", "yocto-demo-compile", "yocto-image-build",
+            },
+            set(registry.runbooks),
         )
         self.assertNotIn("yocto-parse", registry.runbooks)
         self.assertNotIn("yocto-dry-run", registry.runbooks)
-        self.assertNotIn("yocto-build-image", registry.runbooks)
+        self.assertIn("yocto-image-build", registry.runbooks)
         self.assertNotIn("yocto-effective-environment", registry.runbooks)
         qemu = registry.get("qemux86-64-fluorite")
         self.assertEqual("target_mutation", qemu.risk)
         self.assertEqual("qemu_artifact", qemu.steps[0].root)
         self.assertEqual(120, qemu.steps[0].timeout_seconds)
         self.assertIn("-snapshot", qemu.steps[0].argv)
+        self.assertEqual(
+            "yocto_compile_logs",
+            registry.get("yocto-demo-compile").steps[0].activity_root,
+        )
         for runbook in registry.runbooks.values():
             for parameter in runbook.parameters:
                 self.assertGreater(len(parameter.choices), 0)
@@ -64,6 +73,9 @@ class RunbookRegistryTests(unittest.TestCase):
             for name in (
                 "host-capacity.json",
                 "repository-baseline.json",
+                "yocto-metadata-gate.json",
+                "yocto-demo-compile.json",
+                "yocto-image-build.json",
                 "qemux86-64-fluorite.json",
             ):
                 (manifests / name).write_text(
@@ -151,7 +163,7 @@ class CommandRunnerTests(unittest.TestCase):
             result = runner.execute(
                 "repository-baseline", {}, "FLR-0001", plan["plan_id"]
             )
-        self.assertEqual("succeeded", result["status"])
+        self.assertEqual("completed", result["status"])
         self.assertEqual(plan["plan_id"], result["plan_id"])
         self.assertEqual(plan["plan_digest"], result["plan_digest"])
         self.assertEqual(2, len(result["steps"]))
@@ -193,10 +205,14 @@ class CommandRunnerTests(unittest.TestCase):
             self.assertEqual(1, len(events))
             event = events[0]
             self.assertEqual("fluorite.run-lifecycle/v1", event["schema"])
-            self.assertEqual("succeeded", event["status"])
+            self.assertEqual("completed", event["status"])
             self.assertEqual(plan["plan_digest"], event["plan_digest"])
             self.assertEqual(result["run_id"], event["run_id"])
             self.assertTrue(all(len(step["output_sha256"]) == 64 for step in event["steps"]))
+            restarted = CommandRunner(config)
+            durable = restarted.load_completion(result["run_id"])
+            self.assertEqual("completed", durable["status"])
+            self.assertEqual(result["run_id"], durable["evidence_id"])
 
     def test_asynchronous_run_has_bounded_status_and_log(self) -> None:
         config = MCPConfig(data={"command_runner": {"allow_execution": True}})
@@ -211,7 +227,7 @@ class CommandRunnerTests(unittest.TestCase):
             while status["status"] in ("queued", "running") and time.monotonic() < deadline:
                 time.sleep(0.05)
                 status = runner.status(started["run_id"])
-        self.assertEqual("succeeded", status["status"])
+        self.assertEqual("completed", status["status"])
         self.assertTrue(all("output" not in step for step in status["steps"]))
         log = runner.run_log(started["run_id"], None, 100)
         self.assertGreater(len(log["log_lines"]), 0)
@@ -272,7 +288,7 @@ class CommandRunnerTests(unittest.TestCase):
                 Path.cwd(),
                 os.environ,
                 10,
-                cancellation,
+                cancellation=cancellation,
             )
         finally:
             timer.cancel()
@@ -280,6 +296,89 @@ class CommandRunnerTests(unittest.TestCase):
         self.assertFalse(result["timed_out"])
         self.assertIn("child-ready", result["output"])
         self.assertIn("child-terminated", result["output"])
+
+    def test_task_inactivity_timeout_is_distinct_from_wall_clock(self) -> None:
+        result = CommandRunner._capture(
+            ["/bin/sh", "-c", "sleep 2"],
+            Path.cwd(),
+            os.environ,
+            5,
+            inactivity_timeout=1,
+        )
+        self.assertTrue(result["timed_out"])
+        self.assertEqual("task_inactivity", result["timeout_kind"])
+
+    def test_capture_reports_live_bounded_tail_and_process_identity(self) -> None:
+        snapshots: list[dict[str, object]] = []
+        result = CommandRunner._capture(
+            ["/bin/sh", "-c", "printf first; sleep 3; printf last"],
+            Path.cwd(),
+            os.environ,
+            5,
+            progress=lambda item: snapshots.append(dict(item)),
+        )
+        self.assertEqual(0, result["return_code"])
+        self.assertGreaterEqual(len(snapshots), 1)
+        self.assertTrue(all(item["pid"] == result["pid"] for item in snapshots))
+        self.assertTrue(
+            any("first" in item["output"] and "last" not in item["output"] for item in snapshots)
+        )
+        self.assertIn("last", snapshots[-1]["output"])
+
+    def test_task_log_update_resets_inactivity_clock(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            activity_root = Path(directory)
+            task_log = activity_root / "log.do_compile.1"
+            task_log.write_text("start\n", encoding="utf-8")
+            timer = threading.Timer(
+                0.7, lambda: task_log.write_text("progress\n", encoding="utf-8")
+            )
+            snapshots: list[dict[str, object]] = []
+            timer.start()
+            try:
+                result = CommandRunner._capture(
+                    ["/bin/sh", "-c", "sleep 1.5"],
+                    Path.cwd(),
+                    os.environ,
+                    5,
+                    inactivity_timeout=1,
+                    progress=lambda item: snapshots.append(dict(item)),
+                    activity_root=activity_root,
+                )
+            finally:
+                timer.cancel()
+        self.assertFalse(result["timed_out"])
+        self.assertTrue(any(item["activity_source"] == "task_log" for item in snapshots))
+
+    def test_capture_tracks_and_terminates_new_bitbake_server_group(self) -> None:
+        cancellation = threading.Event()
+        timer = threading.Timer(0.3, cancellation.set)
+        timer.start()
+        fake_snapshot = [
+            {"pid": 8101, "ppid": 1, "pgid": 8100, "sid": 8100,
+             "command": "Cooker", "role": "server"},
+            {"pid": 8102, "ppid": 8101, "pgid": 8100, "sid": 8100,
+             "command": "Worker", "role": "worker"},
+        ]
+        signals: list[tuple[int, int]] = []
+        snapshots = [[], fake_snapshot]
+
+        def next_snapshot() -> list[dict[str, object]]:
+            return snapshots.pop(0) if snapshots else []
+
+        try:
+            with patch.object(CommandRunner, "_bitbake_process_snapshot", side_effect=next_snapshot), patch(
+                "mcp.runbook.os.killpg", side_effect=lambda pgid, sig: signals.append((pgid, sig))
+            ):
+                result = CommandRunner._capture(
+                    ["/bin/sh", "-c", "sleep 2"], Path.cwd(), os.environ, 5,
+                    cancellation=cancellation,
+                )
+        finally:
+            timer.cancel()
+        self.assertTrue(result["cancelled"])
+        self.assertIn(8100, result["owned_server_pgids"])
+        self.assertTrue(any(pgid == 8100 and sig == signal.SIGTERM for pgid, sig in signals))
 
 
 if __name__ == "__main__":

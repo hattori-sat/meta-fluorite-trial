@@ -1,4 +1,4 @@
-# meta-local/recipes-graphics/filament/filament-vk_1.54.3.bbappend
+# meta-fluorite-trial/recipes-graphics/filament/filament-vk_1.54.3.bbappend
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 # PV = "1.69.4"
@@ -11,10 +11,10 @@ SRCREV = "2a86c0c60ecce9443fc34631570e924721b20b40"
 # SRCREV = ""
 
 
-# meta-local/recipes-graphics/filament/filament-vk_1.54.3.bbappend
+# meta-fluorite-trial/recipes-graphics/filament/filament-vk_1.54.3.bbappend
 
 
-# meta-local/recipes-graphics/filament/filament-vk_1.54.3.bbappend
+# meta-fluorite-trial/recipes-graphics/filament/filament-vk_1.54.3.bbappend
 # TEMP: drop all patches from meta-vulkan filament-vk recipe
 
 SRC_URI:remove = " \

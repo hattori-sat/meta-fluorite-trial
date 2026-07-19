@@ -56,6 +56,48 @@ class SetupScriptTests(unittest.TestCase):
 
 
 class RepositoryCheckTests(unittest.TestCase):
+    def test_privacy_checker_rejects_non_role_git_metadata_without_echoing_it(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            role_environment = os.environ.copy()
+            role_environment.update(
+                {
+                    "GIT_AUTHOR_NAME": "Fluorite integration role",
+                    "GIT_AUTHOR_EMAIL": "@".join(("integration-role", "localhost")),
+                    "GIT_COMMITTER_NAME": "Fluorite integration role",
+                    "GIT_COMMITTER_EMAIL": "@".join(("integration-role", "localhost")),
+                }
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "--allow-empty", "-m", "role"],
+                check=True,
+                env=role_environment,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            passing = run_script("check-repository-privacy.sh", str(root))
+            self.assertEqual(passing.returncode, 0, passing.stdout)
+
+            blocked_email = "@".join(("personal", "example.invalid"))
+            blocked_environment = role_environment | {
+                "GIT_AUTHOR_NAME": "Personal identity",
+                "GIT_AUTHOR_EMAIL": blocked_email,
+                "GIT_COMMITTER_NAME": "Personal identity",
+                "GIT_COMMITTER_EMAIL": blocked_email,
+            }
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "--allow-empty", "-m", "blocked"],
+                check=True,
+                env=blocked_environment,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            failing = run_script("check-repository-privacy.sh", str(root))
+            self.assertEqual(failing.returncode, 1, failing.stdout)
+            self.assertIn("blocked Git metadata", failing.stdout)
+            self.assertNotIn(blocked_email, failing.stdout)
+
     def test_markdown_link_checker_accepts_and_rejects_internal_links(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
