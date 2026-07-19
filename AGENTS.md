@@ -16,6 +16,11 @@
 - 問題解決は、目的確認、4W1H（Whyを除く）による層別、重点選定、process解析、問題点特定、真因分析、対策、PDCAの順で進める。
 - 4W1HのWhoは個人名でなくrole・責務で記録する。
 - 原因仮説はprocess上の問題点を特定してから立て、相関だけで真因と断定しない。
+- 各作業区切りの開始時に、現在の目的、対象bounded context、feature branch、active ticket、success criteria、最小次アクションをTASKSとwork contextへ明記する。
+- feature branchは原則として1つのticket outcomeだけを所有し、別ticketを発見した場合はInboxへ置く。緊急割込みで既存featureをまたぐ場合は、理由とhandoffをworking logへ記録する。
+- ticket、feature、work document、evidence ID、commitを相互リンクし、ticket statusとTASKSのIn Progressが一致することを確認する。
+- DDD bounded contextの責務を越える観測・実装は、対象context、handoff payload、禁止事項を明示したsubagent assignmentへ分離する。
+- commit前には必ずcanonical check、privacy check、staged diff check、対象に応じた`make verify`を実行し、結果をworking logへ記録する。
 
 ## Safety
 

@@ -5,6 +5,10 @@
 - Depends on: FLR-0002, FLR-0005, FLR-0008, FLR-0016
 - Contexts: Target Validation, Flutter runtime, Graphics, Fluorite demo
 
+## Feature boundary
+
+このticketは`feature-flr-0017-qemu-evidence-mcp`の唯一のoutcomeであり、Target Validationのread-only QEMU session evidenceを完成させる。QEMU起動はExecution context、scene meaningはFluorite context、renderer meaningはGraphics/Flutter contextへhandoffする。
+
 ## Purpose
 
 既存のQEMUノウハウを失わず、artifact identity、boot、explicit `flutter-auto` launch、Vulkan/Wayland swapchain、native readiness、Filament scene creation、crash/coredumpをbounded evidenceとして採取する。QEMU実行そのものと、Fluorite/Flutter/Graphicsの解釈を混ぜない。

@@ -12,11 +12,11 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0017 | legacy QEMU contractをbounded evidence observerへ落とし込む | primary role + target-validator + checker role | Plan | legacy launch/readiness/crash evidenceをcurrent validation contractへ分離する |
+| FLR-0017 | legacy QEMU contractをbounded evidence observerへ落とし込む | primary role + target-validator + checker role | Plan | approved launch profileとsession evidence bundleを定義する |
 
 ## Next
 
-FLR-0016はFLR-0008のBitBake観測を進めるための割込み。preflight完了後、FLR-0008、FLR-0007、FLR-0009〜0011の順序をPDCA Checkで再評価する。
+FLR-0017のみをIn Progressとする。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |
@@ -45,7 +45,7 @@ FLR-0016はFLR-0008のBitBake観測を進めるための割込み。preflight完
 
 ## Inbox
 
-- FLR-0016: BitBake preflight中のMACHINE/conf/cache identityを確認する。
+- FLR-0016: BitBake preflight中のMACHINE/conf/cache identityを確認する（Waiting、manifest provenance UNKNOWN）。
 - FLR-0017: legacy `docs/mac-qemu.md`のexplicit launch/readiness/crash evidenceをQEMU observerへ移す。
 
 - MCP explainability contractをdomain payloadと混ぜずに運用する。

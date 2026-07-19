@@ -1,6 +1,6 @@
 # FLR-0016 — BitBake preflight and existing cache identity
 
-- Status: In Progress — Plan
+- Status: Waiting — metadata observed; provenance incomplete
 - Priority: High
 - Depends on: FLR-0001, FLR-0006, FLR-0007
 - Contexts: AGL, Yocto, Fluorite demo
