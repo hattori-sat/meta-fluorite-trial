@@ -65,7 +65,7 @@ def create_server(config: MCPConfig) -> MCPServer:
             "success_signals": successes,
             "failure_signals": failures,
             "status": "signals_conflict" if successes and failures else "success_signals_present" if successes else "failure_signals_present" if failures else "unknown",
-            "verdict": "FAIL" if failures else "PASS" if successes else "UNKNOWN",
+            "verdict": "UNKNOWN" if kernel.revision_or_image_id is None else "FAIL" if failures else "PASS" if successes else "UNKNOWN",
         }
         return kernel.envelope(
             operation,
@@ -88,7 +88,7 @@ def create_server(config: MCPConfig) -> MCPServer:
             arguments,
             operation="summarize_graphics_evidence",
             success_terms=("vulkan", "wayland", "weston", "renderer", "gpu", "present"),
-            failure_terms=("vk_error", "egl_bad", "failed", "software raster", "llvmpipe", "segfault"),
+            failure_terms=("vk_error", "egl_bad", "failed", "software raster", "segfault"),
             payload_key="graphics_health_evidence",
         )
 

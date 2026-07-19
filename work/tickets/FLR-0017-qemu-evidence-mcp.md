@@ -98,13 +98,15 @@ Execution remains blocked until the current artifact's bundle path, launch user,
 - Current testdata includes `packagegroup-agl-ivi-services-applaunchd`, `vulkan-loader`, `mesa-vulkan-drivers`, and `vulkan-tools`.
 - Host-side rootfs inspection tools for ext4 are unavailable on the Mac role; no rootfs mount, copy, or mutation was attempted.
 
-### Unknowns
+### Resolved facts
 
-- Exact in-guest bundle path, launcher user, `XDG_RUNTIME_DIR`, `WAYLAND_DISPLAY`, and coredump/screen output path remain unconfirmed from current image contents.
+- Guest bundle path, launcher user (`agl-driver`), `XDG_RUNTIME_DIR=/run/user/1001`, and `WAYLAND_DISPLAY=wayland-0` were confirmed during the bounded session.
+- The session log and hash are indexed in `work/evidence/FLR-0017-qemu-session.md`.
 
-### Decision
+### Remaining unknowns
 
-- Do not execute explicit app launch yet. Obtain these values through the guest's bounded boot/session observation or a fixed read-only image inspection capability first.
+- A persistent coredump locator and screen capture locator were not collected before the snapshot session ended.
+- QEMU parameter/session metadata is currently indexed manually; FLR-0018 must emit it as a sidecar.
 
 ## Current QEMU validation result
 

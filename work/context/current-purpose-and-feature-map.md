@@ -38,6 +38,7 @@ It does not own BitBake image rebuilds, cache mutation, Raspberry Pi writes, Flu
 - Evidence transport: `docs/architecture/evidence-handoff-contract.md`.
 - Execution boundary: `domains/execution/README.md`.
 - Chronological evidence: `work/logs/2026-07-19.md`.
+- Evidence index: `work/evidence/FLR-0017-qemu-session.md`.
 
 ## Smallest next action
 
