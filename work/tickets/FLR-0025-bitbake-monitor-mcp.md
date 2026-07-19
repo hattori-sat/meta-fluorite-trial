@@ -93,3 +93,9 @@ Create the active step before process launch, update its PID/PGID, bounded proce
 ### Smallest next action
 
 Verify, commit/push the live-status correction, synchronize the Mini PC, and restart the same incremental demo compile.
+
+### Live I/O correction
+
+- `run-4013109fd45b4221` proved PID/PGID were live, but output remained at zero until cancellation because buffered `read(4096)` waited for a full buffer or EOF.
+- The run was cancelled through MCP after 84.491 seconds; status persisted `cancelled` and exit `-15`.
+- Replace buffered reads with `os.read` so available BitBake progress bytes update activity and the bounded tail immediately.

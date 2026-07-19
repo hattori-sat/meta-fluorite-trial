@@ -545,7 +545,7 @@ class CommandRunner:
             nonlocal total, last_activity
             assert process.stdout is not None
             while True:
-                chunk = process.stdout.read(4096)
+                chunk = os.read(process.stdout.fileno(), 4096)
                 if not chunk:
                     return
                 with output_lock:
