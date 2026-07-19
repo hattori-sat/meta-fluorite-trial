@@ -213,6 +213,7 @@ class CiWorkflowTests(unittest.TestCase):
         self.assertIn("permissions:\n  contents: read", workflow)
         self.assertIn("persist-credentials: false", workflow)
         self.assertIn("run: make ci", workflow)
+        self.assertIn("MAX_FILE_BYTES: '1048576'", workflow)
         self.assertNotIn("secrets.", workflow)
 
         action_references = re.findall(r"uses:\s+([^@\s]+)@([^\s]+)", workflow)

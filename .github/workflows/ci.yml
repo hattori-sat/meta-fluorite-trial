@@ -31,4 +31,5 @@ jobs:
       - name: Run repository gates
         env:
           PYTHONDONTWRITEBYTECODE: '1'
+          MAX_FILE_BYTES: '1048576'
         run: make ci
