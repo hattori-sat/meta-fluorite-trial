@@ -28,6 +28,8 @@ FLR-0017で確認したqemux86-64 QEMU profileを、任意shellではなく、�
 - Fixed manifest `qemux86-64-fluorite` is installed and catalog allowlisted.
 - The command is target-mutation, but execution remains disabled by default and no real runbook execution has been requested through `command_runner`.
 - Current executor retains bounded output in run log/audit; role-local session bundle persistence is still a gap and must be resolved before declaring this ticket Done.
+- `describe_runbook` and `plan_runbook` were exercised with image identity `qemux86-artifact-20260405160535`; the plan reported `execution_enabled=false`, `risk=target_mutation`, `qemu_artifact` root, exact fixed argv, mandatory `-snapshot`, and 120-second timeout.
+- No `execute_runbook` or `start_runbook` call was made.
 
 ## Current evidence
 
