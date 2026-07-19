@@ -9,6 +9,8 @@ SRC_URI = " \
     file://0001-filament_scene-reduce-startup-camera-contention-on-r.patch \
     file://0002-filament_scene-limit-startup-to-playground.patch \
     file://0003-filament_scene-minimize-startup-scene-for-pi.patch \
+    file://0004-filament_scene-omit-native-unsupported-root-cameras.patch \
+    file://0005-filament_scene-omit-typed-lighting-payloads.patch \
     file://config.toml \
 "
 
@@ -16,9 +18,17 @@ S = "${WORKDIR}/git"
 PUBSPEC_APPNAME = "fluorite_examples_demo"
 FLUTTER_APPLICATION_INSTALL_SUFFIX = "toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo"
 FLUTTER_APPLICATION_PATH = "packages/filament_scene/example"
-PUBSPEC_IGNORE_LOCKFILE = "1"
+PUBSPEC_IGNORE_LOCKFILE = "0"
 
 inherit flutter-app
+
+do_configure:append() {
+    if [ ! -f "${S}/${FLUTTER_APPLICATION_PATH}/pubspec.lock" ]; then
+        cd "${S}/${FLUTTER_APPLICATION_PATH}"
+        "${FLUTTER_SDK}/bin/flutter" pub get
+    fi
+}
+do_configure[network] = "1"
 
 do_install:append() {
     install -m 0644 ${WORKDIR}/config.toml \

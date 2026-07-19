@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 20 Jul 2026 22:30:00 +0900
+Subject: [PATCH] filament_scene: omit typed lighting payloads during startup probe
+
+Use native default lighting while isolating the remaining scene startup type
+contract. Shapes remain enabled for the render-path probe.
+---
+ packages/filament_scene/example/lib/main.dart | 2 -
+ 1 file changed, 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -272,2 +272,0 @@
+-      indirectLight: poGetDefaultIndirectLight(),
+-      lights: poGetSceneLightsList(),
+
+-- 
+2.34.1
