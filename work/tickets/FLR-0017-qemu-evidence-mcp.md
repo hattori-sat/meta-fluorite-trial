@@ -89,3 +89,19 @@ legacy contractを入力に、まずread-onlyの「artifact/session identity + l
 - Evidence outputs: serial log, QEMU/boot parameters, app log markers, optional screen locator, and coredump locator. Store only bounded session evidence beside the existing QEMU artifact; do not duplicate kernel/rootfs.
 
 Execution remains blocked until the current artifact's bundle path, launch user, Wayland variables, and evidence output directory are read-only confirmed.
+
+## Current artifact read-only preflight
+
+### Facts
+
+- Current qemux86-64 manifest contains `flutter-auto` 2.0, `agl-driver-shell-env`, and `toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo`.
+- Current testdata includes `packagegroup-agl-ivi-services-applaunchd`, `vulkan-loader`, `mesa-vulkan-drivers`, and `vulkan-tools`.
+- Host-side rootfs inspection tools for ext4 are unavailable on the Mac role; no rootfs mount, copy, or mutation was attempted.
+
+### Unknowns
+
+- Exact in-guest bundle path, launcher user, `XDG_RUNTIME_DIR`, `WAYLAND_DISPLAY`, and coredump/screen output path remain unconfirmed from current image contents.
+
+### Decision
+
+- Do not execute explicit app launch yet. Obtain these values through the guest's bounded boot/session observation or a fixed read-only image inspection capability first.
