@@ -193,6 +193,6 @@ BBLAYERS =+ " \
 
 # fluorite-qemux86-64 setup
 BBLAYERS += " \
-  ${METADIR}/meta-local \
+  @PROJECT_ROOT@/layers/meta-fluorite-trial \
   ${METADIR}/meta-vulkan \
 "

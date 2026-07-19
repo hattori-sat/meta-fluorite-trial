@@ -9,7 +9,7 @@ Toyota Connected の **Fluorite** デモを Automotive Grade Linux (AGL) 上で�
 - ベースライン: AGL `trout` / AGL 20.0.4 系、BitBake 2.8.1
 - 対象: `raspberrypi4-64`、`qemux86-64`
 - イメージ: `agl-ivi-image-flutter`
-- source: fixed AGL manifest、sanitized build conf、Fluorite固有`meta-local`
+- source: fixed AGL manifest、sanitized build conf、Fluorite固有`meta-fluorite-trial` layer
 - automation: 8 bounded-context MCP、10 custom agent、local/CI共通gate
 - build host: Git対象外のlocal設定で接続先を指定
 - 調査結果: [docs/baseline-2026-07-19.md](docs/baseline-2026-07-19.md)
@@ -34,7 +34,7 @@ make verify
 
 ## ディレクトリ
 
-- `layers/meta-local/`: Fluorite固有レイヤー、パッチ、設定fragment
+- `layers/meta-fluorite-trial/`: Fluorite固有レイヤー、パッチ、設定fragment
 - `conf/`: 採取時点のbuild別設定（参照用baseline）
 - `manifests/`: AGL/Yoctoと外部レイヤーの固定revision
 - `domains/`: bounded contextごとの用語、契約、invariant、owner

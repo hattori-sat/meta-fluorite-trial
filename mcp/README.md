@@ -169,7 +169,7 @@ the MCP host must approve the destructive-annotated tool.
 
 Without configuration every context exposes the role alias `repository`, resolved
 from the installed package location. This makes the repository's `manifests/`,
-`conf/` and `layers/meta-local/` available without embedding a user, host or IP.
+`conf/` and `layers/meta-fluorite-trial/` available without embedding a user, host or IP.
 
 Additional source/build roots are local machine data. Copy
 `mcp/config.example.json` outside Git, replace role paths and point the process to

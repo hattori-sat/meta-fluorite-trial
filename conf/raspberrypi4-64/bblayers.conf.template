@@ -62,7 +62,7 @@ BBLAYERS ?= " \
   ${AGL_CORE_DEPENDENCY_LAYERS} \
   ${AGL_CORE_LAYERS} \
   ${YOCTO_LAYERS} \
-  @AGL_ROOT@/meta-local \
+  @PROJECT_ROOT@/layers/meta-fluorite-trial \
   @AGL_ROOT@/meta-vulkan \
   @AGL_BUILD_DIR@/workspace \
   "

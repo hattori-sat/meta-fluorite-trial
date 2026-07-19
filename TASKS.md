@@ -12,7 +12,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0023 | meta-localをFluorite固有実装のsource of truthとしてBitBake入力を再構成する | primary role + build-runner + checker role | Do | project-owned recipe/packagegroup/patchのmetadata gateを通す |
+| FLR-0024 | legacy meta-localをmeta-fluorite-trial layerへ置き換える | primary role + build-runner + checker role | Do | renamed layerのmetadata gateを通す |
 
 ## Next
 
@@ -38,7 +38,8 @@ FLR-0023のみをIn Progressとする。FLR-0020はworkspace bootstrap設計、F
 | [FLR-0018](work/tickets/FLR-0018-qemu-launch-runbook.md) | QEMU launchをregistered Execution runbookへ固定する | FLR-0017 |
 | [FLR-0019](work/tickets/FLR-0019-qemu-build-iteration.md) | BitBake成果物からQEMU stable-render verdictまでを反復する | FLR-0018 |
 | [FLR-0020](work/tickets/FLR-0020-self-contained-build-workspace.md) | meta-fluorite-trialだけでAGL/Yocto build workspaceを再構成する | FLR-0019 |
-| [FLR-0023](work/tickets/FLR-0023-project-owned-fluorite-layer.md) | meta-localをFluorite固有実装のsource of truthとしてBitBake入力を再構成する | FLR-0021, FLR-0022 |
+| [FLR-0023](work/tickets/FLR-0023-project-owned-fluorite-layer.md) | meta-fluorite-trial layerをFluorite固有実装のsource of truthとしてBitBake入力を再構成する | FLR-0021, FLR-0022 |
+| [FLR-0024](work/tickets/FLR-0024-project-layer-naming.md) | legacy meta-localをmeta-fluorite-trial layerへ置き換える | FLR-0023 |
 
 ## Waiting
 
