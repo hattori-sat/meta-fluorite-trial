@@ -1,6 +1,6 @@
 # FLR-0001 — Establish the canonical repository baseline
 
-- Status: In Progress
+- Status: Waiting — foundation delivered; environment acceptance pending
 - Priority: Critical
 - Owner: primary role + checker role
 - Created: 2026-07-19
@@ -21,11 +21,11 @@ fresh cloneから固定revision、独自layer、build設定、issue、作業履�
 
 | Dimension | Observation | Evidence |
 | --- | --- | --- |
-| What | baseline、独自layer、履歴をcandidate treeへ統合したが、commit/push前でfresh cloneへ未配布 | Git status、baseline report |
-| Where | canonical linked worktreeに統合済み。remote branchとbuild-role cloneは旧revision | project context、Git refs |
+| What | baseline、独自layer、履歴、DDD/MCP/agent/setup/CIをremote feature branchへ配布済み | clean-clone gate、remote refs |
+| Where | canonical feature branchとremote branchは一致。build-role cloneのcurrent revisionはUNKNOWN | project context、Git refs |
 | When | repository初期化から最初のQEMU/build作業へ進む前 | working log |
 | Who | primary roleが統合、checker roleがgate判定。個人名は管理しない | agent boundaries |
-| How | fixed input、project layer、DDD/MCP/agent/setup/CIをfeature worktreeへ統合済み。commit/pushはfinal gate後 | Check table |
+| How | fixed input、project layer、DDD/MCP/agent/setup/CIをrole-metadata commitへ固定し、dev/feature refsをpush | Check table |
 
 ### Priority selection
 
@@ -42,11 +42,11 @@ fresh cloneから固定revision、独自layer、build設定、issue、作業履�
 | 3. build baseline | fixed manifest/conf | canonical cloneへ保存 | 35-project fixed manifest、external lock、sanitized target confをcandidate treeへ保存 | baseline lock/tests |
 | 4. custom layer | `meta-local` | Git管理対象 | 45 filesをcandidate treeへ取り込み、patch identity metadataをrole表現へ匿名化。commit待ち | baseline lock/tests |
 | 5. development environment | domain/authority/host境界 | DDD、agent、MCP、setup、CIへ変換 | 8 contexts、10 agents、8 MCP、check-only setup、CIをcandidate treeへ実装 | architecture/tests |
-| 6. final gate | repository tree | privacy/secret/size/PDCA PASS後にcommit/push | local gate PASS。independent re-check、commit、push待ち | checker section |
+| 6. final gate | repository tree | privacy/secret/size/PDCA PASS後にcommit/push | independent check、role metadata、fresh-clone gate、dev/feature pushがPASS | checker section、working log |
 
 ### Problem point
 
-発生時はStep 3でbuild baselineの保存が不完全となり、Step 4のcustom layerもsource of truthへ入らなかった。現在の問題点はStep 6で、検証中candidateが未commit・未pushのためfresh cloneから取得できないこと。
+発生時はStep 3でbuild baselineの保存が不完全となり、Step 4のcustom layerもsource of truthへ入らなかった。Step 6のdelivery問題は解消した。残るacceptance問題は、Linux build roleのcurrent checkout、remote MCP、BitBake、QEMU/target runtimeをpushed revisionへ結び付けていないこと。
 
 ### Ideal condition
 
@@ -61,7 +61,7 @@ fresh cloneから固定revision、独自layer、build設定、issue、作業履�
 
 ### Gap
 
-artifactはcanonical linked worktreeに存在するが未commit・未pushであり、remoteまたはfresh cloneはまだ取得できない。
+artifactはremote feature branchからfresh cloneできる。Linux build roleのcurrent checkoutと実行evidenceはまだ同じrevisionへ更新・検証していない。
 
 ### Impact
 
@@ -80,7 +80,7 @@ repository初期化と既存実験資産の整理段階。
 
 ### Confirmed root cause
 
-問題発生時、workspaceとcanonical cloneが分離し、remote artifact取得の承認境界も未完了だったため、調査結果がrepository artifactへ変換されなかった。allowlist取得とlinked worktree統合でこの原因への対策は完了し、残るdelivery gapはcommit/pushである。
+問題発生時、workspaceとcanonical cloneが分離し、remote artifact取得の承認境界も未完了だったため、調査結果がrepository artifactへ変換されなかった。allowlist取得、linked worktree統合、role metadata commit、remote pushでdelivery gapは解消した。残るgapはLinux build roleとruntime evidenceのacceptanceである。
 
 ### Minimal countermeasure
 
@@ -140,10 +140,10 @@ Stop condition: path衝突、秘密情報、大容量file、remote/local差分�
 
 | Criterion | Expected | Actual | Evidence | Result |
 | --- | --- | --- | --- | --- |
-| clone identity | Mac/mini PCで同じorigin/HEAD | baseline調査時の旧HEADは一致。current feature commitのmini PC checkoutはpush前のためUNKNOWN | working log | PASS WITH CONDITION |
-| management tree | canonical cloneに存在 | candidate linked worktreeへ非破壊同期済み、未commit | git status | DELIVERY PENDING |
-| `meta-local` | Git管理対象 | 45 files、exact repository hash、identity-normalized hashをcandidateに保存、未commit | baseline lock/test | DELIVERY PENDING |
-| fixed manifest | 完全なrevision pin | 35 projectsをcommit hashへ固定したcandidate、未commit | manifest/test | DELIVERY PENDING |
+| clone identity | Mac/mini PCで同じorigin/HEAD | Mac fresh cloneはpushed featureを検証。mini PCのcurrent checkoutはUNKNOWN | working log | PASS WITH CONDITION |
+| management tree | canonical cloneに存在 | role-metadata commitとfresh cloneで取得・検証済み | git/clean-clone gate | PASS |
+| `meta-local` | Git管理対象 | 45 files、exact repository hash、identity-normalized hashをcommitしtest PASS | baseline lock/test | PASS |
+| fixed manifest | 完全なrevision pin | 35 projectsをcommit hashへ固定しfresh clone test PASS | manifest/test | PASS |
 | target conf | 個人/接続先固有値を含まない比較可能なsnapshot | 個人/host値を除去し、role/cache baseline pathとhashでRaspberry Pi/QEMUを保存 | conf/test | PASS |
 | DDD/agent/MCP | AGL/Yoctoを分離しcomponent contextを限定 | 8 contexts、10 agents、8 MCP、single-server routing | config/protocol tests | PASS |
 | host boundary | buildはLinux mini PC、QEMU validationはMac | official workflow、setup、remote/local transportへ反映 | setup docs/tests | PASS |
@@ -152,11 +152,11 @@ Stop condition: path衝突、秘密情報、大容量file、remote/local差分�
 | Yocto effective validation | functional config/recipe/layer変更時に`bitbake -e`/parse | live build treeへ変更を適用せず、imported patch hunkも不変。実効metadataは次のExecution acceptanceまでUNKNOWN | baseline hash、working log | NOT TRIGGERED |
 | Git worktree | canonical repositoryで作業 | canonical repositoryのlinked feature worktreeで作業 | canonical guard | PASS |
 | branch flow | `main → dev-* → feature-*` | `dev-foundation`とticket feature branchを作成 | Git refs | PASS |
-| commit/push | fresh cloneが成果物を取得できる | final implementationは未commit、remote branch未作成 | Git status/remote refs | FAIL |
+| commit/push | fresh cloneが成果物を取得できる | role metadata commit、fresh clone、`dev-foundation`/feature remote refsを確認 | Git/remote refs | PASS |
 
 ### Act
 
-privacy監査で発見したproject-layer除外、圧縮IPv6/private hostname、Yocto `tmp/work` task-log discoveryを是正し、全working-tree gateを再実行した。独立checker PASS後にimplementationをcommitし、clean cloneで同じgateを実行してから`dev-foundation`とfeature branchをpushする。push確認後にFLR-0008を次のWIPへする。
+privacy監査、MCP safety review、staged snapshot gate、role metadata、fresh cloneを通して`dev-foundation`とfeature branchをpushした。deliveryは完了し、ticketをWaitingへ移す。Linux build roleの同一revision checkout/remote handshakeはFLR-0004/0013/0014、実行結果はtarget/build ticketでacceptanceする。次のWIPはFLR-0008とする。
 
 ## Unknowns
 
@@ -167,6 +167,6 @@ privacy監査で発見したproject-layer除外、圧縮IPv6/private hostname、
 
 ## PDCA checker
 
-- Status: PASS WITH CONDITIONS
+- Status: PASS WITH CONDITIONS — delivery criteria PASS
 - Checked by: independent checker role
-- Findings: privacy、MCP境界、remote revision/cleanliness、large-log、schema、response locator、lifecycle evidenceを再監査し、working-tree blockerなし。commit/push/clean-clone CI、実mini-PC handshake、fresh custom-agent override、BitBake/QEMU/Raspberry Pi runtimeは条件として未達またはUNKNOWN。
+- Findings: privacy、MCP境界、remote revision/cleanliness、large-log、schema、response locator、lifecycle evidenceを再監査し、delivery blockerなし。commit/push/local clean-cloneはPASS。GitHub CI、実mini-PC handshake、fresh custom-agent override、BitBake/QEMU/Raspberry Pi runtimeは条件として未達またはUNKNOWN。

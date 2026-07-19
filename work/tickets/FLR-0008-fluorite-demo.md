@@ -1,6 +1,6 @@
 # FLR-0008 — Understand the Fluorite demo behavior and native boundary
 
-- Status: Next
+- Status: In Progress — Plan
 - Priority: High
 - Depends on: FLR-0001
 - Context: [rendering stack](../context/fluorite-rendering-stack.md)

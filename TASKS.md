@@ -4,7 +4,7 @@ Last updated: 2026-07-19
 
 ## Current focus
 
-**[FLR-0001 — Establish the canonical repository baseline](work/tickets/FLR-0001-canonical-repository-baseline.md)**
+**[FLR-0008 — Understand the Fluorite demo](work/tickets/FLR-0008-fluorite-demo.md)**
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -12,11 +12,11 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0001 | baselineと履歴が複数directoryへ分散している。canonical repositoryへ集約する | primary role + checker role | Check | privacy再監査後にcommitし、dev/feature branchをpushする |
+| FLR-0008 | Fluorite 3D demoの成功状態とscene/native境界が未固定 | Fluorite investigator + checker role | Plan | target別に観測可能な3D成功指標を定義し、demo entrypointとassetを固定revisionから追う |
 
 ## Next
 
-FLR-0001完了後の重点候補はFLR-0008。最終目的であるFluoriteの成功状態を先に定義し、その後FLR-0007でAGL組立process、FLR-0009〜0011で下位描画stackを追う。PDCA Checkで順序は再評価する。
+FLR-0008で最終目的であるFluoriteの成功状態を先に定義し、その後FLR-0007でAGL組立process、FLR-0009〜0011で下位描画stackを追う。PDCA Checkで順序は再評価する。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |
@@ -26,7 +26,6 @@ FLR-0001完了後の重点候補はFLR-0008。最終目的であるFluoriteの�
 | [FLR-0005](work/tickets/FLR-0005-target-validation-mcp.md) | QEMU/実機の証拠収集を標準化するvalidation MCPを作る | FLR-0002 |
 | [FLR-0006](work/tickets/FLR-0006-raspberrypi-build.md) | 固定baselineからRaspberry Pi 4 imageを再build・検証する | FLR-0003, FLR-0004 |
 | [FLR-0007](work/tickets/FLR-0007-agl-architecture.md) | AGLがimage、compositor、launcher、appを組み立てるprocessを固定revisionから理解する | FLR-0001 |
-| [FLR-0008](work/tickets/FLR-0008-fluorite-demo.md) | Fluorite demoのscene、asset、操作、native API境界を理解する | FLR-0001 |
 | [FLR-0009](work/tickets/FLR-0009-flutter-engine-embedder.md) | Flutter Engineとivi launcherの描画・thread・surface契約を理解する | FLR-0007, FLR-0008 |
 | [FLR-0010](work/tickets/FLR-0010-filament-bridge.md) | Dart APIからnative filament_viewとFilamentまでのcall pathを特定する | FLR-0008 |
 | [FLR-0011](work/tickets/FLR-0011-vulkan-gpu-stack.md) | Filament/FlutterからVulkan、Mesa、GPUまでの実効経路をtarget別に特定する | FLR-0009, FLR-0010 |
@@ -36,6 +35,7 @@ FLR-0001完了後の重点候補はFLR-0008。最終目的であるFluoriteの�
 
 ## Waiting
 
+- [FLR-0001](work/tickets/FLR-0001-canonical-repository-baseline.md): foundation deliveryはPASS。Linux build roleの同一revision checkout、remote MCP、GitHub CI/repository settingsのacceptance待ち。
 - push後、canonical cloneをproject rootにしたfresh Codex taskでcustom-agent/MCP routingをsmokeする。
 - 実機検証条件（Raspberry Pi 4、display、input、network）の詳細はUNKNOWN。
 - GitHub repository settingsで`Branch policy / validate-branch-flow`をrequired status checkにする。
@@ -51,6 +51,7 @@ FLR-0001完了後の重点候補はFLR-0008。最終目的であるFluoriteの�
 
 - 2026-07-19: mini PCの読み取り専用baseline調査。
 - 2026-07-19: Macとmini PCのclone location/origin/HEAD確認。
+- 2026-07-19: foundationをrole metadata commitへ固定し、fresh clone gate後にdev/feature refsをremoteへ配布。
 
 ## Someday / Maybe
 
