@@ -49,7 +49,14 @@ Only this response envelope is shared:
   "truncated": false,
   "warnings": [],
   "next_queries": [],
-  "redaction_policy": "fluorite.privacy-redaction/v1"
+  "redaction_policy": "fluorite.privacy-redaction/v1",
+  "explainability": {
+    "classification": "bounded_observation",
+    "basis_evidence_ids": ["ev-yocto-..."],
+    "causal_claims": [],
+    "limitations": [],
+    "next_actions": []
+  }
 }
 ```
 
@@ -68,6 +75,12 @@ durable content-addressed objects and cannot be dereferenced alone after restart
 A durable handoff must retain subject/revision identity, tool name and the
 repository-safe root/path/range or search parameters needed to repeat the bounded
 query. Configure `audit_file` when a persistent local call record is required.
+
+The `explainability` block is transport metadata, not domain vocabulary. It
+states what kind of result was returned, which evidence IDs support it, that the
+bounded read made no causal claim, what remains limited or unknown, and the next
+bounded actions. Agents must still separate facts, inferences and hypotheses in
+their handoff; this block does not turn an observation into a diagnosis.
 
 ## Start a server
 

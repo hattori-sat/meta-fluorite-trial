@@ -57,6 +57,7 @@ EvidenceEnvelope
   warnings[]
   next_queries[]
   redaction_policy
+  explainability
 ```
 
 Rules:
@@ -71,6 +72,22 @@ Rules:
 - `evidence_ids`はresponse/auditのcorrelation IDであり、server再起動後に単独でdereferenceできる永続storage keyではない。durable ticketへIDだけを保存せず、identityとquery locatorも保存する。
 - `truncated`がtrueなら切捨て位置と安全なnext queryを返す。
 - domain固有fieldは`payload`へ置き、envelopeへ追加しない。
+
+`explainability` is transport metadata and has this bounded shape:
+
+```text
+explainability
+  classification: bounded_observation
+  basis_evidence_ids[]
+  causal_claims[]
+  limitations[]
+  next_actions[]
+```
+
+The kernel derives this block from the evidence ID, unknowns, warnings and
+bounded next queries. An empty `causal_claims` list is intentional: a source or
+runtime observation is not a root-cause conclusion. Agents still provide
+facts, inferences and hypotheses in their handoff contract.
 
 ## Context isolation
 

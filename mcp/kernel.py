@@ -344,6 +344,13 @@ class Kernel:
             "warnings": list(warnings),
             "next_queries": list(next_queries),
             "redaction_policy": REDACTION_POLICY,
+            "explainability": {
+                "classification": "bounded_observation",
+                "basis_evidence_ids": [evidence_id],
+                "causal_claims": [],
+                "limitations": safe_unknowns + list(warnings),
+                "next_actions": list(next_queries),
+            },
         }
         serialized = json.dumps(result, ensure_ascii=False, separators=(",", ":"))
         if len(serialized.encode("utf-8")) > self.max_response_bytes:
@@ -356,6 +363,7 @@ class Kernel:
             }
             result["truncated"] = True
             result["warnings"].append("response payload exceeded the configured cap")
+            result["explainability"]["limitations"] = safe_unknowns + result["warnings"]
             serialized = json.dumps(result, ensure_ascii=False, separators=(",", ":"))
             if len(serialized.encode("utf-8")) > self.max_response_bytes:
                 result["payload"]["resume_locators"] = locators[:1]
