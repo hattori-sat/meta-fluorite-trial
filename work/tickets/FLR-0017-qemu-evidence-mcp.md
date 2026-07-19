@@ -1,6 +1,6 @@
 # FLR-0017 — QEMU Fluorite evidence observer
 
-- Status: In Progress — Plan
+- Status: In Progress — Check
 - Priority: High
 - Depends on: FLR-0002, FLR-0005, FLR-0008, FLR-0016
 - Contexts: Target Validation, Flutter runtime, Graphics, Fluorite demo
@@ -105,3 +105,30 @@ Execution remains blocked until the current artifact's bundle path, launch user,
 ### Decision
 
 - Do not execute explicit app launch yet. Obtain these values through the guest's bounded boot/session observation or a fixed read-only image inspection capability first.
+
+## Current QEMU validation result
+
+### Evidence IDs
+
+- `E-FLR0017-QEMU-005`: current qemux86-64 snapshot session, role locator `$QEMU_ARTIFACT_ROOT/flr0017-qemu-session.log`, SHA-256 `0762b170ae9ec08efa5c0692711c31065c8cb3b5366d31f39fb393d3c1544f71`.
+- `ev-target-validation-612fdcf462b63a9f6d53`: bounded `summarize_app_launch` response with sufficient image/session identity.
+- `ev-target-validation-89d0d234a95761ba762b`: bounded `summarize_render_case` response with sufficient image/session identity.
+
+### Facts
+
+- Guest boot reached AGL compositor, `applaunchd`, login prompt, and active `agl-driver` Wayland session (`/run/user/1001/wayland-0`).
+- Current image contains and successfully launched the Fluorite bundle as `agl-driver` with `XDG_RUNTIME_DIR=/run/user/1001` and `WAYLAND_DISPLAY=wayland-0`.
+- App evidence includes Application Id `fluorite`, Flutter Engine Vulkan backend, llvmpipe Mesa 24.0.7 / LLVM 18.1.8, Filament initialization, swapchain creation, native readiness, and event channels.
+- The process then terminated with `FEngine::loop` SIGSEGV in `libLLVM.so.18.1` after approximately 74 seconds. This reproduces the legacy failure signature on the current artifact/session profile.
+
+### Verdict
+
+- Boot/service: PASS.
+- Explicit app launch/readiness: PASS.
+- Render initialization: OBSERVED, not a stable render PASS.
+- Stable Fluorite 3D rendering: FAIL for this session because the renderer process crashed after readiness.
+- Root cause: UNKNOWN; the evidence is consistent with the llvmpipe/LLVM hypothesis but does not prove causality.
+
+### Handoff
+
+- FLR-0018 owns conversion of this manual launch into a registered Execution runbook. Flutter runtime, Graphics, and Fluorite investigators receive only the bounded evidence IDs and role locators.

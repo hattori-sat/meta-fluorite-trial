@@ -52,9 +52,9 @@
 ## Ownership and tools
 
 - Primary role: `target-validator`。observer callはread-only。state changeは明示承認済みprocedureだけ。
-- MCP: `target_validation` (`list_validation_bundles`, `summarize_boot_evidence`, `summarize_graphics_evidence`, `summarize_app_launch`, `summarize_render_case`, `read_target_evidence`)。
+- MCP: `target_validation` (`list_validation_bundles`, `summarize_boot_evidence`, `summarize_qemu_boot`, `summarize_graphics_evidence`, `summarize_app_launch`, `summarize_render_case`, `read_target_evidence`)。
 - Cross-context verdict review: `pdca-checker`。
 
-Initial MCPはGit外rootに既に存在するevidence fileをlist/search/readし、boundedなboot/graphics/app-launch/render signalを要約するobserverであり、targetへ接続せず、artifact manifestを自動検証せず、原因を断定しない。role-local configにimage/sessionのcombined identityがないresponseは`identity_status=insufficient`であり、上記invariantによりsuccess baselineへ使えない。image manifest ingestion、session identity、screen evidence、正式なcase verdict生成はFLR-0005で実装する。
+Initial MCPはGit外rootに既に存在するevidence fileをlist/search/readし、boundedなboot/graphics/app-launch/render signalとcase-level `PASS`/`FAIL`/`UNKNOWN`を要約するobserverであり、targetへ接続せず、artifact manifestを自動検証せず、原因を断定しない。role-local configにimage/sessionのcombined identityがないresponseは`identity_status=insufficient`であり、上記invariantによりsuccess baselineへ使えない。正式なimage manifest ingestion、screen evidence、session index生成はFLR-0018以降へ残る。
 
 Context relationshipsは[Domain context map](../../docs/architecture/domain-context-map.md)を参照する。

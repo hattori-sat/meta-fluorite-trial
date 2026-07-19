@@ -65,6 +65,7 @@ def create_server(config: MCPConfig) -> MCPServer:
             "success_signals": successes,
             "failure_signals": failures,
             "status": "signals_conflict" if successes and failures else "success_signals_present" if successes else "failure_signals_present" if failures else "unknown",
+            "verdict": "FAIL" if failures else "PASS" if successes else "UNKNOWN",
         }
         return kernel.envelope(
             operation,
@@ -156,6 +157,7 @@ def create_server(config: MCPConfig) -> MCPServer:
         [
             Tool("list_validation_bundles", "List existing boot, service, input, graphics and screen evidence artifacts.", object_schema(paging), list_bundles),
             Tool("summarize_boot_evidence", "Extract bounded boot success/failure signals from an existing target log.", summary_schema, boot),
+            Tool("summarize_qemu_boot", "Extract bounded QEMU boot/service signals from an existing target log.", summary_schema, boot),
             Tool("summarize_graphics_evidence", "Extract bounded Wayland/Vulkan/Mesa/DRM signals from an existing target log.", summary_schema, graphics),
             Tool("summarize_app_launch", "Extract bounded Flutter/launcher app-start and readiness signals from existing target evidence.", summary_schema, app_launch),
             Tool("summarize_render_case", "Extract bounded QEMU Fluorite render and crash signals without causal diagnosis.", summary_schema, render_case),
