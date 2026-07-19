@@ -1,6 +1,6 @@
 # FLR-0025 — Bounded BitBake monitor MCP
 
-Status: Inbox (Next chat)
+Status: In Progress (Do)
 
 ## Outcome
 
@@ -24,3 +24,51 @@ Provide a context-efficient, read-only monitor for bounded BitBake runs on the M
 ## Smallest next action
 
 Implement a fixed `yocto-demo-compile` monitor manifest plus lifecycle persistence, then add protocol/unit tests before using it for the next incremental compile.
+
+## Design decision — 2026-07-20
+
+### Facts
+
+- `mcp/runbook.py` already owns fixed manifest resolution, execution gates, asynchronous threads, `start_new_session=True`, bounded output capture, and `os.killpg` cancellation.
+- Existing completion audit events are redacted JSONL, but status lookup was process-local and successful runs were labelled `succeeded`.
+- `make verify` passed before and after the implementation change.
+
+### Inferences
+
+- Extending the existing supervisor preserves the fixed target/task and dual approval boundary with less integration risk than adding a second daemon.
+- A durable audit reader can resume completed evidence after MCP restart without replaying a build or exposing arbitrary paths.
+
+### Hypotheses
+
+1. Persisting PID/PGID and distinguishing `timed_out` from `failed` will make timeout evidence sufficient to avoid treating an external client timeout as a BitBake failure. This remains to be checked on a live Mini PC run.
+2. Combined BitBake task output is a sufficient first inactivity signal for the bounded compile. If a live engine build updates only `log.do_compile` and not client output for 1800 seconds, this hypothesis is refuted and the activity source must be narrowed to the fixed task log.
+
+### UNKNOWN
+
+- Mini PC branch/status is synchronized at `3d124ae` before the monitor commit; the target build directory exists and has no current deploy artifact.
+- BitBake server/worker PID discovery and task-output inactivity behavior have not yet been validated on the build host.
+
+### Evidence IDs
+
+- `EV-FLR-0025-local-verify-20260720`: canonical guard, privacy, 66 unit tests, 48 MCP focused tests, protocol smoke, links and file-size checks all PASS.
+- `EV-FLR-0025-local-lifecycle-20260720`: implementation records child PID/PGID, emits `completed`/`timed_out` lifecycle states, and exposes `read_completion`.
+
+### Smallest next action
+
+Commit/push the fixed monitor, fast-forward the Mini PC, configure the Git-ignored build-role roots, then run the metadata gate before the bounded demo compile.
+
+## Implementation — 2026-07-20
+
+### Facts
+
+- Production allowlists three new manifests: `yocto-metadata-gate`, `yocto-demo-compile`, and `yocto-image-build`.
+- No manifest accepts parameters; target, task, build root and environment profile are fixed.
+- Wall-clock and task-output inactivity limits are independent and persist `timeout_kind`.
+- The supervisor starts a new session, records PID/PGID and bounded `/proc` process-group membership, and terminates only its owned PGID.
+- Redacted `fluorite.run-status/v1` JSON is atomically persisted under the audit root and is readable by run/evidence ID after restart.
+- `cleanall`, `cleansstate`, cache deletion, arbitrary shell/argv/path/SSH inputs remain absent.
+- Local `make verify` passes with 67 unit tests and 49 MCP focused tests.
+
+### Smallest next action
+
+Commit/push and synchronize the build role, then execute `yocto-metadata-gate` for FLR-0025.

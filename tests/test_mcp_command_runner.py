@@ -19,11 +19,15 @@ class RunbookRegistryTests(unittest.TestCase):
         registry = RunbookRegistry()
         self.assertIn("repository-baseline", registry.runbooks)
         self.assertEqual(
-            {"host-capacity", "repository-baseline", "qemux86-64-fluorite"}, set(registry.runbooks)
+            {
+                "host-capacity", "repository-baseline", "qemux86-64-fluorite",
+                "yocto-metadata-gate", "yocto-demo-compile", "yocto-image-build",
+            },
+            set(registry.runbooks),
         )
         self.assertNotIn("yocto-parse", registry.runbooks)
         self.assertNotIn("yocto-dry-run", registry.runbooks)
-        self.assertNotIn("yocto-build-image", registry.runbooks)
+        self.assertIn("yocto-image-build", registry.runbooks)
         self.assertNotIn("yocto-effective-environment", registry.runbooks)
         qemu = registry.get("qemux86-64-fluorite")
         self.assertEqual("target_mutation", qemu.risk)
@@ -64,6 +68,9 @@ class RunbookRegistryTests(unittest.TestCase):
             for name in (
                 "host-capacity.json",
                 "repository-baseline.json",
+                "yocto-metadata-gate.json",
+                "yocto-demo-compile.json",
+                "yocto-image-build.json",
                 "qemux86-64-fluorite.json",
             ):
                 (manifests / name).write_text(
@@ -151,7 +158,7 @@ class CommandRunnerTests(unittest.TestCase):
             result = runner.execute(
                 "repository-baseline", {}, "FLR-0001", plan["plan_id"]
             )
-        self.assertEqual("succeeded", result["status"])
+        self.assertEqual("completed", result["status"])
         self.assertEqual(plan["plan_id"], result["plan_id"])
         self.assertEqual(plan["plan_digest"], result["plan_digest"])
         self.assertEqual(2, len(result["steps"]))
@@ -193,10 +200,14 @@ class CommandRunnerTests(unittest.TestCase):
             self.assertEqual(1, len(events))
             event = events[0]
             self.assertEqual("fluorite.run-lifecycle/v1", event["schema"])
-            self.assertEqual("succeeded", event["status"])
+            self.assertEqual("completed", event["status"])
             self.assertEqual(plan["plan_digest"], event["plan_digest"])
             self.assertEqual(result["run_id"], event["run_id"])
             self.assertTrue(all(len(step["output_sha256"]) == 64 for step in event["steps"]))
+            restarted = CommandRunner(config)
+            durable = restarted.load_completion(result["run_id"])
+            self.assertEqual("completed", durable["status"])
+            self.assertEqual(result["run_id"], durable["evidence_id"])
 
     def test_asynchronous_run_has_bounded_status_and_log(self) -> None:
         config = MCPConfig(data={"command_runner": {"allow_execution": True}})
@@ -211,7 +222,7 @@ class CommandRunnerTests(unittest.TestCase):
             while status["status"] in ("queued", "running") and time.monotonic() < deadline:
                 time.sleep(0.05)
                 status = runner.status(started["run_id"])
-        self.assertEqual("succeeded", status["status"])
+        self.assertEqual("completed", status["status"])
         self.assertTrue(all("output" not in step for step in status["steps"]))
         log = runner.run_log(started["run_id"], None, 100)
         self.assertGreater(len(log["log_lines"]), 0)
@@ -272,7 +283,7 @@ class CommandRunnerTests(unittest.TestCase):
                 Path.cwd(),
                 os.environ,
                 10,
-                cancellation,
+                cancellation=cancellation,
             )
         finally:
             timer.cancel()
@@ -280,6 +291,17 @@ class CommandRunnerTests(unittest.TestCase):
         self.assertFalse(result["timed_out"])
         self.assertIn("child-ready", result["output"])
         self.assertIn("child-terminated", result["output"])
+
+    def test_task_inactivity_timeout_is_distinct_from_wall_clock(self) -> None:
+        result = CommandRunner._capture(
+            ["/bin/sh", "-c", "sleep 2"],
+            Path.cwd(),
+            os.environ,
+            5,
+            inactivity_timeout=1,
+        )
+        self.assertTrue(result["timed_out"])
+        self.assertEqual("task_inactivity", result["timeout_kind"])
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # FLR-0024 — Replace legacy meta-local layer identity
 
-Status: In Progress (Do)
+Status: Waiting (Check — FLR-0025 compile/image acceptance)
 
 ## Outcome
 

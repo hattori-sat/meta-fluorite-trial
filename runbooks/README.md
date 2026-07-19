@@ -30,13 +30,18 @@ The confirmation challenge makes accidental execution harder; it does not replac
 the human approval mechanism of the MCP host.
 
 Synchronous real execution is limited to short `read_only` runbooks. Use
-`start_runbook` for every `metadata_write` operation and follow it with status/log
-calls. The catalog also exposes one fixed `qemux86-64-fluorite` target profile. It
+`start_runbook` for every `metadata_write` or `build` operation and follow it with
+status/log calls. The catalog exposes fixed qemux86-64 metadata, Fluorite demo
+compile and AGL Flutter image-build profiles. They accept no target/task/path
+parameters, use independent wall-clock and task-output inactivity limits, own one
+new process group, and persist redacted status JSON by run/evidence ID. The catalog
+also exposes one fixed `qemux86-64-fluorite` target profile. It
 requires a configured `qemu_artifact` role root, fixed kernel/rootfs basenames,
 `-snapshot`, Cocoa display and a 120-second process bound. It does not expose
-parse, dry-run, full effective-environment capture or image build. Graceful/abrupt
-MCP shutdown ownership, build preflight/artifact inventory and lossless
-allowlisted-variable capture must be implemented and reviewed separately.
+arbitrary parse, dry-run, effective-environment target or image build. A record
+left `queued` or `running` across an MCP restart is returned as `unknown`; the
+supervisor never assumes an unobserved completion. Artifact inventory and
+lossless allowlisted-variable capture remain separate validation steps.
 
 ## Adding a runbook
 

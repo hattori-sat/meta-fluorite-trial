@@ -28,6 +28,9 @@ _ALLOWED_PREFIXES = (("git", "status"), ("git", "rev-parse"), ("uname",), ("df",
 _FIXED_RUNBOOK_MANIFESTS = (
     "host-capacity.json",
     "repository-baseline.json",
+    "yocto-metadata-gate.json",
+    "yocto-demo-compile.json",
+    "yocto-image-build.json",
     "qemux86-64-fluorite.json",
 )
 
@@ -41,10 +44,23 @@ _QEMU_X86_64_ARGV = (
     "-device", "virtio-vga", "-device", "virtio-rng-pci", "-usb",
     "-device", "usb-tablet", "-device", "usb-kbd",
 )
+_YOCTO_METADATA_ARGV = ("bitbake", "-e", "agl-ivi-image-flutter")
+_YOCTO_DEMO_COMPILE_ARGV = (
+    "bitbake",
+    "toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo",
+    "-c",
+    "compile",
+)
+_YOCTO_IMAGE_ARGV = ("bitbake", "agl-ivi-image-flutter")
 
 
 def _command_is_allowlisted(argv: tuple[str, ...]) -> bool:
-    if argv == _QEMU_X86_64_ARGV:
+    if argv in (
+        _QEMU_X86_64_ARGV,
+        _YOCTO_METADATA_ARGV,
+        _YOCTO_DEMO_COMPILE_ARGV,
+        _YOCTO_IMAGE_ARGV,
+    ):
         return True
     if any(argv[: len(prefix)] == prefix for prefix in _ALLOWED_PREFIXES):
         return True
@@ -79,6 +95,7 @@ class Step:
     root: str
     environment_profile: str | None
     timeout_seconds: int
+    inactivity_timeout_seconds: int | None
 
 
 @dataclass(frozen=True)
@@ -180,7 +197,10 @@ class RunbookRegistry:
         known_parameters = {parameter.name for parameter in parameter_specs}
         for index, value in enumerate(raw_steps):
             step = _mapping(value, f"{filename}.steps[{index}]")
-            if set(step) - {"id", "argv", "root", "environment_profile", "timeout_seconds"}:
+            if set(step) - {
+                "id", "argv", "root", "environment_profile", "timeout_seconds",
+                "inactivity_timeout_seconds",
+            }:
                 raise ConfigurationError(f"{filename}.steps[{index}] has unsupported fields")
             argv_raw = step.get("argv")
             if not isinstance(argv_raw, list) or not argv_raw or not all(
@@ -203,8 +223,17 @@ class RunbookRegistry:
             if profile is not None and (not isinstance(profile, str) or not _SAFE_PROFILE.fullmatch(profile)):
                 raise ConfigurationError(f"{filename}.steps[{index}].environment_profile is invalid")
             timeout = step.get("timeout_seconds", 30)
-            if isinstance(timeout, bool) or not isinstance(timeout, int) or not 1 <= timeout <= 3600:
+            if isinstance(timeout, bool) or not isinstance(timeout, int) or not 1 <= timeout <= 21600:
                 raise ConfigurationError(f"{filename}.steps[{index}].timeout_seconds is invalid")
+            inactivity_timeout = step.get("inactivity_timeout_seconds")
+            if inactivity_timeout is not None and (
+                isinstance(inactivity_timeout, bool)
+                or not isinstance(inactivity_timeout, int)
+                or not 30 <= inactivity_timeout <= timeout
+            ):
+                raise ConfigurationError(
+                    f"{filename}.steps[{index}].inactivity_timeout_seconds is invalid"
+                )
             steps.append(
                 Step(
                     _string(step.get("id"), f"{filename}.steps[{index}].id"),
@@ -212,6 +241,7 @@ class RunbookRegistry:
                     _string(step.get("root", "repository"), f"{filename}.steps[{index}].root"),
                     profile,
                     timeout,
+                    inactivity_timeout,
                 )
             )
         return Runbook(
@@ -278,6 +308,7 @@ class CommandRunner:
                     "root_role": step.root,
                     "environment_profile": step.environment_profile,
                     "timeout_seconds": step.timeout_seconds,
+                    "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
                 }
                 for step in runbook.steps
             ],
@@ -371,6 +402,7 @@ class CommandRunner:
                     "environment_profile": step.environment_profile,
                     "environment_source": "fixed_profile" if profile else None,
                     "timeout_seconds": step.timeout_seconds,
+                    "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
                 }
             )
         canonical = json.dumps(
@@ -455,11 +487,36 @@ class CommandRunner:
         return command, environment
 
     @staticmethod
+    def _process_group_snapshot(pgid: int) -> list[dict[str, Any]]:
+        proc = Path("/proc")
+        if not proc.is_dir():
+            return []
+        members: list[dict[str, Any]] = []
+        for entry in proc.iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                stat = (entry / "stat").read_text(encoding="utf-8")
+                close = stat.rfind(")")
+                fields = stat[close + 2 :].split()
+                member_pgid = int(fields[2])
+                if member_pgid != pgid:
+                    continue
+                command = stat[stat.find("(") + 1 : close]
+                members.append(
+                    {"pid": int(entry.name), "pgid": member_pgid, "command": command[:80]}
+                )
+            except (OSError, ValueError, IndexError):
+                continue
+        return sorted(members, key=lambda item: item["pid"])
+
+    @staticmethod
     def _capture(
         command: list[str],
         cwd: Path,
         environment: Mapping[str, str],
         timeout: int,
+        inactivity_timeout: int | None = None,
         cancellation: threading.Event | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
@@ -472,20 +529,26 @@ class CommandRunner:
             stderr=subprocess.STDOUT,
             start_new_session=True,
         )
+        process_pid = process.pid
+        process_pgid = os.getpgid(process.pid)
         chunks: list[bytes] = []
         output_digest = hashlib.sha256()
         retained = 0
         total = 0
         cap = 64 * 1024
+        last_activity = started
+        observed_members: dict[int, dict[str, Any]] = {}
+        next_process_scan = started
 
         def drain() -> None:
-            nonlocal retained, total
+            nonlocal retained, total, last_activity
             assert process.stdout is not None
             while True:
                 chunk = process.stdout.read(4096)
                 if not chunk:
                     return
                 total += len(chunk)
+                last_activity = time.monotonic()
                 output_digest.update(chunk)
                 if retained < cap:
                     kept = chunk[: cap - retained]
@@ -495,6 +558,7 @@ class CommandRunner:
         reader = threading.Thread(target=drain, daemon=True)
         reader.start()
         timed_out = False
+        timeout_kind: str | None = None
         cancelled = False
 
         def terminate_group(sig: int) -> None:
@@ -504,12 +568,23 @@ class CommandRunner:
                 return
 
         while process.poll() is None:
+            now = time.monotonic()
+            if now >= next_process_scan:
+                for member in CommandRunner._process_group_snapshot(process_pgid):
+                    observed_members[member["pid"]] = member
+                next_process_scan = now + 1.0
             if cancellation is not None and cancellation.is_set():
                 cancelled = True
                 terminate_group(signal.SIGTERM)
                 break
-            if time.monotonic() - started >= timeout:
+            if now - started >= timeout:
                 timed_out = True
+                timeout_kind = "wall_clock"
+                terminate_group(signal.SIGTERM)
+                break
+            if inactivity_timeout is not None and now - last_activity >= inactivity_timeout:
+                timed_out = True
+                timeout_kind = "task_inactivity"
                 terminate_group(signal.SIGTERM)
                 break
             time.sleep(0.05)
@@ -528,13 +603,17 @@ class CommandRunner:
         output, text_truncated = bounded_text(output, cap)
         return {
             "return_code": return_code,
+            "pid": process_pid,
+            "pgid": process_pgid,
             "timed_out": timed_out,
+            "timeout_kind": timeout_kind,
             "cancelled": cancelled,
             "duration_seconds": round(time.monotonic() - started, 3),
             "output": redact(output),
             "output_bytes": total,
             "output_sha256": output_digest.hexdigest(),
             "truncated": text_truncated or total > retained,
+            "observed_processes": list(observed_members.values())[:128],
         }
 
     def _confirmed_plan(
@@ -586,6 +665,7 @@ class CommandRunner:
             "plan_digest": plan["plan_digest"],
             "created_at": observed_at(),
             "status": status,
+            "evidence_id": run_id,
             "steps": [],
         }
         with self._lock:
@@ -594,7 +674,7 @@ class CommandRunner:
                     (
                         key
                         for key, value in self._runs.items()
-                        if value["status"] in ("succeeded", "failed", "cancelled")
+                        if value["status"] in ("completed", "failed", "timed_out", "cancelled", "unknown")
                     ),
                     None,
                 )
@@ -603,7 +683,57 @@ class CommandRunner:
                 self._runs.pop(completed, None)
                 self._cancellations.pop(completed, None)
             self._runs[run_id] = record
+        self._persist_record(record)
         return record
+
+    def _persist_record(self, record: Mapping[str, Any]) -> None:
+        audit_path = self.config.audit_path()
+        if audit_path is None:
+            return
+        root = audit_path.parent / "run-records"
+        steps = []
+        for step in record.get("steps", []):
+            steps.append(
+                {
+                    key: step.get(key)
+                    for key in (
+                        "id", "return_code", "pid", "pgid", "timed_out", "timeout_kind",
+                        "cancelled", "duration_seconds", "output_bytes", "output_sha256",
+                        "truncated", "working_root_role", "timeout_seconds",
+                        "inactivity_timeout_seconds", "observed_processes",
+                    )
+                }
+            )
+        payload = redact(
+            {
+                "schema": "fluorite.run-status/v1",
+                "evidence_id": record["evidence_id"],
+                "run_id": record["run_id"],
+                "ticket_id": record["ticket_id"],
+                "runbook_id": record["runbook_id"],
+                "risk": record["risk"],
+                "plan_id": record["plan_id"],
+                "plan_digest": record["plan_digest"],
+                "status": record["status"],
+                "created_at": record["created_at"],
+                "started_at": record.get("started_at"),
+                "finished_at": record.get("finished_at"),
+                "steps": steps,
+            }
+        )
+        try:
+            root.mkdir(parents=True, exist_ok=True)
+            destination = root / f"{record['run_id']}.json"
+            temporary = root / f".{record['run_id']}.{uuid.uuid4().hex}.tmp"
+            temporary.write_text(
+                json.dumps(payload, sort_keys=True, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            os.replace(temporary, destination)
+        except OSError:
+            record.setdefault("audit_warnings", []).append(
+                "the durable run status could not be written"
+            )
 
     def _perform(
         self,
@@ -614,6 +744,7 @@ class CommandRunner:
     ) -> None:
         record["status"] = "running"
         record["started_at"] = observed_at()
+        self._persist_record(record)
         for step in runbook.steps:
             if cancellation is not None and cancellation.is_set():
                 record["status"] = "cancelled"
@@ -624,22 +755,29 @@ class CommandRunner:
                 self._resolve_root(step.root),
                 environment,
                 step.timeout_seconds,
+                step.inactivity_timeout_seconds,
                 cancellation,
             )
             outcome["id"] = step.step_id
             outcome["argv"] = redact(self._render_argv(step, plan["parameters"]))
             outcome["working_root_role"] = step.root
             outcome["timeout_seconds"] = step.timeout_seconds
+            outcome["inactivity_timeout_seconds"] = step.inactivity_timeout_seconds
             record["steps"].append(outcome)
+            self._persist_record(record)
             if outcome["cancelled"]:
                 record["status"] = "cancelled"
                 break
-            if outcome["timed_out"] or outcome["return_code"] != 0:
+            if outcome["timed_out"]:
+                record["status"] = "timed_out"
+                break
+            if outcome["return_code"] != 0:
                 record["status"] = "failed"
                 break
         else:
-            record["status"] = "succeeded"
+            record["status"] = "completed"
         record["finished_at"] = observed_at()
+        self._persist_record(record)
         record["audit_warnings"] = self._lifecycle_audit.emit(
             {
                 "schema": "fluorite.run-lifecycle/v1",
@@ -656,13 +794,18 @@ class CommandRunner:
                         "id": step["id"],
                         "working_root_role": step["working_root_role"],
                         "timeout_seconds": step["timeout_seconds"],
+                        "inactivity_timeout_seconds": step["inactivity_timeout_seconds"],
                         "return_code": step["return_code"],
                         "timed_out": step["timed_out"],
+                        "timeout_kind": step["timeout_kind"],
                         "cancelled": step["cancelled"],
                         "duration_seconds": step["duration_seconds"],
                         "output_bytes": step["output_bytes"],
                         "output_sha256": step["output_sha256"],
                         "truncated": step["truncated"],
+                        "pid": step["pid"],
+                        "pgid": step["pgid"],
+                        "observed_processes": step["observed_processes"],
                     }
                     for step in record["steps"]
                 ],
@@ -705,8 +848,9 @@ class CommandRunner:
             try:
                 self._perform(record, runbook, plan, cancellation)
             except Exception:
-                record["status"] = "failed"
+                record["status"] = "unknown"
                 record["finished_at"] = observed_at()
+                self._persist_record(record)
 
         threading.Thread(
             target=run,
@@ -737,13 +881,18 @@ class CommandRunner:
                     "id": step["id"],
                     "return_code": step["return_code"],
                     "timed_out": step["timed_out"],
+                    "timeout_kind": step["timeout_kind"],
                     "cancelled": step["cancelled"],
                     "duration_seconds": step["duration_seconds"],
                     "output_bytes": step["output_bytes"],
                     "output_sha256": step["output_sha256"],
                     "truncated": step["truncated"],
+                    "pid": step.get("pid"),
+                    "pgid": step.get("pgid"),
+                    "observed_processes": step.get("observed_processes", []),
                     "working_root_role": step["working_root_role"],
                     "timeout_seconds": step["timeout_seconds"],
+                    "inactivity_timeout_seconds": step["inactivity_timeout_seconds"],
                 }
                 for step in record["steps"]
             ],
@@ -780,3 +929,36 @@ class CommandRunner:
             "next_cursor": page.next_cursor,
             "truncated": page.truncated or any(bool(step["truncated"]) for step in record["steps"]),
         }
+
+    def load_completion(self, run_id: str) -> dict[str, Any]:
+        path = self.config.audit_path()
+        if path is None:
+            raise MCPDomainError("completion record is unavailable", code="unknown_run")
+        durable = path.parent / "run-records" / f"{run_id}.json"
+        if durable.is_file():
+            try:
+                record = json.loads(durable.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                raise MCPDomainError("completion record is unavailable", code="unknown_run") from exc
+            if record.get("status") in ("queued", "running"):
+                record["status"] = "unknown"
+                record["recovery_note"] = (
+                    "supervisor restart interrupted final-state observation"
+                )
+            return record
+        if not path.is_file():
+            raise MCPDomainError("completion record is unavailable", code="unknown_run")
+        found = None
+        try:
+            for line in path.read_text(encoding="utf-8").splitlines():
+                try:
+                    event = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if event.get("schema") == "fluorite.run-lifecycle/v1" and event.get("run_id") == run_id:
+                    found = event
+        except OSError as exc:
+            raise MCPDomainError("completion record is unavailable", code="unknown_run") from exc
+        if found is None:
+            raise MCPDomainError("unknown run id", code="unknown_run")
+        return found

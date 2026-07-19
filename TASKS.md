@@ -1,10 +1,10 @@
 # Task dashboard
 
-Last updated: 2026-07-19
+Last updated: 2026-07-20
 
 ## Current focus
 
-**[FLR-0023 — Project-owned Fluorite layer and build input](work/tickets/FLR-0023-project-owned-fluorite-layer.md)**
+**[FLR-0025 — Bounded BitBake monitor MCP](work/tickets/FLR-0025-bitbake-monitor-mcp.md)**
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -12,11 +12,11 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0024 | legacy meta-localをmeta-fluorite-trial layerへ置き換える | primary role + build-runner + checker role | Do | renamed layerのmetadata gateを通す |
+| FLR-0025 | fixed BitBake監視からartifact/QEMU/Fluorite確認までを完遂する | primary role + build-runner + checker role | Do | monitorをcommit/syncしmetadata gateを実行する |
 
 ## Next
 
-FLR-0023のみをIn Progressとする。FLR-0020はworkspace bootstrap設計、FLR-0021はlayer topology比較、FLR-0019はbuild environment blockerでWaiting、FLR-0018はrunbook登録済み、FLR-0017は観測/MCP Check済み。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
+FLR-0025のみをIn Progressとする。FLR-0024はrenamed-layer metadata/patch gate済みで、FLR-0025のcompile/image acceptance待ち。FLR-0019のbuild-to-render loopはFLR-0025の監視runbookで再開する。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |

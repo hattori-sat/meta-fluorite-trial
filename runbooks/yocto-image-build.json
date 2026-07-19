@@ -1,0 +1,16 @@
+{
+  "schema": "fluorite.runbook/v1",
+  "id": "yocto-image-build",
+  "title": "Bounded qemux86-64 Fluorite image build",
+  "description": "Incrementally build only the fixed AGL Flutter image target with existing configured caches.",
+  "risk": "build",
+  "parameters": {},
+  "steps": [{
+    "id": "agl-flutter-image",
+    "argv": ["bitbake", "agl-ivi-image-flutter"],
+    "root": "yocto_build",
+    "environment_profile": "yocto",
+    "timeout_seconds": 21600,
+    "inactivity_timeout_seconds": 1800
+  }]
+}
