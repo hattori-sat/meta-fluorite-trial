@@ -4,7 +4,7 @@ Last updated: 2026-07-19
 
 ## Current focus
 
-**[FLR-0008 — Understand the Fluorite demo](work/tickets/FLR-0008-fluorite-demo.md)**
+**[FLR-0015 — Make MCP evidence explainable](work/tickets/FLR-0015-mcp-explainability.md)**
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -12,11 +12,11 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0008 | Fluorite 3D demoの成功状態とscene/native境界が未固定 | Fluorite investigator + checker role | Plan | target別に観測可能な3D成功指標を定義し、demo entrypointとassetを固定revisionから追う |
+| FLR-0015 | MCP観測結果の根拠・限界・次行動をruntimeで明示する | primary role + checker role | Do | explainability contractをテストし、PRをdev-foundationへ出す |
 
 ## Next
 
-FLR-0008で最終目的であるFluoriteの成功状態を先に定義し、その後FLR-0007でAGL組立process、FLR-0009〜0011で下位描画stackを追う。PDCA Checkで順序は再評価する。
+FLR-0015を完了してからFLR-0008でFluoriteの成功状態を定義し、その後FLR-0007でAGL組立process、FLR-0009〜0011で下位描画stackを追う。PDCA Checkで順序は再評価する。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |
@@ -32,6 +32,7 @@ FLR-0008で最終目的であるFluoriteの成功状態を先に定義し、そ�
 | [FLR-0012](work/tickets/FLR-0012-source-knowledge-mcp.md) | component別MCPのshared contractを固定する | FLR-0007, FLR-0008 |
 | [FLR-0013](work/tickets/FLR-0013-agl-observer-mcp.md) | AGLのmanifest、feature、image組立をYoctoから分離して観測する | FLR-0001 |
 | [FLR-0014](work/tickets/FLR-0014-command-runner-mcp.md) | allowlist runbookだけを実行するcommand MCPを作る | FLR-0001, FLR-0004, FLR-0013 |
+| [FLR-0008](work/tickets/FLR-0008-fluorite-demo.md) | Fluorite 3D demoの成功状態とscene/native境界を固定する | FLR-0001, FLR-0015 |
 
 ## Waiting
 
@@ -41,6 +42,8 @@ FLR-0008で最終目的であるFluoriteの成功状態を先に定義し、そ�
 - GitHub repository settingsで`Branch policy / validate-branch-flow`をrequired status checkにする。
 
 ## Inbox
+
+- MCP explainability contractをdomain payloadと混ぜずに運用する。
 
 - `meta-agl/scripts/aglsetup.sh`のlocal変更の必要性を特定する。
 - qemux86-64の`libLLVM.so.18.1` SIGSEGVを再現し、TCG/LLVM/threadingの仮説を比較する。
