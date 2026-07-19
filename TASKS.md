@@ -12,16 +12,16 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0025 | fixed BitBake監視からartifact/QEMU/Fluorite確認までを完遂する | primary role + build-runner + checker role | Do → Check | 別SIDへdaemonizeしたCooker/Workerを追跡・停止する修正をpushし、bounded compileを再開する |
+| FLR-0025 | fixed BitBake監視からartifact/QEMU/Fluorite確認までを完遂する | primary role + build-runner + checker role | Do → Check | pseudo/tar workaroundをMini PCへ同期し、image retry後にartifact hash→SCP→QEMUへ進む |
 
 ## Active loop state
 
 | Phase | State | Evidence / next gate |
 | --- | --- | --- |
 | Monitor implementation | Check | clientと別SID/PGIDのCooker/Workerをlive確認。新規server group追跡・停止test PASS |
-| Git synchronization | Pending | Mac/origin/Mini PCは`1a4891c`。server-group修正commitの再同期待ち |
-| Demo compile | Blocked by monitor sync | `run-f950f77adf4a44f5`はtopology gate後にcancelled。修正版で再開 |
-| Image build | Blocked by compile | fixed `yocto-image-build`;新規deploy artifactが生成された場合のみ次へ進む |
+| Git synchronization | Complete | Mac/origin/Mini PCは`157c1ed`。worktree cleanを再確認する |
+| Demo compile | Complete | bounded demo compile exit 0。image input変更はdemo recipe外 |
+| Image build | In Progress | pseudo/tar失敗をMini PCで再現し、project layer workaroundを追加。同期後に再実行 |
 | Artifact transfer | Blocked by image | kernel/rootfsのidentity、size、SHA-256確認後、Macのactive qemux86-64 artifact directoryへ置換 |
 | QEMU / Fluorite | Blocked by transfer | snapshot QEMU、`agl-driver` Wayland session、explicit `flutter-auto -b <bundle>`、readiness/render/crash判定 |
 | Failure loop | Ready | build/log/QEMU/app/renderの層を分離し、最小修正後にcompileから再開 |
@@ -66,7 +66,7 @@ FLR-0025のみをIn Progressとする。FLR-0024はrenamed-layer metadata/patch 
 - FLR-0016: BitBake preflight中のMACHINE/conf/cache identityを確認する（Waiting、manifest provenance UNKNOWN）。
 - FLR-0017: legacy `docs/mac-qemu.md`のexplicit launch/readiness/crash evidenceをQEMU observerへ移す。
 - FLR-0018: current QEMU app-launch evidenceを固定Execution runbookへ移す。
-- FLR-0019: vkcube packagecopy failureを切り分け、成果物ができた場合のみscp/QEMUへ進む。
+- FLR-0019: pseudo/tar packagecopy failureを切り分け、成果物ができた場合のみscp/QEMUへ進む。
 - FLR-0020: `/AGL/trout` に依存しない fixed-manifest workspace bootstrap を設計する。
 - FLR-0021: `meta-vulkan` add-layer有無ではなく、fixed manifestとactive meta-flutter layer topologyの不一致を比較する。
 

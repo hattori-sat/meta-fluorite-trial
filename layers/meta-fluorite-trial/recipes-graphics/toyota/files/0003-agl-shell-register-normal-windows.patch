@@ -127,7 +127,7 @@ diff -urN a/shell/wayland/window.cc b/shell/wayland/window.cc
 -      m_display->AglShellDoBackground(m_base_surface, 0);
 +      m_display->AglShellDoBackground(m_base_surface, m_output_index);
        if (m_activation_area.x || m_activation_area.y ||
-           m_activation_area.width || m_activation_area.height)
+ 	  m_activation_area.width || m_activation_area.height)
          m_display->AglShellDoSetupActivationArea(
              m_activation_area.x, m_activation_area.y, m_activation_area.width,
 -            m_activation_area.height, 0);

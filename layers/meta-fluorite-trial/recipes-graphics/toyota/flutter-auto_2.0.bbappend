@@ -35,7 +35,6 @@ SRC_URI:append = " \
     file://0005-flutter-auto-restore-agl-shell-bind-for-bg-and-panels.patch \
     file://0006-fluorite-normal-default-activation-area-to-configured-size.patch \
     file://0007-wayland-apply-output-buffer-scale-to-surface.patch \
-    file://0008-app-allow-runtime-fps-cap-via-env.patch \
     file://0009-filament-view-fix-loaded-noninstanced-asset-reuse.patch \
 "
 

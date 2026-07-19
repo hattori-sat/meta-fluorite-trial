@@ -18,6 +18,8 @@ deploy/
 *.spdx.tar.zst
 bitbake-cookerdaemon.log
 cooker-*.log
+work/artifacts/
+.vscode/
 
 # Credentials and local settings
 .env

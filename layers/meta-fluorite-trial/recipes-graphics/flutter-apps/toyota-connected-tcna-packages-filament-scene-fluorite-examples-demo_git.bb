@@ -1,7 +1,7 @@
 SUMMARY = "Fluorite Filament scene examples demo"
 DESCRIPTION = "Project-owned Fluorite demo recipe for AGL Flutter images."
 LICENSE = "BSD-3-Clause"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=d73cf9ba84211d8b7fd0d2865b678fe4"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=d73cf6ba84211d8b7fd0d2865b678fe8"
 
 SRCREV = "2626d1757f18e438f4095e38e413eb40eab40b6d"
 SRC_URI = " \
