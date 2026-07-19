@@ -1,0 +1,56 @@
+# Task dashboard
+
+Last updated: 2026-07-19
+
+## Current focus
+
+**[FLR-0001 — Establish the canonical repository baseline](work/tickets/FLR-0001-canonical-repository-baseline.md)**
+
+WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
+
+## In Progress
+
+| ID | Problem / outcome | Owner | PDCA | Next action |
+| --- | --- | --- | --- | --- |
+| FLR-0001 | baselineと履歴が複数directoryへ分散している。canonical repositoryへ集約する | primary role + checker role | Do | `meta-local`、fixed manifest、confを取り込む |
+
+## Next
+
+FLR-0001完了後の重点候補はFLR-0008。最終目的であるFluoriteの成功状態を先に定義し、その後FLR-0007でAGL組立process、FLR-0009〜0011で下位描画stackを追う。PDCA Checkで順序は再評価する。
+
+| ID | Problem / outcome | Depends on |
+| --- | --- | --- |
+| [FLR-0002](work/tickets/FLR-0002-mac-qemu-baseline.md) | Macで既存qemux86-64の再現可能な起動baselineを採る | FLR-0001 |
+| [FLR-0003](work/tickets/FLR-0003-qemuarm64-hvf.md) | qemuarm64 + HVFがMac検証の主経路になるか判定する | FLR-0002 |
+| [FLR-0004](work/tickets/FLR-0004-yocto-observer-mcp.md) | build hostのAGL/Yocto状態を安全に観測するread-only MCPを作る | FLR-0001 |
+| [FLR-0005](work/tickets/FLR-0005-target-validation-mcp.md) | QEMU/実機の証拠収集を標準化するvalidation MCPを作る | FLR-0002 |
+| [FLR-0006](work/tickets/FLR-0006-raspberrypi-build.md) | 固定baselineからRaspberry Pi 4 imageを再build・検証する | FLR-0003, FLR-0004 |
+| [FLR-0007](work/tickets/FLR-0007-agl-architecture.md) | AGLがimage、compositor、launcher、appを組み立てるprocessを固定revisionから理解する | FLR-0001 |
+| [FLR-0008](work/tickets/FLR-0008-fluorite-demo.md) | Fluorite demoのscene、asset、操作、native API境界を理解する | FLR-0001 |
+| [FLR-0009](work/tickets/FLR-0009-flutter-engine-embedder.md) | Flutter Engineとivi launcherの描画・thread・surface契約を理解する | FLR-0007, FLR-0008 |
+| [FLR-0010](work/tickets/FLR-0010-filament-bridge.md) | Dart APIからnative filament_viewとFilamentまでのcall pathを特定する | FLR-0008 |
+| [FLR-0011](work/tickets/FLR-0011-vulkan-gpu-stack.md) | Filament/FlutterからVulkan、Mesa、GPUまでの実効経路をtarget別に特定する | FLR-0009, FLR-0010 |
+| [FLR-0012](work/tickets/FLR-0012-source-knowledge-mcp.md) | AGL/Fluorite/Flutter/Filament/graphics sourceをbounded evidenceとして読むMCPを作る | FLR-0007, FLR-0008 |
+
+## Waiting
+
+- 現在のCodex projectはcanonical Git repositoryではない。次回以降はcanonical cloneをCodex projectとして開く。
+- 実機検証条件（Raspberry Pi 4、display、input、network）の詳細はUNKNOWN。
+- GitHub repository settingsで`Branch policy / validate-branch-flow`をrequired status checkにする。
+
+## Inbox
+
+- `meta-agl/scripts/aglsetup.sh`のlocal変更の必要性を特定する。
+- qemux86-64の`libLLVM.so.18.1` SIGSEGVを再現し、TCG/LLVM/threadingの仮説を比較する。
+- qemuarm64のMesa/Vulkan/virtio-gpu package構成を確認する。
+- Flutter EngineとFilamentが同一window、別surface、external textureのどれで合成されるか特定する。
+
+## Done
+
+- 2026-07-19: mini PCの読み取り専用baseline調査。
+- 2026-07-19: Macとmini PCのclone location/origin/HEAD確認。
+
+## Someday / Maybe
+
+- build開始・停止を扱うwrite-capable MCP。read-only MCPが安定してから検討する。
+- Raspberry Pi実機の自動電源制御、serial console、screen capture連携。
