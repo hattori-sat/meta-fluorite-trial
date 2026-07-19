@@ -23,7 +23,7 @@ including a caller-supplied `command`, fail closed instead of being ignored.
 | `flutter_runtime` | Flutter Engine/embedder, IVI launcher, threads and surfaces | `catalog_embedder_surfaces`, `search_embedder_contract`, `read_runtime_source` |
 | `filament` | Dart/native bridge, Filament engine, materials and render assets | `catalog_render_assets`, `search_render_bridge`, `read_render_source` |
 | `graphics` | Wayland, Vulkan, Mesa, DRM, GPU and presentation path | `catalog_graphics_configuration`, `search_graphics_path`, `read_graphics_evidence` |
-| `target_validation` | existing boot, service, graphics, input and screen evidence | `list_validation_bundles`, `summarize_boot_evidence`, `summarize_graphics_evidence`, `read_target_evidence` |
+| `target_validation` | existing boot, service, QEMU app-launch, graphics, render, input and screen evidence | `list_validation_bundles`, `summarize_boot_evidence`, `summarize_graphics_evidence`, `summarize_app_launch`, `summarize_render_case`, `read_target_evidence` |
 | `command_runner` | fixed runbook planning, execution ownership and bounded logs | `list_runbooks`, `describe_runbook`, `plan_runbook`, `execute_runbook`, `start_runbook`, `get_run_status`, `read_run_log`, `cancel_run` |
 
 The first seven servers are read-only. They do not run SSH, BitBake or target

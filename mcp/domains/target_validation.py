@@ -91,6 +91,53 @@ def create_server(config: MCPConfig) -> MCPServer:
             payload_key="graphics_health_evidence",
         )
 
+    def app_launch(arguments: Mapping[str, Any]) -> Mapping[str, Any]:
+        return summarize(
+            arguments,
+            operation="summarize_app_launch",
+            success_terms=(
+                "application id",
+                "bundle path",
+                "loading aot",
+                "fengine resolved backend",
+                "native is ready",
+                "event channels created",
+            ),
+            failure_terms=(
+                "platform view type not registered",
+                "missingpluginexception",
+                "failed to load",
+                "segmentation fault",
+                "sigsegv",
+                "libllvm",
+            ),
+            payload_key="app_launch_evidence",
+        )
+
+    def render_case(arguments: Mapping[str, Any]) -> Mapping[str, Any]:
+        return summarize(
+            arguments,
+            operation="summarize_render_case",
+            success_terms=(
+                "vulkan device driver",
+                "vkcreateswapchain",
+                "all systems initialized",
+                "pogetfilamentscene oncreated",
+                "camera",
+                "native is ready",
+            ),
+            failure_terms=(
+                "material version",
+                "postcondition",
+                "bo allocation",
+                "software raster",
+                "segmentation fault",
+                "sigsegv",
+                "libllvm",
+            ),
+            payload_key="render_case_evidence",
+        )
+
     def read(arguments: Mapping[str, Any]) -> Mapping[str, Any]:
         root = root_arg(arguments, evidence)
         excerpt = evidence.read_lines(
@@ -110,6 +157,8 @@ def create_server(config: MCPConfig) -> MCPServer:
             Tool("list_validation_bundles", "List existing boot, service, input, graphics and screen evidence artifacts.", object_schema(paging), list_bundles),
             Tool("summarize_boot_evidence", "Extract bounded boot success/failure signals from an existing target log.", summary_schema, boot),
             Tool("summarize_graphics_evidence", "Extract bounded Wayland/Vulkan/Mesa/DRM signals from an existing target log.", summary_schema, graphics),
+            Tool("summarize_app_launch", "Extract bounded Flutter/launcher app-start and readiness signals from existing target evidence.", summary_schema, app_launch),
+            Tool("summarize_render_case", "Extract bounded QEMU Fluorite render and crash signals without causal diagnosis.", summary_schema, render_case),
             Tool(
                 "read_target_evidence",
                 "Read a bounded excerpt of existing target evidence; no target command is run.",
