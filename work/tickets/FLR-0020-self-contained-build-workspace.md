@@ -13,6 +13,10 @@ Make `meta-fluorite-trial` the sole project control point for reproducing the AG
 - `scripts/setup-build-host.sh` is check-only and also requires an existing `$AGL_ROOT`; it does not run `repo init`, `repo sync`, or fetch external layers.
 - The build configuration templates contain `$AGL_ROOT`-derived paths, so the repository alone cannot currently start BitBake.
 - Existing Mini PC builds use a separate AGL checkout with dirty layer state; its provenance is therefore not a canonical reproduction of this repository.
+- The qemux86-64 template sets `DL_DIR`, `SSTATE_DIR`, and `TMPDIR` to the role cache roots under `/mnt/yocto/flourite-qemux86-64`; the Raspberry Pi template uses `/mnt/yocto/flourite`.
+- The templates set `MACHINE=qemux86-64` or `raspberrypi4-64` and `DISTRO=poky-agl`.
+- The tracked baseline identifies Yocto Scarthgap / BitBake 2.8.1, and the fixed Poky revision is pinned in `manifests/agl-trout-fixed.xml`.
+- AGL's current Trout documentation describes downloading the AGL software, running `aglsetup.sh`, creating `local.conf`/`bblayers.conf`, and then invoking BitBake; it also documents `SSTATE_DIR` and shared-state mirrors as build configuration inputs.
 
 ## Inferences
 
@@ -33,6 +37,9 @@ Make `meta-fluorite-trial` the sole project control point for reproducing the AG
 ## Evidence IDs
 
 - `ev-flr0020-repo-source-overlay-audit-20260719`
+- `ev-flr0020-cache-version-template-audit-20260719`
+- `web-agl-trout-build-environment-20260719`
+- `web-yocto-scarthgap-bitbake-2.8-20260719`
 
 ## Smallest next action
 
