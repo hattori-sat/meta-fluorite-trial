@@ -26,6 +26,7 @@ The repository-owned layer must be named and surfaced as `meta-fluorite-trial`; 
 - Mini PC and Mac feature branches point to the same commit.
 - `bitbake-layers show-layers` reports the renamed layer and no historical app layer.
 - `bitbake -e` resolves the project recipe and explicit scene patches.
+- The renamed-layer bounded compile reached Flutter engine task `do_compile` and timed out at 1200 seconds around ninja step `1150/9648`; no compiler error was recorded, so compile acceptance remains UNKNOWN/Incomplete.
 
 ## Unknowns
 
