@@ -35,7 +35,7 @@ FLR-0008で最終目的であるFluoriteの成功状態を先に定義し、そ�
 
 ## Waiting
 
-- [FLR-0001](work/tickets/FLR-0001-canonical-repository-baseline.md): foundation deliveryはPASS。Linux build roleの同一revision checkout、remote MCP、GitHub CI/repository settingsのacceptance待ち。
+- [FLR-0001](work/tickets/FLR-0001-canonical-repository-baseline.md): foundation deliveryとCIはPASS。PR review/merge、Linux build roleの同一revision checkout、remote MCP、branch policyのacceptance待ち。
 - push後、canonical cloneをproject rootにしたfresh Codex taskでcustom-agent/MCP routingをsmokeする。
 - 実機検証条件（Raspberry Pi 4、display、input、network）の詳細はUNKNOWN。
 - GitHub repository settingsで`Branch policy / validate-branch-flow`をrequired status checkにする。

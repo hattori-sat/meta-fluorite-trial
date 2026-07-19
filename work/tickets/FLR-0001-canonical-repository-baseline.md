@@ -1,6 +1,6 @@
 # FLR-0001 — Establish the canonical repository baseline
 
-- Status: Waiting — foundation delivered; environment acceptance pending
+- Status: Waiting — PR review and environment acceptance pending
 - Priority: Critical
 - Owner: primary role + checker role
 - Created: 2026-07-19
@@ -38,9 +38,9 @@ fresh cloneから固定revision、独自layer、build設定、issue、作業履�
 | Step | Input | Expected process/output | Actual observation | Evidence |
 | --- | --- | --- | --- | --- |
 | 1. clone identity | remoteとHEAD | Mac/build hostで一致 | 一致 | working log |
-| 2. management tree | ticket/context/agent | canonical cloneへ保存 | candidate treeへ同期済み、commit待ち | Git status |
+| 2. management tree | ticket/context/agent | canonical cloneへ保存 | candidate treeへ同期済み、remote feature branchへpush済み | Git status |
 | 3. build baseline | fixed manifest/conf | canonical cloneへ保存 | 35-project fixed manifest、external lock、sanitized target confをcandidate treeへ保存 | baseline lock/tests |
-| 4. custom layer | `meta-local` | Git管理対象 | 45 filesをcandidate treeへ取り込み、patch identity metadataをrole表現へ匿名化。commit待ち | baseline lock/tests |
+| 4. custom layer | `meta-local` | Git管理対象 | 45 filesをcandidate treeへ取り込み、patch identity metadataをrole表現へ匿名化。remote feature branchへpush済み | baseline lock/tests |
 | 5. development environment | domain/authority/host境界 | DDD、agent、MCP、setup、CIへ変換 | 8 contexts、10 agents、8 MCP、check-only setup、CIをcandidate treeへ実装 | architecture/tests |
 | 6. final gate | repository tree | privacy/secret/size/PDCA PASS後にcommit/push | independent check、role metadata、fresh-clone gate、dev/feature pushがPASS | checker section、working log |
 
