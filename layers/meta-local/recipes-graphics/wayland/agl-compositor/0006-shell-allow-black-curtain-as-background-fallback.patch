@@ -1,0 +1,34 @@
+From a8813278f5cabc68d9cf39b655342b85de7a4c35 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 29 Mar 2026 00:00:00 +0900
+Subject: [PATCH] shell: allow black curtain as background fallback
+
+Upstream-Status: Inappropriate [local debug/integration behavior]
+
+The local shell patch stack currently defers pending desktop surfaces until a
+real BG role surface exists. That blocks NORMAL apps on images where no
+homescreen/background client is started, even though agl-compositor already
+has a built-in black curtain fallback and activation code that can use it as
+the visible background.
+
+Treat a mapped black curtain as sufficient background readiness so pending
+surfaces can proceed without introducing an extra BG app dependency.
+---
+ src/shell.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/shell.c b/src/shell.c
+index 7e0f7d8..1f8f9af 100644
+--- a/src/shell.c
++++ b/src/shell.c
+@@ -1066,6 +1066,8 @@
+ 		if (output->background &&
+ 		    output->background->role == IVI_SURFACE_ROLE_BACKGROUND)
+ 			return true;
++		if (output_has_black_curtain(output))
++			return true;
+ 	}
+ 
+ 	return false;
+-- 
+2.43.0

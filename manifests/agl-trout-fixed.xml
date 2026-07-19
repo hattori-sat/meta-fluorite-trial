@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <remote name="agl" fetch="https://gerrit.automotivelinux.org/gerrit/" pushurl="ssh://gerrit.automotivelinux.org:29418" review="https://gerrit.automotivelinux.org/gerrit/"/>
+  <remote name="github" fetch="https://github.com/"/>
+  <remote name="openembedded" fetch="https://git.openembedded.org/"/>
+  <remote name="qtio" fetch="https://code.qt.io/"/>
+  <remote name="yocto" fetch="https://git.yoctoproject.org/"/>
+  
+  <default remote="agl" revision="trout" sync-j="4"/>
+  
+  <project name="AGL/meta-agl" path="meta-agl" revision="bd03d3355cbb58d3fb9be7784f87e7748178aa5d" upstream="trout" dest-branch="trout"/>
+  <project name="AGL/meta-agl-demo" path="meta-agl-demo" revision="edc10359edc24224a015f55df4b3b1461df49f29" upstream="trout" dest-branch="trout"/>
+  <project name="AGL/meta-agl-devel" path="meta-agl-devel" revision="7de9e5f3caa950ec8b8210234233fd7e4f16e405" upstream="trout" dest-branch="trout"/>
+  <project name="AGL/meta-agl-refhw" path="bsp/meta-agl-refhw" revision="9c7336c5819e54179ea525810f38436d7caf0f9a" upstream="trout" dest-branch="trout"/>
+  <project name="CogentEmbedded/meta-rcar" path="bsp/meta-rcar" remote="github" revision="fdc590b9f9853d129d2286876e22fdc91c1fcaa4" upstream="v5.9.4-scarthgap"/>
+  <project name="EmbeddedAndroid/meta-rtlwifi" path="bsp/meta-rtlwifi" remote="github" revision="032a394e7569d1254cd17a0358475b986e64a5a4" upstream="master"/>
+  <project name="Freescale/meta-freescale-3rdparty" path="bsp/meta-freescale-3rdparty" remote="github" revision="70c83e96c7f75e73245cb77f1b0cada9ed4bbc6d" upstream="scarthgap"/>
+  <project name="JeffyCN/meta-rockchip" path="bsp/meta-rockchip" remote="github" revision="d7a4873b1c63aa95f4aa9c42bb0764215dc368ae" upstream="scarthgap"/>
+  <project name="OE4T/meta-tegra" path="bsp/meta-tegra" remote="github" revision="447c21467f65be2389f68a189b6871f13729d222" upstream="scarthgap"/>
+  <project name="SanCloudLtd/meta-sancloud" path="bsp/meta-sancloud" remote="github" revision="7eb9a421f547e347c9da23463734758568e13f95" upstream="kirkstone"/>
+  <project name="agl-ic-eg/meta-rockchip-extra" path="bsp/meta-rockchip-extra" remote="github" revision="c1ec27440639228f05951beeddc8436e60e7d695" upstream="scarthgap-agl"/>
+  <project name="aws4embeddedlinux/meta-aws" path="bsp/meta-aws" remote="github" revision="83a8e979e663b42923998ecd79a919fb9864521f" upstream="scarthgap"/>
+  <project name="dl9pf/meta-codechecker" path="external/meta-codechecker" remote="github" revision="38f9a4a68349b6ce32fdaa320f378991e29d09e9" upstream="master"/>
+  <project name="kraj/meta-clang" path="external/meta-clang" remote="github" revision="5c602337ea1a80fb7217eeda04e396cf90587dca" upstream="scarthgap"/>
+  <project name="meta-arm" path="bsp/meta-arm" remote="yocto" revision="a81c19915b5b9e71ed394032e9a50fd06919e1cd" upstream="scarthgap"/>
+  <project name="meta-flutter/meta-flutter" path="external/meta-flutter" remote="github" revision="67d7a4d3dc1e688eb37f05e8f740aca59fb53b9a" upstream="scarthgap"/>
+  <project name="meta-flutter/workspace-automation" path="external/workspace-automation" remote="github" revision="eaddb9ba610abea9f2f52bd9c37115fd6206fc57" upstream="v2.0"/>
+  <project name="meta-freescale" path="bsp/meta-freescale" remote="yocto" revision="902dde8c5bd29bb507ac8d37772565a6c9ab77cd" upstream="scarthgap"/>
+  <project name="meta-lts-mixins" path="external/meta-lts-mixins_rust" remote="yocto" revision="a8046d5ec53b1856169ac795aa87cb0d5db84c04" upstream="scarthgap/rust"/>
+  <project name="meta-lts-mixins" path="bsp/meta-lts-mixins_u-boot" remote="yocto" revision="66ceeebd047d7fdfc8668b300319a76da8ae257d" upstream="scarthgap/u-boot"/>
+  <project name="meta-raspberrypi" path="bsp/meta-raspberrypi" remote="yocto" revision="2c646d29912dcc873469a57b1c207e1549c5094d" upstream="scarthgap"/>
+  <project name="meta-security" path="external/meta-security" remote="yocto" revision="97e482b71688b62ac1109d16e89368122f039cbf" upstream="scarthgap"/>
+  <project name="meta-selinux" path="external/meta-selinux" remote="yocto" revision="536df5a4fbce3c9fd63f51580f43d248a0d1b0ef" upstream="scarthgap"/>
+  <project name="meta-spdxscanner" path="external/meta-spdxscanner" remote="yocto" revision="2c376d72a1aed6b335aebd3bb28663f973a11fa9" upstream="master"/>
+  <project name="meta-tensorflow" path="external/meta-tensorflow" remote="yocto" revision="eeee54cfa3c51c1fd99604a0d5f173096bdcf1da" upstream="scarthgap"/>
+  <project name="meta-ti" path="bsp/meta-ti" remote="yocto" revision="da28ae30cabd39ebce054ea2e230548d9b9c3322" upstream="scarthgap"/>
+  <project name="meta-virtualization" path="external/meta-virtualization" remote="yocto" revision="f92518e20530edfebca45e4170e11460949a5303" upstream="scarthgap"/>
+  <project name="openembedded/meta-openembedded" path="external/meta-openembedded" remote="github" revision="2759d8870ea387b76c902070bed8a6649ff47b56" upstream="scarthgap"/>
+  <project name="poky" path="external/poky" remote="yocto" revision="72983ac391008ebceb45edc7a8f0f6d5f4fe715c" upstream="scarthgap"/>
+  <project name="renesas-rcar/meta-renesas" path="bsp/meta-renesas" remote="github" revision="89dddd954b07520b6b3f0aba90f69404646ce8b8" upstream="scarthgap-dev"/>
+  <project name="riscv/meta-riscv" path="bsp/meta-riscv" remote="github" revision="76727db91108f53afc8a5b72651167c4446b5fcb" upstream="scarthgap"/>
+  <project name="ros/meta-ros" path="external/meta-ros" remote="github" revision="4a8044f2fd092f5cf5d7371aae1da4b4c961e54c" upstream="scarthgap"/>
+  <project name="sifive/meta-sifive" path="bsp/meta-sifive" remote="github" revision="4b50b9c21248432427e2491462180e7d5df61ae8" upstream="scarthgap"/>
+  <project name="yocto/meta-qt6" path="external/meta-qt6" remote="qtio" revision="57fef415fcde6c3d70a028f42f318f455633dc97" upstream="6.7"/>
+  <project name="zboszor/meta-python-ai" path="external/meta-python-ai" remote="github" revision="47e39d760ce2ecd99bbbc0fbefde4a96ed32a85a" upstream="scarthgap"/>
+</manifest>

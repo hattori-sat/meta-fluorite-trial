@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+Subject: [PATCH] filament_view: drop GEN_MIPMAPPABLE for older Filament
+
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc
+@@ -45,7 +45,7 @@ Texture* HDRLoader::createTextureFromImage(Engine* engine, LinearImage* image) {
+                        .levels(0xff)
+                        .format(Texture::InternalFormat::R11F_G11F_B10F)
+                        .sampler(Texture::Sampler::SAMPLER_2D)
+-                       .usage(Texture::Usage::DEFAULT | Texture::Usage::GEN_MIPMAPPABLE)
++                       .usage(Texture::Usage::DEFAULT)
+                        .build(*engine);
+
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc
+@@ -66,7 +66,7 @@ filament::Texture* TextureLoader::createTextureFromImage(
+       .levels(1)  // TODO should be param, backlogged
+       .format(internalFormat(type))
+       .sampler(filament::Texture::Sampler::SAMPLER_2D)
+-      .usage(filament::Texture::Usage::DEFAULT | filament::Texture::Usage::GEN_MIPMAPPABLE)
++      .usage(filament::Texture::Usage::DEFAULT)
+       .build(*engine);

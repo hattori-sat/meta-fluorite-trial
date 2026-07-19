@@ -1,0 +1,33 @@
+name: Branch policy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-branch-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate pull request branch direction
+        shell: bash
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+
+          case "${BASE_BRANCH}:${HEAD_BRANCH}" in
+            main:dev-*)
+              echo "development milestone into main"
+              ;;
+            dev-*:feature-*)
+              echo "feature into development milestone"
+              ;;
+            *)
+              echo "::error::Allowed pull request flow is feature-* to dev-*, then dev-* to main."
+              exit 1
+              ;;
+          esac

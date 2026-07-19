@@ -1,0 +1,40 @@
+From 584f53cce0066f4322ee181535a027f4e209bbbc Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 8 Mar 2026 23:05:00 +0900
+Subject: [PATCH] grpc-proxy: send agl_shell ready after binding
+
+Upstream-Status: Pending
+
+The gRPC proxy binds successfully to `agl_shell` and `agl_shell_ext`, but it
+never transitions the compositor shell client into the ready state. Normal
+desktop surfaces stay on the pending list until some shell client issues the
+`ready` request.
+
+Background/panel flows work because the original shell-aware client sends
+`ready()`. The fluorite NORMAL path does not, so pending surfaces remain with
+role NONE and are removed before activation completes.
+
+Issue `agl_shell_ready()` immediately after a successful bind so the compositor
+can process pending surfaces for normal applications as well.
+---
+ grpc-proxy/main-grpc.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/grpc-proxy/main-grpc.cpp b/grpc-proxy/main-grpc.cpp
+index 8964946..b9c7225 100644
+--- a/grpc-proxy/main-grpc.cpp
++++ b/grpc-proxy/main-grpc.cpp
+@@ -378,6 +378,13 @@ register_shell_ext(void)
+ 		goto err;
+ 	}
+ 
++	LOG("sending agl_shell ready request\n");
++	agl_shell_ready(sh->shell);
++	if (wl_display_roundtrip(sh->wl_display) < 0) {
++		LOG("Failed while waiting for agl_shell ready roundtrip\n");
++		goto err;
++	}
++
+ 	LOG("agl_shell/agl_shell_ext interfaces OK\n");
+ 	return sh;
+ err:

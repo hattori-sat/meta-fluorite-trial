@@ -1,0 +1,35 @@
+From e9f0d7a6a52ecf4077a2892fc2f790ecbb79f4cd Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 8 Mar 2026 16:46:00 +0900
+Subject: [PATCH] agl-shell-activator: fix activate arg check and listener end
+
+Upstream-Status: Pending
+
+diff --git a/src/AglShellGrpcClient.h b/src/AglShellGrpcClient.h
+index c39b242..704ea9a 100644
+--- a/src/AglShellGrpcClient.h
++++ b/src/AglShellGrpcClient.h
+@@ -60,6 +60,7 @@ public:
+ 		std::unique_lock<std::mutex> l(m_mutex);
+ 
+ 		m_status = s;
++		m_done = true;
+ 
+ 		fprintf(stderr, "%s() done\n", __func__);
+ 		m_cv.notify_one();
+diff --git a/src/main.cpp b/src/main.cpp
+index 268e00d..bdce2ad 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
+ 	switch (get_action(action)) {
+ 	case ACTIVATE:
+-		if (!output && !app_id) {
+-			fprintf(stderr, "Activation require both an app_id and an output\n");
++		if (!output || !app_id) {
++			fprintf(stderr, "Activation requires both an app_id and an output\n");
+ 			help(argv);
+ 		}
+ 		fprintf(stderr, "Activating application '%s' on output '%s'\n",
+-- 
+2.34.1

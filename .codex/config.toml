@@ -1,0 +1,86 @@
+[agents]
+max_threads = 4
+max_depth = 1
+
+# Domain MCPs are disabled for the primary task by default. Each custom agent
+# enables exactly its own server in `.codex/agents/*.toml`.
+[mcp_servers.agl]
+command = "bash"
+args = ["scripts/run-remote-mcp.sh", "agl"]
+cwd = ".."
+env = { PYTHONDONTWRITEBYTECODE = "1" }
+enabled = false
+enabled_tools = ["get_manifest_catalog", "search_integration_points", "read_integration_evidence"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.yocto]
+command = "bash"
+args = ["scripts/run-remote-mcp.sh", "yocto"]
+cwd = ".."
+env = { PYTHONDONTWRITEBYTECODE = "1" }
+enabled = false
+enabled_tools = ["list_layer_metadata", "find_recipe_candidates", "search_metadata", "read_metadata", "list_task_logs", "tail_task_log"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.fluorite]
+command = "bash"
+args = ["scripts/run-mcp.sh", "fluorite"]
+cwd = ".."
+env = { PYTHONDONTWRITEBYTECODE = "1" }
+enabled = false
+enabled_tools = ["catalog_scene_assets", "search_scene_contract", "read_scene_source"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.flutter_runtime]
+command = "bash"
+args = ["scripts/run-mcp.sh", "flutter_runtime"]
+cwd = ".."
+env = { PYTHONDONTWRITEBYTECODE = "1" }
+enabled = false
+enabled_tools = ["catalog_embedder_surfaces", "search_embedder_contract", "read_runtime_source"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.filament]
+command = "bash"
+args = ["scripts/run-mcp.sh", "filament"]
+cwd = ".."
+env = { PYTHONDONTWRITEBYTECODE = "1" }
+enabled = false
+enabled_tools = ["catalog_render_assets", "search_render_bridge", "read_render_source"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.graphics]
+command = "bash"
+args = ["scripts/run-mcp.sh", "graphics"]
+cwd = ".."
+env = { PYTHONDONTWRITEBYTECODE = "1" }
+enabled = false
+enabled_tools = ["catalog_graphics_configuration", "search_graphics_path", "read_graphics_evidence"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.target_validation]
+command = "bash"
+args = ["scripts/run-mcp.sh", "target_validation"]
+cwd = ".."
+env = { PYTHONDONTWRITEBYTECODE = "1" }
+enabled = false
+enabled_tools = ["list_validation_bundles", "summarize_boot_evidence", "summarize_graphics_evidence", "read_target_evidence"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.command_runner]
+command = "bash"
+args = ["scripts/run-remote-mcp.sh", "command_runner"]
+cwd = ".."
+env = { PYTHONDONTWRITEBYTECODE = "1" }
+enabled = false
+enabled_tools = ["list_runbooks", "describe_runbook", "plan_runbook", "execute_runbook", "start_runbook", "get_run_status", "cancel_run", "read_run_log"]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.command_runner.tools.execute_runbook]
+approval_mode = "prompt"
+
+[mcp_servers.command_runner.tools.start_runbook]
+approval_mode = "prompt"
+
+[mcp_servers.command_runner.tools.cancel_run]
+approval_mode = "prompt"

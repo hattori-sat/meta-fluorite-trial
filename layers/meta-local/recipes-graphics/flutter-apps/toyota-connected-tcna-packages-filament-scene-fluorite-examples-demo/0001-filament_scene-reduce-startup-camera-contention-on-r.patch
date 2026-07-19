@@ -1,0 +1,48 @@
+From cd3d0d35e589f72f1715dba302d693bf9326d367 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 8 Mar 2026 04:20:47 +0900
+Subject: [PATCH] filament_scene: reduce startup camera contention on rpi
+
+---
+ .../example/lib/scenes/playground_scene.dart        |  4 ++--
+ .../example/lib/shape_and_object_creators.dart      | 13 ++++---------
+ 2 files changed, 6 insertions(+), 11 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/scenes/playground_scene.dart b/packages/filament_scene/example/lib/scenes/playground_scene.dart
+index 5a132c0..0864c0d 100644
+--- a/packages/filament_scene/example/lib/scenes/playground_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/playground_scene.dart
+@@ -251,8 +251,11 @@ class _PlaygroundSceneViewState extends StatefulSceneViewState {
+ 
+   @override
+   void onCreate() {
+-    PlaygroundSceneView._sceneCamera.setActive();
++    // Keep the default Playground camera active on startup.
++    // Without this, the single remaining scene camera is initialized but may
++    // never become the active view camera, which leaves the 3D view blank.
++    PlaygroundSceneView._sceneCamera.setActive();
+     widget.filament.queueFrameTask(widget.filament.setFogOptions(false));
+   }
+ 
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 445a4b3..78bed04 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -376,13 +376,8 @@ Light poGetDefaultPointLight(Color directLightColor, double intensity) {
+ }
+ 
+ List<Camera> poGetScenesCameras() {
+-  List<Camera> itemsToReturn = [];
+-
+-  itemsToReturn.addAll(PlaygroundSceneView.getSceneCameras());
+-  itemsToReturn.addAll(RadarSceneView.getSceneCameras());
+-  itemsToReturn.addAll(SettingsSceneView.getSceneCameras());
+-  itemsToReturn.addAll(PlanetariumSceneView.getSceneCameras());
+-  itemsToReturn.addAll(TrainsetSceneView.getSceneCameras());
+-
+-  return itemsToReturn;
++  // Keep a single default camera at startup to avoid multi-camera contention
++  // on view target 0. Other scene cameras can be added back after active-camera
++  // switching is stabilized for this platform.
++  return List<Camera>.from(PlaygroundSceneView.getSceneCameras());
+ }
