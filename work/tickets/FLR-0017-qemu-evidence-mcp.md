@@ -76,3 +76,16 @@ legacy contractを入力に、まずread-onlyの「artifact/session identity + l
 - `PASS`はready signalまたはscreen evidenceがある場合だけ、crash/absence/identity不足は`FAIL`または`UNKNOWN`として返す。
 - MCPは任意shellを受け付けず、target mutationはExecutionのregistered runbookとapprovalへ分離する。
 - legacy evidenceをcurrent runの事実として再利用せず、revision/image/session identityを明示する。
+
+## Candidate launch profile (plan, not yet executed)
+
+- Target role: `qemux86-64-macos-tcg`.
+- Artifact inputs: existing indexed kernel/rootfs/qemuboot metadata; no artifact recopy.
+- Machine: q35; accelerator: TCG multi-thread; CPU: qemu64 with the legacy feature flags; memory: 2048 MiB; vCPU: 4.
+- Display/input: Cocoa, virtio-vga, serial monitor, USB tablet/keyboard; network: user-mode with no host forwarding unless explicitly required.
+- Disk safety: ext4 rootfs with `snapshot=on`; never write the source artifact.
+- Timeout: 90 seconds for boot/app readiness, with a separately approved 600-second soak only if readiness succeeds.
+- Guest action: explicit `flutter-auto -b <indexed-Fluorite-bundle>` under the target's registered launcher user and Wayland session environment. Bundle path/user must be observed from the current image before execution, not copied from legacy assumptions.
+- Evidence outputs: serial log, QEMU/boot parameters, app log markers, optional screen locator, and coredump locator. Store only bounded session evidence beside the existing QEMU artifact; do not duplicate kernel/rootfs.
+
+Execution remains blocked until the current artifact's bundle path, launch user, Wayland variables, and evidence output directory are read-only confirmed.
