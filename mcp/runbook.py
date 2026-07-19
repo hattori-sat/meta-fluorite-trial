@@ -523,6 +523,38 @@ class CommandRunner:
         return sorted(members, key=lambda item: item["pid"])
 
     @staticmethod
+    def _bitbake_process_snapshot() -> list[dict[str, Any]]:
+        proc = Path("/proc")
+        if not proc.is_dir():
+            return []
+        roles = {"KnottyUI": "client", "Cooker": "server", "Worker": "worker"}
+        processes: list[dict[str, Any]] = []
+        for entry in proc.iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                stat = (entry / "stat").read_text(encoding="utf-8")
+                close = stat.rfind(")")
+                command = stat[stat.find("(") + 1 : close]
+                role = roles.get(command)
+                if role is None:
+                    continue
+                fields = stat[close + 2 :].split()
+                processes.append(
+                    {
+                        "pid": int(entry.name),
+                        "ppid": int(fields[1]),
+                        "pgid": int(fields[2]),
+                        "sid": int(fields[3]),
+                        "command": command,
+                        "role": role,
+                    }
+                )
+            except (OSError, ValueError, IndexError):
+                continue
+        return sorted(processes, key=lambda item: item["pid"])
+
+    @staticmethod
     def _task_activity_marker(root: Path | None) -> tuple[int, int, str] | None:
         if root is None:
             return None
@@ -552,6 +584,9 @@ class CommandRunner:
         activity_root: Path | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
+        preexisting_bitbake_pids = {
+            item["pid"] for item in CommandRunner._bitbake_process_snapshot()
+        }
         process = subprocess.Popen(
             command,
             cwd=cwd,
@@ -571,6 +606,7 @@ class CommandRunner:
         last_activity = started
         last_activity_source = "process_start"
         observed_members: dict[int, dict[str, Any]] = {}
+        owned_server_pgids: set[int] = set()
         next_process_scan = started
         next_activity_scan = started
         activity_marker = CommandRunner._task_activity_marker(activity_root)
@@ -624,17 +660,24 @@ class CommandRunner:
                 }
             )
 
-        def terminate_group(sig: int) -> None:
-            try:
-                os.killpg(process.pid, sig)
-            except ProcessLookupError:
-                return
+        def terminate_groups(sig: int) -> None:
+            for owned_pgid in sorted({process_pgid, *owned_server_pgids}):
+                try:
+                    os.killpg(owned_pgid, sig)
+                except ProcessLookupError:
+                    continue
 
         while process.poll() is None:
             now = time.monotonic()
             if now >= next_process_scan:
                 for member in CommandRunner._process_group_snapshot(process_pgid):
                     observed_members[member["pid"]] = member
+                for member in CommandRunner._bitbake_process_snapshot():
+                    if member["pid"] in preexisting_bitbake_pids:
+                        continue
+                    observed_members[member["pid"]] = member
+                    if member["role"] in ("server", "worker"):
+                        owned_server_pgids.add(member["pgid"])
                 next_process_scan = now + 1.0
             if now >= next_activity_scan:
                 current_marker = CommandRunner._task_activity_marker(activity_root)
@@ -649,29 +692,49 @@ class CommandRunner:
                 next_progress = now + 2.0
             if cancellation is not None and cancellation.is_set():
                 cancelled = True
-                terminate_group(signal.SIGTERM)
+                terminate_groups(signal.SIGTERM)
                 break
             if now - started >= timeout:
                 timed_out = True
                 timeout_kind = "wall_clock"
-                terminate_group(signal.SIGTERM)
+                terminate_groups(signal.SIGTERM)
                 break
             with output_lock:
                 inactivity_age = now - last_activity
             if inactivity_timeout is not None and inactivity_age >= inactivity_timeout:
                 timed_out = True
                 timeout_kind = "task_inactivity"
-                terminate_group(signal.SIGTERM)
+                terminate_groups(signal.SIGTERM)
                 break
             time.sleep(0.05)
         if process.poll() is None:
             try:
                 return_code = process.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                terminate_group(signal.SIGKILL)
+                terminate_groups(signal.SIGKILL)
                 return_code = process.wait(timeout=5)
         else:
             return_code = int(process.returncode)
+        remaining_servers: list[dict[str, Any]] = []
+        if cancelled or timed_out:
+            shutdown_deadline = time.monotonic() + 5
+            while time.monotonic() < shutdown_deadline:
+                remaining_servers = [
+                    item for item in CommandRunner._bitbake_process_snapshot()
+                    if item["pid"] not in preexisting_bitbake_pids
+                    and item["pgid"] in owned_server_pgids
+                ]
+                if not remaining_servers:
+                    break
+                time.sleep(0.05)
+            if remaining_servers:
+                terminate_groups(signal.SIGKILL)
+                time.sleep(0.1)
+                remaining_servers = [
+                    item for item in CommandRunner._bitbake_process_snapshot()
+                    if item["pid"] not in preexisting_bitbake_pids
+                    and item["pgid"] in owned_server_pgids
+                ]
         reader.join(timeout=2)
         if process.stdout is not None:
             process.stdout.close()
@@ -694,6 +757,8 @@ class CommandRunner:
             "output_sha256": final_digest,
             "truncated": text_truncated or final_total > len(output_tail),
             "observed_processes": list(observed_members.values())[:128],
+            "owned_server_pgids": sorted(owned_server_pgids),
+            "remaining_server_processes": remaining_servers[:128],
         }
 
     def _confirmed_plan(
@@ -1000,6 +1065,8 @@ class CommandRunner:
                     "pid": step.get("pid"),
                     "pgid": step.get("pgid"),
                     "observed_processes": step.get("observed_processes", []),
+                    "owned_server_pgids": step.get("owned_server_pgids", []),
+                    "remaining_server_processes": step.get("remaining_server_processes", []),
                     "activity_source": step.get("activity_source"),
                     "last_activity_age_seconds": step.get("last_activity_age_seconds"),
                     "working_root_role": step["working_root_role"],

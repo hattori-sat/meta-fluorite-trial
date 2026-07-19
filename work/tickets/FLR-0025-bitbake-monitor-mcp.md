@@ -161,3 +161,25 @@ Verify, commit/push the live-status correction, synchronize the Mini PC, and res
 ### Smallest next action
 
 Run local verify/privacy checks, update the remote feature ref with lease protection, fast-forward the build role, then execute the short metadata topology gate.
+
+## Live topology gate — 2026-07-20
+
+### Facts
+
+- Corrected revision metadata run `run-85975b1d8f0146db` completed in 6.987 seconds with exit 0 and durable bounded evidence.
+- Compile topology run `run-f950f77adf4a44f5` observed live task-log activity, but the client and Cooker/Worker used different SID/PGID values.
+- MCP cancellation persisted `cancelled`, exit `-15`, and 37.269 seconds for the client while Cooker/Worker briefly remained. They subsequently exited; no cache cleanup was used.
+- The supervisor now baselines pre-existing BitBake processes, records newly created client/server/worker PID, PPID, PGID and SID, terminates all newly observed owned groups on cancel/timeout, and persists any remaining server processes.
+- Local `make verify` passes with 71 Python tests and 52 MCP focused tests.
+
+### Inference
+
+The earlier timeout ambiguity was caused by BitBake daemon lifecycle crossing the client process-group boundary, not by an observed compiler failure.
+
+### Check rule
+
+The next compile may continue only if status shows the new Cooker/Worker group and a deliberate early cancellation proves `remaining_server_processes` is empty. Otherwise revise again before a long run.
+
+### Smallest next action
+
+Commit/push/synchronize the topology fix, run one early cancellation acceptance, then restart the incremental compile for completion.

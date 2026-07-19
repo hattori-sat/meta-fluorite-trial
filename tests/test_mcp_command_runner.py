@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import tempfile
 import threading
 import time
@@ -348,6 +349,36 @@ class CommandRunnerTests(unittest.TestCase):
                 timer.cancel()
         self.assertFalse(result["timed_out"])
         self.assertTrue(any(item["activity_source"] == "task_log" for item in snapshots))
+
+    def test_capture_tracks_and_terminates_new_bitbake_server_group(self) -> None:
+        cancellation = threading.Event()
+        timer = threading.Timer(0.3, cancellation.set)
+        timer.start()
+        fake_snapshot = [
+            {"pid": 8101, "ppid": 1, "pgid": 8100, "sid": 8100,
+             "command": "Cooker", "role": "server"},
+            {"pid": 8102, "ppid": 8101, "pgid": 8100, "sid": 8100,
+             "command": "Worker", "role": "worker"},
+        ]
+        signals: list[tuple[int, int]] = []
+        snapshots = [[], fake_snapshot]
+
+        def next_snapshot() -> list[dict[str, object]]:
+            return snapshots.pop(0) if snapshots else []
+
+        try:
+            with patch.object(CommandRunner, "_bitbake_process_snapshot", side_effect=next_snapshot), patch(
+                "mcp.runbook.os.killpg", side_effect=lambda pgid, sig: signals.append((pgid, sig))
+            ):
+                result = CommandRunner._capture(
+                    ["/bin/sh", "-c", "sleep 2"], Path.cwd(), os.environ, 5,
+                    cancellation=cancellation,
+                )
+        finally:
+            timer.cancel()
+        self.assertTrue(result["cancelled"])
+        self.assertIn(8100, result["owned_server_pgids"])
+        self.assertTrue(any(pgid == 8100 and sig == signal.SIGTERM for pgid, sig in signals))
 
 
 if __name__ == "__main__":

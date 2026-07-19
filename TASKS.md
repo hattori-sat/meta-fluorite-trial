@@ -12,15 +12,15 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0025 | fixed BitBake監視からartifact/QEMU/Fluorite確認までを完遂する | primary role + build-runner + checker role | Check → Do | multi-agent review反映後に`a147fdc`系をpushし、Mini PCをfast-forwardしてdemo compileを再開する |
+| FLR-0025 | fixed BitBake監視からartifact/QEMU/Fluorite確認までを完遂する | primary role + build-runner + checker role | Do → Check | 別SIDへdaemonizeしたCooker/Workerを追跡・停止する修正をpushし、bounded compileを再開する |
 
 ## Active loop state
 
 | Phase | State | Evidence / next gate |
 | --- | --- | --- |
-| Monitor implementation | Check | metadata gate PASS、live PID/PGIDとbounded outputを確認。`a147fdc`のtask-log activity監視をmulti-agent review中 |
-| Git synchronization | Pending | Macはoriginより1 commit先、Mini PCは`1775b6a`でclean。review反映commitをpush後にfast-forward |
-| Demo compile | Pending | fixed `yocto-demo-compile`; wall-clockとstdout/task-log inactivityを監視 |
+| Monitor implementation | Check | clientと別SID/PGIDのCooker/Workerをlive確認。新規server group追跡・停止test PASS |
+| Git synchronization | Pending | Mac/origin/Mini PCは`1a4891c`。server-group修正commitの再同期待ち |
+| Demo compile | Blocked by monitor sync | `run-f950f77adf4a44f5`はtopology gate後にcancelled。修正版で再開 |
 | Image build | Blocked by compile | fixed `yocto-image-build`;新規deploy artifactが生成された場合のみ次へ進む |
 | Artifact transfer | Blocked by image | kernel/rootfsのidentity、size、SHA-256確認後、Macのactive qemux86-64 artifact directoryへ置換 |
 | QEMU / Fluorite | Blocked by transfer | snapshot QEMU、`agl-driver` Wayland session、explicit `flutter-auto -b <bundle>`、readiness/render/crash判定 |
