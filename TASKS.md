@@ -53,6 +53,7 @@ FLR-0020のみをIn Progressとする。FLR-0019はbuild environment blockerでW
 - FLR-0018: current QEMU app-launch evidenceを固定Execution runbookへ移す。
 - FLR-0019: vkcube packagecopy failureを切り分け、成果物ができた場合のみscp/QEMUへ進む。
 - FLR-0020: `/AGL/trout` に依存しない fixed-manifest workspace bootstrap を設計する。
+- FLR-0021: `meta-vulkan` add-layer有無ではなく、fixed manifestとactive meta-flutter layer topologyの不一致を比較する。
 
 - MCP explainability contractをdomain payloadと混ぜずに運用する。
 
