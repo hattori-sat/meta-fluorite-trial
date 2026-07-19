@@ -34,6 +34,10 @@ class RunbookRegistryTests(unittest.TestCase):
         self.assertEqual("qemu_artifact", qemu.steps[0].root)
         self.assertEqual(120, qemu.steps[0].timeout_seconds)
         self.assertIn("-snapshot", qemu.steps[0].argv)
+        self.assertEqual(
+            "yocto_compile_logs",
+            registry.get("yocto-demo-compile").steps[0].activity_root,
+        )
         for runbook in registry.runbooks.values():
             for parameter in runbook.parameters:
                 self.assertGreater(len(parameter.choices), 0)
@@ -319,6 +323,31 @@ class CommandRunnerTests(unittest.TestCase):
             any("first" in item["output"] and "last" not in item["output"] for item in snapshots)
         )
         self.assertIn("last", snapshots[-1]["output"])
+
+    def test_task_log_update_resets_inactivity_clock(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            activity_root = Path(directory)
+            task_log = activity_root / "log.do_compile.1"
+            task_log.write_text("start\n", encoding="utf-8")
+            timer = threading.Timer(
+                0.7, lambda: task_log.write_text("progress\n", encoding="utf-8")
+            )
+            snapshots: list[dict[str, object]] = []
+            timer.start()
+            try:
+                result = CommandRunner._capture(
+                    ["/bin/sh", "-c", "sleep 1.5"],
+                    Path.cwd(),
+                    os.environ,
+                    5,
+                    inactivity_timeout=1,
+                    progress=lambda item: snapshots.append(dict(item)),
+                    activity_root=activity_root,
+                )
+            finally:
+                timer.cancel()
+        self.assertFalse(result["timed_out"])
+        self.assertTrue(any(item["activity_source"] == "task_log" for item in snapshots))
 
 
 if __name__ == "__main__":

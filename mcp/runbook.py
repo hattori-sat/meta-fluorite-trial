@@ -96,6 +96,7 @@ class Step:
     environment_profile: str | None
     timeout_seconds: int
     inactivity_timeout_seconds: int | None
+    activity_root: str | None
 
 
 @dataclass(frozen=True)
@@ -200,6 +201,7 @@ class RunbookRegistry:
             if set(step) - {
                 "id", "argv", "root", "environment_profile", "timeout_seconds",
                 "inactivity_timeout_seconds",
+                "activity_root",
             }:
                 raise ConfigurationError(f"{filename}.steps[{index}] has unsupported fields")
             argv_raw = step.get("argv")
@@ -234,6 +236,11 @@ class RunbookRegistry:
                 raise ConfigurationError(
                     f"{filename}.steps[{index}].inactivity_timeout_seconds is invalid"
                 )
+            activity_root = step.get("activity_root")
+            if activity_root is not None and (
+                not isinstance(activity_root, str) or not _SAFE_PROFILE.fullmatch(activity_root)
+            ):
+                raise ConfigurationError(f"{filename}.steps[{index}].activity_root is invalid")
             steps.append(
                 Step(
                     _string(step.get("id"), f"{filename}.steps[{index}].id"),
@@ -242,6 +249,7 @@ class RunbookRegistry:
                     profile,
                     timeout,
                     inactivity_timeout,
+                    activity_root,
                 )
             )
         return Runbook(
@@ -309,6 +317,7 @@ class CommandRunner:
                     "environment_profile": step.environment_profile,
                     "timeout_seconds": step.timeout_seconds,
                     "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
+                    "activity_root_role": step.activity_root,
                 }
                 for step in runbook.steps
             ],
@@ -392,6 +401,8 @@ class CommandRunner:
         steps = []
         for step in runbook.steps:
             self._resolve_root(step.root)
+            if step.activity_root is not None:
+                self._resolve_root(step.activity_root)
             profile = self._profile(step.environment_profile)
             argv = self._render_argv(step, parameters)
             steps.append(
@@ -403,6 +414,7 @@ class CommandRunner:
                     "environment_source": "fixed_profile" if profile else None,
                     "timeout_seconds": step.timeout_seconds,
                     "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
+                    "activity_root_role": step.activity_root,
                 }
             )
         canonical = json.dumps(
@@ -511,6 +523,24 @@ class CommandRunner:
         return sorted(members, key=lambda item: item["pid"])
 
     @staticmethod
+    def _task_activity_marker(root: Path | None) -> tuple[int, int, str] | None:
+        if root is None:
+            return None
+        newest: tuple[int, int, str] | None = None
+        try:
+            entries = root.iterdir()
+            for path in entries:
+                if not path.name.startswith(("log.do_", "run.do_")) or not path.is_file():
+                    continue
+                stat = path.stat()
+                marker = (stat.st_mtime_ns, stat.st_size, path.name)
+                if newest is None or marker > newest:
+                    newest = marker
+        except OSError:
+            return None
+        return newest
+
+    @staticmethod
     def _capture(
         command: list[str],
         cwd: Path,
@@ -519,6 +549,7 @@ class CommandRunner:
         inactivity_timeout: int | None = None,
         cancellation: threading.Event | None = None,
         progress: Callable[[Mapping[str, Any]], None] | None = None,
+        activity_root: Path | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
         process = subprocess.Popen(
@@ -538,11 +569,14 @@ class CommandRunner:
         cap = 64 * 1024
         output_lock = threading.Lock()
         last_activity = started
+        last_activity_source = "process_start"
         observed_members: dict[int, dict[str, Any]] = {}
         next_process_scan = started
+        next_activity_scan = started
+        activity_marker = CommandRunner._task_activity_marker(activity_root)
 
         def drain() -> None:
-            nonlocal total, last_activity
+            nonlocal total, last_activity, last_activity_source
             assert process.stdout is not None
             while True:
                 chunk = os.read(process.stdout.fileno(), 4096)
@@ -551,6 +585,7 @@ class CommandRunner:
                 with output_lock:
                     total += len(chunk)
                     last_activity = time.monotonic()
+                    last_activity_source = "combined_stdout"
                     output_digest.update(chunk)
                     output_tail.extend(chunk)
                     if len(output_tail) > cap:
@@ -570,6 +605,8 @@ class CommandRunner:
                 current_output = bytes(output_tail).decode("utf-8", errors="replace")
                 current_total = total
                 current_digest = output_digest.copy().hexdigest()
+                current_activity = last_activity
+                current_activity_source = last_activity_source
             progress(
                 {
                     "pid": process_pid,
@@ -580,6 +617,10 @@ class CommandRunner:
                     "output_sha256": current_digest,
                     "truncated": current_total > len(output_tail),
                     "observed_processes": list(observed_members.values())[:128],
+                    "last_activity_age_seconds": round(
+                        max(0.0, time.monotonic() - current_activity), 3
+                    ),
+                    "activity_source": current_activity_source,
                 }
             )
 
@@ -595,6 +636,14 @@ class CommandRunner:
                 for member in CommandRunner._process_group_snapshot(process_pgid):
                     observed_members[member["pid"]] = member
                 next_process_scan = now + 1.0
+            if now >= next_activity_scan:
+                current_marker = CommandRunner._task_activity_marker(activity_root)
+                if current_marker is not None and current_marker != activity_marker:
+                    with output_lock:
+                        last_activity = now
+                        last_activity_source = "task_log"
+                    activity_marker = current_marker
+                next_activity_scan = now + 0.25
             if now >= next_progress:
                 progress_snapshot()
                 next_progress = now + 2.0
@@ -607,7 +656,9 @@ class CommandRunner:
                 timeout_kind = "wall_clock"
                 terminate_group(signal.SIGTERM)
                 break
-            if inactivity_timeout is not None and now - last_activity >= inactivity_timeout:
+            with output_lock:
+                inactivity_age = now - last_activity
+            if inactivity_timeout is not None and inactivity_age >= inactivity_timeout:
                 timed_out = True
                 timeout_kind = "task_inactivity"
                 terminate_group(signal.SIGTERM)
@@ -730,6 +781,7 @@ class CommandRunner:
                         "cancelled", "duration_seconds", "output_bytes", "output_sha256",
                         "truncated", "working_root_role", "timeout_seconds",
                         "inactivity_timeout_seconds", "observed_processes",
+                        "activity_root_role", "activity_source", "last_activity_age_seconds",
                     )
                 }
             )
@@ -785,6 +837,7 @@ class CommandRunner:
                 "working_root_role": step.root,
                 "timeout_seconds": step.timeout_seconds,
                 "inactivity_timeout_seconds": step.inactivity_timeout_seconds,
+                "activity_root_role": step.activity_root,
                 "return_code": None,
                 "timed_out": False,
                 "timeout_kind": None,
@@ -797,6 +850,8 @@ class CommandRunner:
                 "pid": None,
                 "pgid": None,
                 "observed_processes": [],
+                "activity_source": "process_start",
+                "last_activity_age_seconds": 0.0,
             }
             record["steps"].append(active_step)
             self._persist_record(record)
@@ -813,6 +868,7 @@ class CommandRunner:
                 step.inactivity_timeout_seconds,
                 cancellation,
                 update_progress,
+                self._resolve_root(step.activity_root) if step.activity_root else None,
             )
             active_step.update(outcome)
             self._persist_record(record)
@@ -857,6 +913,9 @@ class CommandRunner:
                         "pid": step["pid"],
                         "pgid": step["pgid"],
                         "observed_processes": step["observed_processes"],
+                        "activity_root_role": step["activity_root_role"],
+                        "activity_source": step["activity_source"],
+                        "last_activity_age_seconds": step["last_activity_age_seconds"],
                     }
                     for step in record["steps"]
                 ],
@@ -941,9 +1000,12 @@ class CommandRunner:
                     "pid": step.get("pid"),
                     "pgid": step.get("pgid"),
                     "observed_processes": step.get("observed_processes", []),
+                    "activity_source": step.get("activity_source"),
+                    "last_activity_age_seconds": step.get("last_activity_age_seconds"),
                     "working_root_role": step["working_root_role"],
                     "timeout_seconds": step["timeout_seconds"],
                     "inactivity_timeout_seconds": step["inactivity_timeout_seconds"],
+                    "activity_root_role": step.get("activity_root_role"),
                 }
                 for step in record["steps"]
             ],

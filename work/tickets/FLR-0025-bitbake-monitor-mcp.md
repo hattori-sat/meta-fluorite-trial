@@ -99,3 +99,5 @@ Verify, commit/push the live-status correction, synchronize the Mini PC, and res
 - `run-4013109fd45b4221` proved PID/PGID were live, but output remained at zero until cancellation because buffered `read(4096)` waited for a full buffer or EOF.
 - The run was cancelled through MCP after 84.491 seconds; status persisted `cancelled` and exit `-15`.
 - Replace buffered reads with `os.read` so available BitBake progress bytes update activity and the bounded tail immediately.
+- `run-626abb9801e942d6` then proved live output streaming, but also confirmed a long Flutter engine task needs its fixed `log.do_compile` as a second activity source. The run was cancelled through MCP after 124.471 seconds before changing the monitor.
+- Add the manifest-fixed `yocto_compile_logs` root. Changes to bounded `log.do_*`/`run.do_*` markers reset task inactivity without accepting a path from the caller.

@@ -37,6 +37,8 @@ parameters, use independent wall-clock and task-output inactivity limits, own on
 new process group, and persist redacted status JSON by run/evidence ID. The catalog
 updates active PID/PGID, bounded process membership and the capped output tail while
 the step is running; callers do not need to wait for completion to observe progress.
+The compile/image profiles also monitor a configured fixed task-log root; either
+client output or `log.do_*`/`run.do_*` file updates reset the inactivity clock.
 The catalog also exposes one fixed `qemux86-64-fluorite` target profile. It
 requires a configured `qemu_artifact` role root, fixed kernel/rootfs basenames,
 `-snapshot`, Cocoa display and a 120-second process bound. It does not expose
