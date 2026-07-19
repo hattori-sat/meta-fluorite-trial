@@ -16,7 +16,7 @@ Git exclude cannot extend the catalog.
 | `read_only` | Runs a fixed observer command. The command itself is not expected to write project state. |
 | `metadata_write` | May create BitBake cache, cooker logs, locks or generated metadata. `bitbake -n`, `-e` and parsing belong here. |
 | `build` | Compiles, packages or assembles an image. |
-| `target_mutation` | Changes a QEMU/device process or target state. No such runbook is installed initially. |
+| `target_mutation` | Changes a QEMU/device process or target state. The installed QEMU profile is snapshot-only and bounded. |
 
 `execute_runbook` is a dry-run unless `dry_run` is explicitly false. Real execution
 requires all four gates:
@@ -31,11 +31,12 @@ the human approval mechanism of the MCP host.
 
 Synchronous real execution is limited to short `read_only` runbooks. Use
 `start_runbook` for every `metadata_write` operation and follow it with status/log
-calls. The initial catalog exposes only short read-only repository/capacity
-observations. It does not expose parse, dry-run, full effective-environment capture
-or image build. Graceful/abrupt MCP shutdown ownership, build preflight/artifact
-inventory and lossless allowlisted-variable capture must be implemented and
-reviewed first.
+calls. The catalog also exposes one fixed `qemux86-64-fluorite` target profile. It
+requires a configured `qemu_artifact` role root, fixed kernel/rootfs basenames,
+`-snapshot`, Cocoa display and a 120-second process bound. It does not expose
+parse, dry-run, full effective-environment capture or image build. Graceful/abrupt
+MCP shutdown ownership, build preflight/artifact inventory and lossless
+allowlisted-variable capture must be implemented and reviewed separately.
 
 ## Adding a runbook
 
