@@ -1,6 +1,6 @@
 # FLR-0018 — Registered QEMU launch runbook
 
-- Status: Next — Plan
+- Status: In Progress — Do
 - Priority: High
 - Depends on: FLR-0017
 - Context: Execution
@@ -22,6 +22,14 @@ FLR-0017で確認したqemux86-64 QEMU profileを、任意shellではなく、�
 - Output is a role-local session bundle containing serial log, launch parameters, and optional screen/coredump locators.
 - Execution remains disabled by default and requires ticket-bound plan, confirmation, and MCP host approval.
 - Target Validation MCP can consume the resulting session bundle without arbitrary command access.
+
+## Current implementation state
+
+- Fixed manifest `qemux86-64-fluorite` is installed and catalog allowlisted.
+- The command is target-mutation, but execution remains disabled by default and no real runbook execution has been requested through `command_runner`.
+- Current executor retains bounded output in run log/audit; role-local session bundle persistence is still a gap and must be resolved before declaring this ticket Done.
+- `describe_runbook` and `plan_runbook` were exercised with image identity `qemux86-artifact-20260405160535`; the plan reported `execution_enabled=false`, `risk=target_mutation`, `qemu_artifact` root, exact fixed argv, mandatory `-snapshot`, and 120-second timeout.
+- No `execute_runbook` or `start_runbook` call was made.
 
 ## Current evidence
 

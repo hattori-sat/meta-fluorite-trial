@@ -19,7 +19,7 @@ Last updated: 2026-07-19
 
 ## Feature boundary
 
-Current feature is `feature-flr-0017-qemu-evidence-mcp` and owns only FLR-0017, the read-only `target_validation` app-launch/render summarizers, evidence locator/session schema, QEMU runbook input contract, and its working log/handoff summaries.
+Current feature is `feature-flr-0018-qemu-launch-runbook` and owns only FLR-0018, the fixed Execution runbook, target-mutation approval boundary, bounded timeout/snapshot contract, and session-output handoff. FLR-0017 is the completed predecessor feature under Check.
 
 It does not own BitBake image rebuilds, cache mutation, Raspberry Pi writes, Flutter/Filament/Vulkan source fixes, LLVM root-cause claims, or arbitrary SSH/QEMU execution.
 

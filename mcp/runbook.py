@@ -25,10 +25,27 @@ _PARAMETER = re.compile(r"^\$\{([a-z][a-z0-9_]*)\}$")
 _SAFE_PROFILE = re.compile(r"^[a-z][a-z0-9_-]*$")
 _TICKET_ID = re.compile(r"^FLR-[0-9]{4}$")
 _ALLOWED_PREFIXES = (("git", "status"), ("git", "rev-parse"), ("uname",), ("df",))
-_FIXED_RUNBOOK_MANIFESTS = ("host-capacity.json", "repository-baseline.json")
+_FIXED_RUNBOOK_MANIFESTS = (
+    "host-capacity.json",
+    "repository-baseline.json",
+    "qemux86-64-fluorite.json",
+)
+
+_QEMU_X86_64_ARGV = (
+    "qemu-system-x86_64", "-machine", "q35", "-accel", "tcg,thread=multi",
+    "-m", "2048", "-smp", "4", "-cpu", "qemu64,+ssse3,+sse4.1,+sse4.2,+popcnt",
+    "-kernel", "./bzImage", "-append", "root=/dev/sda rw console=ttyS0,115200n8",
+    "-drive", "file=./agl-ivi-image-flutter-qemux86-64.rootfs.ext4,format=raw,if=ide",
+    "-snapshot", "-display", "cocoa", "-serial", "mon:stdio",
+    "-netdev", "user,id=net0", "-device", "virtio-net-pci,netdev=net0",
+    "-device", "virtio-vga", "-device", "virtio-rng-pci", "-usb",
+    "-device", "usb-tablet", "-device", "usb-kbd",
+)
 
 
 def _command_is_allowlisted(argv: tuple[str, ...]) -> bool:
+    if argv == _QEMU_X86_64_ARGV:
+        return True
     if any(argv[: len(prefix)] == prefix for prefix in _ALLOWED_PREFIXES):
         return True
     if argv == ("bitbake", "-p"):

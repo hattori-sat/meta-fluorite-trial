@@ -76,7 +76,8 @@
         "revision_or_image_id": null
       },
       "roots": {
-        "yocto_build": "/role/path/to/yocto/build"
+        "yocto_build": "/role/path/to/yocto/build",
+        "qemu_artifact": "/role/path/to/qemu/artifact"
       }
     }
   },

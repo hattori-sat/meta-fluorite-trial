@@ -19,12 +19,17 @@ class RunbookRegistryTests(unittest.TestCase):
         registry = RunbookRegistry()
         self.assertIn("repository-baseline", registry.runbooks)
         self.assertEqual(
-            {"host-capacity", "repository-baseline"}, set(registry.runbooks)
+            {"host-capacity", "repository-baseline", "qemux86-64-fluorite"}, set(registry.runbooks)
         )
         self.assertNotIn("yocto-parse", registry.runbooks)
         self.assertNotIn("yocto-dry-run", registry.runbooks)
         self.assertNotIn("yocto-build-image", registry.runbooks)
         self.assertNotIn("yocto-effective-environment", registry.runbooks)
+        qemu = registry.get("qemux86-64-fluorite")
+        self.assertEqual("target_mutation", qemu.risk)
+        self.assertEqual("qemu_artifact", qemu.steps[0].root)
+        self.assertEqual(120, qemu.steps[0].timeout_seconds)
+        self.assertIn("-snapshot", qemu.steps[0].argv)
         for runbook in registry.runbooks.values():
             for parameter in runbook.parameters:
                 self.assertGreater(len(parameter.choices), 0)
@@ -56,7 +61,11 @@ class RunbookRegistryTests(unittest.TestCase):
             manifests = root / "runbooks"
             manifests.mkdir()
             source = Path(__file__).resolve().parents[1] / "runbooks"
-            for name in ("host-capacity.json", "repository-baseline.json"):
+            for name in (
+                "host-capacity.json",
+                "repository-baseline.json",
+                "qemux86-64-fluorite.json",
+            ):
                 (manifests / name).write_text(
                     (source / name).read_text(encoding="utf-8"), encoding="utf-8"
                 )
@@ -67,6 +76,15 @@ class RunbookRegistryTests(unittest.TestCase):
             with patch("mcp.runbook.repository_root", return_value=root):
                 with self.assertRaises(ConfigurationError):
                     RunbookRegistry()
+
+    def test_qemu_variants_without_snapshot_are_rejected(self) -> None:
+        source = Path(__file__).resolve().parents[1] / "runbooks" / "qemux86-64-fluorite.json"
+        manifest = json.loads(source.read_text(encoding="utf-8"))
+        manifest["steps"][0]["argv"].remove("-snapshot")
+        with tempfile.TemporaryDirectory() as directory:
+            Path(directory, "unsafe.json").write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaises(ConfigurationError):
+                RunbookRegistry(Path(directory))
 
 
 class CommandRunnerTests(unittest.TestCase):

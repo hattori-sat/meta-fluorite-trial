@@ -4,7 +4,7 @@ Last updated: 2026-07-19
 
 ## Current focus
 
-**[FLR-0017 — QEMU Fluorite evidence observer](work/tickets/FLR-0017-qemu-evidence-mcp.md)**
+**[FLR-0018 — Registered QEMU launch runbook](work/tickets/FLR-0018-qemu-launch-runbook.md)**
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -12,11 +12,11 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0017 | legacy QEMU contractをbounded evidence observerへ落とし込む | primary role + target-validator + checker role | Check | current artifactでapp/readiness/crash evidenceを採取済み。FLR-0018へExecutionをhandoff |
+| FLR-0018 | QEMU launchをregistered Execution runbookへ固定する | primary role + build-runner + checker role | Do | dry-run/planでfixed argv、root、snapshot、timeout、side-effect境界を確認する |
 
 ## Next
 
-FLR-0017のみをIn Progressとする。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
+FLR-0018のみをIn Progressとする。FLR-0017は観測/MCP Check済みでExecutionへhandoff。FLR-0016はmetadata observation済みだがprovenance UNKNOWNのためWaiting。FLR-0008はscene acceptanceの後続handoffとする。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |
