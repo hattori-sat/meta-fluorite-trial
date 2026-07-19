@@ -1,6 +1,6 @@
 # FLR-0023 — Project-owned Fluorite layer and build input
 
-Status: In Progress (Check)
+Status: Waiting (compile/image acceptance is owned by FLR-0025)
 
 ## Outcome
 

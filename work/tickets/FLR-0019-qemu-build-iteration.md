@@ -1,6 +1,6 @@
 # FLR-0019 — QEMU build-to-render iteration
 
-Status: In Progress (Do)
+Status: Waiting (FLR-0025 monitored build loop)
 
 ## Outcome
 

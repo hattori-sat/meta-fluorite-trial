@@ -53,4 +53,21 @@ if test "$failed" -ne 0; then
     exit 1
 fi
 
+if git -C "$ROOT" rev-parse --verify HEAD >/dev/null 2>&1; then
+    role_email="integration-role"'@'"localhost"
+    role_identity="Fluorite integration role|${role_email}|Fluorite integration role|${role_email}"
+    metadata_range="${PRIVACY_GIT_RANGE:-HEAD^..HEAD}"
+    if ! git -C "$ROOT" rev-parse --verify "${metadata_range%%..*}" >/dev/null 2>&1; then
+        metadata_range="HEAD"
+    fi
+    while IFS= read -r commit; do
+        identity="$(git -C "$ROOT" show -s --format='%an|%ae|%cn|%ce' "$commit")"
+        if test "$identity" != "$role_identity"; then
+            echo "privacy check: blocked Git metadata detected"
+            echo "privacy check: FAIL (matched values intentionally omitted)"
+            exit 1
+        fi
+    done < <(git -C "$ROOT" rev-list "$metadata_range")
+fi
+
 echo "privacy check: PASS"

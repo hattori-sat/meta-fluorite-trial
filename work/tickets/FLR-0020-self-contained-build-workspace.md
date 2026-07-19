@@ -1,6 +1,6 @@
 # FLR-0020 — Self-contained build workspace bootstrap
 
-Status: In Progress (Plan)
+Status: Waiting (current build reuses the fixed existing workspace)
 
 ## Outcome
 

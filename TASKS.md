@@ -12,11 +12,23 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| FLR-0025 | fixed BitBake監視からartifact/QEMU/Fluorite確認までを完遂する | primary role + build-runner + checker role | Do | monitorをcommit/syncしmetadata gateを実行する |
+| FLR-0025 | fixed BitBake監視からartifact/QEMU/Fluorite確認までを完遂する | primary role + build-runner + checker role | Check → Do | multi-agent review反映後に`a147fdc`系をpushし、Mini PCをfast-forwardしてdemo compileを再開する |
+
+## Active loop state
+
+| Phase | State | Evidence / next gate |
+| --- | --- | --- |
+| Monitor implementation | Check | metadata gate PASS、live PID/PGIDとbounded outputを確認。`a147fdc`のtask-log activity監視をmulti-agent review中 |
+| Git synchronization | Pending | Macはoriginより1 commit先、Mini PCは`1775b6a`でclean。review反映commitをpush後にfast-forward |
+| Demo compile | Pending | fixed `yocto-demo-compile`; wall-clockとstdout/task-log inactivityを監視 |
+| Image build | Blocked by compile | fixed `yocto-image-build`;新規deploy artifactが生成された場合のみ次へ進む |
+| Artifact transfer | Blocked by image | kernel/rootfsのidentity、size、SHA-256確認後、Macのactive qemux86-64 artifact directoryへ置換 |
+| QEMU / Fluorite | Blocked by transfer | snapshot QEMU、`agl-driver` Wayland session、explicit `flutter-auto -b <bundle>`、readiness/render/crash判定 |
+| Failure loop | Ready | build/log/QEMU/app/renderの層を分離し、最小修正後にcompileから再開 |
 
 ## Next
 
-FLR-0025のみをIn Progressとする。FLR-0024はrenamed-layer metadata/patch gate済みで、FLR-0025のcompile/image acceptance待ち。FLR-0019のbuild-to-render loopはFLR-0025の監視runbookで再開する。
+FLR-0025のみをIn Progressとする。FLR-0024はrenamed-layer metadata/patch gate済みで、FLR-0025のcompile/image acceptance待ち。FLR-0019のbuild-to-render loopはFLR-0025の固定監視runbookで再開する。devへの通常mergeはFluorite動作確認まで行わない。
 
 | ID | Problem / outcome | Depends on |
 | --- | --- | --- |

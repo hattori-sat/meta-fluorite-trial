@@ -6,6 +6,34 @@ Status: In Progress (Do)
 
 Provide a context-efficient, read-only monitor for bounded BitBake runs on the Mini PC. The monitor must expose status, elapsed time, current task, exit code, and a capped log tail without accepting arbitrary SSH, shell, or BitBake arguments.
 
+## Success criteria
+
+- Only the three fixed BitBake target/task profiles are executable; arbitrary shell, argv, SSH input, clean tasks and cache deletion remain rejected.
+- `running`, `completed`, `failed`, `timed_out`, `cancelled` and restart-time `unknown` are durable and recoverable by evidence ID.
+- Wall-clock and inactivity bounds are independent; capped output and the selected activity source are visible while running.
+- A live gate records the BitBake client PID/PGID and classifies observed server/worker PID/PGID topology. A worker outside the owned group blocks a long compile until shutdown handling is revised.
+- qemux86-64 effective identity passes before compile, compile exits zero before image, and image exits zero before artifact transfer.
+- Kernel/rootfs size and SHA-256 match across build role and Mac before snapshot QEMU starts.
+- Fluorite reaches readiness, visible stable render and interaction without crash during the bounded session.
+
+## 4W1H stratification and selected stratum
+
+| Dimension | Stratum |
+| --- | --- |
+| What | fixed metadata, demo compile, image, artifact transfer, QEMU, explicit Fluorite launch |
+| When | one predecessor gate at a time; no image before compile and no QEMU before artifact identity |
+| Where | build execution on Linux build role; artifact/QEMU validation on Mac role |
+| Who | command supervisor owns launch/evidence; build role executes; target validator judges runtime |
+| How | plan confirmation, durable status, bounded tail, PID/PGID and hash evidence |
+
+The selected first stratum is supervisor lifecycle because an ambiguous timeout invalidates every downstream build verdict.
+
+## Process and latest first problem point
+
+`fixed plan -> client launch -> live PID/output/task activity -> terminal record -> compile -> image -> hash transfer -> snapshot boot -> explicit app launch -> verdict`
+
+The latest first problem point is between client launch and trustworthy task activity: task-log changes can prove progress, but the current evidence does not yet prove whether BitBake server/workers share the client PGID.
+
 ## Facts
 
 - The existing `yocto` MCP can list/read bounded task logs and the `command_runner` MCP owns fixed asynchronous runbooks.
@@ -42,6 +70,8 @@ Implement a fixed `yocto-demo-compile` monitor manifest plus lifecycle persisten
 
 1. Persisting PID/PGID and distinguishing `timed_out` from `failed` will make timeout evidence sufficient to avoid treating an external client timeout as a BitBake failure. This remains to be checked on a live Mini PC run.
 2. Combined BitBake task output is a sufficient first inactivity signal for the bounded compile. If a live engine build updates only `log.do_compile` and not client output for 1800 seconds, this hypothesis is refuted and the activity source must be narrowed to the fixed task log.
+3. The server and active worker remain in the launched client PGID, so group termination is sufficient. A differing PGID refutes this and blocks the long run.
+4. A fixed Flutter Engine task-log directory is a valid supplemental signal only during demo compile. Treating it as image-wide activity would allow unrelated/stale writes to mask image inactivity, so the image profile uses combined stdout only.
 
 ### UNKNOWN
 
@@ -101,3 +131,33 @@ Verify, commit/push the live-status correction, synchronize the Mini PC, and res
 - Replace buffered reads with `os.read` so available BitBake progress bytes update activity and the bounded tail immediately.
 - `run-626abb9801e942d6` then proved live output streaming, but also confirmed a long Flutter engine task needs its fixed `log.do_compile` as a second activity source. The run was cancelled through MCP after 124.471 seconds before changing the monitor.
 - Add the manifest-fixed `yocto_compile_logs` root. Changes to bounded `log.do_*`/`run.do_*` markers reset task inactivity without accepting a path from the caller.
+
+## Multi-agent Check — 2026-07-20
+
+### Facts
+
+- PDCA, patch, Yocto and target-validation reviewers independently checked the monitor and downstream loop.
+- Fixed commands and destructive-operation rejection passed review.
+- Four FLR-0025 commits had non-role Git metadata; values were not recorded. The local feature segment was rewritten to the approved integration role and a metadata privacy regression gate was added.
+- The image profile incorrectly reused a recipe-specific activity root; it is removed from that profile.
+
+### Inferences
+
+- Compile task-log activity is useful evidence but is not ownership evidence.
+- A short live metadata gate is the smallest safe way to observe actual BitBake topology before allowing a long compile.
+
+### UNKNOWN
+
+- Live client/server/worker PGID topology at the corrected revision.
+- Whether the fixed engine task root exists and advances on the build role.
+- Compile, image, artifact and runtime outcomes.
+
+### Decision rule
+
+- Standardize the monitor only when local gates pass, effective qemux identity is confirmed, and live topology/activity/terminal persistence match expectations.
+- Revise the supervisor before long execution if server/worker ownership or activity association is ambiguous.
+- Cancel and roll back only the latest monitor countermeasure if it suppresses real inactivity or cannot terminate its verified scope; never clean caches to force a result.
+
+### Smallest next action
+
+Run local verify/privacy checks, update the remote feature ref with lease protection, fast-forward the build role, then execute the short metadata topology gate.
