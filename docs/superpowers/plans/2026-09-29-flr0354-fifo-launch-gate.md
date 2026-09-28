@@ -74,7 +74,7 @@ attempt requires a fresh ticket and fresh ID.
 - [x] Integrate the gate validator before GDB attach/GO and add it to `--check`.
 - [x] Run full repository verification; record the unrelated Markdown-link
   failure and run the remaining repository gates individually.
-- [ ] Stage only FLR-0354 files, pass privacy/staged-whitespace checks, and
+- [x] Stage only FLR-0354 files, pass privacy/staged-whitespace checks, and
   commit locally without push or Mini transfer.
 
 ## Acceptance criteria
