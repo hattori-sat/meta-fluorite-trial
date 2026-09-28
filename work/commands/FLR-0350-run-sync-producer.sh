@@ -36,6 +36,7 @@ if "FLR0350_POST_RUN_CAPTURE=SKIPPED reason=gdb-stop-not-confirmed" not in clean
 command_names = (
     "FLR-0350-preflight.cmd",
     "FLR-0350-launch-paused-production.cmd",
+    "FLR-0350-observe-fifo-read-gate.cmd",
     "FLR-0350-release-go.cmd",
     "FLR-0350-attach-pre-submit.cmd",
     "FLR-0350-wait-symbol-gate.cmd",
@@ -98,6 +99,13 @@ print("FLR0350_STATIC_CHECK=PASS commands=%d gdb_python_blocks=%d transfer_chunk
       (len(command_names), len(blocks), len(chunks)))
 print("FLR0350_PROFILE_MATCH=PASS environment=exact cli=exact target=qemux86-64")
 PY
+    python3 "$repo_root/tests/test_flr0350_launch_gate.py"
+    python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id flr0355-0001
+    if python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id flr0350-0001; then
+        echo FLR0350_RUN_ID_REUSE_GATE=FAIL
+        return 1
+    fi
+    echo FLR0350_RUN_ID_REUSE_GATE=PASS
 }
 
 if [ "$#" -eq 1 ] && [ "$1" = --check ]; then
@@ -106,14 +114,15 @@ if [ "$#" -eq 1 ] && [ "$1" = --check ]; then
     echo 'FLR0350_TARGET_PREFLIGHT=NOT_RUN qemu=NOT_STARTED'
     exit 0
 fi
-[ "$#" -eq 1 ] && [ "$1" = flr0350-0001 ] || {
-    echo 'Usage: FLR-0350-run-sync-producer.sh --check | flr0350-0001' >&2
+[ "$#" -eq 1 ] || {
+    echo 'Usage: FLR-0350-run-sync-producer.sh --check | flrNNNN-NNNN' >&2
     exit 2
 }
+run_id=$1
+python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id "$run_id" || exit 2
 
 bash scripts/assert-canonical-repository.sh
 static_check
-run_id=$1
 parent=$evidence_root/$run_id
 run_dir=$parent/qemu
 qmp=$run_dir/qmp-0350.sock
@@ -273,7 +282,11 @@ guest_run install-gdb-finalize install-gdb-finalize.cmd
 grep -F 'FLR0350_GDB_SCRIPT_INSTALL=PASS' "$run_dir/install-gdb-finalize.serial.log"
 
 guest_run launch FLR-0350-launch-paused-production.cmd
-grep -F 'FLR0350_FIFO_READ_GATE=PASS' "$run_dir/launch.serial.log"
+grep -F 'FLR0350_LAUNCH=PASS' "$run_dir/launch.serial.log"
+grep -F 'FLR0350_LAUNCH_WRAPPER=READY' "$run_dir/launch.serial.log"
+guest_run observe-gate FLR-0350-observe-fifo-read-gate.cmd
+python3 scripts/flr0350_launch_gate.py --validate \
+    "$run_dir/launch.serial.log" "$run_dir/observe-gate.serial.log"
 guest_run attach-gdb FLR-0350-attach-pre-submit.cmd
 grep -F 'FLR0350_GDB_ATTACH=PASS' "$run_dir/attach-gdb.serial.log"
 guest_run release-go FLR-0350-release-go.cmd
