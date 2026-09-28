@@ -43,6 +43,20 @@ gate, not a promise that the producer will be observed or that 3D will render.
 - Regression coverage is green: 27 focused tests pass, including rejection of
   missing/consumed IDs and the preflight/start ordering. `--check` passes and
   reports `FLR0350_TARGET_PREFLIGHT=NOT_RUN qemu=NOT_STARTED`.
+- The seven-file local harness/docs change is committed on
+  `feature-flr-0355-fresh-runtime-gate` as `1b3f90c` using the repository's
+  privacy-approved integration-role metadata. No push occurred.
+- The documented Mini role variables are still unset. A targeted read-only
+  search of the process environment, canonical checkout/config filenames, and
+  shell profile candidates found no usable role configuration. The helper has
+  not been invoked with configured roles; no SSH/SCP, transfer, Mini query, or
+  QEMU run occurred.
+- The first handoff-helper invocation exposed a plan error: it requires
+  hexadecimal commit objects, not the branch name `dev-mini-recovery`; it
+  failed at argument validation before creating a bundle or accessing the
+  network. The plan now resolves both refs with `git rev-parse --verify`.
+- The corrected hash-based helper invocation failed closed at the unset
+  `BUILD_HOST` requirement, before bundle creation or SSH. No Mini state changed.
 - The Mini receiver, Mini process/port/evidence state, image hashes, FIFO
   observation, QMP frame/video, and teardown have not been checked in this
   iteration. No transfer, runtime launch, build, or Devtool operation occurred.
@@ -198,8 +212,9 @@ regression test before transfer.
 
 ## UNKNOWN
 
-- Whether the required fixed Mini role configuration is available to the
-  current executor without exposing values in logs.
+- Whether the required fixed Mini role configuration can be made available to
+  the current executor without exposing values in logs. Targeted locations
+  checked so far did not contain/load the documented role variables.
 - Whether the Mini evidence directory/run ID, ports, and target processes are
   free; Mac state is not authoritative for Mini QEMU.
 - Whether the exact pinned image remains present with all three expected

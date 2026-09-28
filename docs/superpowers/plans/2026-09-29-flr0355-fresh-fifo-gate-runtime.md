@@ -67,9 +67,9 @@
 - Produces: one clean local commit and a Mini receiver at that exact bundle tip.
 
 - [x] Run privacy, staged-whitespace, shell/static, and focused tests; review only the staged FLR-0355 paths.
-- [ ] Commit locally with role-safe Git metadata; do not push.
-- [ ] Use `scripts/handoff-fluorite-bundle.sh dev-mini-recovery "$(git rev-parse HEAD)"` with the already-configured local build-host roles. Verify the reported receiver revision equals the exact tip. If role configuration is unavailable, stop before SSH/SCP and report that specific blocker; do not invent host/path values.
-- [ ] Do not run BitBake: this commit changes only the diagnostic harness, not the layer’s image inputs.
+- [x] Commit locally with the privacy-approved role identity; do not push. The harness fix is committed as `1b3f90c`.
+- [ ] Resolve both refs to commit objects, then use `scripts/handoff-fluorite-bundle.sh "$(git rev-parse --verify 'dev-mini-recovery^{commit}')" "$(git rev-parse --verify 'HEAD^{commit}')"` with the already-configured local build-host roles. Role variables are currently unset and targeted local-config searches found no candidate; the helper fail-closed at `BUILD_HOST` before bundle creation/SSH. Resume only when those roles are available; do not invent host/path values.
+- [x] Do not run BitBake: this commit changes only the diagnostic harness, not the layer’s image inputs.
 
 ### Task 4: Run one pinned-image QEMU attempt and capture evidence
 
