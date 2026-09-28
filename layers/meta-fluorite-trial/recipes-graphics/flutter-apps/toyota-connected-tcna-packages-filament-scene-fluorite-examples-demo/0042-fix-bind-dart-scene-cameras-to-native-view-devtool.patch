@@ -1,0 +1,23 @@
+From 9f424111c6d654afbbe746519ade41b7c0dca455 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 03:17:11 +0000
+Subject: [PATCH] fix: bind Dart scene cameras to native view
+
+---
+ packages/filament_scene/lib/scene/scene_widget.dart | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+index 0b0e5cb..a0e07e0 100644
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -221,7 +221,8 @@ class ModelViewerState extends State<SceneView> {
+       widget.models?.forEach((final model) => model.initialize(widget.filament));
+       widget.shapes?.forEach((final shape) => shape.initialize(widget.filament));
+       // v2 scene.camera is a native ViewTarget camera, not an ECS entity.
+-      // Initializing it here would fail the native entity existence check.
++      // Bind the Dart camera to the existing native view without creating an ECS entity.
++      widget.cameras?.forEach((final camera) => camera.initialize(widget.filament));
+ 
+       // Call the onCreated callback with the controller
+       widget.onCreated?.call(controller);

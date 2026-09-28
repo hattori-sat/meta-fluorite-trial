@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Fri, 21 Aug 2026 13:00:00 +0900
+Subject: [PATCH] filament_view: use lowest qemu quality
+
+QEMU's llvmpipe path cannot complete the default Ultra view settings within
+the software frame budget.  Use the existing Lowest preset so the PoC can
+reach a presented frame before restoring production quality settings.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -206,1 +206,1 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+-  ChangeQualitySettings(ViewTarget::ePredefinedQualitySettings::Ultra);
++  ChangeQualitySettings(ViewTarget::ePredefinedQualitySettings::Lowest);

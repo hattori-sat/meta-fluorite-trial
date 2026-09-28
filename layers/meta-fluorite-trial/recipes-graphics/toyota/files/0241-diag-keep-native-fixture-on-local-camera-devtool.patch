@@ -1,0 +1,30 @@
+From 9f653f174fb83d38316006891df00ac2461568ee Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 16:52:39 +0000
+Subject: [PATCH] diag: keep native fixture on local camera
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index c8e6b1d..4ec6c74 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -361,6 +361,16 @@ void ViewTarget::setupNativeMinimalGeometry() {
+ 
+ ////////////////////////////////////////////////////////////////////////////
+ void ViewTarget::vSetupCameraManagerWithDeserializedCamera(std::unique_ptr<Camera> camera) const {
++  const bool fixtureLocalCamera =
++    std::getenv("FLUORITE_NATIVE_FIXTURE_LOCAL_CAMERA") != nullptr;
++  const bool pureMinimalFixture =
++    std::getenv("FLUORITE_NATIVE_PURE_FIXTURE") != nullptr &&
++    std::getenv("FLUORITE_NATIVE_MINIMAL_GEOMETRY") != nullptr;
++  if (fixtureLocalCamera && pureMinimalFixture) {
++    spdlog::info("FLUORITE_NATIVE_FIXTURE_LOCAL_CAMERA enabled=true");
++    return;
++  }
++
+   cameraManager_->updateCamera(camera.get());
+   cameraManager_->setPrimaryCamera(std::move(camera));
+ }

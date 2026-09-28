@@ -1,0 +1,62 @@
+From 7c2fd3e8990d0bb8dd2c4e94444b2bb5abd06ef9 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 17:24:32 +0000
+Subject: [PATCH] diag: trace Vulkan readback task completion
+
+---
+ filament/backend/src/vulkan/VulkanReadPixels.cpp | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanReadPixels.cpp b/filament/backend/src/vulkan/VulkanReadPixels.cpp
+index 50810a654..5d43e30c8 100644
+--- a/filament/backend/src/vulkan/VulkanReadPixels.cpp
++++ b/filament/backend/src/vulkan/VulkanReadPixels.cpp
+@@ -299,13 +299,16 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+ 
+     auto* const pUserBuffer = new PixelBufferDescriptor(std::move(pbd));
+     auto cleanPbdFunc = [pUserBuffer, readCompleteFunc]() {
++        FVK_LOGI << "FLR0026_VK_READBACK_CLEANUP_BEGIN";
+         PixelBufferDescriptor& p = *pUserBuffer;
+         readCompleteFunc(std::move(p));
+         delete pUserBuffer;
++        FVK_LOGI << "FLR0026_VK_READBACK_CLEANUP_END";
+     };
+     auto waitFenceFunc = [device, width, height, swizzle, srcFormat, stagingImage, stagingMemory,
+                                  cmdpool, cmdbuffer, pUserBuffer,
+                                  fence = readCompleteFence]() mutable {
++        FVK_LOGI << "FLR0026_VK_READBACK_FENCE_WAIT_BEGIN";
+         VkResult status = vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
+         FVK_LOGI << "FLR0026_VK_READBACK_FENCE_WAIT result=" << status;
+         if (status != VK_SUCCESS) {
+@@ -320,13 +323,17 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+ 
+         // Map image memory so that we can start copying from it.
+         uint8_t const* srcPixels;
+-        vkMapMemory(device, stagingMemory, 0, VK_WHOLE_SIZE, 0, (void**) &srcPixels);
++        VkResult const mapStatus = vkMapMemory(
++                device, stagingMemory, 0, VK_WHOLE_SIZE, 0, (void**) &srcPixels);
++        FVK_LOGI << "FLR0026_VK_READBACK_MAP_MEMORY result=" << mapStatus;
+         srcPixels += subResourceLayout.offset;
+ 
+-        if (!DataReshaper::reshapeImage(&p, fvkutils::getComponentType(srcFormat),
++        bool const reshapeSucceeded = DataReshaper::reshapeImage(&p, fvkutils::getComponentType(srcFormat),
+                     fvkutils::getComponentCount(srcFormat), srcPixels,
+                     static_cast<int>(subResourceLayout.rowPitch), static_cast<int>(width),
+-                    static_cast<int>(height), swizzle)) {
++                    static_cast<int>(height), swizzle);
++        FVK_LOGI << "FLR0026_VK_READBACK_RESHAPE success=" << reshapeSucceeded;
++        if (!reshapeSucceeded) {
+             FVK_LOGE << "Unsupported PixelDataFormat or PixelDataType";
+         }
+ 
+@@ -338,6 +345,7 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+         FVK_LOGI << "FLR0026_VK_READBACK_WORK_COMPLETE";
+     };
+     mTaskHandler->post(std::move(waitFenceFunc), std::move(cleanPbdFunc));
++    FVK_LOGI << "FLR0026_VK_READBACK_TASK_POSTED";
+ }
+ 
+ void VulkanReadPixels::runUntilComplete() {
+-- 
+2.34.1
+

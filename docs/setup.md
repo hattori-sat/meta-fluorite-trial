@@ -82,7 +82,7 @@ make setup-build-host
 
 ## 4. Materialize an exact captured configuration
 
-preferred fresh-build pathは、mini PC上でfixed revisionの公式`aglsetup.sh`を使ってbase confを生成し、project差分を適用する方法です。fixed source、`meta-local`、`meta-vulkan`が`$AGL_ROOT`に存在し、ticketがcaptured snapshotの完全復元を選んだ場合だけ、sanitized baselineからbuild confを生成できます。defaultはdry-runです。
+preferred fresh-build pathは、mini PC上でfixed revisionの公式`aglsetup.sh`を使ってbase confを生成し、project差分を適用する方法です。fixed source、`meta-vulkan`、および本repoの`layers/meta-fluorite-trial`が存在し、ticketがcaptured snapshotの完全復元を選んだ場合だけ、sanitized baselineからbuild confを生成できます。defaultはdry-runです。
 
 ```sh
 scripts/materialize-build-conf.sh \

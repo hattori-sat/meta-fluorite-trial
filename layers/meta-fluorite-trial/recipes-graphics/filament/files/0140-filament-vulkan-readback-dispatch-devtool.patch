@@ -1,0 +1,46 @@
+From f993e22341f35e9e4f53a9e21fee42172ba85d79 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 17:47:00 +0000
+Subject: [PATCH] diag: trace Vulkan readback command dispatch
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 2964463c8..f39f74807 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -446,7 +446,9 @@ void VulkanDriver::setPresentationTime(int64_t monotonic_clock_ns) {
+ 
+ void VulkanDriver::endFrame(uint32_t frameId) {
+     FVK_PROFILE_MARKER(PROFILE_NAME_ENDFRAME);
++    FVK_LOGI << "FLR0026_VK_END_FRAME_BEGIN";
+     endCommandRecording();
++    FVK_LOGI << "FLR0026_VK_END_FRAME_COMMANDS_RECORDED";
+     collectGarbage();
+ }
+ 
+@@ -1818,8 +1820,11 @@ void VulkanDriver::stopCapture(int) {}
+ 
+ void VulkanDriver::readPixels(Handle<HwRenderTarget> src, uint32_t x, uint32_t y, uint32_t width,
+         uint32_t height, PixelBufferDescriptor&& pbd) {
++    FVK_LOGI << "FLR0026_VK_READBACK_DRIVER_ENTER width=" << width
++             << " height=" << height;
+     auto srcTarget = resource_ptr<VulkanRenderTarget>::cast(&mResourceManager, src);
+     endCommandRecording();
++    FVK_LOGI << "FLR0026_VK_READBACK_DRIVER_COMMANDS_RECORDED";
+     mReadPixels.run(
+             srcTarget, x, y, width, height, mPlatform->getGraphicsQueueFamilyIndex(),
+             std::move(pbd),
+@@ -1829,6 +1834,7 @@ void VulkanDriver::readPixels(Handle<HwRenderTarget> src, uint32_t x, uint32_t y
+             [this](PixelBufferDescriptor&& pbd) {
+                 scheduleDestroy(std::move(pbd));
+             });
++    FVK_LOGI << "FLR0026_VK_READBACK_DRIVER_EXIT";
+ }
+ 
+ void VulkanDriver::readBufferSubData(backend::BufferObjectHandle boh,
+-- 
+2.34.1
+

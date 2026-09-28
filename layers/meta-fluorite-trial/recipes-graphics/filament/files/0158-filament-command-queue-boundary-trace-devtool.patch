@@ -1,0 +1,95 @@
+From 8d4002d97099286a5746b156ca3dba92c38a7c9b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 07:24:00 +0000
+Subject: [PATCH] diag: trace command buffer queue boundaries
+
+---
+ filament/backend/src/CommandBufferQueue.cpp | 17 +++++++++++++++++
+ filament/src/details/Engine.cpp             | 11 +++++++++++
+ 2 files changed, 28 insertions(+)
+
+diff --git a/filament/backend/src/CommandBufferQueue.cpp b/filament/backend/src/CommandBufferQueue.cpp
+index 5ea8aacd0..ed00d3cc2 100644
+--- a/filament/backend/src/CommandBufferQueue.cpp
++++ b/filament/backend/src/CommandBufferQueue.cpp
+@@ -28,6 +28,7 @@
+ #include <utils/ostream.h>
+ 
+ #include <algorithm>
++#include <cstdio>
+ #include <mutex>
+ #include <iterator>
+ #include <utility>
+@@ -114,6 +115,11 @@ void CommandBufferQueue::flush() {
+ 
+     mFreeSpace -= used;
+     mCommandBuffersToExecute.push_back({ begin, end });
++    if (std::getenv("FLR0026_COMMAND_QUEUE_TRACE") != nullptr) {
++        std::fprintf(stderr,
++                "FLR0026_COMMAND_QUEUE_FLUSH begin=%p end=%p used=%zu queued=%zu\n",
++                begin, end, used, mCommandBuffersToExecute.size());
++    }
+     mCondition.notify_one();
+ 
+     // wait until there is enough space in the buffer
+@@ -150,6 +156,12 @@ std::vector<CommandBufferQueue::Range> CommandBufferQueue::waitForCommands() con
+     while ((mCommandBuffersToExecute.empty() || mPaused) && !mExitRequested) {
+         mCondition.wait(lock);
+     }
++    if (std::getenv("FLR0026_COMMAND_QUEUE_TRACE") != nullptr) {
++        std::fprintf(stderr,
++                "FLR0026_COMMAND_QUEUE_WAIT count=%zu paused=%s exit=%s\n",
++                mCommandBuffersToExecute.size(), mPaused ? "true" : "false",
++                mExitRequested ? "true" : "false");
++    }
+     return std::move(mCommandBuffersToExecute);
+ }
+ 
+@@ -158,6 +170,11 @@ void CommandBufferQueue::releaseBuffer(CommandBufferQueue::Range const& buffer)
+             static_cast<char const*>(buffer.begin), static_cast<char const*>(buffer.end));
+     std::lock_guard const lock(mLock);
+     mFreeSpace += used;
++    if (std::getenv("FLR0026_COMMAND_QUEUE_TRACE") != nullptr) {
++        std::fprintf(stderr,
++                "FLR0026_COMMAND_QUEUE_RELEASE begin=%p end=%p used=%zu free=%zu\n",
++                buffer.begin, buffer.end, used, mFreeSpace);
++    }
+     mCondition.notify_one();
+ }
+ 
+diff --git a/filament/src/details/Engine.cpp b/filament/src/details/Engine.cpp
+index 65631a42f..0baa3bdbf 100644
+--- a/filament/src/details/Engine.cpp
++++ b/filament/src/details/Engine.cpp
+@@ -53,6 +53,8 @@
+ 
+ #include <private/utils/Tracing.h>
+ 
++#include <cstdio>
++
+ #include <utils/Allocator.h>
+ #include <utils/CallStack.h>
+ #include <utils/Invocable.h>
+@@ -1422,10 +1424,19 @@ bool FEngine::execute() {
+         return false;
+     }
+ 
++    if (std::getenv("FLR0026_COMMAND_QUEUE_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_ENGINE_EXECUTE count=%zu\n", buffers.size());
++    }
++
+     // execute all command buffers
+     auto& driver = getDriverApi();
+     for (auto& item : buffers) {
+         if (UTILS_LIKELY(item.begin)) {
++            if (std::getenv("FLR0026_COMMAND_QUEUE_TRACE") != nullptr) {
++                std::fprintf(stderr,
++                        "FLR0026_ENGINE_EXECUTE_BUFFER begin=%p end=%p\n",
++                        item.begin, item.end);
++            }
+             driver.execute(item.begin);
+             mCommandBufferQueue.releaseBuffer(item);
+         }
+-- 
+2.34.1
+

@@ -1,0 +1,25 @@
+From 76dbda35f8eabd5c4f29ec23400e16cc808754e0 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 15:04:48 +0000
+Subject: [PATCH] diag: flush native readback commands
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 297fe7c..6fbd477 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -979,6 +979,8 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+           this
+         )
+       );
++      _engine->flush();
++      spdlog::info("FLR0026_NATIVE_READBACK_FLUSH_ISSUED");
+       spdlog::info(
+         "FLR0026_NATIVE_READBACK_QUEUED width={} height={}",
+         readbackWidth,
+-- 
+2.34.1
+

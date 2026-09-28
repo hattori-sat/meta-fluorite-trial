@@ -1,0 +1,36 @@
+From 19701c719230b72e8d9aef976296f13e38056805 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Tue, 8 Sep 2026 07:21:21 +0000
+Subject: [PATCH] diag: allow Flutter input through native surface
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 08a2668..ee82e5f 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -370,6 +370,22 @@ void ViewTarget::setupWaylandSubsurface() {
+     return;
+   }
+ 
++  const bool emptyInputRegionProbe =
++    std::getenv("FLR0026_WAYLAND_EMPTY_INPUT_REGION") != nullptr;
++  if (emptyInputRegionProbe) {
++    wl_region* inputRegion =
++      wl_compositor_create_region(flutter_view->GetDisplay()->GetCompositor());
++    if (inputRegion != nullptr) {
++      // The native surface is a display-only child. An empty input region
++      // lets pointer events continue to the Flutter parent surface.
++      wl_surface_set_input_region(surface_, inputRegion);
++      wl_region_destroy(inputRegion);
++      spdlog::info("FLR0026_WAYLAND_EMPTY_INPUT_REGION enabled=true");
++    } else {
++      spdlog::error("FLR0026_WAYLAND_EMPTY_INPUT_REGION create_region_failed");
++    }
++  }
++
+   const bool skipStackProbe = std::getenv("FLR0026_WAYLAND_SKIP_STACK") != nullptr;
+   if (!skipStackProbe) {
+     wl_subsurface_place_above(subsurface_, parent_surface_);

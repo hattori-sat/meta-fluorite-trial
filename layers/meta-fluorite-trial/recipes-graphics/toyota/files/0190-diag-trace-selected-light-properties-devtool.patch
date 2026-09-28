@@ -1,0 +1,68 @@
+From 90bcc3a6744f393a81e2e5a3aaaa9e8e65cbb257 Mon Sep 17 00:00:00 2001
+From: Fluorite integration role <integration-role@localhost>
+Date: Sun, 6 Sep 2026 04:07:21 +0000
+Subject: [PATCH] diag: trace selected light properties
+
+---
+ .../serialization/scene_text_deserializer.cc  | 28 +++++++++++++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 4646b20..b5d2e39 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -421,12 +421,16 @@ void SceneTextDeserializer::setUpLights() {
+   std::size_t light_limit = lights_.size();
+   std::string light_type_filter;
+   std::string light_skip_guid_filter;
++  std::string light_trace_guid_filter;
+   if (const char* raw_type = std::getenv("FLR0026_NATIVE_LIGHT_TYPE")) {
+     light_type_filter = raw_type;
+   }
+   if (const char* raw_skip_guids = std::getenv("FLR0026_NATIVE_LIGHT_SKIP_GUIDS")) {
+     light_skip_guid_filter = raw_skip_guids;
+   }
++  if (const char* raw_trace_guids = std::getenv("FLR0026_NATIVE_LIGHT_TRACE_GUIDS")) {
++    light_trace_guid_filter = raw_trace_guids;
++  }
+   if (const char* raw_limit = std::getenv("FLR0026_NATIVE_LIGHT_LIMIT")) {
+     char* end = nullptr;
+     const auto parsed_limit = std::strtoul(raw_limit, &end, 10);
+@@ -456,6 +460,24 @@ void SceneTextDeserializer::setUpLights() {
+       );
+       continue;
+     }
++    if (!light_trace_guid_filter.empty()) {
++      const auto trace_guid_list = "," + light_trace_guid_filter + ",";
++      if (trace_guid_list.find(guid_token) != std::string::npos) {
++        const auto& position = snd->getPosition();
++        const auto& direction = snd->getDirection();
++        spdlog::info(
++          "FLR0026_LIGHT_PROPS guid={} type={} color=({},{},{}) color_temperature={} "
++          "intensity={} position=({},{},{}) direction=({},{},{}) cast_light={} "
++          "cast_shadows={} falloff={} spot_inner={} spot_outer={} sun_radius={} "
++          "sun_halo_size={} sun_halo_falloff={}",
++          fst, light_type, snd->color.r, snd->color.g, snd->color.b,
++          snd->getColorTemperature(), snd->getIntensity(), position.x, position.y, position.z,
++          direction.x, direction.y, direction.z, snd->getCastLight(), snd->getCastShadows(),
++          snd->getFalloffRadius(), snd->getSpotLightConeInner(), snd->getSpotLightConeOuter(),
++          snd->getSunAngularRadius(), snd->getSunHaloSize(), snd->getSunHaloFalloff()
++        );
++      }
++    }
+     if (selected_lights >= light_limit) {
+       break;
+     }
+@@ -474,8 +496,10 @@ void SceneTextDeserializer::setUpLights() {
+   }
+ 
+   spdlog::info(
+-    "FLR0026_LIGHT_SETUP_PLAN total={} limit={} type_filter={} skip_guid_filter={} selected={}",
+-    lights_.size(), light_limit, light_type_filter, light_skip_guid_filter, selected_lights
++    "FLR0026_LIGHT_SETUP_PLAN total={} limit={} type_filter={} skip_guid_filter={} "
++    "trace_guid_filter={} selected={}",
++    lights_.size(), light_limit, light_type_filter, light_skip_guid_filter,
++    light_trace_guid_filter, selected_lights
+   );
+ 
+   // if a light didnt get deserialized, tell light system to create a default

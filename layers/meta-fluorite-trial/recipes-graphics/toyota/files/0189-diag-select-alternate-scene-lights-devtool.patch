@@ -1,0 +1,54 @@
+From 49e2575bd4e869e51ea817ba4d66f8783b8b257e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 6 Sep 2026 03:30:50 +0000
+Subject: [PATCH] diag: select alternate scene lights by guid
+
+---
+ .../serialization/scene_text_deserializer.cc    | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 0bff80f..4646b20 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -420,9 +420,13 @@ void SceneTextDeserializer::setUpLights() {
+ 
+   std::size_t light_limit = lights_.size();
+   std::string light_type_filter;
++  std::string light_skip_guid_filter;
+   if (const char* raw_type = std::getenv("FLR0026_NATIVE_LIGHT_TYPE")) {
+     light_type_filter = raw_type;
+   }
++  if (const char* raw_skip_guids = std::getenv("FLR0026_NATIVE_LIGHT_SKIP_GUIDS")) {
++    light_skip_guid_filter = raw_skip_guids;
++  }
+   if (const char* raw_limit = std::getenv("FLR0026_NATIVE_LIGHT_LIMIT")) {
+     char* end = nullptr;
+     const auto parsed_limit = std::strtoul(raw_limit, &end, 10);
+@@ -443,6 +447,15 @@ void SceneTextDeserializer::setUpLights() {
+       );
+       continue;
+     }
++    const auto guid_token = "," + std::to_string(fst) + ",";
++    const auto skip_guid_list = "," + light_skip_guid_filter + ",";
++    if (!light_skip_guid_filter.empty() && skip_guid_list.find(guid_token) != std::string::npos) {
++      spdlog::info(
++        "FLR0026_LIGHT_SKIPPED guid={} type={} skip_guid_filter={}",
++        fst, light_type, light_skip_guid_filter
++      );
++      continue;
++    }
+     if (selected_lights >= light_limit) {
+       break;
+     }
+@@ -461,8 +474,8 @@ void SceneTextDeserializer::setUpLights() {
+   }
+ 
+   spdlog::info(
+-    "FLR0026_LIGHT_SETUP_PLAN total={} limit={} type_filter={} selected={}",
+-    lights_.size(), light_limit, light_type_filter, selected_lights
++    "FLR0026_LIGHT_SETUP_PLAN total={} limit={} type_filter={} skip_guid_filter={} selected={}",
++    lights_.size(), light_limit, light_type_filter, light_skip_guid_filter, selected_lights
+   );
+ 
+   // if a light didnt get deserialized, tell light system to create a default

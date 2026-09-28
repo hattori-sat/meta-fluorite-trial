@@ -1,0 +1,35 @@
+From 55b9b18eeaaf969def8837075e6d79996853872e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 13:52:46 +0000
+Subject: [PATCH] diag: probe present layout transition
+
+---
+ filament/backend/src/vulkan/VulkanSwapChain.cpp | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index 09ec8f0d8..dd046d928 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -109,7 +109,8 @@ void VulkanSwapChain::update() {
+ 
+ void VulkanSwapChain::present(DriverBase& driver) {
+     std::fprintf(stderr, "FLR0026_VK_SWAPCHAIN_PRESENT headless=%s\n", mHeadless ? "true" : "false");
+-    if (!mHeadless && mTransitionSwapChainImageLayoutForPresent) {
++    const bool skipPresentLayout = std::getenv("FLR0026_SKIP_PRESENT_LAYOUT") != nullptr;
++    if (!mHeadless && mTransitionSwapChainImageLayoutForPresent && !skipPresentLayout) {
+         VulkanCommandBuffer& commands = mCommands->get();
+         VkImageSubresourceRange const subresources{
+                 .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+@@ -119,6 +120,8 @@ void VulkanSwapChain::present(DriverBase& driver) {
+                 .layerCount = mLayerCount,
+         };
+         mColors[mCurrentSwapIndex]->transitionLayout(&commands, subresources, VulkanLayout::PRESENT);
++    } else if (skipPresentLayout) {
++        std::fprintf(stderr, "FLR0026_VK_PRESENT_LAYOUT skipped=true\n");
+     }
+ 
+     std::fprintf(stderr, "FLR0026_VK_SWAPCHAIN_FLUSH_BEGIN\\n");
+-- 
+2.34.1
+

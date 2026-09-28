@@ -1,0 +1,96 @@
+From cf56daaecdf2986048fe1678236c060c983f076a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 16:37:39 +0000
+Subject: [PATCH] FLR-0243: isolate plain child replacement
+
+---
+ packages/filament_scene/example/lib/main.dart | 48 ++-----------------
+ 1 file changed, 4 insertions(+), 44 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index eb82170..fbd8535 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -54,40 +54,6 @@ final ValueNotifier<FrameProfilingData> frameProfilingDataNotifier =
+ // only used to separate Flutter composition from the native Filament path.
+ const bool kFlr0026DiagnosticMock3d = false;
+ 
+-/// FLR-0242 diagnostic child. It exercises the common StatefulSceneView
+-/// mount contract without Planetarium-specific state or native commands.
+-class _Flr0242InertSceneView extends StatefulSceneView {
+-  const _Flr0242InertSceneView({
+-    required super.filament,
+-    required super.frameController,
+-    required super.collisionController,
+-    required super.readinessController,
+-  });
+-
+-  @override
+-  State<_Flr0242InertSceneView> createState() => _Flr0242InertSceneViewState();
+-}
+-
+-class _Flr0242InertSceneViewState
+-    extends StatefulSceneViewState<_Flr0242InertSceneView> {
+-  @override
+-  void onCreate() {
+-    print('FLR0242_GENERIC_INERT_ONCREATE');
+-  }
+-
+-  @override
+-  void onUpdateFrame(FilamentViewApi filament, double dt) {}
+-
+-  @override
+-  void onTriggerEvent(String eventName, [dynamic eventData]) {}
+-
+-  @override
+-  void onDestroy() {}
+-
+-  @override
+-  Widget build(BuildContext context) => const SizedBox.shrink();
+-}
+-
+ ////////////////////////////////////////////////////////////////////////
+ void main() {
+   FlutterError.onError = (FlutterErrorDetails details) {
+@@ -141,8 +107,7 @@ class _MyAppState extends State<MyApp> {
+ 
+   /// Scene state/overlay widget. Keep its rebuild below the parent Stack so
+   /// selecting a scene does not repaint the native SceneView sibling.
+-  final ValueNotifier<StatefulSceneView?> _sceneViewNotifier =
+-      ValueNotifier<StatefulSceneView?>(null);
++  final ValueNotifier<Widget?> _sceneViewNotifier = ValueNotifier<Widget?>(null);
+ 
+   @override
+   void initState() {
+@@ -198,12 +163,7 @@ class _MyAppState extends State<MyApp> {
+         collisionController: _collisionEventChannel,
+         readinessController: _nativeReadiness,
+       ),
+-      5 => _Flr0242InertSceneView(
+-        filament: filamentViewApi,
+-        frameController: _frameEventChannel,
+-        collisionController: _collisionEventChannel,
+-        readinessController: _nativeReadiness,
+-      ),
++      5 => const SizedBox.shrink(),
+       _ => throw UnsupportedError("nothiiiing"),
+     };
+   }
+@@ -272,7 +232,7 @@ class _MyAppState extends State<MyApp> {
+             // Flutter widget painting.
+             if (!kFlr0026DiagnosticMock3d) _filamentViewWidget,
+ 
+-            ValueListenableBuilder<StatefulSceneView?>(
++            ValueListenableBuilder<Widget?>(
+               valueListenable: _sceneViewNotifier,
+               builder: (context, sceneView, child) =>
+                   sceneView ?? const SizedBox.shrink(),
+@@ -304,7 +264,7 @@ class _MyAppState extends State<MyApp> {
+                   // FLR-0235: keep the tap boundary without Material hover
+                   // state painting over the native 3D surface.
+                   onTap: () {
+-                    print('FLR0242_SCENE_SUBTREE_ACTIVATION id=5 name=GenericInertStatefulSceneView');
++                    print('FLR0243_SCENE_SUBTREE_ACTIVATION id=5 name=PlainInertWidget');
+                     _setScene(5);
+                   },
+                   child: Container(

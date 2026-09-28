@@ -1,0 +1,56 @@
+From ddb0f2a56d138f9749074a238beca828a3a280d4 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Tue, 8 Sep 2026 12:51:52 +0000
+Subject: [PATCH] diag: place ARGB probe below Flutter parent
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 1bc1b45..6c072bf 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1024,6 +1024,8 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+   const bool argbProbe = std::getenv("FLR0026_SHM_PROBE_ARGB") != nullptr;
+   const bool probeAboveParent =
+     std::getenv("FLR0026_SHM_PROBE_ABOVE_PARENT") != nullptr;
++  const bool probeBelowParent =
++    std::getenv("FLR0026_SHM_PROBE_BELOW_PARENT") != nullptr;
+   if (argbProbe) {
+     std::fill(pixels, pixels + static_cast<size_t>(probe_width) * probe_height, 0x00000000u);
+     for (uint32_t y = 40; y < 120; ++y) {
+@@ -1096,13 +1098,16 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+   }
+   wl_subsurface_set_position(
+     probe_subsurface,
+-    probeAboveParent ? 0 : 240,
+-    probeAboveParent ? 0 : 120
++    (probeAboveParent || probeBelowParent) ? 0 : 240,
++    (probeAboveParent || probeBelowParent) ? 0 : 120
+   );
+   // The protocol requires a sibling subsurface here, not the parent surface.
+-  // The Filament surface is the sibling that this probe must be above.
++  // Select the parent or Filament sibling explicitly for the A/B stacking
++  // probe; this keeps the parent-alpha test independent of native rendering.
+   if (probeAboveParent && parent_surface_ != nullptr) {
+     wl_subsurface_place_above(probe_subsurface, parent_surface_);
++  } else if (probeBelowParent && parent_surface_ != nullptr) {
++    wl_subsurface_place_below(probe_subsurface, parent_surface_);
+   } else if (subsurface_ != nullptr) {
+     wl_subsurface_place_above(probe_subsurface, surface_);
+   }
+@@ -1116,9 +1121,11 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+   shm_probe_data_ = data;
+   shm_probe_size_ = size;
+   spdlog::info(
+-    "FLR0026_WAYLAND_SHM_PROBE_READY width={} height={} child=true",
++    "FLR0026_WAYLAND_SHM_PROBE_READY width={} height={} child=true above_parent={} below_parent={}",
+     probe_width,
+-    probe_height
++    probe_height,
++    probeAboveParent,
++    probeBelowParent
+   );
+ }
+ 

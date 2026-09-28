@@ -1,0 +1,34 @@
+From dc38a3691a48392f892a678cc6eda3f3d41e9842 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 23:22:36 +0000
+Subject: [PATCH] test: use emissive blue material for native fixture
+
+---
+ .../example/lib/shape_and_object_creators.dart        | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index e73b3bb..6533095 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -37,11 +37,12 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+       scale: Vector3.all(1),
+       rotation: Quaternion.identity(),
+       name: 'flr0023_fixture_cube',
+-      // Bind the packaged texture required by unlitUV.filamat while keeping
+-      // the fixture color independent of light and indirect-light setup.
+-      material: poGetUnlitTexturedMaterial(
+-        'assets/materials/texture/floor_basecolor.png',
+-        color: Colors.blue,
++      // Emit saturated blue so the native geometry is unmistakable even when
++      // indirect-light or texture sampling is unavailable in the test image.
++      material: poGetLitMaterial(
++        Colors.blue,
++        emissiveColor: Colors.blue,
++        emissiveIntensity: 1.0,
+       ),
+     ),
+   ];
+-- 
+2.34.1
+

@@ -1,0 +1,26 @@
+From bf1a55fbc0188a1f4cebcc88cbe649be5a7ed0e5 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 23:03:59 +0000
+Subject: [PATCH] fix: bind texture for unlit fixture material
+
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index ec2a76f..e73b3bb 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -37,10 +37,11 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+       scale: Vector3.all(1),
+       rotation: Quaternion.identity(),
+       name: 'flr0023_fixture_cube',
+-      // Use the packaged unlit material so the fixture color is independent of
+-      // light and indirect-light setup.
+-      material: poGetUnlitMaterial(
+-        Colors.blue,
++      // Bind the packaged texture required by unlitUV.filamat while keeping
++      // the fixture color independent of light and indirect-light setup.
++      material: poGetUnlitTexturedMaterial(
++        'assets/materials/texture/floor_basecolor.png',
++        color: Colors.blue,
+       ),
+     ),
+   ];

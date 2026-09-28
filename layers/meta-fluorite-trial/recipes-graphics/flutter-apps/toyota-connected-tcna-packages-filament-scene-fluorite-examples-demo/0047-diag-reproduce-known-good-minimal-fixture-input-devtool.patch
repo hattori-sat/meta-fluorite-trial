@@ -1,0 +1,31 @@
+From b977b78319d35519916dc6aa41d48b25ccee599d Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 05:35:17 +0000
+Subject: [PATCH] diag: reproduce known-good minimal fixture input
+
+---
+ packages/filament_scene/example/lib/main.dart | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 2419900..deb0f33 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -299,11 +299,11 @@ class _MyAppState extends State<MyApp> {
+   SceneView poGetFilamentScene() {
+     return SceneView(
+       filament: filamentViewApi,
+-      // Isolate the previously proven self-made native 3D fixture.
+-      models: null,
++      // Reproduce the known-good minimal fixture input path.
++      models: <Model>[],
+       scene: poGetMinimal3dFixtureScene(),
+       shapes: poGetMinimal3dFixtureShapes(),
+-      cameras: PlaygroundSceneView.getSceneCameras(),
++      cameras: poGetMinimal3dFixtureCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 
+-- 
+2.34.1
+

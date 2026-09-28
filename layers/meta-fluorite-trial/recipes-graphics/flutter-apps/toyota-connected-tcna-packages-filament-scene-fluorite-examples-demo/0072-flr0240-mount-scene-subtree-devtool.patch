@@ -1,0 +1,74 @@
+From ea824e41a4cb83afdcc2cf9189221b4a5d90df3c Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 14:15:50 +0000
+Subject: [PATCH] FLR-0240: isolate scene subtree rebuild
+
+---
+ packages/filament_scene/example/lib/main.dart | 25 ++++++++++++++-----
+ 1 file changed, 19 insertions(+), 6 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index a55a258..869bb87 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -105,8 +105,10 @@ class _MyAppState extends State<MyApp> {
+   /// field to store the scene widget so it's created only once
+   late final SceneView _filamentViewWidget;
+ 
+-  /// Scene state/overlay widget
+-  StatefulSceneView? _sceneView;
++  /// Scene state/overlay widget. Keep its rebuild below the parent Stack so
++  /// selecting a scene does not repaint the native SceneView sibling.
++  final ValueNotifier<StatefulSceneView?> _sceneViewNotifier =
++      ValueNotifier<StatefulSceneView?>(null);
+ 
+   @override
+   void initState() {
+@@ -129,9 +131,9 @@ class _MyAppState extends State<MyApp> {
+     );
+   }
+ 
+-  /// Call only from setState
++  /// Update only the scene subtree; never rebuild the parent Stack here.
+   void _setScene(int sceneId) {
+-    _sceneView = switch (sceneId) {
++    _sceneViewNotifier.value = switch (sceneId) {
+       0 => PlaygroundSceneView(
+         filament: filamentViewApi,
+         frameController: _frameEventChannel,
+@@ -166,6 +168,12 @@ class _MyAppState extends State<MyApp> {
+     };
+   }
+ 
++  @override
++  void dispose() {
++    _sceneViewNotifier.dispose();
++    super.dispose();
++  }
++
+   Future<bool> initializeReadiness() async {
+     const int maxRetries = 30;
+     const Duration retryInterval = Duration(seconds: 1);
+@@ -224,7 +232,11 @@ class _MyAppState extends State<MyApp> {
+             // Flutter widget painting.
+             if (!kFlr0026DiagnosticMock3d) _filamentViewWidget,
+ 
+-            if (_sceneView != null) _sceneView!,
++            ValueListenableBuilder<StatefulSceneView?>(
++              valueListenable: _sceneViewNotifier,
++              builder: (context, sceneView, child) =>
++                  sceneView ?? const SizedBox.shrink(),
++            ),
+ 
+             if (kFlr0026DiagnosticMock3d)
+               const Positioned(
+@@ -252,7 +264,8 @@ class _MyAppState extends State<MyApp> {
+                   // FLR-0235: keep the tap boundary without Material hover
+                   // state painting over the native 3D surface.
+                   onTap: () {
+-                    print('FLR0239_SCENE_TAP_NO_SETSTATE id=3 name=Planetarium');
++                    print('FLR0240_SCENE_SUBTREE_ACTIVATION id=3 name=Planetarium');
++                    _setScene(3);
+                   },
+                   child: Container(
+                     width: 99,

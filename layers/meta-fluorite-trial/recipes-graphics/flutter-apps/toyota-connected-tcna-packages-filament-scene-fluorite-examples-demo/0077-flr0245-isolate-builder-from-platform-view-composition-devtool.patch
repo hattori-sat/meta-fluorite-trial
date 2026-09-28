@@ -1,0 +1,26 @@
+From 8c11c515252841e3d18b606b728bc53f76f26cd8 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 17:33:14 +0000
+Subject: [PATCH] FLR-0245: isolate builder from platform view composition
+
+---
+ packages/filament_scene/example/lib/main.dart | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 9b9bdee..5898984 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -232,11 +232,7 @@ class _MyAppState extends State<MyApp> {
+             // Flutter widget painting.
+             if (!kFlr0026DiagnosticMock3d) _filamentViewWidget,
+ 
+-            ValueListenableBuilder<Widget?>(
+-              valueListenable: _sceneViewNotifier,
+-              child: const SizedBox.shrink(),
+-              builder: (context, sceneView, child) => child!,
+-            ),
++            const SizedBox.shrink(),
+ 
+             if (kFlr0026DiagnosticMock3d)
+               const Positioned(

@@ -1,0 +1,32 @@
+From 589b97abea736c2728c53dcafacbd638e5de57c5 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 12:14:58 +0000
+Subject: [PATCH] FLR-0237: isolate Planetarium overlay composition
+
+---
+ .../example/lib/scenes/planetarium_scene.dart               | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+index ef1dd92..5318d17 100644
+--- a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+@@ -314,6 +314,11 @@ class _PlanetariumSceneViewState extends StatefulSceneViewState {
+ 
+   @override
+   Widget build(BuildContext context) {
++    // FLR-0237 A/B: keep the Planetarium state lifecycle and native frame
++    // commands active while removing the full-surface Flutter gesture layer.
++    // This isolates platform-view composition from native scene ownership.
++    return const SizedBox.shrink();
++    /*
+     return Column(
+       // Force left justification in the column
+       mainAxisAlignment: MainAxisAlignment.end,
+@@ -339,5 +344,6 @@ class _PlanetariumSceneViewState extends StatefulSceneViewState {
+         ),
+       ],
+     );
++    */
+   }
+ }

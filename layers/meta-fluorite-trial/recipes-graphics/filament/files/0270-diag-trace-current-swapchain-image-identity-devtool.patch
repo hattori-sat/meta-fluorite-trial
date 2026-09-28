@@ -1,0 +1,51 @@
+From f71d3a4b87f5b6122fe06d2e220cf045530752b3 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 19 Sep 2026 23:17:13 +0000
+Subject: [PATCH] diag: trace current swapchain image identity
+
+---
+ filament/backend/src/vulkan/VulkanSwapChain.cpp | 12 ++++++++++++
+ filament/backend/src/vulkan/VulkanSwapChain.h   |  7 +------
+ 2 files changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index de651c05b..d47e49cef 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -107,6 +107,18 @@ void VulkanSwapChain::update() {
+     mLayerCount = bundle.layerCount;
+ }
+ 
++fvkmemory::resource_ptr<VulkanTexture> VulkanSwapChain::getCurrentColor() const noexcept {
++    uint32_t const imageIndex = mCurrentSwapIndex;
++    FILAMENT_CHECK_PRECONDITION(
++            imageIndex != VulkanPlatform::ImageSyncData::INVALID_IMAGE_INDEX);
++    auto const color = mColors[imageIndex];
++    if (std::getenv("FLUORITE_SWAPCHAIN_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLUORITE_SWAPCHAIN_CURRENT_COLOR index=%u image=%p\n",
++                imageIndex, static_cast<void*>(color->getImage()));
++    }
++    return color;
++}
++
+ void VulkanSwapChain::present(DriverBase& driver) {
+     const bool fluoritePresentTrace = std::getenv("FLUORITE_PRESENT_TRACE") != nullptr;
+     if (fluoritePresentTrace) {
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.h b/filament/backend/src/vulkan/VulkanSwapChain.h
+index 8a081a607..696bd5232 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.h
++++ b/filament/backend/src/vulkan/VulkanSwapChain.h
+@@ -54,12 +54,7 @@ struct VulkanSwapChain : public HwSwapChain, fvkmemory::Resource {
+     // is.
+     void acquire(bool& resized);
+ 
+-    fvkmemory::resource_ptr<VulkanTexture> getCurrentColor() const noexcept {
+-        uint32_t const imageIndex = mCurrentSwapIndex;
+-        FILAMENT_CHECK_PRECONDITION(
+-            imageIndex != VulkanPlatform::ImageSyncData::INVALID_IMAGE_INDEX);
+-        return mColors[imageIndex];
+-    }
++    fvkmemory::resource_ptr<VulkanTexture> getCurrentColor() const noexcept;
+ 
+     inline fvkmemory::resource_ptr<VulkanTexture> getDepth() const noexcept {
+         return mDepth;

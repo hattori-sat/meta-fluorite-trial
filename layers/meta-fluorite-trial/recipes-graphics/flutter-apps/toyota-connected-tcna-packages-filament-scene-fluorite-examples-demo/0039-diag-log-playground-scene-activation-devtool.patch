@@ -1,0 +1,23 @@
+From 0af6f29baf2bcefc834c2ebbd469606d1320d2d6 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 02:28:26 +0000
+Subject: [PATCH] diag: log Playground scene activation
+
+---
+ .../filament_scene/example/lib/scenes/playground_scene.dart     | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/packages/filament_scene/example/lib/scenes/playground_scene.dart b/packages/filament_scene/example/lib/scenes/playground_scene.dart
+index 5a132c0..368ee4a 100644
+--- a/packages/filament_scene/example/lib/scenes/playground_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/playground_scene.dart
+@@ -251,7 +251,9 @@ class _PlaygroundSceneViewState extends StatefulSceneViewState {
+ 
+   @override
+   void onCreate() {
++    print("FLR0026_PLAYGROUND_ONCREATE");
+     PlaygroundSceneView._sceneCamera.setActive();
++    print("FLR0026_PLAYGROUND_SET_ACTIVE");
+ 
+     widget.filament.queueFrameTask(widget.filament.setFogOptions(false));
+   }

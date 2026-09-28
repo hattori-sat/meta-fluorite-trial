@@ -1,0 +1,47 @@
+From 41fe4018b8b2686217ec1915eccc585df6062ada Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 30 Aug 2026 19:12:47 +0000
+Subject: [PATCH] diag: log shape and camera state
+
+---
+ plugins/filament_view/core/scene/view_target.cc        | 10 ++++++++++
+ .../filament_view/core/systems/derived/shape_system.cc |  5 +++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 541218b..8a4e3a5 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -409,6 +409,16 @@ void ViewTarget::updateCameraSettings(
+   // TODO: consider case where "target" is off - sum orbitRotation + local.rotation
+ 
+   camera_->setModelMatrix(headMatrix);
++  const auto appliedHeadPosition = VectorUtils::translationFromMatrix(headMatrix);
++  spdlog::info(
++    "FLR0026_CAMERA_APPLIED head=({},{},{}) targetPresent={} target=({},{},{}) dolly=({},{},{})",
++    appliedHeadPosition.x, appliedHeadPosition.y, appliedHeadPosition.z,
++    targetPosition != nullptr,
++    targetPosition != nullptr ? targetPosition->x : 0.0f,
++    targetPosition != nullptr ? targetPosition->y : 0.0f,
++    targetPosition != nullptr ? targetPosition->z : 0.0f,
++    cameraData.dollyOffset.x, cameraData.dollyOffset.y, cameraData.dollyOffset.z
++  );
+ 
+   // Update exposure
+   if (cameraData._dirtyExposure) {
+diff --git a/plugins/filament_view/core/systems/derived/shape_system.cc b/plugins/filament_view/core/systems/derived/shape_system.cc
+index 0bbd5c9..eb3cc52 100644
+--- a/plugins/filament_view/core/systems/derived/shape_system.cc
++++ b/plugins/filament_view/core/systems/derived/shape_system.cc
+@@ -161,6 +161,11 @@ void ShapeSystem::addShapeToScene(const std::shared_ptr<shapes::BaseShape>& shap
+   shape->bInitAndCreateShape(_engine, oEntity);
+ 
+   filamentScene->addEntity(oEntity);
++  const bool hasRenderable = _rcm->hasComponent(oEntity);
++  spdlog::info(
++    "FLR0026_SHAPE_READY guid={} entity={} renderable={}",
++    shape->getGuid(), oEntity.getId(), hasRenderable
++  );
+   spdlog::trace("Adding entity {} with filament entity {}", shape->getGuid(), oEntity.getId());
+ 
+   // To investigate a better system for implementing layer mask

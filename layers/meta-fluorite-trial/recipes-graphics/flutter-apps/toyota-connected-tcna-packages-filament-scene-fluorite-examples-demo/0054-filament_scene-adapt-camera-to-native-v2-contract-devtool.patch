@@ -1,0 +1,40 @@
+From 63e116879125fafc252f32981b267e92d54eae68 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 12 Sep 2026 21:03:58 +0000
+Subject: [PATCH] fix: adapt scene camera to native v2 contract
+
+---
+ packages/filament_scene/lib/scene/scene_widget.dart | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+index a0e07e0..dadaecc 100644
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -196,9 +196,13 @@ class ModelViewerState extends State<SceneView> {
+ 
+     //final model = widget.models?.toJson();
+     final JsonObject? scene = widget.scene?.toJson();
++    if (scene != null && widget.cameras != null && widget.cameras!.isNotEmpty) {
++      // flutter-auto v2 creates cameras from scene.camera, not root cameras.
++      // Keep the first fixture camera in the native ViewTarget payload.
++      scene['camera'] = widget.cameras!.first.toJson();
++    }
+     _creationParams["models"] = widget.models?.map((final param) => param.toJson()).toList();
+     _creationParams["scene"] = scene;
+-    _creationParams["cameras"] = widget.cameras?.map((final param) => param.toJson()).toList();
+     // use concatenated toFlatJson
+     _creationParams["shapes"] = widget.shapes
+         ?.map((final param) => param.toFlatJson().map(normalizeShape).toList())
+@@ -221,8 +225,9 @@ class ModelViewerState extends State<SceneView> {
+       widget.models?.forEach((final model) => model.initialize(widget.filament));
+       widget.shapes?.forEach((final shape) => shape.initialize(widget.filament));
+       // v2 scene.camera is a native ViewTarget camera, not an ECS entity.
+-      // Bind the Dart camera to the existing native view without creating an ECS entity.
+-      widget.cameras?.forEach((final camera) => camera.initialize(widget.filament));
++      // The Dart camera list only builds the creation payload above. Do not
++      // initialize it here: generated setCamera* channels have no native v2
++      // handlers and would fail after the platform view is created.
+ 
+       // Call the onCreated callback with the controller
+       widget.onCreated?.call(controller);

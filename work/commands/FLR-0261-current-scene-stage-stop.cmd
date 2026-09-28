@@ -1,0 +1,1 @@
+pid_file=/run/user/1001/flr0261-current-scene-stage.pid; if [ -s "$pid_file" ]; then pid=$(cat "$pid_file"); kill "$pid" 2>/dev/null || true; for _ in 1 2 3 4 5; do kill -0 "$pid" 2>/dev/null || break; sleep 1; done; fi; rm -f "$pid_file"; printf 'FLR0261_CURRENT_SCENE_STAGE_STOP_DONE\n'

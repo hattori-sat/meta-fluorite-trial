@@ -1,0 +1,35 @@
+From 16849440ebf76f8b2ca082db67d91ec04feb9aa2 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 03:27:35 +0000
+Subject: [PATCH] diag: set current fixture local camera
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 8e74b00..c25786a 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -145,6 +145,21 @@ void ViewTarget::_initCamera() {
+   camera_->setExposure(kDefaultAperture, kDefaultShutterSpeed, kDefaultSensitivity);
+   camera_->setModelMatrix(filament::math::mat4f());
+   fview_->setCamera(camera_);
++
++  const bool fixtureLocalCamera =
++    std::getenv("FLUORITE_NATIVE_FIXTURE_LOCAL_CAMERA") != nullptr &&
++    std::getenv("FLUORITE_NATIVE_PURE_FIXTURE") != nullptr &&
++    std::getenv("FLUORITE_NATIVE_MINIMAL_GEOMETRY") != nullptr;
++  if (fixtureLocalCamera) {
++    camera_->lookAt(
++      filament::math::double3{0.0, 0.0, 5.0},
++      filament::math::double3{0.0, 0.0, 0.0},
++      filament::math::double3{0.0, 1.0, 0.0}
++    );
++    spdlog::info(
++      "FLUORITE_NATIVE_FIXTURE_LOCAL_CAMERA enabled=true eye=(0,0,5) target=(0,0,0)"
++    );
++  }
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////

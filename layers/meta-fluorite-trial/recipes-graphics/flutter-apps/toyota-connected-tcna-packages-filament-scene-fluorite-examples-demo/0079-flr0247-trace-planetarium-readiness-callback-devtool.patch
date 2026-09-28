@@ -1,0 +1,61 @@
+From cec84c1435e6c964f550bd1322bb07e6c4b35acd Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 18:30:14 +0000
+Subject: [PATCH] FLR-0247: trace Planetarium readiness callback
+
+---
+ .../example/lib/events/native_readiness.dart         | 12 ++++++++++--
+ .../example/lib/scenes/scene_view.dart               |  1 +
+ 2 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/events/native_readiness.dart b/packages/filament_scene/example/lib/events/native_readiness.dart
+index 73b885a..7ae4247 100644
+--- a/packages/filament_scene/example/lib/events/native_readiness.dart
++++ b/packages/filament_scene/example/lib/events/native_readiness.dart
+@@ -16,6 +16,9 @@ class NativeReadiness {
+     Duration retryInterval = const Duration(milliseconds: 16),
+   ]) {
+     int attempt = 0;
++    bool firstFalseReported = false;
++
++    print('FLR0247_READINESS_POLL_START');
+ 
+     // print('Ready?');
+ 
+@@ -26,17 +29,22 @@ class NativeReadiness {
+           final bool nativeReady = await isNativeReady();
+ 
+           if (nativeReady) {
+-            // print('yippee?');
++            print('FLR0247_READINESS_READY attempt=$attempt');
+             callback();
+-            // print('yippee!');
++            print('FLR0247_READINESS_CALLBACK_DISPATCHED');
+             return;
+           }
++          if (!firstFalseReported) {
++            firstFalseReported = true;
++            print('FLR0247_READINESS_FIRST_FALSE attempt=$attempt');
++          }
+         } catch (e) {
+           //print('Error checking readine/ss: $e');
+         }
+ 
+         await Future.delayed(retryInterval);
+       }
++      print('FLR0247_READINESS_TIMEOUT attempts=$maxRetries');
+     }());
+   }
+ 
+diff --git a/packages/filament_scene/example/lib/scenes/scene_view.dart b/packages/filament_scene/example/lib/scenes/scene_view.dart
+index fe31a9f..22026ae 100644
+--- a/packages/filament_scene/example/lib/scenes/scene_view.dart
++++ b/packages/filament_scene/example/lib/scenes/scene_view.dart
+@@ -27,6 +27,7 @@ abstract class StatefulSceneViewState<T extends StatefulSceneView> extends State
+   @override
+   @nonVirtual
+   void initState() {
++    print('FLR0247_STATE_REGISTER widget=${widget.runtimeType}');
+     widget.readinessController.addCallback(this.onCreate);
+     widget.frameController.addCallback(this.onUpdateFrame);
+     super.initState();

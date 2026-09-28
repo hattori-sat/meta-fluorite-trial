@@ -1,0 +1,40 @@
+From 124b2592cebe81c19c46e245d6214e8a646aeba1 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 19:12:48 +0000
+Subject: [PATCH] diag: trace native fixture renderable contract
+
+---
+ .../filament_view/core/scene/view_target.cc   | 20 +++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index c1a5069..c450daf 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -353,6 +353,26 @@ void ViewTarget::setupNativeMinimalGeometry() {
+     .castShadows(false)
+     .build(*engine, native_diagnostic_entity_);
+   native_diagnostic_scene_->addEntity(native_diagnostic_entity_);
++  const auto& renderableManager = engine->getRenderableManager();
++  const auto renderableInstance = renderableManager.getInstance(native_diagnostic_entity_);
++  const bool hasRenderable = renderableManager.hasComponent(native_diagnostic_entity_);
++  const size_t primitiveCount = hasRenderable
++    ? renderableManager.getPrimitiveCount(renderableInstance)
++    : 0;
++  const bool hasBoundMaterial = hasRenderable && primitiveCount > 0
++    && renderableManager.getMaterialInstanceAt(renderableInstance, 0) != nullptr;
++  spdlog::info(
++    "FLUORITE_NATIVE_MINIMAL_GEOMETRY_CONTRACT entity={} has_renderable={} instance={} "
++    "primitives={} bound_material={} material_instance={} vertex_count={} index_count={} scene=true",
++    native_diagnostic_entity_.getId(),
++    hasRenderable,
++    renderableInstance.asValue(),
++    primitiveCount,
++    hasBoundMaterial,
++    native_diagnostic_material_instance_ != nullptr,
++    native_diagnostic_vertex_buffer_->getVertexCount(),
++    native_diagnostic_index_buffer_->getIndexCount()
++  );
+   spdlog::info(
+     "FLUORITE_NATIVE_MINIMAL_GEOMETRY_READY vertices=8 indices={} scene=true",
+     sizeof(indices) / sizeof(indices[0])

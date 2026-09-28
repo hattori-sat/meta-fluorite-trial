@@ -1,0 +1,54 @@
+From b9306ebfd32c6d4423d30168524f13c2a7c6354d Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 02:58:47 +0000
+Subject: [PATCH] FLR-0274: restore initial camera and planetarium route
+
+---
+ packages/filament_scene/example/lib/main.dart | 20 ++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 8216d2c..e3494e8 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -198,11 +198,10 @@ class _MyAppState extends State<MyApp> {
+             // Flutter widget painting.
+             if (!kFlr0026DiagnosticMock3d) _filamentViewWidget,
+ 
+-            PlanetariumSceneView(
+-              filament: filamentViewApi,
+-              frameController: _frameEventChannel,
+-              collisionController: _collisionEventChannel,
+-              readinessController: _nativeReadiness,
++            ValueListenableBuilder<Widget?>(
++              valueListenable: _sceneViewNotifier,
++              builder: (context, sceneView, child) =>
++                  sceneView ?? const SizedBox.shrink(),
+             ),
+ 
+             if (kFlr0026DiagnosticMock3d)
+@@ -231,8 +230,8 @@ class _MyAppState extends State<MyApp> {
+                   // FLR-0235: keep the tap boundary without Material hover
+                   // state painting over the native 3D surface.
+                   onTap: () {
+-                    print('FLR0244_SCENE_SUBTREE_ACTIVATION id=5 name=StableChildBuilderRebuild');
+-                    _setScene(5);
++                    print('FLR0274_SCENE_TRANSITION id=3 name=Planetarium');
++                    _setScene(3);
+                   },
+                   child: Container(
+                     width: 99,
+@@ -288,6 +287,13 @@ class _MyAppState extends State<MyApp> {
+         _frameEventChannel.setController(filamentViewApi);
+         _collisionEventChannel.setController(filamentViewApi);
+ 
++        // The initial payload contains production models and the self-made
++        // fixture near the origin. Planetarium is a separate route centered
++        // at (-720, 0, 680), so it must not become active merely because its
++        // widget used to be mounted unconditionally at startup.
++        PlaygroundSceneView.getSceneCameras().first.setActive();
++        print('FLR0274_INITIAL_PLAYGROUND_SET_ACTIVE');
++
+         print('poGetFilamentScene onCreated completed');
+         print('FLR0256_PO_ON_CREATED_END');
+         print('FLR0249_READINESS_START_AFTER_PLATFORM_VIEW');

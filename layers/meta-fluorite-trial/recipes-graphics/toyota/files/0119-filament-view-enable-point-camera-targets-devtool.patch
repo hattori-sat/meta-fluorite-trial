@@ -1,0 +1,22 @@
+From 6b8976493c8ae04d4b1f9b35d1fdc403aa9637c4 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 03:36:46 +0000
+Subject: [PATCH] fix: enable point camera targets
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index c2bed59..3267b10 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -496,7 +496,7 @@ std::optional<FlutterError> FilamentViewPlugin::SetCameraTarget(
+   // Get camera component
+   const auto camera = ecs->getComponent<Camera>(id);
+ 
+-  camera->enableTarget = !!target_position && target_entity_id != kNullGuid;
++  camera->enableTarget = target_position != nullptr || target_entity_id != kNullGuid;
+   camera->targetEntity = target_entity_id;
+   if (target_position) {
+     camera->targetPoint = filament::math::float3(

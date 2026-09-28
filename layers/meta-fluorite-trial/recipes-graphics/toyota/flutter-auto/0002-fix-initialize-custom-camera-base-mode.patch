@@ -1,0 +1,23 @@
+From 482c3a262f03d009107248969a98194e1d75387c Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 04:30:59 +0000
+Subject: [PATCH] fix: initialize custom camera base mode
+
+---
+ plugins/filament_view/core/scene/camera/camera.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/camera/camera.cc b/plugins/filament_view/core/scene/camera/camera.cc
+index d4d804b..5cb521e 100644
+--- a/plugins/filament_view/core/scene/camera/camera.cc
++++ b/plugins/filament_view/core/scene/camera/camera.cc
+@@ -24,7 +24,8 @@
+ namespace plugin_filament_view {
+ ////////////////////////////////////////////////////////////////////////////
+ Camera::Camera(const flutter::EncodableMap& params)
+-  : eCustomCameraMode_(Unset),
++  : mode_(filament::camutils::Mode::ORBIT),
++    eCustomCameraMode_(Unset),
+     forceSingleFrameUpdate_(false),
+     fCurrentOrbitAngle_(0),
+     inertia_rotationSpeed_(0.05f),

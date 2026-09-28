@@ -1,0 +1,21 @@
+From 3781b7347875be59ae15aea6e7dd0563cd860516 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 03:35:41 +0000
+Subject: [PATCH] test: aim fixture camera at cube
+
+---
+ .../filament_scene/example/lib/shape_and_object_creators.dart    | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 3163471..881fd6a 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -55,6 +55,7 @@ List<Camera> poGetMinimal3dFixtureCameras() {
+       orbitOriginPoint: Vector3.zero(),
+       orbitDistance: 5,
+       dollyOffset: Vector3(5, 0, 0),
++      orbitAngles: Vector2(1.5707963267948966, 0),
+       targetPoint: Vector3.zero(),
+     ),
+   ];

@@ -1,0 +1,66 @@
+From 94c05e7a6c695b9db64b87d8891ab84dffca81aa Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 6 Sep 2026 02:12:32 +0000
+Subject: [PATCH] diag: select scene lights for runtime isolation
+
+---
+ .../serialization/scene_text_deserializer.cc  | 34 +++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 14e8812..0bff80f 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -418,9 +418,35 @@ void SceneTextDeserializer::setUpSkybox() const {
+ void SceneTextDeserializer::setUpLights() {
+   const auto lightSystem = _ecs->getSystem<LightSystem>(__FUNCTION__);
+ 
++  std::size_t light_limit = lights_.size();
++  std::string light_type_filter;
++  if (const char* raw_type = std::getenv("FLR0026_NATIVE_LIGHT_TYPE")) {
++    light_type_filter = raw_type;
++  }
++  if (const char* raw_limit = std::getenv("FLR0026_NATIVE_LIGHT_LIMIT")) {
++    char* end = nullptr;
++    const auto parsed_limit = std::strtoul(raw_limit, &end, 10);
++    if (end != raw_limit && *end == '\0') {
++      light_limit = parsed_limit < light_limit ? parsed_limit : light_limit;
++    }
++  }
++
++  std::size_t selected_lights = 0;
++
+   // Note, this introduces a fire and forget functionality for entities
+   // there's no "one" owner system, but its propagated to whomever cares for it.
+   for (const auto& [fst, snd] : lights_) {
++    const auto light_type = Light::lightTypeToText(snd->getLightType());
++    if (!light_type_filter.empty() && light_type_filter != light_type) {
++      spdlog::info(
++        "FLR0026_LIGHT_SKIPPED guid={} type={} filter={}", fst, light_type, light_type_filter
++      );
++      continue;
++    }
++    if (selected_lights >= light_limit) {
++      break;
++    }
++
+     const auto newEntity = std::make_shared<EntityObject>(
+       "SceneTextDeserializer::setUpLights", fst
+     );
+@@ -429,8 +455,16 @@ void SceneTextDeserializer::setUpLights() {
+     _ecs->addComponent(newEntity->getGuid(), snd);
+ 
+     lightSystem->BuildLightAndAddToScene(*snd);
++    ++selected_lights;
++    spdlog::info("FLR0026_LIGHT_SELECTED ordinal={} guid={} type={}",
++      selected_lights - 1, fst, light_type);
+   }
+ 
++  spdlog::info(
++    "FLR0026_LIGHT_SETUP_PLAN total={} limit={} type_filter={} selected={}",
++    lights_.size(), light_limit, light_type_filter, selected_lights
++  );
++
+   // if a light didnt get deserialized, tell light system to create a default
+   // one.
+   if (lights_.empty()) {

@@ -1,0 +1,26 @@
+From 21f64a71672b8a7ef864cf67326264b4aa600a5b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 18:11:04 +0000
+Subject: [PATCH] diag: flush software frame surface on 0062 baseline
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 464e6d2..65e791f 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -693,7 +693,11 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+       obj->DrawFrame(frameTime);
+       if (obj->surface_ != nullptr) {
+         wl_surface_commit(obj->surface_);
+-        spdlog::info("FLR0026_WAYLAND_SOFTWARE_SURFACE_COMMITTED committed=true");
++        const auto flushResult = wl_display_flush(obj->display_);
++        spdlog::info(
++          "FLR0026_WAYLAND_SOFTWARE_SURFACE_FLUSHED result={}",
++          flushResult
++        );
+       }
+       post(*ECSManager::GetInstance()->getStrand(), [drawSoftwareFrame, frameTime] {
+         (*drawSoftwareFrame)(frameTime + 100);

@@ -1,0 +1,24 @@
+From ecf40d4087ba5cb5e9f884744a6c2674813317e7 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 16:04:07 +0000
+Subject: [PATCH] fix: keep standalone render outside frame
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 79533d7..edd1328 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -957,7 +957,6 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+       const size_t readbackSize = static_cast<size_t>(readbackWidth) *
+         static_cast<size_t>(readbackHeight) * 4u;
+       auto* pixels = new uint8_t[readbackSize]();
+-      renderer->renderStandaloneView(native_readback_view_);
+       renderer->readPixels(
+         native_readback_target_,
+         0,
+-- 
+2.34.1
+

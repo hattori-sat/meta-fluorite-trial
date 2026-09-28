@@ -1,0 +1,69 @@
+From 876d075093bb8b3550cae21eb5cd281121f52d55 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 19:15:20 +0000
+Subject: [PATCH] diag: trace HDR indirect light stages
+
+---
+ .../core/systems/derived/indirect_light_system.cc    | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/indirect_light_system.cc b/plugins/filament_view/core/systems/derived/indirect_light_system.cc
+index 3170768..89baec6 100644
+--- a/plugins/filament_view/core/systems/derived/indirect_light_system.cc
++++ b/plugins/filament_view/core/systems/derived/indirect_light_system.cc
+@@ -112,6 +112,7 @@ Resource<std::string_view> IndirectLightSystem::loadIndirectLightHdrFromFile(
+   const std::string& asset_path,
+   const double intensity
+ ) {
++  spdlog::info("FLR0026_HDR_IBL_LOAD_BEGIN");
+   const auto filamentSystem = ecs->getSystem<FilamentSystem>("loadIndirectLightHdrFromFile");
+   const auto engine = filamentSystem->getFilamentEngine();
+ 
+@@ -119,17 +120,23 @@ Resource<std::string_view> IndirectLightSystem::loadIndirectLightHdrFromFile(
+   try {
+     texture = HDRLoader::createTexture(engine, asset_path);
+   } catch (...) {
++    spdlog::info("FLR0026_HDR_TEXTURE_DECODE_FAILED");
+     return Resource<std::string_view>::Error("Could not decode HDR file");
+   }
++  spdlog::info("FLR0026_HDR_TEXTURE_READY");
+   const auto skyboxTexture = filamentSystem->getIBLProfiler()->createCubeMapTexture(texture);
+   engine->destroy(texture);
++  spdlog::info("FLR0026_HDR_CUBEMAP_READY");
+ 
+   const auto reflections = filamentSystem->getIBLProfiler()->getLightReflection(skyboxTexture);
++  spdlog::info("FLR0026_HDR_REFLECTIONS_READY");
+ 
++  spdlog::info("FLR0026_HDR_IBL_BUILD_BEGIN");
+   const auto ibl = filament::IndirectLight::Builder()
+                      .reflections(reflections)
+                      .intensity(static_cast<float>(intensity))
+                      .build(*engine);
++  spdlog::info("FLR0026_HDR_IBL_BUILD_DONE");
+ 
+   const auto prevIndirectLight = filamentSystem->getFilamentScene()->getIndirectLight();
+   if (prevIndirectLight) {
+@@ -137,6 +144,7 @@ Resource<std::string_view> IndirectLightSystem::loadIndirectLightHdrFromFile(
+   }
+ 
+   filamentSystem->getFilamentScene()->setIndirectLight(ibl);
++  spdlog::info("FLR0026_HDR_IBL_SCENE_SET_DONE");
+ 
+   return Resource<std::string_view>::Success("loaded Indirect light successfully");
+ }
+@@ -153,11 +161,15 @@ std::future<Resource<std::string_view>> IndirectLightSystem::setIndirectLightFro
+   const auto assetPath = ecs->getConfigValue<std::string>(kAssetPath);
+ 
+   post(strand_, [&, promise, path = path, intensity, assetPath] {
++    spdlog::info("FLR0026_HDR_ASSET_REQUEST");
+     std::filesystem::path asset_path(assetPath);
+     asset_path /= path;
+ 
+     if (path.empty() || !exists(asset_path)) {
++      spdlog::info("FLR0026_HDR_ASSET_INVALID");
+       promise->set_value(Resource<std::string_view>::Error("Asset path not valid"));
++    } else {
++      spdlog::info("FLR0026_HDR_ASSET_VALID");
+     }
+     try {
+       promise->set_value(loadIndirectLightHdrFromFile(asset_path.c_str(), intensity));

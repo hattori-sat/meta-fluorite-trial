@@ -1,0 +1,26 @@
+From 6879a849a874cb741a141e5808a0d8339334e656 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 11:01:41 +0000
+Subject: [PATCH] fix: set native fixture color on active MaterialInstance
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index c450daf..f27ff31 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -332,10 +332,10 @@ void ViewTarget::setupNativeMinimalGeometry() {
+     return;
+   }
+ 
+-  native_diagnostic_material_->setDefaultParameter(
++  native_diagnostic_material_instance_ = native_diagnostic_material_->createInstance();
++  native_diagnostic_material_instance_->setParameter(
+     "color", filament::RgbType::LINEAR, float3{0.05f, 0.45f, 1.0f}
+   );
+-  native_diagnostic_material_instance_ = native_diagnostic_material_->createInstance();
+   native_diagnostic_entity_ = engine->getEntityManager().create();
+   RenderableManager::Builder(1)
+     .boundingBox({{-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}})

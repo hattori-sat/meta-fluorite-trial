@@ -1,0 +1,1 @@
+if test -r /run/user/1001/flr0284-production-direct-light.pid; then pid=$(cat /run/user/1001/flr0284-production-direct-light.pid); kill -TERM "$pid" 2>/dev/null || true; fi; printf 'FLR0284_PRODUCTION_DIRECT_LIGHT_STOP_DONE\n'

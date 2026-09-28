@@ -1,0 +1,1998 @@
+[11:29:56.175355] [I] v2.0 @ dd6d9224
+[11:29:56.177704] [I] **********
+[11:29:56.177816] [I] * Global *
+[11:29:56.177866] [I] **********
+[11:29:56.177944] [I] Application Id: .......... fluorite
+[11:29:56.178071] [I] Disable Cursor: .......... false
+[11:29:56.178130] [I] Debug Backend: ........... false
+[11:29:56.178146] [I] ********
+[11:29:56.178163] [I] * View *
+[11:29:56.178179] [I] ********
+[11:29:56.178222] [I] Bundle Path: .............. /usr/share/flutter/toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo/3.38.3/release
+[11:29:56.178245] [I] Window Type: .............. NORMAL
+[11:29:56.178327] [I] Output Index: ............. 0
+[11:29:56.178436] [I] Size: ..................... 1280 x 720
+[11:29:56.179278] [I] Pixel Ratio: .............. 1.0
+[11:29:56.179353] [I] Fullscreen: ............... false
+[11:29:56.179441] [I] Accessibility Features: ... 0
+[11:29:56.179495] [I] *******************
+[11:29:56.179510] [I] * Activation Area *
+[11:29:56.179525] [I] *******************
+[11:29:56.179589] [I] x: ........................ 0
+[11:29:56.179644] [I] y: ........................ 0
+[11:29:56.179660] [I] width: .................... 1280
+[11:29:56.179677] [I] height: ................... 720
+[11:29:56.426183] [I] Enabling 2 instance extensions:
+	VK_KHR_surface
+	VK_KHR_wayland_surface
+[11:29:56.597431] [I] vendor 10005, device 0, driver 1, api 1.3
+[11:29:58.262538] [I] (0) Loading AOT: /usr/share/flutter/toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo/3.38.3/release/lib/libapp.so
+[11:29:59.197913] [I] flutter: tree_uuids: {202: tree_root, 204: tree_layer_1, 206: tree_layer_2, 208: tree_layer_3, 210: tree_layer_4}
+[11:29:59.201364] [I] flutter: sun distance: 0.0
+[11:29:59.202657] [I] flutter: planet: sun (220), distance: 0.0, size: 10.0
+[11:29:59.202962] [I] flutter: mercury distance: 10.0
+[11:29:59.203016] [I] flutter: planet: mercury (222), distance: 10.0, size: 0.5
+[11:29:59.203109] [I] flutter: venus distance: 13.0
+[11:29:59.203163] [I] flutter: planet: venus (224), distance: 13.0, size: 1.5
+[11:29:59.203189] [I] flutter: earth distance: 15.0
+[11:29:59.203203] [I] flutter: planet: earth (226), distance: 15.0, size: 1.0
+[11:29:59.203220] [I] flutter: mars distance: 18.0
+[11:29:59.203237] [I] flutter: planet: mars (228), distance: 18.0, size: 0.7
+[11:29:59.203273] [I] flutter: jupiter distance: 25.0
+[11:29:59.203289] [I] flutter: planet: jupiter (230), distance: 25.0, size: 2.3
+[11:29:59.203312] [I] flutter: saturn distance: 30.0
+[11:29:59.203325] [I] flutter: planet: saturn (232), distance: 30.0, size: 2.0
+[11:29:59.203352] [I] flutter: uranus distance: 35.0
+[11:29:59.203367] [I] flutter: planet: uranus (234), distance: 35.0, size: 1.25
+[11:29:59.203385] [I] flutter: neptune distance: 40.0
+[11:29:59.203429] [I] flutter: planet: neptune (236), distance: 40.0, size: 1.5
+[11:29:59.203449] [I] flutter: pluto distance: 45.0
+[11:29:59.203461] [I] flutter: planet: pluto (238), distance: 45.0, size: 0.25
+[11:29:59.205381] [I] flutter: Checking native readiness, attempt 1...
+[11:29:59.312827] [I] FLR0026_FILAMENT_BACKEND_OVERRIDE requested=VULKAN
+FEngine (64 bits) created at 0x7f36ac005190 (threading is enabled)
+FEngine resolved backend: Vulkan
+Vulkan device driver: llvmpipe Mesa 24.0.7 (LLVM 18.1.8)
+Selected physical device 'llvmpipe (LLVM 18.1.8, 128 bits)' from 1 physical devices. (vendor 0x10005, device 0x0, driver 0x1, api 1.3)
+Backend feature level: 3
+FEngine feature level: 1
+[11:29:59.801559] [I] flutter: Native is not ready. Retrying...
+[11:29:59.853019] [I] All systems initialized
+[11:29:59.856381] [I] From DeserializeDataAndSetupMessageChannels You're calling to get a system from an off thread, undefined experience! Use a message to do your work or grab the ecsystemmanager strand and do your work.
+[11:29:59.863228] [I] From RegisterWithRegistrar You're calling to get a system from an off thread, undefined experience! Use a message to do your work or grab the ecsystemmanager strand and do your work.
+[11:29:59.892356] [I] FLR0026_NATIVE_SKIP_MODEL_LOAD enabled=true models=60 shapes=37 lights=13
+[11:29:59.892755] [I] FLR0026_NATIVE_SKIP_SKYBOX enabled=true
+[11:29:59.896202] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=5 light_component=true instance_valid=true scene_has_entity=true scene_light_count=1 position=(74.5,1.2,68.85)
+[11:29:59.896364] [I] FLR0026_LIGHT_SELECTED ordinal=0 guid=126 type=POINT
+[11:29:59.896859] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=6 light_component=true instance_valid=true scene_has_entity=true scene_light_count=2 position=(74.5,1.2,67.15)
+[11:29:59.896879] [I] FLR0026_LIGHT_SELECTED ordinal=1 guid=128 type=POINT
+[11:29:59.897267] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=7 light_component=true instance_valid=true scene_has_entity=true scene_light_count=3 position=(69.5,1,68.85)
+[11:29:59.897279] [I] FLR0026_LIGHT_SELECTED ordinal=2 guid=130 type=POINT
+[11:29:59.897336] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=8 light_component=true instance_valid=true scene_has_entity=true scene_light_count=4 position=(69.5,1,67.15)
+[11:29:59.897344] [I] FLR0026_LIGHT_SELECTED ordinal=3 guid=132 type=POINT
+[11:29:59.897735] [I] FLR0026_LIGHT_PROPS guid=134 type=POINT color=(1,0.59607846,0) color_temperature=0 intensity=6000000 position=(74.5,1.2,68.85) direction=(0,-1,0) cast_light=true cast_shadows=false falloff=2 spot_inner=0 spot_outer=0 sun_radius=0 sun_halo_size=0 sun_halo_falloff=0
+[11:29:59.897837] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=9 light_component=true instance_valid=true scene_has_entity=true scene_light_count=5 position=(74.5,1.2,68.85)
+[11:29:59.897847] [I] FLR0026_LIGHT_SELECTED ordinal=4 guid=134 type=POINT
+[11:29:59.897864] [I] FLR0026_LIGHT_PROPS guid=136 type=POINT color=(1,0.59607846,0) color_temperature=0 intensity=6000000 position=(74.5,1.2,67.15) direction=(0,-1,0) cast_light=true cast_shadows=false falloff=2 spot_inner=0 spot_outer=0 sun_radius=0 sun_halo_size=0 sun_halo_falloff=0
+[11:29:59.897950] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=10 light_component=true instance_valid=true scene_has_entity=true scene_light_count=6 position=(74.5,1.2,67.15)
+[11:29:59.897958] [I] FLR0026_LIGHT_SELECTED ordinal=5 guid=136 type=POINT
+[11:29:59.898059] [I] FLR0026_LIGHT_SETUP_PLAN total=13 limit=6 type_filter= skip_guid_filter= trace_guid_filter=134,136 position_override_guid=0 position_override_enabled=false selected=6
+[11:29:59.898188] [I] FLR0026_NATIVE_SKIP_INDIRECT_LIGHT enabled=true
+[11:29:59.904304] [I] Reading: /usr/share/flutter/toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo/3.38.3/release/data/flutter_assets/assets/materials/lit.filamat
+[11:29:59.929047] [I] No default parameter value available for setMaterialInstancePropertiesFromMyPropertyMap emissive
+[11:29:59.929174] [I] No default parameter value available for setMaterialInstancePropertiesFromMyPropertyMap reflectance
+[11:29:59.929862] [I] FLR0026_SHAPE_READY guid=188 entity=11 renderable=true
+[11:29:59.930178] [I] No default parameter value available for setMaterialInstancePropertiesFromMyPropertyMap emissive
+[11:29:59.930192] [I] No default parameter value available for setMaterialInstancePropertiesFromMyPropertyMap reflectance
+[11:29:59.930427] [I] FLR0026_SHAPE_READY guid=190 entity=12 renderable=true
+[11:29:59.930528] [I] No default parameter value available for setMaterialInstancePropertiesFromMyPropertyMap emissive
+[11:29:59.930537] [I] No default parameter value available for setMaterialInstancePropertiesFromMyPropertyMap reflectance
+[11:29:59.930653] [I] FLR0026_SHAPE_READY guid=192 entity=13 renderable=true
+[11:29:59.933023] [I] Reading: /usr/share/flutter/toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo/3.38.3/release/data/flutter_assets/assets/materials/textured_pbr.filamat
+[11:30:00.246388] [I] FLR0026_SHAPE_READY guid=194 entity=14 renderable=true
+[11:30:00.246991] [I] FLR0026_SHAPE_READY guid=196 entity=15 renderable=true
+[11:30:00.247557] [I] FLR0026_SHAPE_READY guid=198 entity=16 renderable=true
+[11:30:00.248203] [I] FLR0026_SHAPE_READY guid=200 entity=17 renderable=true
+[11:30:00.248336] [I] FLR0026_SHAPE_READY guid=202 entity=18 renderable=true
+[11:30:00.248670] [I] FLR0026_SHAPE_READY guid=212 entity=19 renderable=true
+[11:30:00.248799] [I] FLR0026_SHAPE_READY guid=204 entity=20 renderable=true
+[11:30:00.248891] [I] FLR0026_SHAPE_READY guid=206 entity=21 renderable=true
+[11:30:00.248993] [I] FLR0026_SHAPE_READY guid=208 entity=22 renderable=true
+[11:30:00.249136] [I] FLR0026_SHAPE_READY guid=210 entity=23 renderable=true
+[11:30:00.249237] [I] FLR0026_SHAPE_READY guid=118 entity=24 renderable=true
+[11:30:00.249343] [I] FLR0026_SHAPE_READY guid=120 entity=25 renderable=true
+[11:30:00.249492] [I] FLR0026_SHAPE_READY guid=216 entity=26 renderable=true
+[11:30:00.249707] [I] FLR0026_SHAPE_READY guid=244 entity=27 renderable=true
+[11:30:00.249913] [I] FLR0026_SHAPE_READY guid=246 entity=28 renderable=true
+[11:30:00.250057] [I] FLR0026_SHAPE_READY guid=248 entity=29 renderable=true
+[11:30:00.250192] [I] FLR0026_SHAPE_READY guid=250 entity=30 renderable=true
+[11:30:00.250335] [I] FLR0026_SHAPE_READY guid=252 entity=31 renderable=true
+[11:30:00.250486] [I] FLR0026_SHAPE_READY guid=254 entity=32 renderable=true
+[11:30:00.250679] [I] FLR0026_SHAPE_READY guid=256 entity=33 renderable=true
+[11:30:00.250830] [I] FLR0026_SHAPE_READY guid=258 entity=34 renderable=true
+[11:30:00.250966] [I] FLR0026_SHAPE_READY guid=260 entity=35 renderable=true
+[11:30:00.251108] [I] FLR0026_SHAPE_READY guid=262 entity=36 renderable=true
+[11:30:00.251366] [I] FLR0026_SHAPE_READY guid=220 entity=37 renderable=true
+[11:30:00.251675] [I] FLR0026_SHAPE_READY guid=222 entity=38 renderable=true
+[11:30:00.251943] [I] FLR0026_SHAPE_READY guid=224 entity=39 renderable=true
+[11:30:00.252217] [I] FLR0026_SHAPE_READY guid=226 entity=40 renderable=true
+[11:30:00.252489] [I] FLR0026_SHAPE_READY guid=228 entity=41 renderable=true
+[11:30:00.252810] [I] FLR0026_SHAPE_READY guid=230 entity=42 renderable=true
+[11:30:00.253084] [I] FLR0026_SHAPE_READY guid=232 entity=43 renderable=true
+[11:30:00.253357] [I] FLR0026_SHAPE_READY guid=234 entity=44 renderable=true
+[11:30:00.253731] [I] FLR0026_SHAPE_READY guid=236 entity=45 renderable=true
+[11:30:00.254043] [I] FLR0026_SHAPE_READY guid=238 entity=46 renderable=true
+[11:30:00.254153] [I] FLR0026_SHAPE_READY guid=264 entity=47 renderable=true
+[11:30:00.256526] [I] FLR0026_WAYLAND_SURFACE_CREATED surface=true subsurface=true parent=true position=(0, 0) surface_ptr=0x7f36ac1e0d10 parent_ptr=0x561970cdacb0 display_ptr=0x561970c735e0 skip_stack=false sync=false
+[11:30:00.259242] [I] From FilamentViewPluginCApiRegisterWithRegistrar You're calling to get a system from an off thread, undefined experience! Use a message to do your work or grab the ecsystemmanager strand and do your work.
+[11:30:00.359673] [I] FLR0026_SCENE_VISIBILITY seq=1 scene=true entities=44 renderables=38 lights=6 camera_entity=56 viewport=1280x800
+[11:30:00.360961] [I] FLR0026_CAMERA_GEOMETRY seq=1 position=(0.000,0.000,0.000) forward=(-0.000,-0.000,-1.000) fov_vertical=90.000 near=0.000 far=0.000
+[11:30:00.361078] [I] FLR0026_VIEW_STATE seq=1 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:00.361322] [I] FLR0026_RENDERABLE_SAMPLE seq=1 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:00.361397] [I] FLR0026_RENDERABLE_SAMPLE seq=1 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.361408] [I] FLR0026_RENDERABLE_SAMPLE seq=1 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.361419] [I] FLR0026_RENDERABLE_SAMPLE seq=1 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.361430] [I] FLR0026_RENDERABLE_SAMPLE seq=1 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.361440] [I] FLR0026_RENDERABLE_SAMPLE seq=1 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.363272] [I] FLR0026_SHAPE_READY guid=197 entity=57 renderable=true
+[11:30:00.363717] [I] FLR0026_SHAPE_READY guid=199 entity=58 renderable=true
+[11:30:00.363928] [I] FLR0026_SHAPE_READY guid=201 entity=59 renderable=true
+[11:30:00.364118] [I] FLR0026_SHAPE_READY guid=203 entity=60 renderable=true
+[11:30:00.364522] [I] FLR0026_SHAPE_READY guid=205 entity=61 renderable=true
+[11:30:00.364793] [I] FLR0026_SHAPE_READY guid=207 entity=62 renderable=true
+[11:30:00.364999] [I] FLR0026_SHAPE_READY guid=209 entity=63 renderable=true
+FLR0026_FRAME_SKIP_STATUS status=NO_FENCE
+[11:30:00.367455] [I] FLR0026_FRAME_BEGIN seq=1 started=true
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:00.373385] [I] FLR0026_FRAME_END seq=1
+[11:30:00.373477] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=1 started=true
+[11:30:00.374351] [I] FLR0026_FRAME_EVENT_RETURNED seq=1
+[11:30:00.377028] [I] flutter: Camera 12 enabled
+[11:30:00.377999] [I] flutter: Camera 266 enabled
+[11:30:00.378135] [I] flutter: Camera 86 enabled
+[11:30:00.378261] [I] flutter: Camera 214 enabled
+[11:30:00.378786] [I] flutter: Camera 146 enabled
+[11:30:00.378906] [I] flutter: Camera 148 enabled
+[11:30:00.378994] [I] flutter: Camera 150 enabled
+[11:30:00.379111] [I] flutter: poGetFilamentScene onCreated
+[11:30:00.379151] [I] flutter: poGetFilamentScene onCreated completed
+[11:30:00.385846] [I] Accessibility tree dumped to /home/agl-driver/.flutter-auto/accessibility/semantic_tree_init.json
+[11:30:00.475066] [I] FLR0026_SCENE_VISIBILITY seq=2 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:00.475247] [I] FLR0026_CAMERA_GEOMETRY seq=2 position=(0.000,0.000,0.000) forward=(-0.000,-0.000,-1.000) fov_vertical=90.000 near=0.000 far=0.000
+[11:30:00.475272] [I] FLR0026_VIEW_STATE seq=2 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:00.475311] [I] FLR0026_RENDERABLE_SAMPLE seq=2 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:00.475339] [I] FLR0026_RENDERABLE_SAMPLE seq=2 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.475362] [I] FLR0026_RENDERABLE_SAMPLE seq=2 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.475386] [I] FLR0026_RENDERABLE_SAMPLE seq=2 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.475409] [I] FLR0026_RENDERABLE_SAMPLE seq=2 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.475432] [I] FLR0026_RENDERABLE_SAMPLE seq=2 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+FLR0026_FRAME_SKIP_STATUS status=NO_FENCE
+[11:30:00.476075] [I] FLR0026_FRAME_BEGIN seq=2 started=true
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:00.480443] [I] FLR0026_FRAME_END seq=2
+[11:30:00.480472] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=2 started=true
+[11:30:00.480682] [I] FLR0026_FRAME_EVENT_RETURNED seq=2
+[11:30:00.581152] [I] FLR0026_SCENE_VISIBILITY seq=3 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:00.581338] [I] FLR0026_CAMERA_GEOMETRY seq=3 position=(0.000,0.000,0.000) forward=(-0.000,-0.000,-1.000) fov_vertical=90.000 near=0.000 far=0.000
+[11:30:00.581364] [I] FLR0026_VIEW_STATE seq=3 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:00.581405] [I] FLR0026_RENDERABLE_SAMPLE seq=3 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:00.581435] [I] FLR0026_RENDERABLE_SAMPLE seq=3 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.581541] [I] FLR0026_RENDERABLE_SAMPLE seq=3 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.581733] [I] FLR0026_RENDERABLE_SAMPLE seq=3 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.581774] [I] FLR0026_RENDERABLE_SAMPLE seq=3 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:00.581802] [I] FLR0026_RENDERABLE_SAMPLE seq=3 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:00.583356] [I] FLR0026_FRAME_BEGIN seq=3 started=false
+[11:30:00.583480] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=3
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:00.585843] [I] FLR0026_FRAME_END seq=3
+[11:30:00.585875] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=3 started=false
+[11:30:00.586008] [I] FLR0026_FRAME_EVENT_RETURNED seq=3
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:00.687341] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=4
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+FLR0026_VK_DRIVER_BEGIN_FRAME frame_id=1
+FLR0026_VK_DRIVER_BEGIN_FRAME_DONE frame_id=1
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:00.790877] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=5
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:00.807106] [I] flutter: Checking native readiness, attempt 2...
+[11:30:00.809932] [I] flutter: Native is ready. Proceeding...
+[11:30:00.810074] [I] flutter: Creating Event Channels
+[11:30:00.812937] [I] flutter: Event Channels created.
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:00.894159] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=6
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:00.997369] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=7
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.100446] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=8
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.203993] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=9
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:01.306544] [I] FLR0026_SCENE_VISIBILITY seq=10 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:01.307043] [I] FLR0026_CAMERA_GEOMETRY seq=10 position=(0.000,0.000,0.000) forward=(-0.000,-0.000,-1.000) fov_vertical=90.000 near=0.000 far=0.000
+[11:30:01.307082] [I] FLR0026_VIEW_STATE seq=10 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:01.307126] [I] FLR0026_RENDERABLE_SAMPLE seq=10 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:01.307155] [I] FLR0026_RENDERABLE_SAMPLE seq=10 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:01.307258] [I] FLR0026_RENDERABLE_SAMPLE seq=10 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:01.307291] [I] FLR0026_RENDERABLE_SAMPLE seq=10 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:01.307315] [I] FLR0026_RENDERABLE_SAMPLE seq=10 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:01.307338] [I] FLR0026_RENDERABLE_SAMPLE seq=10 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.308029] [I] FLR0026_FRAME_BEGIN seq=10 started=false
+[11:30:01.308055] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=10
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:01.310810] [I] FLR0026_FRAME_END seq=10
+[11:30:01.310852] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=10 started=false
+[11:30:01.310983] [I] FLR0026_FRAME_EVENT_RETURNED seq=10
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.418698] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=11
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:01.438370] [I] flutter: FLR0026_PLAYGROUND_ONCREATE
+[11:30:01.438525] [I] flutter: FLR0026_CAMERA_SET_ACTIVE_BEGIN id=12 view=0 engine=true
+[11:30:01.438890] [I] From SetActiveCamera You're calling to get a system from an off thread, undefined experience! Use a message to do your work or grab the ecsystemmanager strand and do your work.
+[11:30:01.439023] [I] FLR0026_ACTIVE_CAMERA_REQUEST view=0 camera=12
+[11:30:01.439129] [I] FLR0026_ACTIVE_CAMERA view=0 camera=12
+[11:30:01.439667] [I] flutter: FLR0026_CAMERA_SET_ACTIVE_REQUEST id=12 request=true
+[11:30:01.439795] [I] flutter: Camera 12 enabled
+[11:30:01.440161] [I] flutter: FLR0026_PLAYGROUND_SET_ACTIVE
+[11:30:01.442510] [I] flutter: FLR0026_CAMERA_SET_ACTIVE_DONE id=12 view=0
+[11:30:01.523254] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.525183] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=12
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:01.641833] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:01.642424] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:01.642525] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:01.642681] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:01.643067] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.643487] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=13
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:01.750292] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:01.750498] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:01.750708] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:01.750811] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:01.751156] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.751560] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=14
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:01.856931] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:01.857144] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:01.857230] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:01.857307] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:01.857715] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.858129] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=15
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:01.964434] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:01.964791] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:01.964893] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:01.964967] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:01.965304] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:01.965830] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=16
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:02.069957] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.070265] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.070347] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.070418] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.070950] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:02.071365] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=17
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+FLR0026_VK_FLUSH_BEGIN injected=(nil) has_last_submit=false
+FLR0026_VK_FLUSH_POOL_BEGIN pool=0x7f36a9b01b90
+FLR0026_VK_COMMAND_END_BEGIN buffer=0x7f36a8023f60\nFLR0026_VK_COMMAND_END_DONE buffer=0x7f36a8023f60\nFLR0026_VK_SUBMIT_SYNC seq=1 wait_count=0 wait0=(nil) wait1=(nil) signal=0x7f36a8023e80
+FLR0026_VK_QUEUE_SUBMIT_BEGIN queue=0x7f36a802bbe0 fence=0x7f36a9b00b90\nFLR0026_VK_QUEUE_SUBMIT_DONE result=0 queue=0x7f36a802bbe0 fence=0x7f36a9b00b90\nFLR0026_VK_CMD_FENCE_STATUS fence=0x7f36a9b00b90 status=1
+FLR0026_VK_FLUSH_POOL_DONE pool=0x7f36a9b01b90 dependency=true
+FLR0026_VK_FLUSH_DONE has_flushed=true
+FLR0026_VK_FLUSH_BEGIN injected=(nil) has_last_submit=true
+FLR0026_VK_FLUSH_DONE has_flushed=false
+FLR0026_VK_END_FRAME_DONE
+FLR0026_VK_END_FRAME_BEGIN
+FLR0026_VK_END_FRAME_COMMANDS_RECORDED
+[11:30:02.176109] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.176377] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.176494] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.176734] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.177207] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:02.182401] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=18
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:02.292118] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.292324] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.292408] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.292670] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.292873] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+FLR0026_VK_WAYLAND_SURFACE_CREATE result=0 display=561970c735e0 wl_surface=7f36ac1e0d10 extent=1280x800 vk_surface=7f36a9d8a010
+[11:30:02.296035] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=19
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:02.401464] [I] FLR0026_SCENE_VISIBILITY seq=20 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:02.401871] [I] FLR0026_CAMERA_GEOMETRY seq=20 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:02.401910] [I] FLR0026_VIEW_STATE seq=20 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:02.401952] [I] FLR0026_RENDERABLE_SAMPLE seq=20 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:02.401981] [I] FLR0026_RENDERABLE_SAMPLE seq=20 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:02.402005] [I] FLR0026_RENDERABLE_SAMPLE seq=20 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:02.402029] [I] FLR0026_RENDERABLE_SAMPLE seq=20 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:02.402053] [I] FLR0026_RENDERABLE_SAMPLE seq=20 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:02.402076] [I] FLR0026_RENDERABLE_SAMPLE seq=20 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:02.402440] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.402542] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.402731] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.402822] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.403150] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:02.403544] [I] FLR0026_FRAME_BEGIN seq=20 started=false
+[11:30:02.403628] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=20
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:02.405951] [I] FLR0026_FRAME_END seq=20
+[11:30:02.405981] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=20 started=false
+[11:30:02.406092] [I] FLR0026_FRAME_EVENT_RETURNED seq=20
+[11:30:02.506535] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.507735] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.507787] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.507822] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.508008] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:02.508213] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=21
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:02.609921] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.610060] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.610100] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.610133] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.610351] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:02.610662] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=22
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+FLR0026_VK_PRESENT_MODE requested=fifo selected=2 supported=true
+FLR0026_VK_SWAPCHAIN_CREATE caps=0 surface=7f36a9d8a010 swapchain=7f36a9c6ebb0 current=4294967295x4294967295 chosen=1280x800 format=44 images=5
+FLR0026_VK_MAKE_CURRENT_BEGIN
+FLR0026_VK_ACQUIRE_BOUNDARY_BEGIN resized=false
+FLR0026_VK_ACQUIRE_SYNC index=0 semaphore=0x7f36a9c5d460\nFLR0026_VK_SWAPCHAIN_ACQUIRE result=0 swapchain=7f36a9c6ebb0 index=0
+FLR0026_VK_ACQUIRE_BOUNDARY_DONE result=0 index=0 semaphore=0x7f36a9c5d460
+FLR0026_VK_ACQUIRE_WAIT_SEMAPHORE enabled=true\nFLR0026_VK_ACQUIRE_BOUNDARY_INJECTED semaphore=0x7f36a9c5d460
+FLR0026_VK_ACQUIRE_BOUNDARY_DONE2
+FLR0026_VK_MAKE_CURRENT_ACQUIRED resized=false
+vkCreateSwapchain: 1280x800, 44, 0, swapchain-size=5, identity-transform=true, depth=126, protected=false
+[11:30:02.717896] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.718015] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.718052] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.718085] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.718248] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:02.718444] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=23
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:02.820213] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.820325] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.820359] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.820386] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.820539] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:02.820812] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=24
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:02.929042] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:02.929253] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:02.929338] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:02.929413] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:02.929836] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:02.930046] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=25
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.032275] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.032507] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.032671] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.032762] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.033098] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.033499] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=26
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.137226] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.137426] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.137457] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.137484] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.137726] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.137923] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=27
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.239990] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.240191] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.240269] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.240337] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.240716] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.241128] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=28
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.344444] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.344778] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.344873] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.344951] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.345267] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.345740] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=29
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.448967] [I] FLR0026_SCENE_VISIBILITY seq=30 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:03.449167] [I] FLR0026_CAMERA_GEOMETRY seq=30 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:03.449192] [I] FLR0026_VIEW_STATE seq=30 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:03.449233] [I] FLR0026_RENDERABLE_SAMPLE seq=30 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:03.449262] [I] FLR0026_RENDERABLE_SAMPLE seq=30 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:03.449287] [I] FLR0026_RENDERABLE_SAMPLE seq=30 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:03.449312] [I] FLR0026_RENDERABLE_SAMPLE seq=30 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:03.449337] [I] FLR0026_RENDERABLE_SAMPLE seq=30 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:03.449361] [I] FLR0026_RENDERABLE_SAMPLE seq=30 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:03.449868] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.449991] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.450071] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.450220] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.450667] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.451085] [I] FLR0026_FRAME_BEGIN seq=30 started=false
+[11:30:03.451105] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=30
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.458827] [I] FLR0026_FRAME_END seq=30
+[11:30:03.458869] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=30 started=false
+[11:30:03.458969] [I] FLR0026_FRAME_EVENT_RETURNED seq=30
+FLR0026_VK_MAKE_CURRENT_DONE
+FLR0026_VK_CMD_FENCE_STATUS fence=0x7f36a9b00b90 status=0
+FLR0026_VK_DRIVER_BEGIN_FRAME frame_id=1
+FLR0026_VK_DRIVER_BEGIN_FRAME_DONE frame_id=1
+[11:30:03.561894] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.562014] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.562049] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.562078] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.562252] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.562442] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=31
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.666878] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.666994] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.667028] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.667058] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.667229] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.667421] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=32
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.773031] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.773147] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.773183] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.773213] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.773368] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.773601] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=33
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.880861] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.880984] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.881019] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.881049] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.881210] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.881403] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=34
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:03.986044] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:03.986167] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:03.986250] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:03.986286] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:03.986440] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:03.986690] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=35
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.091267] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.091396] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.091430] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.091459] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.091671] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.091860] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=36
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.196249] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.196363] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.196395] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.196423] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.196653] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.196878] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=37
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.298441] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.298615] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.298663] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.298695] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.298854] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.299052] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=38
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.405884] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.405997] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.406030] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.406059] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.406206] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.406386] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=39
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.511552] [I] FLR0026_SCENE_VISIBILITY seq=40 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:04.511723] [I] FLR0026_CAMERA_GEOMETRY seq=40 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:04.511736] [I] FLR0026_VIEW_STATE seq=40 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:04.511758] [I] FLR0026_RENDERABLE_SAMPLE seq=40 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:04.511822] [I] FLR0026_RENDERABLE_SAMPLE seq=40 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:04.511838] [I] FLR0026_RENDERABLE_SAMPLE seq=40 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:04.511849] [I] FLR0026_RENDERABLE_SAMPLE seq=40 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:04.511859] [I] FLR0026_RENDERABLE_SAMPLE seq=40 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:04.511869] [I] FLR0026_RENDERABLE_SAMPLE seq=40 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:04.512096] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.512145] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.512176] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.512216] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.512378] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.512616] [I] FLR0026_FRAME_BEGIN seq=40 started=false
+[11:30:04.512632] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=40
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.520741] [I] FLR0026_FRAME_END seq=40
+[11:30:04.520768] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=40 started=false
+[11:30:04.520843] [I] FLR0026_FRAME_EVENT_RETURNED seq=40
+[11:30:04.623233] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.623355] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.623391] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.623434] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.623693] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.623902] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=41
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.729322] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.729454] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.729490] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.729521] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.729739] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.729946] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=42
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.841878] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.842000] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.842035] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.842066] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.842222] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.842417] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=43
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:04.952869] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:04.952990] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:04.953026] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:04.953056] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:04.953225] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:04.953415] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=44
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.055111] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.055242] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.055277] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.055306] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.055469] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.055766] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=45
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.166179] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.166421] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.166507] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.166705] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.166904] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.167113] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=46
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.269156] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.269269] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.269304] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.269334] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.269489] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.269754] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=47
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.374370] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.374499] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.374536] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.374619] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.374789] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.374985] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=48
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.476842] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.476964] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.477000] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.477082] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.477242] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.477434] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=49
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.582672] [I] FLR0026_SCENE_VISIBILITY seq=50 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:05.582796] [I] FLR0026_CAMERA_GEOMETRY seq=50 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:05.582808] [I] FLR0026_VIEW_STATE seq=50 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:05.582830] [I] FLR0026_RENDERABLE_SAMPLE seq=50 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:05.582843] [I] FLR0026_RENDERABLE_SAMPLE seq=50 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:05.582854] [I] FLR0026_RENDERABLE_SAMPLE seq=50 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:05.582864] [I] FLR0026_RENDERABLE_SAMPLE seq=50 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:05.582874] [I] FLR0026_RENDERABLE_SAMPLE seq=50 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:05.582884] [I] FLR0026_RENDERABLE_SAMPLE seq=50 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:05.583109] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.583159] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.583192] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.583222] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.583370] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.583556] [I] FLR0026_FRAME_BEGIN seq=50 started=false
+[11:30:05.583616] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=50
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.592283] [I] FLR0026_FRAME_END seq=50
+[11:30:05.592341] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=50 started=false
+[11:30:05.592440] [I] FLR0026_FRAME_EVENT_RETURNED seq=50
+[11:30:05.697958] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.698076] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.698113] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.698144] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.698303] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.698494] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=51
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.807881] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.807995] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.808030] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.808059] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.808211] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.808442] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=52
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:05.918896] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:05.919004] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:05.919039] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:05.919067] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:05.919220] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:05.919409] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=53
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.023399] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.023537] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.023626] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.023668] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.023829] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.024026] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=54
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.131258] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.131381] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.131417] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.131452] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.131655] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.131860] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=55
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.239213] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.239335] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.239371] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.239402] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.239634] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.239838] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=56
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.346267] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.346395] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.346431] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.346462] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.346678] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.346885] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=57
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.459868] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.459998] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.460034] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.460066] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.460226] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.460428] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=58
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.572856] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.572986] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.573026] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.573064] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.573222] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.573418] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=59
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.676644] [I] FLR0026_SCENE_VISIBILITY seq=60 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:06.676779] [I] FLR0026_CAMERA_GEOMETRY seq=60 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:06.676792] [I] FLR0026_VIEW_STATE seq=60 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:06.676815] [I] FLR0026_RENDERABLE_SAMPLE seq=60 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:06.676829] [I] FLR0026_RENDERABLE_SAMPLE seq=60 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:06.676859] [I] FLR0026_RENDERABLE_SAMPLE seq=60 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:06.676870] [I] FLR0026_RENDERABLE_SAMPLE seq=60 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:06.676881] [I] FLR0026_RENDERABLE_SAMPLE seq=60 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:06.676891] [I] FLR0026_RENDERABLE_SAMPLE seq=60 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:06.677125] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.677176] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.677211] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.677243] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.677398] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.677635] [I] FLR0026_FRAME_BEGIN seq=60 started=false
+[11:30:06.677646] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=60
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.678840] [I] FLR0026_FRAME_END seq=60
+[11:30:06.678854] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=60 started=false
+[11:30:06.690601] [I] FLR0026_FRAME_EVENT_RETURNED seq=60
+[11:30:06.792871] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.792997] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.793097] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.793135] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.793295] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.793483] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=61
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:06.899234] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:06.899364] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:06.899400] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:06.899432] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:06.899632] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:06.899833] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=62
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.004363] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.004502] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.004541] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.004635] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.004813] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.005014] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=63
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.109491] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.109715] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.109760] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.109794] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.109962] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.110152] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=64
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.215424] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.215552] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.215661] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.215703] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.215882] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.216084] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=65
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.323676] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.323794] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.323830] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.323860] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.324013] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.324271] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=66
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.428254] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.428381] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.428417] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.428447] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.428644] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.428853] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=67
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.534895] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.535011] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.535044] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.535072] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.535228] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.535410] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=68
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.642861] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.642981] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.643017] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.643046] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.643201] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.643393] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=69
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.746829] [I] FLR0026_SCENE_VISIBILITY seq=70 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:07.747016] [I] FLR0026_CAMERA_GEOMETRY seq=70 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:07.747047] [I] FLR0026_VIEW_STATE seq=70 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:07.747095] [I] FLR0026_RENDERABLE_SAMPLE seq=70 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:07.747125] [I] FLR0026_RENDERABLE_SAMPLE seq=70 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:07.747150] [I] FLR0026_RENDERABLE_SAMPLE seq=70 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:07.747174] [I] FLR0026_RENDERABLE_SAMPLE seq=70 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:07.747198] [I] FLR0026_RENDERABLE_SAMPLE seq=70 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:07.747221] [I] FLR0026_RENDERABLE_SAMPLE seq=70 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:07.747709] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.747821] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.747954] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.747990] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.748142] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.748328] [I] FLR0026_FRAME_BEGIN seq=70 started=false
+[11:30:07.748338] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=70
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.749733] [I] FLR0026_FRAME_END seq=70
+[11:30:07.749757] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=70 started=false
+[11:30:07.749847] [I] FLR0026_FRAME_EVENT_RETURNED seq=70
+[11:30:07.851887] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.852004] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.852038] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.852068] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.852228] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.852441] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=71
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:07.957260] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:07.957377] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:07.957412] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:07.957443] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:07.957650] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:07.957862] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=72
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.061898] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.062032] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.062069] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.062099] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.062263] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.062459] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=73
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.164475] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.164642] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.164685] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.164718] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.164879] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.165071] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=74
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.272876] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.272994] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.273029] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.273108] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.273274] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.273520] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=75
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.381036] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.381155] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.381189] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.381218] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.381374] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.381618] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=76
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.487170] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.487336] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.487384] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.487427] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.487656] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.487850] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=77
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.593097] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.593328] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.593368] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.593400] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.593712] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.593999] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=78
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.698947] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.699061] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.699096] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.699127] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.699283] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.699477] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=79
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.802893] [I] FLR0026_SCENE_VISIBILITY seq=80 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:08.803018] [I] FLR0026_CAMERA_GEOMETRY seq=80 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:08.803032] [I] FLR0026_VIEW_STATE seq=80 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:08.803054] [I] FLR0026_RENDERABLE_SAMPLE seq=80 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:08.803124] [I] FLR0026_RENDERABLE_SAMPLE seq=80 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:08.803139] [I] FLR0026_RENDERABLE_SAMPLE seq=80 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:08.803150] [I] FLR0026_RENDERABLE_SAMPLE seq=80 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:08.803160] [I] FLR0026_RENDERABLE_SAMPLE seq=80 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:08.803171] [I] FLR0026_RENDERABLE_SAMPLE seq=80 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:08.803402] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.803453] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.803486] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.803516] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.803726] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.803954] [I] FLR0026_FRAME_BEGIN seq=80 started=false
+[11:30:08.803965] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=80
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:08.805371] [I] FLR0026_FRAME_END seq=80
+[11:30:08.805385] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=80 started=false
+[11:30:08.805478] [I] FLR0026_FRAME_EVENT_RETURNED seq=80
+[11:30:08.912866] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:08.912979] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:08.913012] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:08.913041] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:08.913201] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:08.913395] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=81
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.031862] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.032000] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.032036] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.032067] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.032226] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.032452] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=82
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.147892] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.148009] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.148044] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.148074] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.148228] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.148419] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=83
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.258887] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.259009] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.259044] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.259073] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.259228] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.259419] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=84
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.367020] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.367238] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.367325] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.367400] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.367806] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.368057] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=85
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.469923] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.470044] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.470079] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.470109] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.470267] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.470460] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=86
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.577888] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.578007] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.578042] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.578072] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.578225] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.578407] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=87
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.683368] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.683492] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.683531] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.683614] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.683781] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.683977] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=88
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.789447] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.789608] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.789653] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.789685] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.789903] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.790102] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=89
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.902681] [I] FLR0026_SCENE_VISIBILITY seq=90 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:09.902805] [I] FLR0026_CAMERA_GEOMETRY seq=90 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:09.902818] [I] FLR0026_VIEW_STATE seq=90 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:09.902839] [I] FLR0026_RENDERABLE_SAMPLE seq=90 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:09.902853] [I] FLR0026_RENDERABLE_SAMPLE seq=90 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:09.902863] [I] FLR0026_RENDERABLE_SAMPLE seq=90 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:09.902874] [I] FLR0026_RENDERABLE_SAMPLE seq=90 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:09.902884] [I] FLR0026_RENDERABLE_SAMPLE seq=90 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:09.902894] [I] FLR0026_RENDERABLE_SAMPLE seq=90 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:09.903118] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:09.903168] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:09.903201] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:09.903232] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:09.903379] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:09.903631] [I] FLR0026_FRAME_BEGIN seq=90 started=false
+[11:30:09.903647] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=90
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:09.907652] [I] FLR0026_FRAME_END seq=90
+[11:30:09.907708] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=90 started=false
+[11:30:09.907801] [I] FLR0026_FRAME_EVENT_RETURNED seq=90
+[11:30:10.012870] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.013003] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.013039] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.013071] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.013228] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.013423] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=91
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.115604] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.115711] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.115762] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.115792] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.115954] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.116180] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=92
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.221898] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.222016] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.222052] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.222083] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.222240] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.222438] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=93
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.329909] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.330037] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.330072] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.330103] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.330266] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.330465] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=94
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.437922] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.438047] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.438082] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.438112] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.438271] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.438464] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=95
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.552549] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.552733] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.552773] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.552806] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.552967] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.553160] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=96
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.667882] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.668005] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.668042] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.668075] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.668232] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.668423] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=97
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.776381] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.776554] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.776676] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.776718] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.776878] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.777068] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=98
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.884540] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.884824] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.884868] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.884902] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.885074] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.885458] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=99
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.987668] [I] FLR0026_SCENE_VISIBILITY seq=100 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:10.987789] [I] FLR0026_CAMERA_GEOMETRY seq=100 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:10.987803] [I] FLR0026_VIEW_STATE seq=100 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:10.987825] [I] FLR0026_RENDERABLE_SAMPLE seq=100 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:10.987839] [I] FLR0026_RENDERABLE_SAMPLE seq=100 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:10.987850] [I] FLR0026_RENDERABLE_SAMPLE seq=100 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:10.987860] [I] FLR0026_RENDERABLE_SAMPLE seq=100 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:10.987871] [I] FLR0026_RENDERABLE_SAMPLE seq=100 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:10.987881] [I] FLR0026_RENDERABLE_SAMPLE seq=100 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:10.988112] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:10.988167] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:10.988203] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:10.988238] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:10.988395] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:10.988657] [I] FLR0026_FRAME_BEGIN seq=100 started=false
+[11:30:10.988670] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=100
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:10.995964] [I] FLR0026_FRAME_END seq=100
+[11:30:10.995994] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=100 started=false
+[11:30:10.996087] [I] FLR0026_FRAME_EVENT_RETURNED seq=100
+[11:30:11.100881] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.101017] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.101056] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.101148] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.101313] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.101510] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=101
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:11.209104] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.209228] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.209266] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.209299] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.209456] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.209726] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=102
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:11.322859] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.322987] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.323027] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.323060] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.323224] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.323435] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=103
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:11.429783] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.429913] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.429953] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.430011] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.430189] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.430388] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=104
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:11.537360] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.537484] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.537523] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.537555] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.545855] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.546153] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=105
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:11.663902] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.664026] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.664062] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.664093] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.664250] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.664503] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=106
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:11.766249] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.766348] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.766383] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.766414] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.766663] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.766876] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=107
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:11.868613] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.868736] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.868773] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.868804] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.868963] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.869157] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=108
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:11.971097] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:11.971214] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:11.971251] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:11.971282] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:11.971443] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:11.971744] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=109
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.080677] [I] FLR0026_SCENE_VISIBILITY seq=110 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:12.080817] [I] FLR0026_CAMERA_GEOMETRY seq=110 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:12.080830] [I] FLR0026_VIEW_STATE seq=110 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:12.080852] [I] FLR0026_RENDERABLE_SAMPLE seq=110 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:12.080866] [I] FLR0026_RENDERABLE_SAMPLE seq=110 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:12.080876] [I] FLR0026_RENDERABLE_SAMPLE seq=110 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:12.080887] [I] FLR0026_RENDERABLE_SAMPLE seq=110 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:12.080897] [I] FLR0026_RENDERABLE_SAMPLE seq=110 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:12.080908] [I] FLR0026_RENDERABLE_SAMPLE seq=110 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:12.081134] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.081185] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.081271] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.081309] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.081463] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.081719] [I] FLR0026_FRAME_BEGIN seq=110 started=false
+[11:30:12.081730] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=110
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.086650] [I] FLR0026_FRAME_END seq=110
+[11:30:12.086685] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=110 started=false
+[11:30:12.086760] [I] FLR0026_FRAME_EVENT_RETURNED seq=110
+[11:30:12.189901] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.190029] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.190066] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.190097] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.190254] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.190455] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=111
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.292500] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.292703] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.292745] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.292776] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.292954] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.293156] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=112
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.397792] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.397927] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.397963] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.397994] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.398165] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.398360] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=113
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.506884] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.507003] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.507038] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.507068] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.507222] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.507413] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=114
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.609882] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.610002] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.610038] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.610133] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.610294] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.610486] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=115
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.726874] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.726992] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.727026] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.727056] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.727210] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.727402] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=116
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.837880] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.838004] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.838043] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.838076] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.838235] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.838430] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=117
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:12.944138] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:12.944255] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:12.944292] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:12.944324] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:12.944490] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:12.944753] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=118
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.048492] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.048709] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.048755] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.048790] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.048969] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.049168] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=119
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.154487] [I] FLR0026_SCENE_VISIBILITY seq=120 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:13.154692] [I] FLR0026_CAMERA_GEOMETRY seq=120 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:13.154710] [I] FLR0026_VIEW_STATE seq=120 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:13.154732] [I] FLR0026_RENDERABLE_SAMPLE seq=120 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:13.154800] [I] FLR0026_RENDERABLE_SAMPLE seq=120 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:13.154816] [I] FLR0026_RENDERABLE_SAMPLE seq=120 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:13.154827] [I] FLR0026_RENDERABLE_SAMPLE seq=120 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:13.154837] [I] FLR0026_RENDERABLE_SAMPLE seq=120 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:13.154847] [I] FLR0026_RENDERABLE_SAMPLE seq=120 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:13.155070] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.155128] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.155162] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.155194] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.155345] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.155534] [I] FLR0026_FRAME_BEGIN seq=120 started=false
+[11:30:13.155543] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=120
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.161322] [I] FLR0026_FRAME_END seq=120
+[11:30:13.161366] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=120 started=false
+[11:30:13.164792] [I] FLR0026_FRAME_EVENT_RETURNED seq=120
+[11:30:13.265645] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.265773] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.265811] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.265848] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.266024] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.266219] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=121
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.375482] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.375657] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.375701] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.375734] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.375910] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.376101] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=122
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.484408] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.484524] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.484558] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.484649] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.484829] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.485017] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=123
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.600914] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.601034] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.601069] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.601100] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.601262] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.601455] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=124
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.715862] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.715977] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.716011] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.716040] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.716191] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.716376] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=125
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.818230] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.818350] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.818386] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.818416] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.818622] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.818831] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=126
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:13.922056] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:13.922181] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:13.922217] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:13.922247] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:13.922418] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:13.922682] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=127
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.033239] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.033380] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.033415] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.033446] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.033678] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.033892] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=128
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.140874] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.140993] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.141028] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.141057] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.141270] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.141461] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=129
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.257867] [I] FLR0026_SCENE_VISIBILITY seq=130 scene=true entities=51 renderables=45 lights=6 camera_entity=56 viewport=1280x800
+[11:30:14.257998] [I] FLR0026_CAMERA_GEOMETRY seq=130 position=(5.000,0.000,-5.000) forward=(-0.707,-0.000,0.707) fov_vertical=60.000 near=0.050 far=1000.000
+[11:30:14.258011] [I] FLR0026_VIEW_STATE seq=130 view_scene=true system_scene=true same_scene=true visible_layers=255 blend_opaque=false
+[11:30:14.258033] [I] FLR0026_RENDERABLE_SAMPLE seq=130 entity=4 world_pos=(0.000,0.000,0.000) bounds_min=(0.000,0.000,0.000) bounds_max=(0.000,0.000,0.000) layer=1
+[11:30:14.258046] [I] FLR0026_RENDERABLE_SAMPLE seq=130 entity=11 world_pos=(3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:14.258057] [I] FLR0026_RENDERABLE_SAMPLE seq=130 entity=12 world_pos=(0.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:14.258067] [I] FLR0026_RENDERABLE_SAMPLE seq=130 entity=13 world_pos=(-3.000,1.000,3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:14.258077] [I] FLR0026_RENDERABLE_SAMPLE seq=130 entity=14 world_pos=(3.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:14.258086] [I] FLR0026_RENDERABLE_SAMPLE seq=130 entity=15 world_pos=(0.000,1.000,-3.000) bounds_min=(-0.500,-0.500,-0.500) bounds_max=(0.500,0.500,0.500) layer=1
+[11:30:14.258332] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.258386] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.258418] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.258448] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.258673] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.258878] [I] FLR0026_FRAME_BEGIN seq=130 started=false
+[11:30:14.258888] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=130
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.260010] [I] FLR0026_FRAME_END seq=130
+[11:30:14.260021] [I] FLR0026_DRAWFRAME_BEFORE_EVENT seq=130 started=false
+[11:30:14.261014] [I] FLR0026_FRAME_EVENT_RETURNED seq=130
+[11:30:14.361459] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.361642] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.361688] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.361720] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.361885] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.362084] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=131
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.465601] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.465731] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.465769] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.465800] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.465982] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.466226] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=132
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.572293] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.572407] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.572445] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.572477] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.572719] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.572926] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=133
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.680962] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.681082] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.681117] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.681147] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.681307] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.681502] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=134
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.790892] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.791011] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.791046] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.791078] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.791255] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.791460] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=135
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:14.915367] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:14.915486] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:14.915522] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:14.915553] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:14.915776] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:14.915983] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=136
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:15.017764] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:15.017894] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:15.017933] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:15.017963] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:15.018136] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:15.018326] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=137
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:15.134949] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:15.135120] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:15.135160] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:15.135191] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:15.135367] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:15.135560] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=138
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE
+[11:30:15.248636] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[11:30:15.248770] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[11:30:15.248814] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[11:30:15.248852] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[11:30:15.249039] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_FRAME_FENCE_WAIT_LINKED linked=false
+FLR0026_FRAME_SKIP_STATUS status=1
+[11:30:15.249259] [I] FLR0026_FRAME_FORCED_AFTER_SKIP seq=139
+FLR0026_RENDERER_COMMIT_ENQUEUE
+FLR0026_FRAME_FENCE_CREATE_REQUEST
+FLR0026_FRAME_FENCE_CREATE_RETURNED valid=true
+FLR0026_RENDERER_ENDFRAME_ENQUEUE

@@ -1,0 +1,1 @@
+printf 'FLR0271_NATIVE_COREDUMP_BEGIN\n'; coredumpctl info 631 --no-pager 2>/dev/null | grep -E -- 'PID:|Signal:|Executable:|Command Line:|Stack trace|#[0-9]+|flutter-auto|libvulkan_lvp|llvmpipe' | head -n 220 || true; printf 'FLR0271_NATIVE_COREDUMP_END\n'

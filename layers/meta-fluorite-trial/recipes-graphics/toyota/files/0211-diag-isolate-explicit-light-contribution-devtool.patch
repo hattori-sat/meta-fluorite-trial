@@ -1,0 +1,30 @@
+From 7774c042eee5087240dc86b43f89df20b5f2fe17 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 12 Sep 2026 09:23:12 +0000
+Subject: [PATCH] diag: isolate explicit light contribution
+
+---
+ .../filament_view/core/systems/derived/light_system.cc | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 0df944e..ba0bb14 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -153,7 +153,15 @@ void LightSystem::BuildLight(Light& light) {
+   builder.intensity(light.getIntensity());
+   builder.position(light.getPosition());
+   builder.direction(light.getDirection());
+-  builder.castLight(light.getCastLight());
++  const bool disableDirectContribution =
++    std::getenv("FLUORITE_NATIVE_LIGHT_DISABLE_CONTRIBUTION") != nullptr;
++  builder.castLight(light.getCastLight() && !disableDirectContribution);
++  if (disableDirectContribution) {
++    spdlog::info(
++      "FLUORITE_NATIVE_LIGHT_DISABLE_CONTRIBUTION enabled=true entity={}",
++      light.m_poFilamentEntityLight.getId()
++    );
++  }
+   const bool disableShadowCasting =
+     std::getenv("FLR0026_NATIVE_LIGHT_DISABLE_SHADOWS") != nullptr;
+   builder.castShadows(light.getCastShadows() && !disableShadowCasting);

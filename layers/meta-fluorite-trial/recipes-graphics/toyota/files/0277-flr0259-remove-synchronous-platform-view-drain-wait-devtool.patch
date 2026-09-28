@@ -1,0 +1,32 @@
+From 2ab004d7e179a3f249899e672ff02a125bb25830 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 21 Sep 2026 04:23:12 +0000
+Subject: [PATCH] FLR-0259: remove synchronous PlatformView drain wait
+
+---
+ plugins/filament_view/filament_view_plugin_c_api.cc | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin_c_api.cc b/plugins/filament_view/filament_view_plugin_c_api.cc
+index 8de27f051..acb04aa2d 100644
+--- a/plugins/filament_view/filament_view_plugin_c_api.cc
++++ b/plugins/filament_view/filament_view_plugin_c_api.cc
+@@ -82,17 +82,12 @@ void FilamentViewPluginCApiRegisterWithRegistrar(
+     auto viewTargetSystem = ecs->getSystem<plugin_filament_view::ViewTargetSystem>(
+       "FilamentViewPluginCApiRegisterWithRegistrar"
+     );
+-    std::promise<void> startupPromise;
+-    auto startupFuture = startupPromise.get_future();
+-    post(*ecs->getStrand(), [&viewTargetSystem, &startupPromise] {
++    post(*ecs->getStrand(), [viewTargetSystem] {
+       spdlog::info("FLUORITE_VIEWTARGET_CAPI_DRAIN_BEGIN");
+       spdlog::debug("== Starting ViewTargetSystem frame rendering loops ==");
+ 
+       viewTargetSystem->ProcessMessages();
+       spdlog::info("FLUORITE_VIEWTARGET_CAPI_DRAIN_END");
+-      startupPromise.set_value();
+     });
+-
+-    startupFuture.wait();
+   }
+ }

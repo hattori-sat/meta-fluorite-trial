@@ -1,0 +1,16 @@
+# Shared image additions used by Fluorite validation builds.
+
+IMAGE_INSTALL:append = " \
+    packagegroup-fluorite-demo \
+    packagegroup-fluorite-runtime-debug \
+    ivi-homescreen \
+    agl-shell-activator \
+    window-management-client-grpc \
+    vulkan-loader \
+    mesa-vulkan-drivers \
+"
+
+DISTRO_FEATURES:append = " vulkan"
+
+# Keep debug/coredump tooling aligned with the current Raspberry Pi bring-up.
+require conf/include/agl-devel.inc

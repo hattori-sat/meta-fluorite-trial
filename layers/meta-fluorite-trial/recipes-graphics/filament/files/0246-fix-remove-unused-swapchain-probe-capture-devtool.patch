@@ -1,0 +1,22 @@
+From 0ca0f053c76663b202e284b7c53aae27d2c735e6 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 21:01:57 +0000
+Subject: [PATCH] fix: remove unused swapchain probe capture
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index e7e533a8c..2d08d4af7 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -1838,7 +1838,7 @@ void VulkanDriver::endRenderPass(int) {
+                     [context = &mContext](uint32_t types, VkFlags reqs) {
+                         return context->selectMemoryType(types, reqs);
+                     },
+-                    [probeImage, pixelCount, componentCount](PixelBufferDescriptor&& result) {
++                    [probeImage, pixelCount](PixelBufferDescriptor&& result) {
+                         auto const* const pixels = static_cast<uint8_t const*>(result.buffer);
+                         size_t nonzeroPixels = 0;
+                         size_t chromaticPixels = 0;

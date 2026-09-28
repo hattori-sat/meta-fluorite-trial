@@ -1,0 +1,25 @@
+From bd11b75c46f2b96472ab1d3dac28da94d93707cd Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 11:22:08 +0000
+Subject: [PATCH] FLR-0236: activate Planetarium scene from Scenes tap
+
+---
+ packages/filament_scene/example/lib/main.dart | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index a50b69a..8b07bcb 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -251,7 +251,10 @@ class _MyAppState extends State<MyApp> {
+                 child: GestureDetector(
+                   // FLR-0235: keep the tap boundary without Material hover
+                   // state painting over the native 3D surface.
+-                  onTap: () {},
++                  onTap: () {
++                    print('FLR0236_SCENE_ACTIVATION id=3 name=Planetarium');
++                    setState(() => _setScene(3));
++                  },
+                   child: Container(
+                     width: 99,
+                     height: 32,

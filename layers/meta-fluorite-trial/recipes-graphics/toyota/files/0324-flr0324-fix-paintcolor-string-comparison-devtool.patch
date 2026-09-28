@@ -1,0 +1,48 @@
+From 3aefa9ad7867ede15231f1f5c197307e942f4eb0 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 09:19:21 +0000
+Subject: [PATCH] FLR-0324: fix PaintColor string comparison
+
+---
+ plugins/filament_view/core/systems/derived/model_system.cc | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index bf0976b..2fd1d89 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -20,6 +20,7 @@
+ #include <array>
+ #include <asio/post.hpp>
+ #include <cassert>
++#include <string_view>
+ #include <core/components/derived/collider.h>
+ #include <core/entity/base/entityobject.h>
+ #include <core/include/file_utils.h>
+@@ -505,7 +506,7 @@ void ModelSystem::setupRenderable(
+         !production_emissive_override_applied_ && primitive == 0 &&
+         std::getenv("FLR0307_PRODUCTION_EMISSIVE_OVERRIDE") != nullptr &&
+         model->getAssetPath().find("sequoia_ngp.glb") != std::string::npos &&
+-        materialInstance->getName() == "PaintColor" &&
++        std::string_view{materialInstance->getName()} == "PaintColor" &&
+         material->hasParameter("emissiveFactor")
+       ) {
+         materialInstance->setParameter(
+@@ -522,7 +523,7 @@ void ModelSystem::setupRenderable(
+         !production_base_color_override_applied_ && primitive == 0 &&
+         std::getenv("FLR0316_PRODUCTION_BASE_COLOR_OVERRIDE") != nullptr &&
+         model->getAssetPath().find("sequoia_ngp.glb") != std::string::npos &&
+-        materialInstance->getName() == "PaintColor" &&
++        std::string_view{materialInstance->getName()} == "PaintColor" &&
+         material->hasParameter("baseColorFactor")
+       ) {
+         materialInstance->setParameter(
+@@ -543,7 +544,7 @@ void ModelSystem::setupRenderable(
+           fEntity.getId(), primitive,
+           std::getenv("FLR0316_PRODUCTION_BASE_COLOR_OVERRIDE") != nullptr,
+           model->getAssetPath().find("sequoia_ngp.glb") != std::string::npos,
+-          materialInstance->getName() == "PaintColor",
++          std::string_view{materialInstance->getName()} == "PaintColor",
+           material->hasParameter("baseColorFactor"), materialInstance->getName(),
+           model->getAssetPath()
+         );

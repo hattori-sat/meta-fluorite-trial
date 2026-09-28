@@ -1,0 +1,36 @@
+From 7f056542737aca44a8dd964d191f1e8e99081e43 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 02:53:03 +0000
+Subject: [PATCH] diag: trace camera activation request
+
+---
+ packages/filament_scene/lib/camera/camera.dart | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/lib/camera/camera.dart b/packages/filament_scene/lib/camera/camera.dart
+index 93972c8..236d82f 100644
+--- a/packages/filament_scene/lib/camera/camera.dart
++++ b/packages/filament_scene/lib/camera/camera.dart
+@@ -82,8 +82,21 @@ class Camera extends TransformEntity with CameraComponent.Camera, CameraComponen
+   /// Sets the camera as active for the given view
+   void setActive([final int? viewId]) {
+     final int activeViewId = viewId ?? 0;
++    final FilamentViewApi? currentEngine = engine;
++    print(
++      'FLR0026_CAMERA_SET_ACTIVE_BEGIN id=$id view=$activeViewId '
++      'engine=${currentEngine != null}',
++    );
+     markViewActive(activeViewId);
+-    engine?.queueFrameTask(engine?.setActiveCamera(activeViewId, id));
++    final Future<void>? request = currentEngine?.setActiveCamera(activeViewId, id);
++    print('FLR0026_CAMERA_SET_ACTIVE_REQUEST id=$id request=${request != null}');
++    currentEngine?.queueFrameTask(request);
++    request?.then(
++      (_) => print('FLR0026_CAMERA_SET_ACTIVE_DONE id=$id view=$activeViewId'),
++      onError: (Object error, StackTrace stack) {
++        print('FLR0026_CAMERA_SET_ACTIVE_ERROR id=$id error=$error');
++      },
++    );
+     onEnable();
+   }
+ 

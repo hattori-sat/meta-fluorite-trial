@@ -1,0 +1,9 @@
+.git
+.repo
+downloads
+sstate-cache
+tmp
+deploy
+*.ext4
+*.wic
+*.img

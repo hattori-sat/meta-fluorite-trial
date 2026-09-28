@@ -1,0 +1,1 @@
+log=/run/user/1001/flr0285-production-no-model-skip-shapes.log; grep -n -E 'FLR0026_FRAME_SKIP_STATUS status=0|FLR0026_FRAME_FENCE_WAIT_RESULT status=0|FLUORITE_VK_QUEUE_PRESENT_RETURN|FLR0026_VK_QUEUE_PRESENT result=' "$log" | tail -n 40; true

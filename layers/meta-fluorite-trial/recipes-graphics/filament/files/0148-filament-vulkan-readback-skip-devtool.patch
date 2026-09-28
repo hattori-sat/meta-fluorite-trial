@@ -1,0 +1,35 @@
+From a9e0b2a60a2b80938d4b2a1b1359f2d6ca886b19 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 02:58:43 +0000
+Subject: [PATCH] diag: allow skipping Vulkan readback
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index f39f74807..8d76800b9 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -45,6 +45,7 @@
+ 
+ #include <chrono>
+ #include <cstdio>
++#include <cstdlib>
+ 
+ using namespace bluevk;
+ 
+@@ -1822,6 +1823,10 @@ void VulkanDriver::readPixels(Handle<HwRenderTarget> src, uint32_t x, uint32_t y
+         uint32_t height, PixelBufferDescriptor&& pbd) {
+     FVK_LOGI << "FLR0026_VK_READBACK_DRIVER_ENTER width=" << width
+              << " height=" << height;
++    if (std::getenv("FLR0026_SKIP_READBACK") != nullptr) {
++        FVK_LOGI << "FLR0026_VK_READBACK_SKIPPED";
++        return;
++    }
+     auto srcTarget = resource_ptr<VulkanRenderTarget>::cast(&mResourceManager, src);
+     endCommandRecording();
+     FVK_LOGI << "FLR0026_VK_READBACK_DRIVER_COMMANDS_RECORDED";
+-- 
+2.34.1
+

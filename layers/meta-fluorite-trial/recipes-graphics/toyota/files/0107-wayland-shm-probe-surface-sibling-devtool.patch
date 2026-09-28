@@ -1,0 +1,22 @@
+From 838f213ae068e509dde6ca4648e2482718503123 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 20:44:05 +0000
+Subject: [PATCH] fix: use filament surface for shm sibling ordering
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 9ce7f44..8812fd9 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -882,7 +882,7 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+   // The protocol requires a sibling subsurface here, not the parent surface.
+   // The Filament surface is the sibling that this probe must be above.
+   if (subsurface_ != nullptr) {
+-    wl_subsurface_place_above(probe_subsurface, subsurface_);
++    wl_subsurface_place_above(probe_subsurface, surface_);
+   }
+   wl_subsurface_set_desync(probe_subsurface);
+ 
+-- 
+2.34.1
+

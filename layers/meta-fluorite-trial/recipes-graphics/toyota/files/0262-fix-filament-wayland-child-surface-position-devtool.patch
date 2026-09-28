@@ -1,0 +1,21 @@
+From de45b3607e19202d15ffb237cb4598a61aef6f4d Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 19:08:54 +0000
+Subject: [PATCH] fix: position Filament Wayland child surface
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 4abe7a108..fa9241fe6 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -218,6 +218,7 @@ void ViewTarget::setupWaylandSubsurface() {
+   }
+ 
+   wl_subsurface_place_above(subsurface_, parent_surface_);
++  wl_subsurface_set_position(subsurface_, left_, top_);
+   wl_subsurface_set_desync(subsurface_);
+ }
+ 

@@ -1,0 +1,117 @@
+From b211db53dbd5f88168db5c8f21133de733ac2d14 Mon Sep 17 00:00:00 2001
+From: Fluorite integration role <integration-role@localhost>
+Date: Tue, 15 Sep 2026 14:31:47 +0000
+Subject: [PATCH] diag: read back direct fixture swapchain pixels
+
+---
+ .../filament_view/core/scene/view_target.cc   | 77 +++++++++++++++++--
+ 1 file changed, 72 insertions(+), 5 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 7cc69ac3a..4abe7a108 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -23,11 +23,11 @@
+ #include <core/systems/derived/view_target_system.h>
+ #include <core/systems/ecs.h>
+ #include <core/utils/vectorutils.h>
+-
+ #include <filament_view_plugin.h>
+-
+ #include <filament/IndexBuffer.h>
+ #include <filament/Material.h>
++#include <algorithm>
++#include <backend/PixelBufferDescriptor.h>
+ #include <filament/Renderer.h>
+ #include <filament/RenderableManager.h>
+ #include <filament/Scene.h>
+@@ -38,12 +38,10 @@
+ #include <filament/math/TMatHelpers.h>
+ #include <filament/math/mat4.h>
+ #include <filament/math/vec3.h>
+-
+-#include <functional>
+ #include <filament/math/vec4.h>
+ #include <filament/utils/EntityManager.h>
+ #include <filamat/MaterialBuilder.h>
+-
++#include <functional>
+ #include <chrono>
+ #include <cstdlib>
+ #include <thread>
+@@ -858,6 +856,75 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     if (traceFrameBoundary) {
+       spdlog::info("FLUORITE_VIEWTARGET_RENDER_RETURN");
+     }
++    if (std::getenv("FLUORITE_NATIVE_SWAPCHAIN_READBACK") != nullptr) {
++      const auto viewport = fview_->getViewport();
++      const uint32_t readbackWidth = viewport.width;
++      const uint32_t readbackHeight = viewport.height;
++      const size_t pixelCount = static_cast<size_t>(readbackWidth) * readbackHeight;
++      const size_t byteCount = pixelCount * 4;
++      if (pixelCount == 0) {
++        spdlog::warn("FLUORITE_NATIVE_SWAPCHAIN_READBACK_SKIPPED reason=empty_viewport");
++      } else {
++        struct SwapchainReadbackContext {
++          uint32_t width;
++          uint32_t height;
++          size_t pixelCount;
++        };
++        auto* const readbackContext = new SwapchainReadbackContext{
++          readbackWidth,
++          readbackHeight,
++          pixelCount
++        };
++        auto* const pixels = new uint8_t[byteCount]{};
++        const auto readbackCallback = [](void* data, size_t, void* user) {
++          const auto* const context = static_cast<SwapchainReadbackContext*>(user);
++          const auto* const bytes = static_cast<uint8_t const*>(data);
++          size_t nonzeroPixels = 0;
++          uint64_t byteSum = 0;
++          uint8_t maxByte = 0;
++          if (bytes) {
++            for (size_t pixel = 0; pixel < context->pixelCount; ++pixel) {
++              const size_t offset = pixel * 4;
++              const bool nonzero = bytes[offset] != 0 || bytes[offset + 1] != 0 ||
++                bytes[offset + 2] != 0 || bytes[offset + 3] != 0;
++              nonzeroPixels += nonzero ? 1 : 0;
++              for (size_t component = 0; component < 4; ++component) {
++                byteSum += bytes[offset + component];
++                maxByte = std::max(maxByte, bytes[offset + component]);
++              }
++            }
++          }
++          spdlog::info(
++            "FLUORITE_NATIVE_SWAPCHAIN_READBACK_RESULT width={} height={} "
++            "nonzero_pixels={} total_pixels={} byte_sum={} max_byte={} buffer_null={}",
++            context->width,
++            context->height,
++            nonzeroPixels,
++            context->pixelCount,
++            byteSum,
++            static_cast<unsigned>(maxByte),
++            bytes == nullptr
++          );
++          delete[] static_cast<uint8_t*>(data);
++          delete context;
++        };
++        filament::backend::PixelBufferDescriptor pbd(
++          pixels,
++          byteCount,
++          filament::backend::PixelDataFormat::RGBA,
++          filament::backend::PixelDataType::UBYTE,
++          readbackCallback,
++          readbackContext
++        );
++        spdlog::info(
++          "FLUORITE_NATIVE_SWAPCHAIN_READBACK_REQUEST width={} height={} bytes={}",
++          readbackWidth,
++          readbackHeight,
++          byteCount
++        );
++        renderer->readPixels(0, 0, readbackWidth, readbackHeight, std::move(pbd));
++      }
++    }
+     // spdlog::debug("=== END FRAME ===");
+     renderer->endFrame();
+     if (traceFrameBoundary) {

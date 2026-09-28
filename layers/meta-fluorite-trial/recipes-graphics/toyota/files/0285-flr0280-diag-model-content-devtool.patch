@@ -1,0 +1,71 @@
+From edbf719f0488acd02d4418f26c79894dbe6e16aa Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 05:38:54 +0000
+Subject: [PATCH] FLR-0280: trace production model content binding
+
+---
+ .../core/systems/derived/model_system.cc      | 37 +++++++++++++++++++
+ 1 file changed, 37 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index e3eb06e..9b555ea 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -26,6 +26,8 @@
+ #include <core/systems/ecs.h>
+ #include <curl_client/curl_client.h>
+ #include <filament/Scene.h>
++#include <filament/Material.h>
++#include <filament/MaterialInstance.h>
+ #include <filament/gltfio/ResourceLoader.h>
+ #include <filament/gltfio/TextureProvider.h>
+ #include <filament/gltfio/materials/uberarchive.h>
+@@ -369,6 +371,12 @@ void ModelSystem::setupRenderable(
+ 
+   const auto ri = _rcm->getInstance(fEntity);
+   if (!ri.isValid()) {
++    if (std::getenv("FLR0280_MODEL_CONTENT_TRACE") != nullptr) {
++      spdlog::info(
++        "FLR0280_MODEL_RENDERABLE_INVALID entity={} name={} model={} path={}",
++        fEntity.getId(), child->name, model->getGuid(), model->getAssetPath()
++      );
++    }
+     spdlog::trace(
+       "[{}] Skipping fentity {} of model({}), has no renderable", __FUNCTION__, fEntity.getId(),
+       model->getGuid()
+@@ -378,6 +386,35 @@ void ModelSystem::setupRenderable(
+     return;
+   }
+ 
++  if (std::getenv("FLR0280_MODEL_CONTENT_TRACE") != nullptr) {
++    const auto& box = _rcm->getAxisAlignedBoundingBox(ri);
++    const auto primitiveCount = _rcm->getPrimitiveCount(ri);
++    spdlog::info(
++      "FLR0280_MODEL_RENDERABLE entity={} name={} model={} path={} primitives={} "
++      "center=({},{},{}) half_extent=({},{},{}) layer={}",
++      fEntity.getId(), child->name, model->getGuid(), model->getAssetPath(), primitiveCount,
++      box.center.x, box.center.y, box.center.z, box.halfExtent.x, box.halfExtent.y,
++      box.halfExtent.z, _rcm->getLayerMask(ri)
++    );
++    for (size_t primitive = 0; primitive < primitiveCount && primitive < 8; ++primitive) {
++      auto* materialInstance = _rcm->getMaterialInstanceAt(ri, primitive);
++      if (materialInstance == nullptr) {
++        spdlog::info(
++          "FLR0280_MODEL_MATERIAL entity={} primitive={} present=false", fEntity.getId(), primitive
++        );
++        continue;
++      }
++      const auto* material = materialInstance->getMaterial();
++      spdlog::info(
++        "FLR0280_MODEL_MATERIAL entity={} primitive={} present=true instance={} material={} "
++        "shading={} blending={} color_write={} depth_write={} double_sided={}",
++        fEntity.getId(), primitive, materialInstance->getName(), material->getName(),
++        static_cast<int>(material->getShading()), static_cast<int>(material->getBlendingMode()),
++        material->isColorWriteEnabled(), material->isDepthWriteEnabled(), material->isDoubleSided()
++      );
++    }
++  }
++
+   const auto commonRenderable = model->getCommonRenderable();
+   _rcm->setCastShadows(ri, commonRenderable->IsCastShadowsEnabled());
+   _rcm->setReceiveShadows(ri, commonRenderable->IsReceiveShadowsEnabled());

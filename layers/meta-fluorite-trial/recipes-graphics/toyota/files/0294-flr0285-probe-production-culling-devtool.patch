@@ -1,0 +1,50 @@
+From e716e620f127ef81cb3ce88ed5d5d0ac97590cee Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@localhost>
+Date: Thu, 24 Sep 2026 23:19:44 +0900
+Subject: [PATCH] FLR-0285: probe production culling
+
+---
+ .../core/systems/derived/model_system.cc        | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index cdbb616..1bf5b96 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -73,6 +73,9 @@ void ModelSystem::addLoadedModelsToScene(::filament::Scene* scene) {
+ 
+   size_t modelCount = 0;
+   size_t entityCount = 0;
++  size_t cullingDisabled = 0;
++  const bool disableCulling =
++    std::getenv("FLR0285_NATIVE_DISABLE_CULLING") != nullptr;
+   for (const auto& [guid, model] : _models) {
+     (void) guid;
+     if (model == nullptr || !model->isInScene()) {
+@@ -85,14 +88,24 @@ void ModelSystem::addLoadedModelsToScene(::filament::Scene* scene) {
+     scene->addEntities(assetInstance->getEntities(), assetInstance->getEntityCount());
+     ++modelCount;
+     entityCount += assetInstance->getEntityCount();
++    if (disableCulling) {
++      for (size_t i = 0; i < assetInstance->getEntityCount(); ++i) {
++        const auto instance = _rcm->getInstance(assetInstance->getEntities()[i]);
++        if (instance.isValid()) {
++          _rcm->setCulling(instance, false);
++          ++cullingDisabled;
++        }
++      }
++    }
+   }
+ 
+   if (modelCount != 0) {
+     diagnostic_scene_models_added_ = true;
+     spdlog::info(
+-      "FLR0285_NATIVE_MODEL_SCENE_ADDED models={} entities={} scene=diagnostic",
++      "FLR0285_NATIVE_MODEL_SCENE_ADDED models={} entities={} culling_disabled={} scene=diagnostic",
+       modelCount,
+-      entityCount
++      entityCount,
++      cullingDisabled
+     );
+   }
+ }

@@ -1,0 +1,64 @@
+From 8a55a475a058eebd069852a51e9f4b80218c6fe5 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 23 Sep 2026 22:38:58 +0000
+Subject: [PATCH] FLR-0272: guard asynchronous scene setup enqueue
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 22 ++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index 0c3af86..d857464 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -19,6 +19,7 @@
+ #include <asio/post.hpp>
+ #include <atomic>
+ #include <chrono>
++#include <cstdlib>
+ #include <core/components/derived/camera.h>
+ #include <core/components/derived/transform.h>
+ #include <core/scene/serialization/scene_text_deserializer.h>
+@@ -49,6 +50,7 @@ namespace plugin_filament_view {
+ 
+ std::unique_ptr<SceneTextDeserializer> sceneTextDeserializer;
+ SceneTextDeserializer* postSetupDeserializer = nullptr;
++std::atomic_bool sceneSetupQueued{false};
+ bool m_bHasSetupRegistrar = false;
+ 
+ //////////////////////////////////////////////////////////////////////////////////////////
+@@ -132,10 +134,15 @@ void DeserializeDataAndSetupMessageChannels(
+   // Get the strand from the ECSManager
+   const auto& strand = *ecs->getStrand();
+ 
+-
+-  // Safeguarded to only be called once no matter how many times this method is
+-  // called.
+-  if (postSetupDeserializer == nullptr) {
++  // The callback is posted asynchronously, so checking only
++  // postSetupDeserializer is insufficient: several callers can observe null
++  // before the first callback runs and enqueue duplicate deserializers. Keep
++  // the one-shot guard atomic across that in-flight window.
++  const bool traceSceneSetup = std::getenv("FLR0027_SCENE_SETUP_TRACE") != nullptr;
++  if (!sceneSetupQueued.exchange(true, std::memory_order_acq_rel)) {
++    if (traceSceneSetup) {
++      spdlog::info("FLR0027_SCENE_SETUP_ENQUEUED");
++    }
+     post(strand, [=]() mutable {
+       spdlog::trace("running SceneTextDeserializer");
+       sceneTextDeserializer = std::make_unique<SceneTextDeserializer>(params);
+@@ -144,8 +151,13 @@ void DeserializeDataAndSetupMessageChannels(
+       // making sure this is only called once!
+       postSetupDeserializer->RunPostSetupLoad();
+ 
+-    });
++      if (traceSceneSetup) {
++        spdlog::info("FLR0027_SCENE_SETUP_COMPLETED");
++      }
+ 
++    });
++  } else if (traceSceneSetup) {
++    spdlog::info("FLR0027_SCENE_SETUP_SKIPPED already_enqueued=true");
+   }
+ 
+   spdlog::trace("getting systems");

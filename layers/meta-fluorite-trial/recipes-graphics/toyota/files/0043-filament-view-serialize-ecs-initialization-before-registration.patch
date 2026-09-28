@@ -1,0 +1,28 @@
+From 5d4f8a2b1c3e7d9f0a6b5c4e3d2f1a0b9c8d7e6f Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 18:20:00 +0900
+Subject: [PATCH] filament_view: serialize ECS initialization before registration
+
+Restore a bounded synchronization point for ECS system creation while keeping
+scene deserialization and channel setup asynchronous.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+Index: git/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+===================================================================
+--- git.orig/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
++++ git/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+@@ -64,0 +65,2 @@
++  std::promise<void> initPromise;
++  const std::future<void> initFuture = initPromise.get_future();
+@@ -65,1 +67,1 @@
+-  post(strand, [=]() mutable {
++  post(strand, [=, &initPromise]() mutable {
+@@ -82,0 +84,1 @@
++    initPromise.set_value();
+@@ -84,0 +87,1 @@
++  initFuture.wait();
+-- 
+2.34.1

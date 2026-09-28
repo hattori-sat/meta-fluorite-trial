@@ -91,6 +91,10 @@ def create_server(config: MCPConfig) -> MCPServer:
             next_queries=("read_run_log",) if result["steps"] else (),
         )
 
+    def completion(arguments: Mapping[str, Any]) -> Mapping[str, Any]:
+        result = runner.load_completion(string_arg(arguments, "run_id", required=True))
+        return kernel.envelope("read_completion", {"completion": result})
+
     def cancel(arguments: Mapping[str, Any]) -> Mapping[str, Any]:
         result = runner.cancel(string_arg(arguments, "run_id", required=True))
         return kernel.envelope("cancel_run", {"cancellation": result})
@@ -167,6 +171,12 @@ def create_server(config: MCPConfig) -> MCPServer:
                 "Read bounded status for a process owned by this server instance.",
                 object_schema({"run_id": {"type": "string"}}, required=("run_id",)),
                 status,
+            ),
+            Tool(
+                "read_completion",
+                "Read a redacted durable completion record after an MCP restart.",
+                object_schema({"run_id": {"type": "string"}}, required=("run_id",)),
+                completion,
             ),
             Tool(
                 "read_run_log",

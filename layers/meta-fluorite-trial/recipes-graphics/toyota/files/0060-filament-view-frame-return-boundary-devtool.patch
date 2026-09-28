@@ -1,0 +1,33 @@
+From a89bd4145f59381f07d64a80e22de09060eee1cb Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 16:14:24 +0000
+Subject: [PATCH] diag: trace frame boundary after subsurface commit
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index b9e331a..f4d1189 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -656,6 +656,9 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // const auto scriptStart = std::chrono::steady_clock::now();
+ 
+   // spdlog::debug("[{}] Calling Script event: preRenderFrame", __FUNCTION__);
++  if (shouldLogFrame) {
++    spdlog::info("FLR0026_DRAWFRAME_BEFORE_EVENT seq={} started={}", frameSequence, frameStarted);
++  }
+   FilamentViewPlugin::CallEvent(
+     kPreRenderFrame,
+     {//
+@@ -730,7 +733,9 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+     if (callback == nullptr) {
+       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+     }
++    spdlog::info("FLR0026_ONFRAME_BEFORE_DRAW surfacePresent={}", obj->surface_ != nullptr);
+     obj->DrawFrame(time);
++    spdlog::info("FLR0026_ONFRAME_AFTER_DRAW surfacePresent={}", obj->surface_ != nullptr);
+ 
+     // Filament's Vulkan present may attach the child buffer without committing
+     // the subsurface state. Commit the pending Wayland state explicitly so the

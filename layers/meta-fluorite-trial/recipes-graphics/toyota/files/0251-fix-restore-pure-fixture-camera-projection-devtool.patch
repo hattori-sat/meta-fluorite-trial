@@ -1,0 +1,28 @@
+From e73c859fa60f1dd129ec9920c14b593fc660b468 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 03:38:29 +0000
+Subject: [PATCH] fix: restore pure fixture camera projection
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index c25786a..af6ab8d 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -151,6 +151,14 @@ void ViewTarget::_initCamera() {
+     std::getenv("FLUORITE_NATIVE_PURE_FIXTURE") != nullptr &&
+     std::getenv("FLUORITE_NATIVE_MINIMAL_GEOMETRY") != nullptr;
+   if (fixtureLocalCamera) {
++    camera_->setProjection(
++      60.0, calculateAspectRatio(), kDefaultNearPlane, kDefaultFarPlane,
++      filament::Camera::Fov::VERTICAL
++    );
++    spdlog::info(
++      "FLUORITE_NATIVE_FIXTURE_CAMERA_PROJECTION_APPLIED fov=60 direction=vertical near=0.05 "
++      "far=1000"
++    );
+     camera_->lookAt(
+       filament::math::double3{0.0, 0.0, 5.0},
+       filament::math::double3{0.0, 0.0, 0.0},

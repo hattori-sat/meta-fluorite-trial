@@ -1,0 +1,42 @@
+From 7115a641750eb3e531ab1c05455109187ba0d8a8 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 18:23:24 +0000
+Subject: [PATCH] diag: trace effective ViewTarget scene contract
+
+---
+ .../filament_view/core/scene/view_target.cc   | 22 +++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 9ab9ff0..c1a5069 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -511,6 +511,28 @@ const wl_callback_listener ViewTarget::frame_listener = {.done = OnFrame};
+ void ViewTarget::DrawFrame(const uint32_t time) {
+   const bool traceFrameBoundary = std::getenv("FLUORITE_VIEWTARGET_FRAME_TRACE") != nullptr;
+   if (traceFrameBoundary) {
++    const auto filamentSystem = ECSManager::GetInstance()->getSystem<FilamentSystem>("DrawFrame");
++    const auto viewport = fview_->getViewport();
++    const auto activeScene = fview_->getScene();
++    const auto cameraPosition = fview_->getCamera().getPosition();
++    spdlog::info(
++      "FLUORITE_VIEWTARGET_EFFECTIVE_CONTRACT scene_native={} scene_default={} "
++      "camera_pos=({},{},{}) viewport=({},{},{},{}) blend={} parent_surface={} surface={} "
++      "subsurface={}",
++      activeScene == native_diagnostic_scene_,
++      activeScene == filamentSystem->getFilamentScene(),
++      cameraPosition.x,
++      cameraPosition.y,
++      cameraPosition.z,
++      viewport.left,
++      viewport.bottom,
++      viewport.width,
++      viewport.height,
++      static_cast<int>(fview_->getBlendMode()),
++      parent_surface_ != nullptr,
++      surface_ != nullptr,
++      subsurface_ != nullptr
++    );
+     spdlog::info(
+       "FLUORITE_VIEWTARGET_DRAW_FRAME_BEGIN time={} swapchain={} view={} scene={}",
+       time,

@@ -1,0 +1,51 @@
+From 6498a9332d55c47ca2af50780a2b15a925f2315f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 13:02:50 +0000
+Subject: [PATCH] test: send Planetarium shapes through native creation payload
+
+---
+ packages/filament_scene/example/lib/main.dart | 23 ++++++++++---------
+ 1 file changed, 12 insertions(+), 11 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 8280f99..5755a4a 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -121,13 +121,11 @@ class _MyAppState extends State<MyApp> {
+     _filamentViewWidget = poGetFilamentScene();
+ 
+     unawaited(
+-      initializeReadiness().then((isReady) {
+-        if (isReady) {
+-          setState(() {
+-            _setScene(0);
+-          });
+-        }
+-      }),
++      // FLR-0141 initial-payload gate: the v2 Native view consumes the
++      // selected scene from creationParams. Do not mount a StatefulSceneView
++      // here; its current camera-control callbacks use generated setCamera*
++      // channels that the Fluorite v2 Native plugin does not implement.
++      initializeReadiness(),
+     );
+   }
+ 
+@@ -299,11 +297,14 @@ class _MyAppState extends State<MyApp> {
+   SceneView poGetFilamentScene() {
+     return SceneView(
+       filament: filamentViewApi,
+-      // Isolate the previously proven self-made native 3D fixture.
++      // FLR-0141: exercise the implemented v2 creation contract with the
++      // shape-only Planetarium payload. This deliberately avoids GLB model
++      // loading so shape/camera serialization is separated from the known
++      // production-asset/llvmpipe failure.
+       models: <Model>[],
+-      scene: poGetMinimal3dFixtureScene(),
+-      shapes: poGetMinimal3dFixtureShapes(),
+-      cameras: poGetMinimal3dFixtureCameras(),
++      scene: poGetScene(),
++      shapes: PlanetariumSceneView.getSceneShapes(),
++      cameras: PlanetariumSceneView.getSceneCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 

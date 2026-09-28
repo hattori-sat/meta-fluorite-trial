@@ -1,0 +1,34 @@
+From eb03a502744706bb275d47172d5eebcab6f7cdb4 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 00:30:56 +0000
+Subject: [PATCH] fix: correct Vulkan readback copy fields
+
+---
+ filament/backend/src/vulkan/VulkanReadPixels.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanReadPixels.cpp b/filament/backend/src/vulkan/VulkanReadPixels.cpp
+index 22575b388..e59418542 100644
+--- a/filament/backend/src/vulkan/VulkanReadPixels.cpp
++++ b/filament/backend/src/vulkan/VulkanReadPixels.cpp
+@@ -271,7 +271,7 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+             .y = (int32_t)(mipHeight - (height + y)),
+             .z = 0,
+         },
+-        .extent = {
++        .imageExtent = {
+             .width = width,
+             .height = height,
+             .depth = 1,
+@@ -323,7 +323,7 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+         delete pUserBuffer;
+         FVK_LOGI << "FLR0026_VK_READBACK_CLEANUP_END";
+     };
+-    auto waitFenceFunc = [device, width, height, swizzle, srcFormat, stagingBuffer, stagingMemory,
++    auto waitFenceFunc = [device, width, height, swizzle, stagingBuffer, stagingMemory,
+                                  cmdpool, cmdbuffer, pUserBuffer, bpp, componentType,
+                                  componentCount, hostCachedStaging,
+                                  fence = readCompleteFence]() mutable {
+-- 
+2.34.1
+

@@ -1,0 +1,37 @@
+From 3865020a5ef163681b1a3fdf41edc6e347c7b74b Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 3 Sep 2026 07:40:17 +0000
+Subject: [PATCH] diag: commit native surface before present
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 18083c5..dac8650 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1142,10 +1142,20 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+         readbackWidth,
+         readbackHeight
+       );
+     }
+     // spdlog::debug("=== END FRAME ===");
++    if (surface_ != nullptr &&
++        (std::getenv("FLR0026_NATIVE_CLEAR_PROBE") != nullptr ||
++         std::getenv("FLR0026_NATIVE_PRE_PRESENT_COMMIT") != nullptr)) {
++      wl_surface_commit(surface_);
++      const auto flushResult = wl_display_flush(display_);
++      spdlog::info(
++        "FLR0026_PRE_PRESENT_SURFACE_COMMITTED result={}",
++        flushResult
++      );
++    }
+     renderer->endFrame();
+     if (native_readback_probe_enabled_ && native_readback_probe_queued_ &&
+         native_readback_fence_ == nullptr) {
+       native_readback_fence_ = _engine->createFence();
+       spdlog::info(
+-- 
+2.34.1
+

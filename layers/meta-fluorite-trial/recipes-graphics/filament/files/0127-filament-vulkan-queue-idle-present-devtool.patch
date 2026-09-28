@@ -1,0 +1,30 @@
+From 236ed2750f0a157dee90d854d0488b026c9674dd Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 09:31:40 +0000
+Subject: [PATCH] diag: test Vulkan queue idle before present
+
+---
+ .../src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp     | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index 63bce95ff..ace3185d2 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -348,10 +348,16 @@ VkResult VulkanPlatformSurfaceSwapChain::present(uint32_t index, VkSemaphore fin
+             .pSwapchains = &mSwapchain,
+             .pImageIndices = &currentIndex,
+     };
+     std::fprintf(stderr, "FLR0026_VK_PRESENT_WAIT_SEMAPHORE enabled=%s\\n",
+             skipFinishedSemaphore ? "false" : "true");
++    const bool waitForQueueIdle = std::getenv("FLR0026_PRESENT_QUEUE_IDLE") != nullptr;
++    if (waitForQueueIdle) {
++        const VkResult idleResult = vkQueueWaitIdle(mQueue);
++        std::fprintf(stderr, "FLR0026_VK_QUEUE_WAIT_IDLE result=%d\\n",
++                static_cast<int32_t>(idleResult));
++    }
+     std::fprintf(stderr, "FLR0026_VK_QUEUE_PRESENT_BEGIN queue=%p swapchain=%p index=%u\\n",
+             static_cast<void*>(mQueue), static_cast<void*>(mSwapchain), currentIndex);
+     VkResult result = vkQueuePresentKHR(mQueue, &presentInfo);
+     std::fprintf(
+             stderr,

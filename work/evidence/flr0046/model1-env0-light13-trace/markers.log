@@ -1,0 +1,1236 @@
+[14:04:01.477904] [I] FLR0026_MODEL_SELECTED ordinal=0 asset=assets/models/sequoia_ngp.glb
+[14:04:01.478175] [I] FLR0026_MODEL_LOAD_PLAN total=60 limit=1 match= inspected=2 queued=1
+[14:04:01.480852] [I] FLR0026_LIGHT_SELECTED ordinal=0 guid=126 type=POINT
+[14:04:01.481309] [I] FLR0026_LIGHT_SELECTED ordinal=1 guid=128 type=POINT
+[14:04:01.481527] [I] FLR0026_LIGHT_SELECTED ordinal=2 guid=130 type=POINT
+[14:04:01.481581] [I] FLR0026_LIGHT_SELECTED ordinal=3 guid=132 type=POINT
+[14:04:01.481606] [I] FLR0026_LIGHT_SELECTED ordinal=4 guid=134 type=POINT
+[14:04:01.481743] [I] FLR0026_LIGHT_SELECTED ordinal=5 guid=136 type=POINT
+[14:04:01.481784] [I] FLR0026_LIGHT_SELECTED ordinal=6 guid=138 type=POINT
+[14:04:01.481987] [I] FLR0026_LIGHT_SELECTED ordinal=7 guid=140 type=POINT
+[14:04:01.482238] [I] FLR0026_LIGHT_SELECTED ordinal=8 guid=162 type=POINT
+[14:04:01.482264] [I] FLR0026_LIGHT_SELECTED ordinal=9 guid=164 type=POINT
+[14:04:01.482282] [I] FLR0026_LIGHT_SELECTED ordinal=10 guid=166 type=POINT
+[14:04:01.482301] [I] FLR0026_LIGHT_SELECTED ordinal=11 guid=168 type=POINT
+[14:04:01.482317] [I] FLR0026_LIGHT_SELECTED ordinal=12 guid=170 type=POINT
+[14:04:01.482566] [I] FLR0026_LIGHT_SETUP_PLAN total=13 limit=13 type_filter= skip_guid_filter= trace_guid_filter= position_override_guid=0 position_override_enabled=false selected=13
+[14:04:01.514727] [I] FLR0026_SHAPE_READY guid=188 entity=18 renderable=true
+[14:04:01.515151] [I] FLR0026_SHAPE_READY guid=190 entity=19 renderable=true
+[14:04:01.515352] [I] FLR0026_SHAPE_READY guid=192 entity=20 renderable=true
+[14:04:01.816213] [I] FLR0026_SHAPE_READY guid=194 entity=21 renderable=true
+[14:04:01.816811] [I] FLR0026_SHAPE_READY guid=196 entity=22 renderable=true
+[14:04:01.817217] [I] FLR0026_SHAPE_READY guid=198 entity=23 renderable=true
+[14:04:01.817850] [I] FLR0026_SHAPE_READY guid=200 entity=24 renderable=true
+[14:04:01.818004] [I] FLR0026_SHAPE_READY guid=202 entity=25 renderable=true
+[14:04:01.818125] [I] FLR0026_SHAPE_READY guid=212 entity=26 renderable=true
+[14:04:01.818296] [I] FLR0026_SHAPE_READY guid=204 entity=27 renderable=true
+[14:04:01.818398] [I] FLR0026_SHAPE_READY guid=206 entity=28 renderable=true
+[14:04:01.818493] [I] FLR0026_SHAPE_READY guid=208 entity=29 renderable=true
+[14:04:01.818605] [I] FLR0026_SHAPE_READY guid=210 entity=30 renderable=true
+[14:04:01.818788] [I] FLR0026_SHAPE_READY guid=118 entity=31 renderable=true
+[14:04:01.818893] [I] FLR0026_SHAPE_READY guid=120 entity=32 renderable=true
+[14:04:01.819066] [I] FLR0026_SHAPE_READY guid=216 entity=33 renderable=true
+[14:04:01.819200] [I] FLR0026_SHAPE_READY guid=244 entity=34 renderable=true
+[14:04:01.819432] [I] FLR0026_SHAPE_READY guid=246 entity=35 renderable=true
+[14:04:01.819576] [I] FLR0026_SHAPE_READY guid=248 entity=36 renderable=true
+[14:04:01.819743] [I] FLR0026_SHAPE_READY guid=250 entity=37 renderable=true
+[14:04:01.819954] [I] FLR0026_SHAPE_READY guid=252 entity=38 renderable=true
+[14:04:01.820137] [I] FLR0026_SHAPE_READY guid=254 entity=39 renderable=true
+[14:04:01.820270] [I] FLR0026_SHAPE_READY guid=256 entity=40 renderable=true
+[14:04:01.820396] [I] FLR0026_SHAPE_READY guid=258 entity=41 renderable=true
+[14:04:01.820520] [I] FLR0026_SHAPE_READY guid=260 entity=42 renderable=true
+[14:04:01.820710] [I] FLR0026_SHAPE_READY guid=262 entity=43 renderable=true
+[14:04:01.821007] [I] FLR0026_SHAPE_READY guid=220 entity=44 renderable=true
+[14:04:01.821300] [I] FLR0026_SHAPE_READY guid=222 entity=45 renderable=true
+[14:04:01.821550] [I] FLR0026_SHAPE_READY guid=224 entity=46 renderable=true
+[14:04:01.821878] [I] FLR0026_SHAPE_READY guid=226 entity=47 renderable=true
+[14:04:01.822150] [I] FLR0026_SHAPE_READY guid=228 entity=48 renderable=true
+[14:04:01.822467] [I] FLR0026_SHAPE_READY guid=230 entity=49 renderable=true
+[14:04:01.822793] [I] FLR0026_SHAPE_READY guid=232 entity=50 renderable=true
+[14:04:01.823058] [I] FLR0026_SHAPE_READY guid=234 entity=51 renderable=true
+[14:04:01.823374] [I] FLR0026_SHAPE_READY guid=236 entity=52 renderable=true
+[14:04:01.823724] [I] FLR0026_SHAPE_READY guid=238 entity=53 renderable=true
+[14:04:01.823837] [I] FLR0026_SHAPE_READY guid=264 entity=54 renderable=true
+[14:04:01.931132] [I] FLR0026_MODEL_STAGE_PROGRESS seq=1 progress=0 assets=1
+[14:04:01.935151] [I] FLR0026_SHAPE_READY guid=197 entity=64 renderable=true
+[14:04:01.936390] [I] FLR0026_SHAPE_READY guid=199 entity=65 renderable=true
+[14:04:01.936967] [I] FLR0026_SHAPE_READY guid=201 entity=66 renderable=true
+[14:04:01.937446] [I] FLR0026_SHAPE_READY guid=203 entity=67 renderable=true
+[14:04:01.937996] [I] FLR0026_SHAPE_READY guid=205 entity=68 renderable=true
+[14:04:01.938711] [I] FLR0026_SHAPE_READY guid=207 entity=69 renderable=true
+[14:04:01.939232] [I] FLR0026_SHAPE_READY guid=209 entity=70 renderable=true
+[14:04:01.944122] [I] FLR0026_FRAME_BEGIN seq=1 started=true
+[14:04:02.237805] [I] FLR0026_MODEL_STAGE_ASSET_CREATED asset=assets/models/sequoia_ngp.glb guid=2 bytes=13671064 entities=22
+[14:04:02.343547] [I] FLR0026_MODEL_STAGE_ASYNC_BEGIN asset=assets/models/sequoia_ngp.glb guid=2
+[14:04:02.344017] [I] FLR0026_MODEL_STAGE_INSTANCE_READY asset=assets/models/sequoia_ngp.glb guid=2 instance=0x7f0324181a90
+[14:04:03.025032] [I] FLR0026_MODEL_STAGE_PROGRESS seq=2 progress=1 assets=1
+[14:04:03.025354] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=1
+[14:04:03.026862] [I] FLR0026_FRAME_BEGIN seq=2 started=true
+[14:04:03.134879] [I] FLR0026_MODEL_STAGE_PROGRESS seq=3 progress=1 assets=1
+[14:04:03.135030] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.136563] [I] FLR0026_FRAME_BEGIN seq=3 started=false
+[14:04:03.237400] [I] FLR0026_MODEL_STAGE_PROGRESS seq=4 progress=1 assets=1
+[14:04:03.237519] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.338806] [I] FLR0026_MODEL_STAGE_PROGRESS seq=5 progress=1 assets=1
+[14:04:03.338929] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.340402] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:03.441943] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.444092] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:03.545785] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.546503] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:03.648144] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.648984] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:03.750511] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.751327] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:03.852831] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.853509] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:03.854456] [I] FLR0026_FRAME_BEGIN seq=10 started=false
+[14:04:03.955110] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:03.955884] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.056866] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.057577] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.159147] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+FLR0026_VK_COMMAND_END_BEGIN buffer=0x7f03180251a0\nFLR0026_VK_COMMAND_END_DONE buffer=0x7f03180251a0\nFLR0026_VK_QUEUE_SUBMIT_BEGIN queue=0x7f031802c530 fence=0x7f0319b008b0\nFLR0026_VK_QUEUE_SUBMIT_DONE result=0 queue=0x7f031802c530 fence=0x7f0319b008b0\n[14:04:04.159973] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.261560] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.262171] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.368751] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.369122] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.474146] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.474925] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.576115] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.576739] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.678039] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.678530] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.779349] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.779973] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.881268] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.882044] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:04.882694] [I] FLR0026_FRAME_BEGIN seq=20 started=false
+[14:04:04.983154] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:04.984003] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.085564] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.086359] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.191873] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.192344] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.293825] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.294206] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.395472] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.395924] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.496721] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.497102] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.598752] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.599135] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.700798] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.701197] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.803768] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.804158] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.905213] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:05.905935] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:05.906343] [I] FLR0026_FRAME_BEGIN seq=30 started=false
+[14:04:06.007902] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.011274] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.117056] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.117515] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.223250] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.223702] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.327364] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.327814] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.431574] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.432024] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.532770] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.533150] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.634045] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.634415] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.735209] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.735581] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.843767] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.844143] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.950140] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:06.950515] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:06.957985] [I] FLR0026_FRAME_BEGIN seq=40 started=false
+[14:04:07.058462] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.059187] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.165903] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.166352] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.267455] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.267879] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.370122] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.370495] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.471257] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.471683] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.576721] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.577098] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.685862] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.686237] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.789768] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.790168] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.891075] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.891448] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.997762] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:07.998120] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:07.998488] [I] FLR0026_FRAME_BEGIN seq=50 started=false
+[14:04:08.098954] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.099694] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:08.207185] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.207816] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:08.308807] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.309212] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:08.418767] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.419133] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:08.519812] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.520207] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:08.620993] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.621372] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:08.728773] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.729149] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:08.831797] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.832168] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:08.933024] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:08.933399] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.034193] [I] FLR0026_MODEL_STAGE_PROGRESS seq=60 progress=1 assets=1
+[14:04:09.034288] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.034583] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.035003] [I] FLR0026_FRAME_BEGIN seq=60 started=false
+[14:04:09.137815] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.138216] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.242166] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.242548] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.343341] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.343805] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.444550] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.444992] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.547790] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.548188] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.651770] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.652128] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.756739] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.757322] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.858174] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.858553] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:09.963866] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:09.964446] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.077889] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.078280] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.078725] [I] FLR0026_FRAME_BEGIN seq=70 started=false
+[14:04:10.179105] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.179493] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.280311] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.280721] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.384548] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.385283] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.492784] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.493161] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.593947] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.594320] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.695094] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.695465] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.796971] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.797349] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:10.906775] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:10.907378] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.008927] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.009327] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.110110] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.110479] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.110915] [I] FLR0026_FRAME_BEGIN seq=80 started=false
+[14:04:11.211317] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.211741] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.314819] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.315247] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.416292] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.416738] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.522756] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.523147] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.625786] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.626172] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.731781] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.732169] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.833008] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.833404] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:11.934123] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:11.934500] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.036769] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.037160] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.141960] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.142350] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.142789] [I] FLR0026_FRAME_BEGIN seq=90 started=false
+[14:04:12.246346] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.246775] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.353906] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.354294] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.461781] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.462156] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.577783] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.578171] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.679776] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.680151] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.787789] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.788167] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.889025] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.889411] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:12.991790] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:12.992369] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.097758] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.098963] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.205767] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.206149] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.206680] [I] FLR0026_FRAME_BEGIN seq=100 started=false
+[14:04:13.312769] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.313137] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.413914] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.414288] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.515788] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.516164] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.618822] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.619193] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.719968] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.720336] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.822785] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.823168] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:13.926775] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:13.927155] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.027899] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.028291] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.130790] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.131169] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.232216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.232572] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.232992] [I] FLR0026_FRAME_BEGIN seq=110 started=false
+[14:04:14.335999] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.336384] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.437458] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.437889] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.538695] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.539078] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.639821] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.640189] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.740985] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.741365] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.844774] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.845148] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:14.947859] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:14.948251] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.051303] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.051838] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.152739] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.153134] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.255775] [I] FLR0026_MODEL_STAGE_PROGRESS seq=120 progress=1 assets=1
+[14:04:15.255862] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.256176] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.256549] [I] FLR0026_FRAME_BEGIN seq=120 started=false
+[14:04:15.359300] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.359756] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.463239] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.463665] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.566762] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.567153] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.672917] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.673293] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.779970] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.780366] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.885328] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.885821] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:15.987932] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:15.988327] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.091793] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.092190] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.195794] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.196186] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.297040] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.297415] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.297843] [I] FLR0026_FRAME_BEGIN seq=130 started=false
+[14:04:16.398212] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.398587] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.499778] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.500148] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.601910] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.602292] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.703068] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.703447] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.805780] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.806161] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:16.907001] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:16.907383] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.008349] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.008791] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.110798] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.111167] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.218758] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.219132] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.319902] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.320286] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.320726] [I] FLR0026_FRAME_BEGIN seq=140 started=false
+[14:04:17.421125] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.421523] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.523066] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.523456] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.624255] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.624690] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.729790] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.730163] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.833795] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.834167] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:17.940871] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:17.941242] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.043763] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.044139] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.144804] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.145191] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.248286] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.248712] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.349503] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.349951] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.350347] [I] FLR0026_FRAME_BEGIN seq=150 started=false
+[14:04:18.454240] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.454700] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.561387] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.561825] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.664677] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.665089] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.767786] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.768165] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.869445] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.869952] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:18.976447] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:18.977076] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.081483] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.081929] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.182775] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.183165] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.283995] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.284367] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.385151] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.385544] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.385999] [I] FLR0026_FRAME_BEGIN seq=160 started=false
+[14:04:19.499762] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.500133] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.604767] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.605140] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.707808] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.708178] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.811782] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.812163] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:19.914775] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:19.915145] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.015798] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.016179] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.120333] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.120748] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.229754] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.230137] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.335760] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.336168] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.439942] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.440320] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.440733] [I] FLR0026_FRAME_BEGIN seq=170 started=false
+[14:04:20.547115] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.548920] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.652909] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.653275] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.754015] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.754391] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.860806] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.861161] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:20.972875] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:20.973269] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.074052] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.074442] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.175288] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.175716] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.277448] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.277896] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.381479] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.381917] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.485194] [I] FLR0026_MODEL_STAGE_PROGRESS seq=180 progress=1 assets=1
+[14:04:21.485283] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.485586] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.486013] [I] FLR0026_FRAME_BEGIN seq=180 started=false
+[14:04:21.588783] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.589170] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.693790] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.694167] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.799842] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.800225] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:21.903903] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:21.904297] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.008846] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.009470] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.110943] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.111789] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.223965] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.224348] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.328531] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.328942] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.430831] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.431361] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.534942] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.535328] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.535742] [I] FLR0026_FRAME_BEGIN seq=190 started=false
+[14:04:22.638805] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.639192] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.744183] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.744567] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.849047] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.849433] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:22.950829] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:22.951291] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.052264] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.052701] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.157945] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.158331] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.264499] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.264919] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.367997] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.368364] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.473453] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.473872] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.575952] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.576343] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.576819] [I] FLR0026_FRAME_BEGIN seq=200 started=false
+[14:04:23.678798] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.679171] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.779969] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.780536] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.886118] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.886494] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:23.992882] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:23.993484] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.094440] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.094887] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.197807] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.198250] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.299786] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.300150] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.406773] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.407164] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.507982] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.508351] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.609151] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.609583] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.610371] [I] FLR0026_FRAME_BEGIN seq=210 started=false
+[14:04:24.714199] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.714599] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.822288] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.822753] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:24.923448] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:24.923866] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.025793] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.026191] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.127161] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.127554] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.229780] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.230163] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.330938] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.331328] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.434783] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.435157] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.538905] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.539287] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.642787] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.643157] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.643529] [I] FLR0026_FRAME_BEGIN seq=220 started=false
+[14:04:25.744178] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.744843] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.845690] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.846075] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:25.946978] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:25.947375] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.048821] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.049209] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.158773] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.159172] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.261770] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.262154] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.371757] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.372144] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.478795] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.479174] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.581724] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.585010] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.686092] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.686483] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.686992] [I] FLR0026_FRAME_BEGIN seq=230 started=false
+[14:04:26.787451] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.788106] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.891228] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.891603] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:26.992706] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:26.993098] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.097317] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.097763] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.200799] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.201168] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.316773] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.317153] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.417971] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.418340] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.521977] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.522357] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.623131] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.623502] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.724295] [I] FLR0026_MODEL_STAGE_PROGRESS seq=240 progress=1 assets=1
+[14:04:27.724376] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.724721] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.725092] [I] FLR0026_FRAME_BEGIN seq=240 started=false
+[14:04:27.825516] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.825953] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:27.932124] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:27.932497] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.042967] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.043358] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.148075] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.148482] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.255175] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.255548] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.356440] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.357205] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.459352] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.459890] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.560789] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.561193] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.662021] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.662412] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.767216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.767603] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.768061] [I] FLR0026_FRAME_BEGIN seq=250 started=false
+[14:04:28.879939] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.880327] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:28.982772] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:28.983153] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.083928] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.084315] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.185130] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.185527] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.286676] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.287066] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.387805] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.388197] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.493792] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.494197] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.597871] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.598262] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.699254] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.699815] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.803000] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.803368] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:29.803797] [I] FLR0026_FRAME_BEGIN seq=260 started=false
+[14:04:29.913056] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:29.913441] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.021776] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.022174] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.135953] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.136337] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.240276] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.240685] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.344264] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.344701] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.448772] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.449144] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.550945] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.551321] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.652106] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.652478] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_SWAPCHAIN_FLUSH_BEGIN\nFLR0026_VK_COMMAND_END_BEGIN buffer=0x7f0318026920\nFLR0026_VK_COMMAND_END_DONE buffer=0x7f0318026920\nFLR0026_VK_QUEUE_SUBMIT_BEGIN queue=0x7f031802c530 fence=0x7f0318021320\nFLR0026_VK_QUEUE_SUBMIT_DONE result=0 queue=0x7f031802c530 fence=0x7f0318021320\nFLR0026_VK_SWAPCHAIN_FLUSH_DONE flushed=true\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_BEGIN\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=true\nFLR0026_VK_PRESENT_WAIT_SEMAPHORE enabled=true\nFLR0026_VK_QUEUE_PRESENT_BEGIN queue=0x7f031802c530 swapchain=0x7f0319e3ac90 index=0\n[14:04:30.753270] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.753723] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.854585] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.855060] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:30.855455] [I] FLR0026_FRAME_BEGIN seq=270 started=false
+[14:04:30.959753] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:30.960143] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.077753] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.078149] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.179053] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.180051] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.281477] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.281928] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.385575] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.386212] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.490307] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.490740] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.595177] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.595809] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.736061] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.736459] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.840363] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.841393] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.943094] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:31.943474] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:31.943924] [I] FLR0026_FRAME_BEGIN seq=280 started=false
+[14:04:32.050446] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.050886] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.157763] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.158155] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.259200] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.259592] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.361774] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.362159] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.462963] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.463346] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.567131] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.567522] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.668295] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.668748] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.769979] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.770570] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.871759] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.872428] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.974222] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:32.977681] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:32.978117] [I] FLR0026_FRAME_BEGIN seq=290 started=false
+[14:04:33.080761] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.081199] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:33.190772] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.191201] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:33.291944] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.292324] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:33.393896] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.394473] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:33.495780] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.496166] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:33.596999] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.597678] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:33.698514] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.698937] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:33.800787] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.801189] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:33.901997] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:33.902387] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.004657] [I] FLR0026_MODEL_STAGE_PROGRESS seq=300 progress=1 assets=1
+[14:04:34.004757] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.005076] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.005483] [I] FLR0026_FRAME_BEGIN seq=300 started=false
+[14:04:34.106118] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.106587] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.207526] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.208283] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.309025] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.309392] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.410192] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.410581] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.512780] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.513174] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.614009] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.614702] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.715678] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.716065] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.816794] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.817181] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:34.917977] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:34.918363] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.019216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.019690] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.020092] [I] FLR0026_FRAME_BEGIN seq=310 started=false
+[14:04:35.120474] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.120918] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.223183] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.223578] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.324348] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.324793] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.425533] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.426010] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.526816] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.527200] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.628016] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.628399] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.731793] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.732177] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.832973] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.833365] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:35.934180] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:35.934565] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.035333] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.035797] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.036198] [I] FLR0026_FRAME_BEGIN seq=320 started=false
+[14:04:36.136545] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.137013] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.243791] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.244180] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.347786] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.348181] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.450340] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.450774] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.552531] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.553001] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.656756] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.657142] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.761768] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.762215] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.866768] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.867151] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:36.967966] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:36.968542] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.069539] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.070009] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.070407] [I] FLR0026_FRAME_BEGIN seq=330 started=false
+[14:04:37.170852] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.171426] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.272421] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.273160] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.376834] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.377414] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.479785] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.480168] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.583863] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.584447] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.685347] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.685791] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.786906] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.787482] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.889771] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.890152] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:37.990927] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:37.991322] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.093778] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.094171] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.094561] [I] FLR0026_FRAME_BEGIN seq=340 started=false
+[14:04:38.195032] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.195605] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.297784] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.298161] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.399048] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.399692] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.502765] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.503150] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.603982] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.604380] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.706770] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.707163] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.808090] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.808763] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:38.909696] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:38.910100] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.010832] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.011252] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.112041] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.112447] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.112931] [I] FLR0026_FRAME_BEGIN seq=350 started=false
+[14:04:39.214602] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.215087] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.317787] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.318176] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.418990] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.419382] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.520174] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.520566] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.621364] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.621829] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.722583] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.723030] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.823778] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.824173] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:39.924963] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:39.925357] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.026146] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.026552] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.127353] [I] FLR0026_MODEL_STAGE_PROGRESS seq=360 progress=1 assets=1
+[14:04:40.127436] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.127807] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.128206] [I] FLR0026_FRAME_BEGIN seq=360 started=false
+[14:04:40.228569] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.229020] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.329794] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.330191] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.431043] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.431432] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.532211] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.532599] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.633390] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.633855] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.734581] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.735023] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.835764] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.836156] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:40.936971] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:40.937367] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.038155] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.038559] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.141774] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.142175] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.142565] [I] FLR0026_FRAME_BEGIN seq=370 started=false
+[14:04:41.244763] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.245154] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.345983] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.346379] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.447165] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.447551] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.548372] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.548837] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.651767] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.652155] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.752934] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.753324] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.854105] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.854494] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:41.955280] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:41.955719] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.056450] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.056919] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.158847] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.159533] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.160118] [I] FLR0026_FRAME_BEGIN seq=380 started=false
+[14:04:42.260549] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.261012] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.361872] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.362468] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.464774] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.465163] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.566070] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.566712] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.667551] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.668028] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.768770] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.769172] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.870027] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.870416] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:42.971263] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:42.971919] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.072881] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.073286] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.175842] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.176439] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.177026] [I] FLR0026_FRAME_BEGIN seq=390 started=false
+[14:04:43.277454] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.277901] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.378765] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.379347] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.480278] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.480719] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.583860] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.584434] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.686768] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.687156] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.788229] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.788889] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.890761] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.891149] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:43.992064] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:43.992692] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.093507] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.093969] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.194813] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.195414] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.195883] [I] FLR0026_FRAME_BEGIN seq=400 started=false
+[14:04:44.298754] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.299138] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.402765] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.403154] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.503937] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.504322] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.605110] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.605499] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.708773] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.709164] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.809946] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.810342] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:44.911143] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:44.911544] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.012373] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.012865] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.115764] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.116155] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.219765] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.220159] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.220550] [I] FLR0026_FRAME_BEGIN seq=410 started=false
+[14:04:45.322798] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.323190] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.426773] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.427163] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.529772] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.530164] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.633781] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.634169] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.737782] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.738249] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.839086] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.839480] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:45.940325] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:45.940783] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.041550] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.042034] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.143775] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.144174] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.247757] [I] FLR0026_MODEL_STAGE_PROGRESS seq=420 progress=1 assets=1
+[14:04:46.247839] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.248158] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.248543] [I] FLR0026_FRAME_BEGIN seq=420 started=false
+[14:04:46.350771] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.351162] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.451977] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.452374] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.553142] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.553538] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.655372] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.655826] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.756534] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.756983] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.857802] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.858196] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:46.958957] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:46.959353] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.060427] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.060883] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.162824] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.163417] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.266761] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.267153] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.267542] [I] FLR0026_FRAME_BEGIN seq=430 started=false
+[14:04:47.368025] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.368579] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.470763] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.471203] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.573845] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.574436] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.677759] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.678151] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.781849] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.782438] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.883892] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.884282] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:47.987860] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:47.988438] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.089336] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.089806] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.190705] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.191299] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.293116] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.293506] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.293964] [I] FLR0026_FRAME_BEGIN seq=440 started=false
+[14:04:48.394823] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.395436] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.497792] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.498185] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.599004] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.599423] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.700233] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.700685] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.801440] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.801900] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:48.902674] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:48.903077] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.003907] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.004311] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.105096] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.105488] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.206268] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.206744] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.308781] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.309164] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.309598] [I] FLR0026_FRAME_BEGIN seq=450 started=false
+[14:04:49.411780] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.412172] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.514776] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.515166] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.616099] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.616496] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.717309] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.717764] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.818497] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.818946] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:49.919749] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:49.920151] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.020967] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.021369] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.122182] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.122570] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.224893] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.225281] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.326119] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.326512] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.326960] [I] FLR0026_FRAME_BEGIN seq=460 started=false
+[14:04:50.427332] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.427793] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.528510] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.528944] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.629703] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.630107] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.730893] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.731289] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.832081] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.832472] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:50.933244] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:50.933690] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.034423] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.034879] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.135669] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.136061] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.236884] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.237276] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.338088] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.338504] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.338976] [I] FLR0026_FRAME_BEGIN seq=470 started=false
+[14:04:51.439362] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.439813] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.540567] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.541046] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.642769] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.643158] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.743965] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.744359] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.845140] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.845528] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:51.946305] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:51.946753] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.047587] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.048043] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.148774] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.149166] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.249969] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.250353] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.351142] [I] FLR0026_MODEL_STAGE_PROGRESS seq=480 progress=1 assets=1
+[14:04:52.351226] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.351543] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.352000] [I] FLR0026_FRAME_BEGIN seq=480 started=false
+[14:04:52.452366] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.452808] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.553539] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.554012] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.654752] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.655138] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.755928] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.756321] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.857125] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.857508] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:52.958357] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:52.958812] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.060770] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.061167] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.161976] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.162374] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.263147] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.263537] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.366393] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.367430] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.368005] [I] FLR0026_FRAME_BEGIN seq=490 started=false
+[14:04:53.468470] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.468901] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.569754] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.570341] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.671323] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.671766] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.772574] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.773202] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.874080] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.874465] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:53.975351] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:53.975996] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.076976] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.077367] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.178275] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.178942] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.280779] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.281162] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.384832] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.385397] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.385994] [I] FLR0026_FRAME_BEGIN seq=500 started=false
+[14:04:54.488761] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.489145] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.590065] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.590687] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.693433] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.693928] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.797869] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.798381] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:54.908778] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:54.909165] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.011056] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.011456] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.112240] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.112683] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.213416] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.213889] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.319773] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.320160] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.420959] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.421346] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.421798] [I] FLR0026_FRAME_BEGIN seq=510 started=false
+[14:04:55.524765] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.525153] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.630790] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.631181] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.734770] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.735160] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.837770] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.838165] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:55.938974] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:55.939364] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.042763] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.043161] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.143956] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.144346] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.245342] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.245799] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.346521] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.346959] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.447735] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.448121] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.448510] [I] FLR0026_FRAME_BEGIN seq=520 started=false
+[14:04:56.548954] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.549345] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.652772] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.653160] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.756774] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.757158] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.858178] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.858582] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:56.959368] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:56.959819] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.060561] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.061030] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.161757] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.162172] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.263003] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.263381] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.364237] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.364880] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.465747] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.466140] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.466536] [I] FLR0026_FRAME_BEGIN seq=530 started=false
+[14:04:57.567007] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.567577] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.668568] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.669004] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.770828] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.771412] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.873773] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.874163] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:57.975025] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:57.975602] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.077767] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.078171] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.179028] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.179606] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.280599] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.281035] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.381763] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.382200] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.482984] [I] FLR0026_MODEL_STAGE_PROGRESS seq=540 progress=1 assets=1
+[14:04:58.483067] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.483380] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.483814] [I] FLR0026_FRAME_BEGIN seq=540 started=false
+[14:04:58.585842] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.586431] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.689847] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.690472] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.792878] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.793487] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.894524] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.894983] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:58.995910] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:58.996568] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:59.099794] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:59.100188] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:59.201174] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:59.202020] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:59.302776] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:59.303207] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:59.404854] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:59.405466] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:59.506428] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:59.506886] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:59.507283] [I] FLR0026_FRAME_BEGIN seq=550 started=false
+[14:04:59.617085] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:59.617484] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:59.721777] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:59.722189] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:04:59.825797] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:04:59.826186] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)

@@ -1,0 +1,46 @@
+From 04e07ec6b13f9d1ea95e81b7d825c0d4c6f06241 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 01:36:28 +0000
+Subject: [PATCH] diag: isolate native fixture setup
+
+---
+ .../serialization/scene_text_deserializer.cc  | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 69a8f2b..eda2890 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -16,6 +16,7 @@
+ #include "scene_text_deserializer.h"
+ 
+ #include <asio/post.hpp>
++#include <cstdlib>
+ #include <core/entity/base/entityobject.h>
+ #include <core/include/literals.h>
+ #include <core/systems/derived/collision_system.h>
+@@ -195,6 +196,24 @@ void SceneTextDeserializer::DeserializeSceneLevel(const flutter::EncodableValue&
+ void SceneTextDeserializer::RunPostSetupLoad() {
+   spdlog::debug("Running post setup load...");
+ 
++  if (std::getenv("FLUORITE_NATIVE_PURE_FIXTURE") != nullptr) {
++    spdlog::info(
++      "FLUORITE_NATIVE_PURE_FIXTURE enabled=true models={} shapes={} lights={}",
++      models_.size(), shapes_.size(), lights_.size()
++    );
++
++    // Keep the deserialized camera contract, while leaving production scene
++    // resource loading out of the native geometry control experiment.
++    ECSMessage viewTargetCameraSet;
++    viewTargetCameraSet.addData(ECSMessageType::SetCameraFromDeserializedLoad, camera_);
++    ECSManager::GetInstance()->vRouteMessage(viewTargetCameraSet);
++    spdlog::info("FLUORITE_NATIVE_PURE_FIXTURE_SETUP_DONE");
++    camera_ = nullptr;
++    indirect_light_.reset();
++    skybox_.reset();
++    return;
++  }
++
+   spdlog::trace("setUpLoadingModels");
+   setUpLoadingModels();
+   spdlog::trace("setUpSkybox");

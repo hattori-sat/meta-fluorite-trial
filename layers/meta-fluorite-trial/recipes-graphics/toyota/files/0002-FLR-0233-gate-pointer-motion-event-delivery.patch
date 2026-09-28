@@ -1,0 +1,27 @@
+From 9d45183ba10f805c17458093cd08bdf3be6dffc4 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 09:36:33 +0000
+Subject: [PATCH] FLR-0233: gate pointer motion event delivery
+
+---
+ shell/wayland/display.cc | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/shell/wayland/display.cc b/shell/wayland/display.cc
+index b8df7d4..24a91c6 100644
+--- a/shell/wayland/display.cc
++++ b/shell/wayland/display.cc
+@@ -462,6 +462,13 @@ void Display::pointer_handle_motion(void* data,
+   auto* d = static_cast<Display*>(data);
+ 
+   if (!d->m_wayland_event_mask.pointer_motion) {
++    if (std::getenv("FLUORITE_DISABLE_POINTER_MOTION_EVENT") != nullptr) {
++      spdlog::info(
++          "FLUORITE_DISABLE_POINTER_MOTION_EVENT enabled=true "
++          "operation=skip_pointer_motion");
++      return;
++    }
++
+     d->m_pointer.event.surface_x = wl_fixed_to_double(sx);
+     d->m_pointer.event.surface_y = wl_fixed_to_double(sy);
+ 

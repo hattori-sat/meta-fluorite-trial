@@ -1,0 +1,25 @@
+From 02888db6c1a0e10f94e86dc6b3d3894be1b545b0 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 21:56:16 +0000
+Subject: [PATCH] fix: satisfy Vulkan diagnostic format checks
+
+---
+ .../backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index de5f4fc9f..27d72d5df 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -274,7 +274,7 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
+             mSwapChainBundle.extent.width,
+             mSwapChainBundle.extent.height,
+             static_cast<int32_t>(surfaceFormat.format),
+-            mSwapChainBundle.colors.size());
++            static_cast<size_t>(mSwapChainBundle.colors.size()));
+ 
+     FVK_LOGI << "vkCreateSwapchain"
+            << ": " << mSwapChainBundle.extent.width << "x" << mSwapChainBundle.extent.height << ", "
+-- 
+2.34.1
+

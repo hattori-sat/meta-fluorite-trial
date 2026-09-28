@@ -1,0 +1,31 @@
+From 750e91897b8543da13daf386f3b3769dfad5c39d Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 18:00:32 +0000
+Subject: [PATCH] diag: isolate production model loading
+
+---
+ .../scene/serialization/scene_text_deserializer.cc    | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 23f750f..dc04f9a 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -208,8 +208,15 @@ void SceneTextDeserializer::RunPostSetupLoad() {
+     return;
+   }
+ 
+-  spdlog::trace("setUpLoadingModels");
+-  setUpLoadingModels();
++  if (std::getenv("FLR0026_NATIVE_SKIP_MODEL_LOAD") != nullptr) {
++    spdlog::info(
++      "FLR0026_NATIVE_SKIP_MODEL_LOAD enabled=true models={} shapes={} lights={}",
++      models_.size(), shapes_.size(), lights_.size()
++    );
++  } else {
++    spdlog::trace("setUpLoadingModels");
++    setUpLoadingModels();
++  }
+   spdlog::trace("setUpSkybox");
+   setUpSkybox();
+   spdlog::trace("setUpLights");

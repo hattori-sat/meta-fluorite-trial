@@ -1,0 +1,45 @@
+From fdca97aded748bd60f20711ef82ae8a198111ea6 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 11:58:09 +0000
+Subject: [PATCH] diag: trace ViewTarget registration messages from effective
+ baseline
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index 05a1de572..2492b1353 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -229,8 +229,14 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+   PlatformViewRemoveListener removeListener,
+   void* platform_view_context
+ ) {
++  spdlog::info(
++    "FLUORITE_VIEWTARGET_REGISTER_ENTER loaded={} state={}",
++    _hasLoadedOnce,
++    static_cast<int>(ECSManager::GetRunState())
++  );
+   // Make sure we only initialize once
+   if (_hasLoadedOnce) {
++    spdlog::info("FLUORITE_VIEWTARGET_REGISTER_EARLY_RETURN");
+     spdlog::warn("FilamentViewPlugin::RegisterWithRegistrar called more than once!");
+     return;
+   }
+@@ -271,6 +277,7 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+   );
+ 
+   ecs->RouteMessage(viewTargetCreationRequest);
++  spdlog::info("FLUORITE_VIEWTARGET_CREATE_ENQUEUED");
+ 
+   if (!m_bHasSetupRegistrar) {
+     m_bHasSetupRegistrar = true;
+@@ -296,6 +303,7 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+ 
+   // Ok to be called infinite times.
+   KickOffRenderingLoops();
++  spdlog::info("FLUORITE_VIEWTARGET_START_ENQUEUED");
+ 
+   // ECS update is entered by ViewTarget::DrawFrame. Drain the bootstrap
+   // messages after registration so the ViewTarget creation and rendering-loop

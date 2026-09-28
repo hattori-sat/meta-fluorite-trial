@@ -1,0 +1,93 @@
+From 63aa2c87efdf164522a610cf264cc63844bab4a8 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 21:57:42 +0000
+Subject: [PATCH] FLR-0305: add opt-in production default-scene light probe
+
+---
+ .../filament_view/core/scene/view_target.cc   | 37 +++++++++++++++++++
+ .../filament_view/core/scene/view_target.h    |  3 ++
+ 2 files changed, 40 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 92923c7..271dc66 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -240,6 +240,10 @@ ViewTarget::~ViewTarget() {
+     _engine->destroy(native_diagnostic_light_entity_);
+     native_diagnostic_light_entity_.clear();
+   }
++  if (production_probe_light_entity_) {
++    _engine->destroy(production_probe_light_entity_);
++    production_probe_light_entity_.clear();
++  }
+   if (native_diagnostic_material_instance_) {
+     _engine->destroy(native_diagnostic_material_instance_);
+     native_diagnostic_material_instance_ = nullptr;
+@@ -1008,6 +1012,37 @@ void ViewTarget::setupNativeMinimalGeometry() {
+   );
+ }
+ 
++////////////////////////////////////////////////////////////////////////////
++void ViewTarget::setupProductionProbeLight() {
++  if (production_probe_light_entity_ ||
++      std::getenv("FLR0305_PRODUCTION_SCENE_LIGHT") == nullptr) {
++    return;
++  }
++
++  const auto filamentSystem = ECSManager::GetInstance()->getSystem<FilamentSystem>(__FUNCTION__);
++  auto* engine = filamentSystem->getFilamentEngine();
++  auto* scene = filamentSystem->getFilamentScene();
++  if (engine == nullptr || scene == nullptr) {
++    spdlog::warn("FLR0305_PRODUCTION_SCENE_LIGHT_SETUP skipped engine_or_scene=null");
++    return;
++  }
++
++  production_probe_light_entity_ = engine->getEntityManager().create();
++  filament::LightManager::Builder(filament::LightManager::Type::SUN)
++    .color({1.0f, 0.9f, 0.8f})
++    .intensity(110000.0f)
++    .direction({0.7f, -1.0f, -0.8f})
++    .sunAngularRadius(1.9f)
++    .castShadows(false)
++    .build(*engine, production_probe_light_entity_);
++  scene->addEntity(production_probe_light_entity_);
++  spdlog::info(
++    "FLR0305_PRODUCTION_SCENE_LIGHT_SETUP_DONE entity={} scene=default type=SUN "
++    "intensity=110000 direction=(0.7,-1,-0.8)",
++    production_probe_light_entity_.getId()
++  );
++}
++
+ ////////////////////////////////////////////////////////////////////////////
+ void ViewTarget::ChangeQualitySettings(const ePredefinedQualitySettings qualitySettings) {
+   // reset the settings for each quality setting
+@@ -1427,6 +1462,8 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   )
+                           .count();
+ 
++  setupProductionProbeLight();
++
+   const bool pureFixtureCamera =
+     std::getenv("FLUORITE_NATIVE_PURE_FIXTURE") != nullptr &&
+     std::getenv("FLUORITE_NATIVE_FIXTURE_LOCAL_CAMERA") != nullptr &&
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index a9d3e6b..2c15d77 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -203,6 +203,8 @@ class ViewTarget {
+     utils::Entity native_diagnostic_entity_;
+     utils::Entity native_diagnostic_light_entity_;
+ 
++    utils::Entity production_probe_light_entity_;
++
+     // todo to be moved?
+     ::filament::gltfio::Animator* fanimator_;
+ 
+@@ -223,6 +225,7 @@ class ViewTarget {
+ 
+     void setupView(uint32_t width, uint32_t height);
+     void setupNativeMinimalGeometry();
++    void setupProductionProbeLight();
+ 
+     uint32_t m_LastTime = 0;
+ };

@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 21:15:00 +0900
+Subject: [PATCH] filament_view: send frame event without a reply callback
+
+Keep the existing event payload and future bookkeeping, but remove the
+reply-bearing MethodChannel overload from the render-strand frame event. This
+isolates whether the platform messenger reply path is what stops DrawFrame.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+Index: git/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+===================================================================
+--- git.orig/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
++++ git/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+@@ -183,2 +183,1 @@
+-    // wrap map in unique_ptr EncodableValue
+-    std::make_unique<flutter::EncodableValue>(encodableMap), std::move(retval)
++    std::make_unique<flutter::EncodableValue>(encodableMap)

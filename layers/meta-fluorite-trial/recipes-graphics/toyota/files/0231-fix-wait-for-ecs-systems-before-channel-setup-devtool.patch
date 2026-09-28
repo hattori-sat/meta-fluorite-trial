@@ -1,0 +1,60 @@
+From 3c08dbb36b073b16c2553925fa3478268e6ad362 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 00:52:18 +0000
+Subject: [PATCH] fix: wait for ECS systems before channel setup
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 25 ++++++++++++++++---
+ 1 file changed, 21 insertions(+), 4 deletions(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index ec09d61..b98aa74 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -17,6 +17,7 @@
+ #include "filament_view_plugin.h"
+ 
+ #include <asio/post.hpp>
++#include <chrono>
+ #include <core/components/derived/camera.h>
+ #include <core/components/derived/transform.h>
+ #include <core/scene/serialization/scene_text_deserializer.h>
+@@ -37,6 +38,7 @@
+ #include <messages.g.h>
+ #include <method_result_functions.h>
+ #include <plugins/common/common.h>
++#include <thread>
+ 
+ class FlutterView;
+ 
+@@ -119,11 +121,26 @@ void DeserializeDataAndSetupMessageChannels(
+   }
+ 
+   spdlog::trace("getting systems");
+-  const auto animationSystem = ecs->getSystem<AnimationSystem>(__FUNCTION__);
+-
+-  const auto viewTargetSystem = ecs->getSystem<ViewTargetSystem>(__FUNCTION__);
++  constexpr auto kSystemInitializationTimeout = std::chrono::milliseconds(2000);
++  const auto initializationDeadline =
++      std::chrono::steady_clock::now() + kSystemInitializationTimeout;
++  std::shared_ptr<AnimationSystem> animationSystem;
++  std::shared_ptr<ViewTargetSystem> viewTargetSystem;
++  std::shared_ptr<CollisionSystem> collisionSystem;
++  do {
++    animationSystem = ecs->getSystem<AnimationSystem>(__FUNCTION__);
++    viewTargetSystem = ecs->getSystem<ViewTargetSystem>(__FUNCTION__);
++    collisionSystem = ecs->getSystem<CollisionSystem>(__FUNCTION__);
++    if (animationSystem && viewTargetSystem && collisionSystem) {
++      break;
++    }
++    std::this_thread::sleep_for(std::chrono::milliseconds(1));
++  } while (std::chrono::steady_clock::now() < initializationDeadline);
+ 
+-  const auto collisionSystem = ecs->getSystem<CollisionSystem>(__FUNCTION__);
++  if (!animationSystem || !viewTargetSystem || !collisionSystem) {
++    spdlog::error("ECS systems were not initialized before message-channel setup");
++    return;
++  }
+ 
+   collisionSystem->setupMessageChannels(registrar, "plugin.filament_view.collision_info");
+   viewTargetSystem->setupMessageChannels(registrar, "plugin.filament_view.frame_view");

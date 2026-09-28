@@ -1,0 +1,224 @@
+From 0cc85f1b407ec9c907bf066095b08d2fc83e76aa Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 12:14:13 +0000
+Subject: [PATCH] diag: add minimal native geometry pipeline
+
+---
+ .../filament_view/core/scene/view_target.cc   | 134 ++++++++++++++++++
+ .../filament_view/core/scene/view_target.h    |  12 ++
+ 2 files changed, 146 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index b830599..0b900a0 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -28,7 +28,10 @@
+ 
+ #include <filament/Renderer.h>
+ #include <filament/Fence.h>
++#include <filament/IndexBuffer.h>
++#include <filament/Material.h>
+ #include <filament/RenderTarget.h>
++#include <filament/RenderableManager.h>
+ #include <filament/SwapChain.h>
+ #include <filament/Texture.h>
+ #include <filament/View.h>
+@@ -36,8 +39,11 @@
+ #include <filament/backend/PixelBufferDescriptor.h>
+ #include <filament/math/TMatHelpers.h>
+ #include <filament/math/mat4.h>
++#include <filament/math/vec3.h>
+ #include <filament/math/vec4.h>
++#include <filament/VertexBuffer.h>
+ #include <filament/utils/EntityManager.h>
++#include <filamat/MaterialBuilder.h>
+ 
+ #include <chrono>
+ #include <cstdlib>
+@@ -236,6 +242,31 @@ ViewTarget::~ViewTarget() {
+     native_readback_texture_ = nullptr;
+   }
+ 
++  if (_engine && native_diagnostic_entity_) {
++    _engine->destroy(native_diagnostic_entity_);
++    native_diagnostic_entity_.clear();
++  }
++  if (_engine && native_diagnostic_material_instance_) {
++    _engine->destroy(native_diagnostic_material_instance_);
++    native_diagnostic_material_instance_ = nullptr;
++  }
++  if (_engine && native_diagnostic_material_) {
++    _engine->destroy(native_diagnostic_material_);
++    native_diagnostic_material_ = nullptr;
++  }
++  if (_engine && native_diagnostic_index_buffer_) {
++    _engine->destroy(native_diagnostic_index_buffer_);
++    native_diagnostic_index_buffer_ = nullptr;
++  }
++  if (_engine && native_diagnostic_vertex_buffer_) {
++    _engine->destroy(native_diagnostic_vertex_buffer_);
++    native_diagnostic_vertex_buffer_ = nullptr;
++  }
++  if (_engine && native_diagnostic_scene_) {
++    _engine->destroy(native_diagnostic_scene_);
++    native_diagnostic_scene_ = nullptr;
++  }
++
+   _engine->destroy(fview_);
+   _engine->destroy(fswapChain_);
+ 
+@@ -476,9 +507,112 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+ 
+   _initCamera();
+ 
++  if (std::getenv("FLR0026_NATIVE_MINIMAL_GEOMETRY") != nullptr) {
++    setupNativeMinimalGeometry();
++    fview_->setScene(native_diagnostic_scene_);
++    fview_->setBlendMode(filament::View::BlendMode::OPAQUE);
++    spdlog::info("FLR0026_NATIVE_MINIMAL_GEOMETRY_ENABLED scene=true");
++  }
++
+   SPDLOG_TRACE("--{}", __FUNCTION__);
+ }
+ 
++////////////////////////////////////////////////////////////////////////////
++void ViewTarget::setupNativeMinimalGeometry() {
++  native_diagnostic_scene_ = _engine->createScene();
++  if (!native_diagnostic_scene_) {
++    spdlog::error("FLR0026_NATIVE_MINIMAL_GEOMETRY_SCENE_FAILED");
++    return;
++  }
++
++  using filament::IndexBuffer;
++  using filament::RenderableManager;
++  using filament::VertexAttribute;
++  using filament::VertexBuffer;
++  using filament::math::float3;
++
++  static constexpr float vertices[] = {
++    -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,
++    -1.0f,  1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,
++     1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,
++  };
++  static constexpr uint16_t indices[] = {
++    0, 1, 2, 2, 3, 0, 1, 5, 6, 6, 2, 1, 5, 4, 7, 7, 6, 5,
++    4, 0, 3, 3, 7, 4, 3, 2, 6, 6, 7, 3, 4, 5, 1, 1, 0, 4,
++  };
++
++  native_diagnostic_vertex_buffer_ = VertexBuffer::Builder()
++    .vertexCount(8)
++    .bufferCount(1)
++    .attribute(VertexAttribute::POSITION, 0, VertexBuffer::AttributeType::FLOAT3)
++    .build(*_engine);
++  native_diagnostic_index_buffer_ = IndexBuffer::Builder()
++    .indexCount(sizeof(indices) / sizeof(indices[0]))
++    .bufferType(IndexBuffer::IndexType::USHORT)
++    .build(*_engine);
++  if (!native_diagnostic_vertex_buffer_ || !native_diagnostic_index_buffer_) {
++    spdlog::error("FLR0026_NATIVE_MINIMAL_GEOMETRY_BUFFER_FAILED");
++    return;
++  }
++  native_diagnostic_vertex_buffer_->setBufferAt(
++    *_engine,
++    0,
++    VertexBuffer::BufferDescriptor(vertices, sizeof(vertices))
++  );
++  native_diagnostic_index_buffer_->setBuffer(
++    *_engine,
++    IndexBuffer::BufferDescriptor(indices, sizeof(indices))
++  );
++
++  filamat::MaterialBuilder::init();
++  filamat::MaterialBuilder materialBuilder;
++  materialBuilder
++    .name("flr0026_native_minimal_unlit")
++    .material(
++      "void material(inout MaterialInputs material) {"
++      "  prepareMaterial(material);"
++      "  material.baseColor = vec4(materialParams.color, 1.0);"
++      "}"
++    )
++    .parameter("color", filament::backend::UniformType::FLOAT3)
++    .shading(filamat::MaterialBuilder::Shading::UNLIT)
++    .targetApi(filamat::MaterialBuilder::TargetApi::ALL)
++    .platform(filamat::MaterialBuilder::Platform::ALL);
++  const auto package = materialBuilder.build(_engine->getJobSystem());
++  native_diagnostic_material_ = filament::Material::Builder()
++    .package(package.getData(), package.getSize())
++    .build(*_engine);
++  if (!native_diagnostic_material_) {
++    spdlog::error("FLR0026_NATIVE_MINIMAL_GEOMETRY_MATERIAL_FAILED");
++    return;
++  }
++  native_diagnostic_material_->setDefaultParameter(
++    "color", filament::RgbType::LINEAR, float3{0.05f, 0.45f, 1.0f}
++  );
++  native_diagnostic_material_instance_ = native_diagnostic_material_->createInstance();
++  native_diagnostic_entity_ = _engine->getEntityManager().create();
++  RenderableManager::Builder(1)
++    .boundingBox({{-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}})
++    .material(0, native_diagnostic_material_instance_)
++    .geometry(
++      0,
++      RenderableManager::PrimitiveType::TRIANGLES,
++      native_diagnostic_vertex_buffer_,
++      native_diagnostic_index_buffer_,
++      0,
++      sizeof(indices) / sizeof(indices[0])
++    )
++    .culling(false)
++    .receiveShadows(false)
++    .castShadows(false)
++    .build(*_engine, native_diagnostic_entity_);
++  native_diagnostic_scene_->addEntity(native_diagnostic_entity_);
++  spdlog::info(
++    "FLR0026_NATIVE_MINIMAL_GEOMETRY_READY vertices=8 indices={} scene=true",
++    sizeof(indices) / sizeof(indices[0])
++  );
++}
++
+ ////////////////////////////////////////////////////////////////////////////
+ void ViewTarget::ChangeQualitySettings(const ePredefinedQualitySettings qualitySettings) {
+   // reset the settings for each quality setting
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index a912857..ee01d39 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -32,8 +32,13 @@
+ 
+ namespace filament {
+ class Fence;
++class IndexBuffer;
++class Material;
++class MaterialInstance;
+ class RenderTarget;
++class Scene;
+ class Texture;
++class VertexBuffer;
+ }  // namespace filament
+ 
+ namespace plugin_filament_view {
+@@ -151,6 +156,7 @@ class ViewTarget {
+      */
+     void setupShmProbe(uint32_t width, uint32_t height);
+     void attachShmProbe();
++    void setupNativeMinimalGeometry();
+     void pollNativeReadbackFence();
+     void setupWaylandSubsurface();
+     static void OnNativeReadback(void* buffer, size_t size, void* user);
+@@ -193,6 +199,12 @@ class ViewTarget {
+     ::filament::View* native_readback_view_{};
+     ::filament::Texture* native_readback_texture_{};
+     ::filament::RenderTarget* native_readback_target_{};
++    ::filament::Scene* native_diagnostic_scene_{};
++    ::filament::VertexBuffer* native_diagnostic_vertex_buffer_{};
++    ::filament::IndexBuffer* native_diagnostic_index_buffer_{};
++    ::filament::Material* native_diagnostic_material_{};
++    ::filament::MaterialInstance* native_diagnostic_material_instance_{};
++    utils::Entity native_diagnostic_entity_;
+     std::mutex frameLock_;
+     ::filament::View* fview_{};
+ 
+-- 
+2.34.1
+

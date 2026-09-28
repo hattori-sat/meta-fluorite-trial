@@ -1,0 +1,22 @@
+From 5b34318b08bfd59c1e94b438a2e3b2203bad4f91 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 02:44:28 +0000
+Subject: [PATCH] fix: use lowest quality for QEMU validation
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 314f852..e266a9b 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -277,7 +277,7 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+   //       with Post-Processing enabled
+   fview_->setStencilBufferEnabled(false);
+ 
+-  ChangeQualitySettings(ViewTarget::ePredefinedQualitySettings::Ultra);
++  ChangeQualitySettings(ViewTarget::ePredefinedQualitySettings::Lowest);
+ 
+   _initCamera();
+ 

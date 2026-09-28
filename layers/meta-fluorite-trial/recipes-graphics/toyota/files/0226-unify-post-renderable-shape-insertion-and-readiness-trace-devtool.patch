@@ -1,0 +1,32 @@
+From 6a162ae6ab9df768581b8161535a56e2ed39efb0 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 23:35:00 +0000
+Subject: [PATCH] fix: record renderable after post-build scene insertion
+
+---
+ .../filament_view/core/systems/derived/shape_system.cc    | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/shape_system.cc b/plugins/filament_view/core/systems/derived/shape_system.cc
+index 61e4ecb..b1ddf7d 100644
+--- a/plugins/filament_view/core/systems/derived/shape_system.cc
++++ b/plugins/filament_view/core/systems/derived/shape_system.cc
+@@ -156,11 +156,17 @@ void ShapeSystem::addShapeToScene(const std::shared_ptr<shapes::BaseShape>& shap
+ 
+   spdlog::trace("addShapesToScene: {}", shape->getGuid());
+   FilamentEntity oEntity = _em->create();
+-  filamentScene->addEntity(oEntity);
+   shape->_fEntity = oEntity;
+ 
+   shape->bInitAndCreateShape(_engine, oEntity);
+ 
++  filamentScene->addEntity(oEntity);
++  const bool hasRenderable = _rcm->hasComponent(oEntity);
++  spdlog::info(
++    "FLR0026_SHAPE_READY guid={} entity={} renderable={}",
++    shape->getGuid(), oEntity.getId(), hasRenderable
++  );
++
+   spdlog::trace("Adding entity {} with filament entity {}", shape->getGuid(), oEntity.getId());
+ 
+   // To investigate a better system for implementing layer mask

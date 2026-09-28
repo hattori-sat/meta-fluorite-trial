@@ -1,0 +1,51 @@
+From 92a27bf9f76fb6432a69efcd50abd24dad967caa Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 00:18:10 +0000
+Subject: [PATCH] fix: detach cameras until activation
+
+---
+ packages/filament_scene/lib/camera/camera.dart     | 4 +++-
+ packages/filament_scene/lib/components/camera.dart | 8 +++++++-
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/lib/camera/camera.dart b/packages/filament_scene/lib/camera/camera.dart
+index 62c1f1e..93972c8 100644
+--- a/packages/filament_scene/lib/camera/camera.dart
++++ b/packages/filament_scene/lib/camera/camera.dart
+@@ -81,7 +81,9 @@ class Camera extends TransformEntity with CameraComponent.Camera, CameraComponen
+ 
+   /// Sets the camera as active for the given view
+   void setActive([final int? viewId]) {
+-    engine?.queueFrameTask(engine?.setActiveCamera(viewId, id));
++    final int activeViewId = viewId ?? 0;
++    markViewActive(activeViewId);
++    engine?.queueFrameTask(engine?.setActiveCamera(activeViewId, id));
+     onEnable();
+   }
+ 
+diff --git a/packages/filament_scene/lib/components/camera.dart b/packages/filament_scene/lib/components/camera.dart
+index aec9e60..3e92d56 100644
+--- a/packages/filament_scene/lib/components/camera.dart
++++ b/packages/filament_scene/lib/components/camera.dart
+@@ -29,7 +29,8 @@ mixin class Camera {
+ 
+   // NOTE: expose this to properly support multiview
+   // ignore: prefer_final_fields
+-  int _viewId = 0;
++  // Keep cameras detached until setActive selects one for a view.
++  int _viewId = -1;
+ 
+   void setProjection({final Projection? projection, final LensProjection? lens}) {
+     assert(
+@@ -43,6 +44,11 @@ mixin class Camera {
+     this.lens = lens;
+   }
+ 
++  /// Records the view selected by the native active-camera command.
++  void markViewActive(final int viewId) {
++    _viewId = viewId;
++  }
++
+   JsonObject cameraToJson() {
+     return <String, dynamic>{
+       'exposure': exposure?.toJson(),

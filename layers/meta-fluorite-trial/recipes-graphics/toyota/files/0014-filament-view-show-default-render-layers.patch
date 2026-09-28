@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 17 Aug 2026 17:40:00 +0900
+Subject: [PATCH] filament_view: show default render layers
+
+Shape renderables keep Filament's default layer because the shape system's
+layer assignment is disabled.  Do not restrict the view to layer bit 0x4;
+make all default renderable layers visible.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -168,7 +168,7 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+ 
+   // this probably needs to change
+-  fview_->setVisibleLayers(0x4, 0x4);
++  fview_->setVisibleLayers(0xff, 0xff);
+   fview_->setViewport({0, 0, width, height});
+ 
+   fview_->setBlendMode(filament::View::BlendMode::TRANSLUCENT);

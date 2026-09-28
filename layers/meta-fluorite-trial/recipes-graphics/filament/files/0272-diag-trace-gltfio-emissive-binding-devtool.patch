@@ -1,0 +1,45 @@
+From 1e23440d12a891ced7af47553e889ede7b83fee9 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 05:17:36 +0000
+Subject: [PATCH] FLR-0320: trace gltfio emissive binding
+
+---
+ libs/gltfio/src/FilamentAsset.cpp | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/libs/gltfio/src/FilamentAsset.cpp b/libs/gltfio/src/FilamentAsset.cpp
+index 4940766e1..7e93bd820 100644
+--- a/libs/gltfio/src/FilamentAsset.cpp
++++ b/libs/gltfio/src/FilamentAsset.cpp
+@@ -28,6 +28,8 @@
+ #include "GltfEnums.h"
+ #include "Wireframe.h"
+ 
++#include <cstring>
++
+ using namespace filament;
+ using namespace utils;
+ 
+@@ -122,6 +124,11 @@ void FFilamentAsset::addTextureBinding(MaterialInstance* materialInstance,
+     info.flags = flags;
+ 
+     const TextureSlot slot = { materialInstance, parameterName };
++    if (std::strcmp(parameterName, "emissiveMap") == 0) {
++        slog.i << "FLR0320_GLTFIO_EMISSIVE_BIND texture_index=" << textureIndex
++               << " texture_ready=" << (info.texture != nullptr)
++               << " queued_bindings=" << info.bindings.size() << io::endl;
++    }
+     if (info.texture) {
+         applyTextureBinding(textureIndex, slot, false);
+     } else {
+@@ -153,6 +160,10 @@ void FFilamentAsset::applyTextureBinding(size_t textureIndex, const TextureSlot&
+         sampler.setMinFilter(TextureSampler::MinFilter::LINEAR_MIPMAP_LINEAR);
+     }
+     tb.materialInstance->setParameter(tb.materialParameter, info.texture, sampler);
++    if (std::strcmp(tb.materialParameter, "emissiveMap") == 0) {
++        slog.i << "FLR0320_GLTFIO_EMISSIVE_APPLY texture_index=" << textureIndex
++               << " add_dependency=" << addDependency << io::endl;
++    }
+     if (addDependency) {
+         mDependencyGraph.addEdge(info.texture, tb.materialInstance, tb.materialParameter);
+     }

@@ -1,0 +1,37 @@
+From 7cc9c47b47e9fe3b9d9267e1a520a1bbbe988c03 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 02:03:05 +0000
+Subject: [PATCH] diag: trace fence status immediately after submit
+
+---
+ filament/backend/src/vulkan/VulkanCommands.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanCommands.cpp b/filament/backend/src/vulkan/VulkanCommands.cpp
+index 616ed0262..654297060 100644
+--- a/filament/backend/src/vulkan/VulkanCommands.cpp
++++ b/filament/backend/src/vulkan/VulkanCommands.cpp
+@@ -30,6 +30,7 @@
+ #include <utils/debug.h>
+ 
+ #include <cstdio>
++#include <cstdlib>
+ 
+ using namespace bluevk;
+ using namespace utils;
+@@ -244,6 +245,12 @@ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+         vkQueueSubmit(mQueue, 1, &submitInfo, mFence);
+     std::fprintf(stderr, "FLR0026_VK_QUEUE_SUBMIT_DONE result=%d queue=%p fence=%p\\n",
+             static_cast<int32_t>(result), static_cast<void*>(mQueue), static_cast<void*>(mFence));
++    if (std::getenv("FLR0026_QUEUE_FENCE_TRACE") != nullptr && result == VK_SUCCESS) {
++        const VkResult fenceStatus = vkGetFenceStatus(mDevice, mFence);
++        std::fprintf(stderr,
++                "FLR0026_VK_QUEUE_FENCE_AFTER_SUBMIT status=%d fence=%p\\n",
++                static_cast<int32_t>(fenceStatus), static_cast<void*>(mFence));
++    }
+     mFenceStatus->setStatus(VK_NOT_READY);
+ 
+ #if FVK_ENABLED(FVK_DEBUG_COMMAND_BUFFER)
+-- 
+2.34.1
+

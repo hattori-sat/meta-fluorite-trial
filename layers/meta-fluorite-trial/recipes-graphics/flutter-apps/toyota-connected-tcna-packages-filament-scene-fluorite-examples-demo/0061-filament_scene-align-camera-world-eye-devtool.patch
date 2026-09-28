@@ -1,0 +1,40 @@
+From a0310861a1f2a13d5e5908a6c2d1436386bbbf65 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 13:41:23 +0000
+Subject: [PATCH] fix: align orbit camera with native world-space eye
+
+---
+ packages/filament_scene/lib/camera/camera.dart | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/lib/camera/camera.dart b/packages/filament_scene/lib/camera/camera.dart
+index 2c13aee..5e0dece 100644
+--- a/packages/filament_scene/lib/camera/camera.dart
++++ b/packages/filament_scene/lib/camera/camera.dart
+@@ -271,6 +271,17 @@ class Camera extends TransformEntity with CameraComponent.Camera, CameraComponen
+   @override
+   JsonObject toJson() {
+     final Vector3 nativeTarget = targetPoint ?? orbitOriginPoint ?? Vector3.zero();
++    // The current Fluorite Native creation path consumes this legacy field as
++    // the world-space eye of lookAt(), not as the Dart orbit radius. Preserve
++    // the origin-at-zero fixture while translating an orbit-point camera to
++    // the same world-space frame as its target.
++    final Vector3 nativeFlightStartPosition = orbitOriginPoint == null
++        ? Vector3(orbitDistance, 0, 0)
++        : Vector3(
++            nativeTarget.x + orbitDistance,
++            nativeTarget.y,
++            nativeTarget.z,
++          );
+ 
+     return <String, dynamic>{
+       ...super.toJson(),
+@@ -282,7 +293,7 @@ class Camera extends TransformEntity with CameraComponent.Camera, CameraComponen
+       'mode': 'INERTIA_AND_GESTURES',
+       'targetPosition': nativeTarget.toJson(),
+       'upVector': Vector3(0, 1, 0).toJson(),
+-      'flightStartPosition': Vector3(orbitDistance, 0, 0).toJson(),
++      'flightStartPosition': nativeFlightStartPosition.toJson(),
+     };
+   }
+ }

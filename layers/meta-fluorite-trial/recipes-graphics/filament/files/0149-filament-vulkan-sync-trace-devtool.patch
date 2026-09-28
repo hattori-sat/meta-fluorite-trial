@@ -1,0 +1,50 @@
+From 1bc7c2eb49df5946412d7ff15135408cbad3e8f8 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 03:22:21 +0000
+Subject: [PATCH] diag: trace Vulkan acquire submit synchronization
+
+---
+ filament/backend/src/vulkan/VulkanCommands.cpp           | 9 +++++++++
+ .../src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp  | 6 ++++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanCommands.cpp b/filament/backend/src/vulkan/VulkanCommands.cpp
+index 654297060..f6271aaad 100644
+--- a/filament/backend/src/vulkan/VulkanCommands.cpp
++++ b/filament/backend/src/vulkan/VulkanCommands.cpp
+@@ -239,6 +239,15 @@ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+              << " fence=" << mFence;
+ #endif
+ 
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr,
++                "FLR0026_VK_SUBMIT_SYNC wait_count=%zu wait0=%p wait1=%p signal=%p\n",
++                mWaitSemaphores.size(),
++                mWaitSemaphores.size() > 0 ? static_cast<void*>(mWaitSemaphores[0]) : nullptr,
++                mWaitSemaphores.size() > 1 ? static_cast<void*>(mWaitSemaphores[1]) : nullptr,
++                static_cast<void*>(submissionSemaphore));
++    }
++
+     std::fprintf(stderr, "FLR0026_VK_QUEUE_SUBMIT_BEGIN queue=%p fence=%p\\n",
+             static_cast<void*>(mQueue), static_cast<void*>(mFence));
+     UTILS_UNUSED_IN_RELEASE VkResult result =
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index 9baf24e19..9371a7831 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -317,6 +317,12 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
+ VkResult VulkanPlatformSurfaceSwapChain::acquire(VulkanPlatform::ImageSyncData* outImageSyncData) {
+     mCurrentImageReadyIndex = (mCurrentImageReadyIndex + 1) % IMAGE_READY_SEMAPHORE_COUNT;
+     outImageSyncData->imageReadySemaphore = mImageReady[mCurrentImageReadyIndex];
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr,
++                "FLR0026_VK_ACQUIRE_SYNC index=%u semaphore=%p\\n",
++                mCurrentImageReadyIndex,
++                static_cast<void*>(outImageSyncData->imageReadySemaphore));
++    }
+     VkResult result = vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX,
+             outImageSyncData->imageReadySemaphore, VK_NULL_HANDLE, &outImageSyncData->imageIndex);
+ 
+-- 
+2.34.1
+

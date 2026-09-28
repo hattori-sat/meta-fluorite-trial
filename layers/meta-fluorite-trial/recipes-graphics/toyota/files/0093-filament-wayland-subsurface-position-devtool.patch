@@ -1,0 +1,34 @@
+From 751802c9ad09f4cabf2c15177bad188fd1adb389 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 18:12:31 +0000
+Subject: [PATCH] diag: set native subsurface position
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 38ad991..09864ff 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -249,12 +249,15 @@ void ViewTarget::setupWaylandSubsurface() {
+   }
+ 
+   wl_subsurface_place_above(subsurface_, parent_surface_);
++  wl_subsurface_set_position(subsurface_, left_, top_);
+   wl_subsurface_set_desync(subsurface_);
+   spdlog::info(
+-    "FLR0026_WAYLAND_SURFACE_CREATED surface={} subsurface={} parent={}",
++    "FLR0026_WAYLAND_SURFACE_CREATED surface={} subsurface={} parent={} position=({}, {})",
+     surface_ != nullptr,
+     subsurface_ != nullptr,
+-    parent_surface_ != nullptr
++    parent_surface_ != nullptr,
++    left_,
++    top_
+   );
+ }
+ 
+-- 
+2.34.1
+

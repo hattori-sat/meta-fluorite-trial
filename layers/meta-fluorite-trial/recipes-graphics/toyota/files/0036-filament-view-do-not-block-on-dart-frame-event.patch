@@ -1,0 +1,39 @@
+From 9f5a5c9f6d2c7a3b2d6b1c4e9f0a8b7c6d5e4f3a Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 14:00:00 +0900
+Subject: [PATCH] filament_view: do not block render strand on Dart frame event
+
+The preRenderFrame callback can issue Pigeon calls back to the native ECS
+strand while the current frame is running on that same strand. Waiting for
+the Dart callback therefore deadlocks the first frame. Keep emitting the
+event, but let its completion run asynchronously so the render strand can
+process the queued native calls.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -619,17 +619,16 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // const auto scriptStart = std::chrono::steady_clock::now();
+
+   // spdlog::debug("[{}] Calling Script event: preRenderFrame", __FUNCTION__);
+-  const auto scriptFuture = FilamentViewPlugin::CallEvent(
++  FilamentViewPlugin::CallEvent(
+     kPreRenderFrame,
+     {//
+      std::make_pair(kParam_DeltaTime, EncodableValue(deltaTime)),
+      std::make_pair(kParam_FPS, EncodableValue(fps)),
+      std::make_pair(kParam_cpuFrametime, EncodableValue(cpuFrametime)),
+      std::make_pair(kParam_gpuFrametime, EncodableValue(gpuFrametime))
+     }
+   );
+
+-  scriptFuture.wait();
+   // const auto scriptDuration = std::chrono::steady_clock::now() - scriptStart;
+   // spdlog::debug(
+   //   "[{}] Script frametime: {:.2f}ms", __FUNCTION__,
+-- 
+2.39.2

@@ -1,0 +1,54 @@
+From 18c518bcb20576bd2370e64d13aa2497acf7e789 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 21 Sep 2026 04:04:19 +0900
+Subject: [PATCH] FLR-0248: trace native readiness method call
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index a8060b90c..0c3af8697 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -17,6 +17,7 @@
+ #include "filament_view_plugin.h"
+ 
+ #include <asio/post.hpp>
++#include <atomic>
+ #include <chrono>
+ #include <core/components/derived/camera.h>
+ #include <core/components/derived/transform.h>
+@@ -423,6 +424,7 @@ void FilamentViewPlugin::setupMessageChannels(flutter::PluginRegistrar* registra
+ 
+   // Setup MethodChannel for readiness check
+   const std::string readinessMethodChannel = "plugin.filament_view.readiness_checker";
++  static std::atomic<int> readinessCheckCount{0};
+ 
+   const auto methodChannel = std::make_unique<flutter::MethodChannel<>>(
+     registrar->messenger(), readinessMethodChannel, &flutter::StandardMethodCodec::GetInstance()
+@@ -432,9 +434,22 @@ void FilamentViewPlugin::setupMessageChannels(flutter::PluginRegistrar* registra
+     [&](const flutter::MethodCall<>& call, const std::unique_ptr<flutter::MethodResult<>>& result) {
+       if (call.method_name() == "isReady") {
+         // Check readiness and respond
+-        bool isReady = ECSManager::GetRunState() == ECSManager::RunState::Running;
+-        spdlog::debug("Readiness check: {}", static_cast<int>(ECSManager::GetRunState()));
++        const int callId = ++readinessCheckCount;
++        const auto state = ECSManager::GetRunState();
++        const bool isReady = state == ECSManager::RunState::Running;
++        const bool traceCall = callId <= 3 || callId % 50 == 0;
++        if (traceCall) {
++          spdlog::info(
++            "FLR0248_NATIVE_CALL_RECEIVED id={} state={} ready={}",
++            callId,
++            static_cast<int>(state),
++            static_cast<int>(isReady)
++          );
++        }
+         result->Success(flutter::EncodableValue(isReady));
++        if (traceCall) {
++          spdlog::info("FLR0248_NATIVE_CALL_RESPONDED id={}", callId);
++        }
+       } else {
+         result->NotImplemented();
+       }

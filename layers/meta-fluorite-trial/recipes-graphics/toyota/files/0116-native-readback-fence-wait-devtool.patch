@@ -1,0 +1,28 @@
+From f25fd1bd10bdef8cdf34fc5e5379c077ce5fadc2 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 21:10:17 +0000
+Subject: [PATCH] diag: wait for native readback fence
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 8812fd9..d517925 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -960,7 +960,10 @@ void ViewTarget::pollNativeReadbackFence() {
+     return;
+   }
+ 
+-  const auto status = native_readback_fence_->wait(filament::Fence::Mode::FLUSH, 0);
++  constexpr uint64_t kReadbackFenceTimeoutNs = 50'000'000;
++  const auto status = native_readback_fence_->wait(
++    filament::Fence::Mode::FLUSH, kReadbackFenceTimeoutNs
++  );
+   if (status == filament::Fence::FenceStatus::TIMEOUT_EXPIRED) {
+     if (!native_readback_fence_timeout_logged_) {
+       spdlog::info("FLR0026_NATIVE_READBACK_FENCE_STATUS status={}", static_cast<int>(status));
+-- 
+2.34.1
+

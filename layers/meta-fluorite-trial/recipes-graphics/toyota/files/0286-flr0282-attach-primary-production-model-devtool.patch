@@ -1,0 +1,35 @@
+From d138e54436a86e6885d52dfb12781ca6ffef8082 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 06:28:44 +0000
+Subject: [PATCH] fix: attach primary production model to scene
+
+---
+ .../filament_view/core/systems/derived/model_system.cc    | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 9b555ea..3f623e0 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -214,11 +214,6 @@ void ModelSystem::addModelToScene(EntityGUID modelGuid) {
+ 
+   const utils::Slice renderables{modelEntities, modelEntityCount};
+ 
+-  if (instancingMode == ModelInstancingMode::primary) {
+-    spdlog::trace("  Model({}) is primary, not adding to scene", modelGuid);
+-    return;
+-  }
+-
+   // Add to ECS
+   spdlog::trace("  Adding model({}) to ECS", __FUNCTION__, modelGuid);
+   ecs->addEntity(model);
+@@ -577,7 +572,8 @@ void ModelSystem::updateAsyncAssetLoading() {
+ 
+         switch (model->getInstancingMode()) {
+           case ModelInstancingMode::primary:
+-            spdlog::trace("Model is primary, updating transform but not adding to scene");
++            spdlog::trace("Model is primary, adding its asset instance to the scene");
++            addModelToScene(modelGuid);
+             break;
+           case ModelInstancingMode::secondary:
+             // load the model as an instance

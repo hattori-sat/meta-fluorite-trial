@@ -1,0 +1,95 @@
+From 80f6b2a865b50f0c4203d41a66d91151b977e78a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 13:11:02 +0000
+Subject: [PATCH] diag: trace native vertex buffer boundary
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 50 ++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 9f5ee4c3f..5d65a4e46 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -61,6 +61,19 @@ namespace filament::backend {
+ 
+ namespace {
+ 
++uint32_t fluoriteTraceChecksum(const void* data, size_t size) noexcept {
++    if (data == nullptr || size == 0) {
++        return 0;
++    }
++    auto const* bytes = static_cast<uint8_t const*>(data);
++    uint32_t hash = 2166136261u;
++    for (size_t i = 0; i < size; i++) {
++        hash ^= bytes[i];
++        hash *= 16777619u;
++    }
++    return hash;
++}
++
+ VmaAllocator createAllocator(VkInstance instance, VkPhysicalDevice physicalDevice,
+         VkDevice device) {
+     VmaAllocator allocator;
+@@ -1472,8 +1485,22 @@ void VulkanDriver::updateIndexBuffer(Handle<HwIndexBuffer> ibh, BufferDescriptor
+         uint32_t byteOffset) {
+     VulkanCommandBuffer& commands = mCommands.get();
+     auto ib = resource_ptr<VulkanIndexBuffer>::cast(&mResourceManager, ibh);
++    const bool trace = std::getenv("FLUORITE_NATIVE_VERTEX_TRACE") != nullptr;
++    if (trace) {
++        FVK_LOGI << "FLUORITE_NATIVE_VK_UPLOAD_BEGIN binding=index object=" << ibh.getId()
++                 << " buffer=" << ib->getVkBuffer()
++                 << " byte_offset=" << byteOffset
++                 << " bytes=" << p.size
++                 << " checksum=" << fluoriteTraceChecksum(p.buffer, p.size);
++    }
+     commands.acquire(ib);
+     ib->loadFromCpu(commands, p.buffer, byteOffset, p.size);
++    if (trace) {
++        FVK_LOGI << "FLUORITE_NATIVE_VK_UPLOAD_QUEUED binding=index object=" << ibh.getId()
++                 << " buffer=" << ib->getVkBuffer()
++                 << " byte_offset=" << byteOffset
++                 << " bytes=" << p.size;
++    }
+ 
+     scheduleDestroy(std::move(p));
+ }
+@@ -1488,8 +1515,23 @@ void VulkanDriver::updateBufferObject(Handle<HwBufferObject> boh, BufferDescript
+     VulkanCommandBuffer& commands = mCommands.get();
+ 
+     auto bo = resource_ptr<VulkanBufferObject>::cast(&mResourceManager, boh);
++    const bool trace = std::getenv("FLUORITE_NATIVE_VERTEX_TRACE") != nullptr &&
++            bo->bindingType == BufferObjectBinding::VERTEX;
++    if (trace) {
++        FVK_LOGI << "FLUORITE_NATIVE_VK_UPLOAD_BEGIN binding=vertex object=" << boh.getId()
++                 << " buffer=" << bo->getVkBuffer()
++                 << " byte_offset=" << byteOffset
++                 << " bytes=" << bd.size
++                 << " checksum=" << fluoriteTraceChecksum(bd.buffer, bd.size);
++    }
+     commands.acquire(bo);
+     bo->loadFromCpu(commands, bd.buffer, byteOffset, bd.size);
++    if (trace) {
++        FVK_LOGI << "FLUORITE_NATIVE_VK_UPLOAD_QUEUED binding=vertex object=" << boh.getId()
++                 << " buffer=" << bo->getVkBuffer()
++                 << " byte_offset=" << byteOffset
++                 << " bytes=" << bd.size;
++    }
+ 
+     scheduleDestroy(std::move(bd));
+ }
+@@ -2352,6 +2394,14 @@ void VulkanDriver::bindRenderPrimitive(Handle<HwRenderPrimitive> rph) {
+     VkDeviceSize const* offsets = vbi->getOffsets();
+     VkBuffer const* buffers = prim->vertexBuffer->getVkBuffers();
+ 
++    if (std::getenv("FLUORITE_NATIVE_VERTEX_TRACE") != nullptr) {
++        FVK_LOGI << "FLUORITE_NATIVE_VK_BIND buffer_count=" << bufferCount
++                 << " vertex_buffer=" << (bufferCount > 0 ? buffers[0] : VK_NULL_HANDLE)
++                 << " vertex_offset=" << (bufferCount > 0 ? offsets[0] : 0)
++                 << " index_buffer=" << prim->indexBuffer->getVkBuffer()
++                 << " index_type=" << static_cast<unsigned>(prim->indexBuffer->indexType);
++    }
++
+     // Next bind the vertex buffers and index buffer. One potential performance improvement is to
+     // avoid rebinding these if they are already bound, but since we do not (yet) support subranges
+     // it would be rare for a client to make consecutive draw calls with the same render primitive.

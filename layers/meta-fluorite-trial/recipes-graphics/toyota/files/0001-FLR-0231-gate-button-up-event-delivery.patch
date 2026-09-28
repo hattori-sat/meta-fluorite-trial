@@ -1,0 +1,28 @@
+From e718f812d18c411fb69891e225444d6566f7f8ee Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 07:51:10 +0000
+Subject: [PATCH] FLR-0231: gate button-up event delivery
+
+---
+ shell/wayland/display.cc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/shell/wayland/display.cc b/shell/wayland/display.cc
+index 3cb7b05..b8df7d4 100644
+--- a/shell/wayland/display.cc
++++ b/shell/wayland/display.cc
+@@ -501,6 +501,14 @@ void Display::pointer_handle_button(void* data,
+       phase = kUp;
+     }
+ 
++    if (state == WL_POINTER_BUTTON_STATE_RELEASED &&
++        std::getenv("FLUORITE_DISABLE_BUTTON_UP_EVENT") != nullptr) {
++      spdlog::info(
++          "FLUORITE_DISABLE_BUTTON_UP_EVENT enabled=true "
++          "operation=skip_pointer_up");
++      return;
++    }
++
+     if (d->m_active_engine) {
+       d->m_active_engine->CoalesceMouseEvent(
+           kFlutterPointerSignalKindNone, phase, d->m_pointer.event.surface_x,

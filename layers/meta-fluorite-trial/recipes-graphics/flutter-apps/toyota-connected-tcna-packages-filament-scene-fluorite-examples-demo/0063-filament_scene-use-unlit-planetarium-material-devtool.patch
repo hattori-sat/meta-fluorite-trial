@@ -1,0 +1,25 @@
+From b001c94f07a1fe28d41fc155f670e4e400662e7f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 15:36:41 +0000
+Subject: [PATCH] test: use baseMap-satisfied unlit Planetarium material
+
+---
+ .../filament_scene/example/lib/scenes/planetarium_scene.dart | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+index 43ccb33..ef1dd92 100644
+--- a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+@@ -213,7 +213,10 @@ class PlanetariumSceneView extends StatefulSceneView {
+             ? Vector3.all(planetSizes[name]!)
+             : Vector3.all(planetSizes[name]! / distance),
+         rotation: Quaternion.identity(),
+-        material: poGetLitMaterial(planetColors[name]!),
++        material: poGetUnlitTexturedMaterial(
++          "assets/materials/texture/floor_basecolor.png",
++          color: planetColors[name]!,
++        ),
+         stacks: 20,
+         slices: 20,
+         receiveShadows: true,

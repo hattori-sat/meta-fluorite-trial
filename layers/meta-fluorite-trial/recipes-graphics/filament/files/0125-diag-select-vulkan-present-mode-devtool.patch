@@ -1,0 +1,63 @@
+From 0fd7d70e2313d077c12fd8c22f8e870580ef461e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 07:54:01 +0000
+Subject: [PATCH] diag: select Vulkan present mode for WSI test
+
+---
+ .../platform/VulkanPlatformSwapChainImpl.cpp    | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index cc5cf9779..5e8494d57 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -23,10 +23,12 @@
+ 
+ #include <backend/DriverEnums.h>
+ 
+ #include <cstdio>
+ #include <cstdint>
++#include <cstdlib>
++#include <cstring>
+ 
+ using namespace bluevk;
+ using namespace utils;
+ 
+ namespace filament::backend {
+@@ -194,11 +196,19 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
+     FILAMENT_CHECK_POSTCONDITION(surfaceFormat.format != VK_FORMAT_UNDEFINED)
+             << "Cannot find suitable swapchain format";
+ 
+     // Verify that our chosen present mode is supported. In practice all devices support the FIFO
+     // mode, but we check for it anyway for completeness.  (and to avoid validation warnings)
+-    VkPresentModeKHR const desiredPresentMode = VK_PRESENT_MODE_FIFO_KHR;
++    VkPresentModeKHR desiredPresentMode = VK_PRESENT_MODE_FIFO_KHR;
++    const char* requestedPresentMode = std::getenv("FLR0026_PRESENT_MODE");
++    if (requestedPresentMode != nullptr &&
++            std::strcmp(requestedPresentMode, "immediate") == 0) {
++        desiredPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
++    } else if (requestedPresentMode != nullptr &&
++            std::strcmp(requestedPresentMode, "mailbox") == 0) {
++        desiredPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
++    }
+     FixedCapacityVector<VkPresentModeKHR> presentModes = fvkutils::enumerate(
+             vkGetPhysicalDeviceSurfacePresentModesKHR, mPhysicalDevice, mSurface);
+     bool foundSuitablePresentMode = false;
+     for (VkPresentModeKHR mode: presentModes) {
+         if (mode == desiredPresentMode) {
+@@ -206,10 +216,15 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
+             break;
+         }
+     }
+     FILAMENT_CHECK_POSTCONDITION(foundSuitablePresentMode)
+             << "Desired present mode is not supported by this device.";
++    std::fprintf(stderr,
++            "FLR0026_VK_PRESENT_MODE requested=%s selected=%d supported=%s\n",
++            requestedPresentMode != nullptr ? requestedPresentMode : "fifo",
++            static_cast<int32_t>(desiredPresentMode),
++            foundSuitablePresentMode ? "true" : "false");
+ 
+     // Create the low-level swap chain.
+     if (caps.currentExtent.width == VULKAN_UNDEFINED_EXTENT
+             || caps.currentExtent.height == VULKAN_UNDEFINED_EXTENT) {
+         mSwapChainBundle.extent = mFallbackExtent;

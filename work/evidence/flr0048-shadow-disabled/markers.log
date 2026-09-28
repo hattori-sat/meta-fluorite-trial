@@ -1,0 +1,17 @@
+Application Id: fluorite
+Bundle Path: /usr/share/flutter/toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo/3.38.3/release
+FEngine resolved backend: Vulkan
+Vulkan device driver: llvmpipe Mesa 24.0.7 (LLVM 18.1.8)
+FLR0026_MODEL_SELECTED ordinal=0 asset=assets/models/sequoia_ngp.glb
+FLR0026_MODEL_LOAD_PLAN total=60 limit=1 match= inspected=2 queued=1
+FLR0026_LIGHT_SETUP_PLAN total=13 limit=9 type_filter= skip_guid_filter= trace_guid_filter= position_override_guid=0 position_override_enabled=false selected=9
+FLR0026_SHAPE_READY guid=188 entity=14 renderable=true
+FLR0026_WAYLAND_SURFACE_CREATED surface=true subsurface=true parent=true
+FLR0026_FRAME_BEGIN seq=1 started=true
+FLR0026_FRAME_BEGIN seq=2 started=true
+FLR0026_FRAME_BEGIN seq=3 started=false
+QMP_ANALYSIS width=1280 height=800 region=200,100,400,250 changed_pixels=856 bounding_box=200,113,29,66
+QMP_PPM_SHA256=5748ebf361f40f37d374c8be18940fc2be59e968f231a9106f7d7b0cb8644589
+QMP_SHUTDOWN reason=host-qmp-quit
+QMP_SOCKET=removed
+RESIDUAL_PROCESSES=qemu-system:none runqemu:none flutter-auto:none

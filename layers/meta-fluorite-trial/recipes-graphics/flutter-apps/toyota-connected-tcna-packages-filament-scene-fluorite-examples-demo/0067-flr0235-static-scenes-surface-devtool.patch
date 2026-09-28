@@ -1,0 +1,49 @@
+From 4201646d59795ef904685f435cda8140572338f5 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 10:45:53 +0000
+Subject: [PATCH] FLR-0235: replace Material hover button with static surface
+
+---
+ packages/filament_scene/example/lib/main.dart | 28 +++++++++++++------
+ 1 file changed, 20 insertions(+), 8 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 341c506..a50b69a 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -245,15 +245,27 @@ class _MyAppState extends State<MyApp> {
+             Positioned(
+               top: 24,
+               right: 24,
+-              child: FilledButton(
+-                // FLR-0234: keep pointer delivery and button activation, but
+-                // do not paint an opaque hover overlay over the 2D/3D view.
+-                style: ButtonStyle(
+-                  overlayColor:
+-                      WidgetStateProperty.all<Color?>(Colors.transparent),
++              child: Semantics(
++                button: true,
++                label: 'Scenes',
++                child: GestureDetector(
++                  // FLR-0235: keep the tap boundary without Material hover
++                  // state painting over the native 3D surface.
++                  onTap: () {},
++                  child: Container(
++                    width: 99,
++                    height: 32,
++                    alignment: Alignment.center,
++                    decoration: const BoxDecoration(
++                      color: Color(0xff6040a0),
++                      borderRadius: BorderRadius.all(Radius.circular(20)),
++                    ),
++                    child: const Text(
++                      'Scenes',
++                      style: TextStyle(color: Colors.white),
++                    ),
++                  ),
+                 ),
+-                onPressed: () {},
+-                child: const Text('Scenes'),
+               ),
+             ),
+           ],

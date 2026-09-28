@@ -1,0 +1,1 @@
+grep -n -E 'FLUORITE_NATIVE|FLUORITE_VIEWTARGET|FLR0026_VK_(WAYLAND|QUEUE_PRESENT|PRESENT_BOUNDARY)|wl_subsurface|wl_surface' /tmp/flr0148-runtime.log | head -n 160

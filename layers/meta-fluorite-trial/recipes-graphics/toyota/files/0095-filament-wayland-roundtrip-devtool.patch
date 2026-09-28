@@ -1,0 +1,34 @@
+From 88d27cd0638a3a5390913cc63df0746702090bb7 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 18:42:51 +0000
+Subject: [PATCH] diag: roundtrip wayland before frame
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index df96fc7..dcfc108 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -928,6 +928,17 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+ 
+   pollNativeReadbackFence();
+ 
++  if (std::getenv("FLR0026_WAYLAND_ROUNDTRIP") != nullptr && display_ != nullptr) {
++    const int roundtripResult = wl_display_roundtrip(display_);
++    if (shouldLogFrame) {
++      spdlog::info(
++        "FLR0026_WAYLAND_ROUNDTRIP result={} seq={}",
++        roundtripResult,
++        frameSequence
++      );
++    }
++  }
++
+   if (std::getenv("FLR0026_WAYLAND_DISPATCH_PENDING") != nullptr && display_ != nullptr) {
+     wl_display_dispatch_pending(display_);
+     if (shouldLogFrame) {
+-- 
+2.34.1
+

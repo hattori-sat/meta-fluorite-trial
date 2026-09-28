@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 17 Aug 2026 12:00:00 +0900
+Subject: [PATCH] filament_scene: normalize frame event map
+
+StandardMessageCodec decodes the native event as Map<Object?, Object?> on
+embedded Linux.  Convert it before passing the event to the JsonObject API
+instead of relying on an invalid generic cast.
+
+---
+ packages/filament_scene/example/lib/events/frame_event_channel.dart | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/events/frame_event_channel.dart b/packages/filament_scene/example/lib/events/frame_event_channel.dart
+--- a/packages/filament_scene/example/lib/events/frame_event_channel.dart
++++ b/packages/filament_scene/example/lib/events/frame_event_channel.dart
+@@ -91,7 +91,7 @@ class FrameEventChannel {
+ 
+             // Log extracted values
+             if (method == 'preRenderFrame') {
+-              await _onPreRenderFrame(event as JsonObject);
++              await _onPreRenderFrame(Map<String, dynamic>.from(event));
+             }
+           }
+         },

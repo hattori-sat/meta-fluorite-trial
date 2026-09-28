@@ -1,0 +1,29 @@
+From 2c4d6e8f0a1b3c5d7e9f1029384756a8b0c1d2e3 Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 16:00:00 +0900
+Subject: [PATCH] filament_view: do not block platform registration on ECS init
+
+ECS initialization is posted to its strand. Platform-view registration must
+not wait on that strand, because the Flutter message thread also services
+readiness and platform-view messages. Remove the obsolete stack promise and
+let the posted initialization complete asynchronously.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc b/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+@@ -64,2 +64,0 @@ void RunOnceCheckAndInitializeECSystems() {
+-  std::promise<void> initPromise;
+-  const std::future<void> initFuture = initPromise.get_future();
+@@ -67,1 +65,1 @@ void RunOnceCheckAndInitializeECSystems() {
+-  post(strand, [=, &initPromise]() mutable {
++  post(strand, [=]() mutable {
+@@ -86,1 +84,0 @@ void RunOnceCheckAndInitializeECSystems() {
+-    initPromise.set_value();
+@@ -89,1 +86,0 @@ void RunOnceCheckAndInitializeECSystems() {
+-  initFuture.wait();
+-- 
+2.39.2

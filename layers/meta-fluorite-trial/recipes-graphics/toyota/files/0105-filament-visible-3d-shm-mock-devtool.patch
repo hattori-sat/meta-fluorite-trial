@@ -1,0 +1,128 @@
+From 83a703b3d53a6196add12aee16428a1dd5697986 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 19:44:48 +0000
+Subject: [PATCH] diag: render a 3D cube in visible SHM probe
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index dcfc108..6b67c70 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -101,6 +101,94 @@ const wl_registry_listener shm_registry_listener = {
+   .global_remove = onShmGlobalRemove
+ };
+ 
++struct MockPoint {
++  float x;
++  float y;
++};
++
++float mockEdge(const MockPoint& a, const MockPoint& b, const MockPoint& p) {
++  return (p.x - a.x) * (b.y - a.y) - (p.y - a.y) * (b.x - a.x);
++}
++
++void fillMockTriangle(
++  uint32_t* pixels,
++  const uint32_t width,
++  const uint32_t height,
++  const MockPoint& a,
++  const MockPoint& b,
++  const MockPoint& c,
++  const uint32_t color
++) {
++  const float area = mockEdge(a, b, c);
++  if (area == 0.0f) return;
++
++  const int32_t minX = std::max(
++    0,
++    static_cast<int32_t>(std::min({a.x, b.x, c.x}))
++  );
++  const int32_t maxX = std::min(
++    static_cast<int32_t>(width) - 1,
++    static_cast<int32_t>(std::max({a.x, b.x, c.x}))
++  );
++  const int32_t minY = std::max(
++    0,
++    static_cast<int32_t>(std::min({a.y, b.y, c.y}))
++  );
++  const int32_t maxY = std::min(
++    static_cast<int32_t>(height) - 1,
++    static_cast<int32_t>(std::max({a.y, b.y, c.y}))
++  );
++  const bool positive = area > 0.0f;
++
++  for (int32_t y = minY; y <= maxY; ++y) {
++    for (int32_t x = minX; x <= maxX; ++x) {
++      const MockPoint p{static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f};
++      const float w0 = mockEdge(b, c, p);
++      const float w1 = mockEdge(c, a, p);
++      const float w2 = mockEdge(a, b, p);
++      if ((positive && w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f) ||
++          (!positive && w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f)) {
++        pixels[static_cast<size_t>(y) * width + static_cast<size_t>(x)] = color;
++      }
++    }
++  }
++}
++
++void fillMockQuad(
++  uint32_t* pixels,
++  const uint32_t width,
++  const uint32_t height,
++  const MockPoint& a,
++  const MockPoint& b,
++  const MockPoint& c,
++  const MockPoint& d,
++  const uint32_t color
++) {
++  fillMockTriangle(pixels, width, height, a, b, c, color);
++  fillMockTriangle(pixels, width, height, a, c, d, color);
++}
++
++void drawMockCube(uint32_t* pixels, const uint32_t width, const uint32_t height) {
++  constexpr uint32_t background = 0xff101826u;
++  constexpr uint32_t topFace = 0xffd9e8ffu;
++  constexpr uint32_t leftFace = 0xff3f7ad6u;
++  constexpr uint32_t rightFace = 0xffd66a3fu;
++  for (size_t index = 0; index < static_cast<size_t>(width) * height; ++index) {
++    pixels[index] = background;
++  }
++
++  const MockPoint top{120.0f, 24.0f};
++  const MockPoint right{198.0f, 58.0f};
++  const MockPoint center{120.0f, 94.0f};
++  const MockPoint left{42.0f, 58.0f};
++  const MockPoint bottomLeft{42.0f, 124.0f};
++  const MockPoint bottom{120.0f, 158.0f};
++  const MockPoint bottomRight{198.0f, 124.0f};
++  fillMockQuad(pixels, width, height, top, right, center, left, topFace);
++  fillMockQuad(pixels, width, height, left, center, bottom, bottomLeft, leftFace);
++  fillMockQuad(pixels, width, height, center, right, bottomRight, bottom, rightFace);
++}
++
+ }  // namespace
+ 
+ ////////////////////////////////////////////////////////////////////////////
+@@ -732,8 +820,17 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+     return;
+   }
+   auto* pixels = static_cast<uint32_t*>(data);
+-  for (size_t i = 0; i < static_cast<size_t>(probe_width) * probe_height; ++i) {
+-    pixels[i] = 0x00FF00FFu;
++  if (std::getenv("FLR0026_3D_SHM_MOCK") != nullptr) {
++    drawMockCube(pixels, probe_width, probe_height);
++    spdlog::info(
++      "FLR0026_3D_SHM_MOCK_READY width={} height={} object=cube",
++      probe_width,
++      probe_height
++    );
++  } else {
++    for (size_t i = 0; i < static_cast<size_t>(probe_width) * probe_height; ++i) {
++      pixels[i] = 0x00FF00FFu;
++    }
+   }
+ 
+   auto* pool = wl_shm_create_pool(
+-- 
+2.34.1
+

@@ -1,0 +1,63 @@
+services:
+  devtool:
+    container_name: ${FLUORITE_MAC_DOCKER_CONTAINER:-fluorite-mac-devtool}
+    image: ${FLUORITE_MAC_DEVTOOL_IMAGE:-fluorite-yocto-devtool:22.04}
+    user: "0:0"
+    init: true
+    command: ["sleep", "infinity"]
+    network_mode: ${FLUORITE_MAC_DOCKER_NETWORK:-bridge}
+    environment:
+      AGL_ROOT: /workspace/agl
+      BUILD_DIR: /workspace/build
+      DL_DIR: /yocto-cache/downloads
+      SSTATE_DIR: /yocto-cache/sstate-cache
+      TMPDIR: /yocto-cache/tmp
+      BITBAKE_ENV_SCRIPT: /workspace/agl/external/poky/oe-init-build-env
+      AGL_SETUP_SCRIPT: /workspace/agl/meta-agl/scripts/aglsetup.sh
+      AGL_SETUP_MACHINE: qemux86-64
+      AGL_SETUP_FEATURES: agl-demo agl-app-framework agl-flutter agl-kuksa-val agl-netboot agl-pipewire agl-selinux
+      EXTRA_BBLAYERS: /workspace/project/layers/meta-fluorite-trial /workspace/agl/meta-vulkan
+      DEVTOOL_UID: ${FLUORITE_MAC_DOCKER_UID:-1000}
+      DEVTOOL_GID: ${FLUORITE_MAC_DOCKER_GID:-1000}
+      HOME: /tmp
+    labels:
+      com.fluorite.mac-devtool.contract: "1"
+      com.fluorite.mac-devtool.project-root: ${FLUORITE_MAC_PROJECT_ROOT:-.}
+      com.fluorite.mac-devtool.agl-root: ${FLUORITE_MAC_AGL_ROOT:-.}
+      com.fluorite.mac-devtool.image: ${FLUORITE_MAC_DEVTOOL_IMAGE:-fluorite-yocto-devtool:22.04}
+      com.fluorite.mac-devtool.uid: ${FLUORITE_MAC_DOCKER_UID:-1000}
+      com.fluorite.mac-devtool.gid: ${FLUORITE_MAC_DOCKER_GID:-1000}
+      com.fluorite.mac-devtool.build-volume: ${FLUORITE_MAC_DOCKER_BUILD_VOLUME:-fluorite-mac-devtool-build}
+      com.fluorite.mac-devtool.dl-volume: ${FLUORITE_MAC_DOCKER_DL_VOLUME:-fluorite-mac-devtool-downloads}
+      com.fluorite.mac-devtool.sstate-volume: ${FLUORITE_MAC_DOCKER_SSTATE_VOLUME:-fluorite-mac-devtool-sstate-cache}
+      com.fluorite.mac-devtool.tmp-volume: ${FLUORITE_MAC_DOCKER_TMP_VOLUME:-fluorite-mac-devtool-tmp}
+    volumes:
+      - type: bind
+        source: ${FLUORITE_MAC_PROJECT_ROOT:-.}
+        target: /workspace/project
+      - type: bind
+        source: ${FLUORITE_MAC_AGL_ROOT:-.}
+        target: /workspace/agl
+        read_only: true
+      - type: volume
+        source: fluorite_mac_devtool_build
+        target: /workspace/build
+      - type: volume
+        source: fluorite_mac_devtool_downloads
+        target: /yocto-cache/downloads
+      - type: volume
+        source: fluorite_mac_devtool_sstate
+        target: /yocto-cache/sstate-cache
+      - type: volume
+        source: fluorite_mac_devtool_tmp
+        target: /yocto-cache/tmp
+
+volumes:
+  fluorite_mac_devtool_build:
+    name: ${FLUORITE_MAC_DOCKER_BUILD_VOLUME:-fluorite-mac-devtool-build}
+  fluorite_mac_devtool_downloads:
+    name: ${FLUORITE_MAC_DOCKER_DL_VOLUME:-fluorite-mac-devtool-downloads}
+  fluorite_mac_devtool_sstate:
+    name: ${FLUORITE_MAC_DOCKER_SSTATE_VOLUME:-fluorite-mac-devtool-sstate-cache}
+  fluorite_mac_devtool_tmp:
+    name: ${FLUORITE_MAC_DOCKER_TMP_VOLUME:-fluorite-mac-devtool-tmp}

@@ -1,0 +1,33 @@
+From f4b001e588937bbe4b40abfc546302076a556e5e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 12:32:37 +0000
+Subject: [PATCH] test: restore production scene for native route validation
+
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index dc82ae1..33b4ece 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -297,15 +297,14 @@ class _MyAppState extends State<MyApp> {
+ 
+   ////////////////////////////////////////////////////////////////////////
+   SceneView poGetFilamentScene() {
+     return SceneView(
+       filament: filamentViewApi,
+-      // Reproduce the known-good minimal fixture input path.
+-      models: <Model>[],
+-      scene: poGetMinimal3dFixtureScene(),
+-      shapes: poGetMinimal3dFixtureShapes(),
+-      cameras: poGetMinimal3dFixtureCameras(),
++      models: poGetModelList(),
++      scene: poGetScene(),
++      shapes: poGetScenesShapes(),
++      cameras: poGetScenesCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 
+         poController = controller;
+ 
+-- 
+2.34.1
+

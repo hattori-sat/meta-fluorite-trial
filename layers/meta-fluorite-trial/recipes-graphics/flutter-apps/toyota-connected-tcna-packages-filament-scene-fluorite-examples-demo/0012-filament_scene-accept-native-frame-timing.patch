@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Fri, 21 Aug 2026 23:10:00 +0900
+Subject: [PATCH] filament_scene: accept native frame timing key
+
+The native filament_view plugin sends the frame interval as
+`timeSinceLastRenderedSec`, while the example app previously read the
+unrelated `deltaTime` key.  Use the native key with a compatibility fallback
+and normalize numeric values before invoking update callbacks.
+
+---
+ packages/filament_scene/example/lib/events/frame_event_channel.dart | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/events/frame_event_channel.dart b/packages/filament_scene/example/lib/events/frame_event_channel.dart
+--- a/packages/filament_scene/example/lib/events/frame_event_channel.dart
++++ b/packages/filament_scene/example/lib/events/frame_event_channel.dart
+@@ -121,6 +121,10 @@ class FrameEventChannel {
+   Future<void> _onPreRenderFrame(JsonObject event) async {
+     // Handle preRenderFrame event
+-    final deltaTime = event['deltaTime'];
++    final rawDeltaTime =
++        event['timeSinceLastRenderedSec'] ?? event['deltaTime'];
++    final double deltaTime = rawDeltaTime is num
++        ? rawDeltaTime.toDouble()
++        : 0.0;
+ 
+     //
+     final scriptTimeStart = DateTime.now().microsecondsSinceEpoch;

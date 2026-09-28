@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sat, 22 Aug 2026 20:45:00 +0900
+Subject: [PATCH] filament-view: request a transparent Filament swapchain
+
+TRANSLUCENT view blending and a zero-alpha clear are not sufficient when
+the swapchain is created with its default opaque configuration. Request the
+Filament transparent swapchain so the Wayland subsurface can reveal the
+Flutter parent around rendered geometry.
+
+---
+ .../filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -178,1 +178,1 @@
+-  fswapChain_ = _engine->createSwapChain(&native_window_);
++  fswapChain_ = _engine->createSwapChain(&native_window_, filament::SwapChain::CONFIG_TRANSPARENT);

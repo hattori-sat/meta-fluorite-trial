@@ -1,0 +1,22 @@
+From 81820dfae2a7b81c270ba6b52d9dc3323dbf37e7 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 12:52:59 +0000
+Subject: [PATCH] fix: pass ECS manager pointer to deferred route helper
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index a8d2498c5..a8060b90c 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -290,7 +290,7 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+   // Every time this method is called, we should create a new view target.
+   // Route it after the initialization post above, on the same strand.
+   RouteViewTargetCreationRequest(
+-    ecs.get(),
++    ecs,
+     engine,
+     static_cast<int32_t>(top),
+     static_cast<int32_t>(left),

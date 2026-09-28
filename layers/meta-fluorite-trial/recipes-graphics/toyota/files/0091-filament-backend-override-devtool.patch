@@ -1,0 +1,40 @@
+From 034b1c2bf9c86e9ba8bc0e7e7499787275149678 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 17:34:10 +0000
+Subject: [PATCH] diag: allow filament backend override
+
+
+diff --git a/plugins/filament_view/core/systems/derived/filament_system.cc b/plugins/filament_view/core/systems/derived/filament_system.cc
+index 220fa03..a243c3a 100644
+--- a/plugins/filament_view/core/systems/derived/filament_system.cc
++++ b/plugins/filament_view/core/systems/derived/filament_system.cc
+@@ -15,6 +15,9 @@
+  */
+ #include "filament_system.h"
+ 
++#include <cstdlib>
++#include <cstring>
++
+ #include <core/systems/ecs.h>
+ #include <filament/Renderer.h>
+ #include <plugins/common/common.h>
+@@ -41,7 +44,15 @@ void FilamentSystem::onSystemInit() {
+       &config                             // Pass the custom config
+   );*/
+ 
+-  fengine_ = filament::Engine::create(filament::Engine::Backend::VULKAN);
++  auto backend = filament::Engine::Backend::VULKAN;
++  const char* requestedBackend = std::getenv("FLR0026_FILAMENT_BACKEND");
++  if (requestedBackend != nullptr && std::strcmp(requestedBackend, "OPENGL") == 0) {
++    backend = filament::Engine::Backend::OPENGL;
++    spdlog::info("FLR0026_FILAMENT_BACKEND_OVERRIDE requested=OPENGL");
++  } else {
++    spdlog::info("FLR0026_FILAMENT_BACKEND_OVERRIDE requested=VULKAN");
++  }
++  fengine_ = filament::Engine::create(backend);
+   iblProfiler_ = std::make_unique<IBLProfiler>(fengine_);
+   frenderer_ = fengine_->createRenderer();
+   fscene_ = fengine_->createScene();
+-- 
+2.34.1
+

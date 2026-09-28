@@ -1,0 +1,28 @@
+From 05f80aae7d229a06cb5a8797af6b0ffaccc8ba7e Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Tue, 8 Sep 2026 07:58:31 +0000
+Subject: [PATCH] diag: clear native opaque region hint
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index ee82e5f..fe99c98 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -386,6 +386,14 @@ void ViewTarget::setupWaylandSubsurface() {
+     }
+   }
+ 
++  const bool emptyOpaqueRegionProbe =
++    std::getenv("FLR0026_WAYLAND_EMPTY_OPAQUE_REGION") != nullptr;
++  if (emptyOpaqueRegionProbe) {
++    // Explicitly clear any compositor opaque hint for the display-only child.
++    wl_surface_set_opaque_region(surface_, nullptr);
++    spdlog::info("FLR0026_WAYLAND_EMPTY_OPAQUE_REGION enabled=true");
++  }
++
+   const bool skipStackProbe = std::getenv("FLR0026_WAYLAND_SKIP_STACK") != nullptr;
+   if (!skipStackProbe) {
+     wl_subsurface_place_above(subsurface_, parent_surface_);

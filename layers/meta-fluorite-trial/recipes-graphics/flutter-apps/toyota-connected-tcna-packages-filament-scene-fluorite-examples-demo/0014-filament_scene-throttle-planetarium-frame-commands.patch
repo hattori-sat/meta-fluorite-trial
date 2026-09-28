@@ -1,0 +1,94 @@
+From 1b7d8d2f6d0b2c6d3a5b6e7f8a9b0c1d2e3f4a5b Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 19:00:00 +0900
+Subject: [PATCH] filament_scene: bound scene frame command rates
+
+Bound Planetarium and Trainset native transform requests so slow QEMU frames
+cannot accumulate a large pre-render command queue.
+
+Upstream-Status: Inappropriate [Fluorite runtime workaround]
+
+diff --git a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+index edb70e8..8dc47d9 100644
+--- a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+@@ -265,15 +265,23 @@ class _PlanetariumSceneViewState extends StatefulSceneViewState {
+   void onTriggerEvent(final String eventName, [final dynamic eventData]) {}
+ 
+   double _timer = 60 * 10; // 10 minutes
++  DateTime _lastCommandAt = DateTime.fromMillisecondsSinceEpoch(0);
++  int _nextPlanetIndex = 0;
+ 
+   @override
+   void onUpdateFrame(FilamentViewApi engine, double dt) {
+     _timer += dt;
++    final DateTime now = DateTime.now();
++    if (now.difference(_lastCommandAt) < const Duration(milliseconds: 500)) {
++      return;
++    }
++    _lastCommandAt = now;
+ 
+     // rotate planets
+-    for (final String name in PlanetariumSceneView.planets) {
++    for (int update = 0; update < 1; update++) {
++      final String name = PlanetariumSceneView.planets[_nextPlanetIndex];
++      _nextPlanetIndex = (_nextPlanetIndex + 1) % PlanetariumSceneView.planets.length;
+       final double speed = 1 / PlanetariumSceneView.planetSpeeds[name]! * 0.25;
+-      // final double distance = PlanetariumSceneView.planetDistances[name]!;
+ 
+       // rotate around the sun
+       final double angle = _timer * speed * 2 * 3.14;
+       Quaternion rot = Quaternion.euler(angle, 0, 0);
+ 
+       widget.filament.queueFrameTask(
+         widget.filament.setEntityTransformRotation(
+           PlanetariumSceneView.objectGuids["${name}_orbit"]!,
+           rot.storage64,
+         ),
+       );
+     }
+   }
+
+diff --git a/packages/filament_scene/example/lib/scenes/trainset_scene.dart b/packages/filament_scene/example/lib/scenes/trainset_scene.dart
+index 7ca370a..71208de 100644
+--- a/packages/filament_scene/example/lib/scenes/trainset_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/trainset_scene.dart
+@@ -186,10 +186,19 @@ class _TrainsetSceneViewState extends StatefulSceneViewState {
+   static const double _traincarPathDistanceOffset = 2.5;
+ 
+   final Vector3 _tmpFlatPos = Vector3.zero();
++  DateTime _lastCommandAt = DateTime.fromMillisecondsSinceEpoch(0);
++  int _nextTraincarIndex = 0;
+ 
+   @override
+   void onUpdateFrame(FilamentViewApi filament, double dt) {
+-    for (int i = 0; i < TrainsetSceneView.traincarCount; i++) {
++    final DateTime now = DateTime.now();
++    if (now.difference(_lastCommandAt) < const Duration(milliseconds: 500)) {
++      return;
++    }
++    _lastCommandAt = now;
++    for (int update = 0; update < 1; update++) {
++      final int i = _nextTraincarIndex;
++      _nextTraincarIndex = (_nextTraincarIndex + 1) % TrainsetSceneView.traincarCount;
+       final Model traincar = TrainsetSceneView.traincars[i];
+ 
+       double distanceTraveled = traincarDistanceTraveled[i];
+       distanceTraveled += speed * dt;
+       distanceTraveled = distanceTraveled % _pathLength;
+       distanceTraveled += distanceTraveled < 0 ? _pathLength : 0;
+
+       getPointOnPath(distanceTraveled, TrainsetSceneView.sceneOrigin, _tmpFlatPos);
+       if (i == 0) {
+         // print('Traincar position: ${(distanceTraveled / _pathLength * 100).toStringAsFixed(0)}%');
+       }
+
+       traincar.position.setValues(_tmpFlatPos.x, 0, _tmpFlatPos.y);
+       traincar.rotation.setEuler(_tmpFlatPos.z, 0, 0);
+       traincar.updateTransform();
+
+       traincarDistanceTraveled[i] = distanceTraveled;
+     }
+   }
+-- 
+2.43.0

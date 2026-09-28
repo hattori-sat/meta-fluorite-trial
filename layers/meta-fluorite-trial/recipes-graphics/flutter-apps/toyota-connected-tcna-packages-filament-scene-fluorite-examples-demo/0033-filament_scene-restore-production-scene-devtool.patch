@@ -1,0 +1,35 @@
+From f3024e3afe6dac6a27e436e9d6509a69e1ea30c7 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 23:52:06 +0000
+Subject: [PATCH] test: restore production Example Demo scene
+
+---
+ packages/filament_scene/example/lib/main.dart | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 794cb7c..762d567 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -299,12 +299,12 @@ class _MyAppState extends State<MyApp> {
+   SceneView poGetFilamentScene() {
+     return SceneView(
+       filament: filamentViewApi,
+-      // FLR-0023 diagnostic fixture: prove the Flutter Engine -> native
+-      // Filament path with exactly one deterministic shape.
+-      models: <Model>[],
+-      scene: poGetMinimal3dFixtureScene(),
+-      shapes: poGetMinimal3dFixtureShapes(),
+-      cameras: poGetMinimal3dFixtureCameras(),
++      // Restore the production Example Demo scene after the native fixture
++      // proved the visible Filament path.
++      models: poGetModelList(),
++      scene: poGetScene(),
++      shapes: poGetScenesShapes(),
++      cameras: poGetScenesCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 
+-- 
+2.34.1
+

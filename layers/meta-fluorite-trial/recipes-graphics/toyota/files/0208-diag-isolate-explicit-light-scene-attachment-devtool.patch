@@ -1,0 +1,47 @@
+From 544f451f51b21dbcf69b5db5ed016517f0ae547f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 02:44:45 +0000
+Subject: [PATCH] diag: isolate explicit light scene attachment
+
+---
+ .../core/systems/derived/light_system.cc      | 26 ++++++++++++++++++-
+ 1 file changed, 25 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 5eb750f..0df944e 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -61,8 +61,32 @@ void LightSystem::CreateDefaultLight() {
+ 
+ ////////////////////////////////////////////////////////////////////////////////////
+ void LightSystem::BuildLightAndAddToScene(Light& light) {
++  const bool trace =
++    std::getenv("FLR0026_NATIVE_LIGHT_OPERATION_TRACE") != nullptr;
++  const bool skipSceneAdd =
++    std::getenv("FLR0026_NATIVE_LIGHT_SKIP_SCENE_ADD") != nullptr;
++
++  if (trace) {
++    spdlog::info("FLR0026_NATIVE_LIGHT_BUILD_BEGIN");
++  }
+   BuildLight(light);
+-  AddLightToScene(light);
++  if (trace) {
++    spdlog::info(
++      "FLR0026_NATIVE_LIGHT_BUILD_DONE native_entity={}",
++      light.m_poFilamentEntityLight.getId()
++    );
++  }
++
++  if (skipSceneAdd) {
++    if (trace) {
++      spdlog::info("FLR0026_NATIVE_LIGHT_SCENE_ADD_SKIPPED");
++    }
++  } else {
++    AddLightToScene(light);
++    if (trace) {
++      spdlog::info("FLR0026_NATIVE_LIGHT_SCENE_ADD_DONE");
++    }
++  }
+ 
+   if (const char* rawDelayUs =
+         std::getenv("FLR0026_NATIVE_LIGHT_OPERATION_DELAY_US")) {

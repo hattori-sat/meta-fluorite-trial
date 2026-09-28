@@ -1,0 +1,29 @@
+From 28b98a4fd82667eaf5ee9d020e06e0b4e2dc076e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 12:39:14 +0000
+Subject: [PATCH] diag: trace queue wait lifecycle
+
+---
+ filament/backend/src/CommandBufferQueue.cpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/filament/backend/src/CommandBufferQueue.cpp b/filament/backend/src/CommandBufferQueue.cpp
+index ed00d3cc2a..b893d75dfd 100644
+--- a/filament/backend/src/CommandBufferQueue.cpp
++++ b/filament/backend/src/CommandBufferQueue.cpp
+@@ -149,7 +149,15 @@ void CommandBufferQueue::flush() {
+ }
+ 
+ std::vector<CommandBufferQueue::Range> CommandBufferQueue::waitForCommands() const {
++    const bool lifecycleTrace = std::getenv("FLUORITE_DRIVER_LIFECYCLE_TRACE") != nullptr;
++    if (lifecycleTrace) {
++        std::fprintf(stderr, "FLUORITE_QUEUE_WAIT_ENTER\n");
++    }
+     if (!UTILS_HAS_THREADING) {
++        if (lifecycleTrace) {
++            std::fprintf(stderr, "FLUORITE_QUEUE_WAIT_SINGLE_THREAD count=%zu\n",
++                    mCommandBuffersToExecute.size());
++        }
+         return std::move(mCommandBuffersToExecute);
+     }
+     std::unique_lock lock(mLock);

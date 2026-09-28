@@ -1,0 +1,140 @@
+From a107000b063550d82223135319c8567e2271fa3e Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 12:57:17 +0000
+Subject: [PATCH] diag: show explicit Flutter 3D mock overlay
+
+---
+ packages/filament_scene/example/lib/main.dart | 109 ++++++++++++++++++
+ 1 file changed, 109 insertions(+)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 4a04f8e..7f2070e 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -50,6 +50,10 @@ final ValueNotifier<FrameProfilingData> frameProfilingDataNotifier =
+       ),
+     );
+ 
++// FLR-0026 diagnostic switch. This overlay is intentionally obvious and is
++// only used to separate Flutter composition from the native Filament path.
++const bool kFlr0026DiagnosticMock3d = true;
++
+ ////////////////////////////////////////////////////////////////////////
+ void main() {
+   FlutterError.onError = (FlutterErrorDetails details) {
+@@ -208,6 +212,14 @@ class _MyAppState extends State<MyApp> {
+ 
+             if (_sceneView != null) _sceneView!,
+ 
++            if (kFlr0026DiagnosticMock3d)
++              const Positioned(
++                top: 86,
++                left: 0,
++                right: 0,
++                child: IgnorePointer(child: Center(child: Flr0026DiagnosticMock3d())),
++              ),
++
+             // A profiling overlay
+             Positioned(
+               top: 0,
+@@ -295,3 +307,100 @@ class _MyAppState extends State<MyApp> {
+     );
+   }
+ }
++
++class Flr0026DiagnosticMock3d extends StatelessWidget {
++  const Flr0026DiagnosticMock3d({super.key});
++
++  @override
++  Widget build(BuildContext context) {
++    return Column(
++      mainAxisSize: MainAxisSize.min,
++      children: [
++        SizedBox(
++          width: 220,
++          height: 190,
++          child: CustomPaint(painter: _Flr0026CubePainter()),
++        ),
++        DecoratedBox(
++          decoration: BoxDecoration(
++            color: const Color(0xdd102a43),
++            border: Border.all(color: const Color(0xff7dd3fc), width: 1),
++            borderRadius: BorderRadius.circular(4),
++          ),
++          child: const Padding(
++            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
++            child: Text(
++              'FLR-0026 MOCK 3D',
++              style: TextStyle(
++                color: Color(0xffe0f2fe),
++                fontSize: 12,
++                fontWeight: FontWeight.bold,
++              ),
++            ),
++          ),
++        ),
++      ],
++    );
++  }
++}
++
++class _Flr0026CubePainter extends CustomPainter {
++  @override
++  void paint(Canvas canvas, Size size) {
++    final Offset top = Offset(size.width * 0.50, size.height * 0.08);
++    final Offset leftTop = Offset(size.width * 0.16, size.height * 0.30);
++    final Offset center = Offset(size.width * 0.50, size.height * 0.52);
++    final Offset rightTop = Offset(size.width * 0.84, size.height * 0.30);
++    final Offset leftBottom = Offset(size.width * 0.16, size.height * 0.80);
++    final Offset centerBottom = Offset(size.width * 0.50, size.height * 0.98);
++    final Offset rightBottom = Offset(size.width * 0.84, size.height * 0.80);
++
++    final Paint shadow = Paint()..color = const Color(0x66000000);
++    canvas.drawOval(
++      Rect.fromCenter(
++        center: Offset(size.width * 0.50, size.height * 0.94),
++        width: size.width * 0.76,
++        height: size.height * 0.11,
++      ),
++      shadow,
++    );
++
++    final Paint topPaint = Paint()..color = const Color(0xff38bdf8);
++    final Paint leftPaint = Paint()..color = const Color(0xff2563eb);
++    final Paint rightPaint = Paint()..color = const Color(0xfff97316);
++    final Paint edge = Paint()
++      ..color = const Color(0xfff8fafc)
++      ..style = PaintingStyle.stroke
++      ..strokeWidth = 2.5
++      ..strokeJoin = StrokeJoin.round;
++
++    final Path topFace = Path()
++      ..moveTo(top.dx, top.dy)
++      ..lineTo(rightTop.dx, rightTop.dy)
++      ..lineTo(center.dx, center.dy)
++      ..lineTo(leftTop.dx, leftTop.dy)
++      ..close();
++    final Path leftFace = Path()
++      ..moveTo(leftTop.dx, leftTop.dy)
++      ..lineTo(center.dx, center.dy)
++      ..lineTo(centerBottom.dx, centerBottom.dy)
++      ..lineTo(leftBottom.dx, leftBottom.dy)
++      ..close();
++    final Path rightFace = Path()
++      ..moveTo(center.dx, center.dy)
++      ..lineTo(rightTop.dx, rightTop.dy)
++      ..lineTo(rightBottom.dx, rightBottom.dy)
++      ..lineTo(centerBottom.dx, centerBottom.dy)
++      ..close();
++
++    canvas.drawPath(topFace, topPaint);
++    canvas.drawPath(leftFace, leftPaint);
++    canvas.drawPath(rightFace, rightPaint);
++    canvas.drawPath(topFace, edge);
++    canvas.drawPath(leftFace, edge);
++    canvas.drawPath(rightFace, edge);
++  }
++
++  @override
++  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
++}

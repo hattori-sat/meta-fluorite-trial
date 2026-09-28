@@ -1,0 +1,27 @@
+From d53ef222db62d67283f223c04f85ad0d3d7ebf6e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 18:04:25 +0000
+Subject: [PATCH] FLR-0246: mount Planetarium directly without builder
+
+---
+ packages/filament_scene/example/lib/main.dart | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 5898984..d402e37 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -232,7 +232,12 @@ class _MyAppState extends State<MyApp> {
+             // Flutter widget painting.
+             if (!kFlr0026DiagnosticMock3d) _filamentViewWidget,
+ 
+-            const SizedBox.shrink(),
++            PlanetariumSceneView(
++              filament: filamentViewApi,
++              frameController: _frameEventChannel,
++              collisionController: _collisionEventChannel,
++              readinessController: _nativeReadiness,
++            ),
+ 
+             if (kFlr0026DiagnosticMock3d)
+               const Positioned(

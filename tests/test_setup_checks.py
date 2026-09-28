@@ -56,6 +56,48 @@ class SetupScriptTests(unittest.TestCase):
 
 
 class RepositoryCheckTests(unittest.TestCase):
+    def test_privacy_checker_rejects_non_role_git_metadata_without_echoing_it(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            role_environment = os.environ.copy()
+            role_environment.update(
+                {
+                    "GIT_AUTHOR_NAME": "Fluorite integration role",
+                    "GIT_AUTHOR_EMAIL": "@".join(("integration-role", "localhost")),
+                    "GIT_COMMITTER_NAME": "Fluorite integration role",
+                    "GIT_COMMITTER_EMAIL": "@".join(("integration-role", "localhost")),
+                }
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "--allow-empty", "-m", "role"],
+                check=True,
+                env=role_environment,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            passing = run_script("check-repository-privacy.sh", str(root))
+            self.assertEqual(passing.returncode, 0, passing.stdout)
+
+            blocked_email = "@".join(("personal", "example.invalid"))
+            blocked_environment = role_environment | {
+                "GIT_AUTHOR_NAME": "Personal identity",
+                "GIT_AUTHOR_EMAIL": blocked_email,
+                "GIT_COMMITTER_NAME": "Personal identity",
+                "GIT_COMMITTER_EMAIL": blocked_email,
+            }
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "--allow-empty", "-m", "blocked"],
+                check=True,
+                env=blocked_environment,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            failing = run_script("check-repository-privacy.sh", str(root))
+            self.assertEqual(failing.returncode, 1, failing.stdout)
+            self.assertIn("blocked Git metadata", failing.stdout)
+            self.assertNotIn(blocked_email, failing.stdout)
+
     def test_markdown_link_checker_accepts_and_rejects_internal_links(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -150,6 +192,44 @@ class RepositoryCheckTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            candidate = root / "reserved-placeholder.md"
+            reserved_email = "fluorite" + "@example.invalid"
+            suffixed_email = reserved_email + ".evil"
+            candidate.write_text(
+                f"{reserved_email}\n{suffixed_email}\n",
+                encoding="utf-8",
+            )
+            result = run_script("check-repository-privacy.sh", str(root))
+            self.assertEqual(result.returncode, 1, result.stdout)
+            self.assertNotIn(suffixed_email, result.stdout)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            candidate = root / "wayland-trace.md"
+            candidate.write_text(
+                "wl_subsurface@31.set_position(0, 0)\n"
+                "wl_surface@14\n"
+                "wl_pointer@65.motion(1189.96093750, 39.99218750)\n",
+                encoding="utf-8",
+            )
+            result = run_script("check-repository-privacy.sh", str(root))
+            self.assertEqual(result.returncode, 0, result.stdout)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            candidate = root / "workflow.md"
+            candidate.write_text(
+                "Do not create index.local.\n"
+                "Fluorite Devtool <fluorite-devtool@localhost>\n"
+                "root@qemux86-64\n"
+                + "root" + "@.\n",
+                encoding="utf-8",
+            )
+            result = run_script("check-repository-privacy.sh", str(root))
+            self.assertEqual(result.returncode, 0, result.stdout)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
             candidate = root / "network.conf"
             ipv6_value = ":".join(
                 ("2001", "0db8", "0000", "0000", "0000", "0000", "0000", "0042")
@@ -167,6 +247,15 @@ class RepositoryCheckTests(unittest.TestCase):
             result = run_script("check-repository-privacy.sh", str(root))
             self.assertEqual(result.returncode, 1, result.stdout)
             self.assertNotIn(compressed_ipv6, result.stdout)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            candidate = root / "cpp-trace.md"
+            candidate.write_text(
+                "std::__1::__assoc_sub_state::wait\n", encoding="utf-8"
+            )
+            result = run_script("check-repository-privacy.sh", str(root))
+            self.assertEqual(result.returncode, 0, result.stdout)
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

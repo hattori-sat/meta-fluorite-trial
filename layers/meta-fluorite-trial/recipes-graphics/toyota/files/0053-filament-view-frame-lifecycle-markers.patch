@@ -1,0 +1,61 @@
+From 88b0b4ac7a95ccc1615e765db484d130048ab282 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 30 Aug 2026 18:23:56 +0000
+Subject: [PATCH] diag: trace Filament frame lifecycle
+
+---
+ .../filament_view/core/scene/view_target.cc   | 21 ++++++++++++++++++-
+ 1 file changed, 20 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 89e8715..541218b 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -162,6 +162,12 @@ void ViewTarget::setupWaylandSubsurface() {
+ 
+   wl_subsurface_place_above(subsurface_, parent_surface_);
+   wl_subsurface_set_desync(subsurface_);
++  spdlog::info(
++    "FLR0026_WAYLAND_SURFACE_CREATED surface={} subsurface={} parent={}",
++    surface_ != nullptr,
++    subsurface_ != nullptr,
++    parent_surface_ != nullptr
++  );
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////
+@@ -541,6 +547,10 @@ const wl_callback_listener ViewTarget::frame_listener = {.done = OnFrame};
+  * rendered
+  */
+ void ViewTarget::DrawFrame(const uint32_t time) {
++  static uint32_t frameMarkerSequence = 0;
++  const uint32_t frameSequence = ++frameMarkerSequence;
++  const bool shouldLogFrame = frameSequence <= 3 || frameSequence % 10 == 0;
++
+   if (m_LastTime == 0) {
+     m_LastTime = time;
+   }
+@@ -606,13 +616,22 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // Render the scene, unless the renderer wants to skip the frame.
+   const auto gpuDrawStart = std::chrono::steady_clock::now();
+   // spdlog::debug("=== BEGIN FRAME ===");
+-  if (renderer->beginFrame(fswapChain_, std::chrono::steady_clock::now().time_since_epoch().count())) {
++  const bool frameStarted = renderer->beginFrame(
++    fswapChain_, std::chrono::steady_clock::now().time_since_epoch().count()
++  );
++  if (shouldLogFrame) {
++    spdlog::info("FLR0026_FRAME_BEGIN seq={} started={}", frameSequence, frameStarted);
++  }
++  if (frameStarted) {
+     // Frame is being rendered
+     // TODO(kerberjg): send kPreRenderFrame event, async with wait
+     // spdlog::debug("=== RENDER FRAME ===");
+     renderer->render(fview_);
+     // spdlog::debug("=== END FRAME ===");
+     renderer->endFrame();
++    if (shouldLogFrame) {
++      spdlog::info("FLR0026_FRAME_END seq={}", frameSequence);
++    }
+     // TODO(kerberjg): send kPostRenderFrame event, async with wait
+   } else {
+     // beginFrame failed, the renderer couldn't render this frame

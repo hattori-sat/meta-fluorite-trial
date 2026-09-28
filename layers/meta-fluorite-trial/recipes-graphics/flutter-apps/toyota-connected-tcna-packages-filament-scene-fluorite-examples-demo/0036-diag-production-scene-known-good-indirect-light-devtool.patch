@@ -1,0 +1,22 @@
+From 89f251d1d10394e55863c85d3c8afb764a1222bd Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 01:07:52 +0000
+Subject: [PATCH] diag: use known-good indirect light for production scene
+
+---
+ packages/filament_scene/example/lib/main.dart | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 762d567..121fed0 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -289,7 +289,7 @@ class _MyAppState extends State<MyApp> {
+     return Scene(
+       skybox: ColorSkybox(color: Colors.white),
+       //skybox: HdrSkybox.asset("assets/envs/courtyard.hdr"),
+-      indirectLight: HdrIndirectLight.asset("assets/envs/courtyard.hdr"),
++      indirectLight: poGetDefaultIndirectLight(),
+       //indirectLight: poGetDefaultIndirectLight(),
+       lights: poGetSceneLightsList(),
+     );

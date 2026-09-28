@@ -1,0 +1,38 @@
+From 848e15983ed0380fb251c000f04bf6194e5b5001 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 02:50:35 +0000
+Subject: [PATCH] diag: allow Flutter input through native surface
+
+---
+ .../filament_view/core/scene/view_target.cc    | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 9daf2741b..d099acb80 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -377,6 +377,24 @@ void ViewTarget::setupWaylandSubsurface() {
+     return;
+   }
+ 
++  const bool emptyInputRegion =
++    std::getenv("FLUORITE_NATIVE_EMPTY_INPUT_REGION") != nullptr;
++  if (emptyInputRegion) {
++    wl_region* inputRegion =
++      wl_compositor_create_region(flutter_view->GetDisplay()->GetCompositor());
++    if (inputRegion != nullptr) {
++      // The native surface is display-only in this diagnostic mode. An empty
++      // input region lets pointer events continue to the Flutter parent.
++      wl_surface_set_input_region(surface_, inputRegion);
++      wl_region_destroy(inputRegion);
++      spdlog::info("FLUORITE_NATIVE_EMPTY_INPUT_REGION enabled=true");
++    } else {
++      spdlog::error(
++        "FLUORITE_NATIVE_EMPTY_INPUT_REGION create_region_failed"
++      );
++    }
++  }
++
+   const bool placeBelow =
+     std::getenv("FLUORITE_NATIVE_WAYLAND_PLACE_BELOW") != nullptr;
+   if (placeBelow) {

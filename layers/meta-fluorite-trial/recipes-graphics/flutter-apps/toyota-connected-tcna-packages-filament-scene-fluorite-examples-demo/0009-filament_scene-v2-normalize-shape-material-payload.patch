@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 10 Aug 2026 19:00:00 +0900
+Subject: [PATCH] filament_scene: normalize v2 shape material payload
+
+flutter-auto v2 deserializes material parameters in type-before-value order
+and requires COLOR values to remain four-element numeric lists. Normalize only
+the creation-time shape material maps; the public Dart API remains unchanged.
+
+---
+ packages/filament_scene/lib/scene/scene_widget.dart | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -169,14 +169,41 @@ class ModelViewerState extends State<SceneView> {
+   void _setupCreationParams() {
++    JsonObject normalizeMaterial(final JsonObject material) {
++      final Object? parameters = material['parameters'];
++      if (parameters is! List) return material;
++
++      final normalized = <JsonObject>[];
++      for (final Object? parameter in parameters) {
++        if (parameter is! Map<String, dynamic>) {
++          throw UnsupportedError('material.parameters contains ${parameter.runtimeType}');
++        }
++        final type = parameter['type'];
++        Object? value = parameter['value'];
++        normalized.add(<String, dynamic>{
++          'name': parameter['name'],
++          'type': type,
++          'value': value,
++        });
++      }
++      return <String, dynamic>{...material, 'parameters': normalized};
++    }
++
++    JsonObject normalizeShape(final JsonObject shape) {
++      final material = shape['material'];
++      return material is JsonObject
++          ? <String, dynamic>{...shape, 'material': normalizeMaterial(material)}
++          : shape;
++    }
++
+     //final model = widget.models?.toJson();
+     final JsonObject? scene = widget.scene?.toJson();
+     if (scene != null && widget.cameras != null && widget.cameras!.isNotEmpty) {
+       // flutter-auto v2 creates cameras from scene.camera, not root cameras.
+       // Keep the first active camera GUID aligned with Dart post-create setup.
+       scene['camera'] = widget.cameras!.first.toJson();
+     }
+     _creationParams["models"] = widget.models?.map((final param) => param.toJson()).toList();
+     _creationParams["scene"] = scene;
+     // use concatenated toFlatJson
+     _creationParams["shapes"] = widget.shapes
+-        ?.map((final param) => param.toFlatJson())
++        ?.map((final param) => param.toFlatJson().map(normalizeShape).toList())
+         .flattenedToList;

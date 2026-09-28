@@ -1,0 +1,26 @@
+From 5de22af7e6316b3d2356276096526bffe6deb247 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 12 Sep 2026 14:21:51 +0000
+Subject: [PATCH] refresh model reuse patch for current plugin API
+
+---
+ plugins/filament_view/core/systems/derived/model_system.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 3c43615..427aa34 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -546,6 +546,12 @@ void ModelSystem::queueModelLoad(std::shared_ptr<Model> model) {
+       case AssetLoadingState::loaded:
+         // add model to asset's loading queue
+         _models[modelGuid] = std::move(model);
++        if (instanceMode == ModelInstancingMode::none && assetData.asset != nullptr) {
++          // Reuse the already-loaded asset for non-instanced models so the later
++          // add-to-scene path sees a valid asset instead of a null placeholder.
++          _models[modelGuid]->setAsset(assetData.asset);
++          _models[modelGuid]->setAssetInstance(assetData.asset->getInstance());
++        }
+         assetData.loadingInstances.emplace_back(modelGuid);
+         spdlog::trace("  Asset loaded: model queued for instancing.");
+         return;

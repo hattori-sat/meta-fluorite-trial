@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sat, 22 Aug 2026 19:35:00 +0900
+Subject: [PATCH] filament-view: place render surface above Flutter parent
+
+The Flutter parent surface is full-screen and opaque in the QEMU runtime.
+Placing the Filament subsurface below it hides every native pixel. Keep the
+native view above the parent so translucent Filament content can be composed
+with the Flutter UI.
+
+---
+ .../filament_view/core/scene/view_target.cc                  | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -139,1 +139,1 @@ void ViewTarget::setupWaylandSubsurface() {
+-  wl_subsurface_place_below(subsurface_, parent_surface_);
++  wl_subsurface_place_above(subsurface_, parent_surface_);
+-- 
+2.34.1

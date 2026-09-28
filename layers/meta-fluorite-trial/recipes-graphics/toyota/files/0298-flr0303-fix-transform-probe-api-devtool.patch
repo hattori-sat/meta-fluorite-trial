@@ -1,0 +1,26 @@
+From a8a365088e8a3d13743957d03797d72e69115929 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 20:45:28 +0000
+Subject: [PATCH] FLR-0303: fix transform probe API
+
+---
+ plugins/filament_view/core/systems/derived/model_system.cc | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index ebf0a99..ed2585e 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -333,10 +333,8 @@ void ModelSystem::addModelToScene(EntityGUID modelGuid) {
+       const auto world = _tm->getWorldTransform(transformInstance);
+       spdlog::info(
+         "FLR0302_PRODUCTION_TRANSFORM role={} entity={} valid=true parent={} "
+-        "world_translation=({},{},{}) world_scale=({},{},{})",
+-        role, entity.getId(), parentEntity.getId(), world[3].x, world[3].y, world[3].z,
+-        filament::math::length(world[0].xyz), filament::math::length(world[1].xyz),
+-        filament::math::length(world[2].xyz)
++        "world_translation=({},{},{})",
++        role, entity.getId(), parentEntity.getId(), world[3].x, world[3].y, world[3].z
+       );
+     };
+ 

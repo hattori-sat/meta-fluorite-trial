@@ -1,0 +1,130 @@
+From ac7c9d281a83e5b2b8d9851f2a483e4694478dc8 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 21 Sep 2026 01:23:13 +0000
+Subject: [PATCH] FLR-0255: defer readiness polling until platform view
+
+---
+ .../example/lib/events/native_readiness.dart  | 36 +++++++++++++------
+ packages/filament_scene/example/lib/main.dart | 33 ++---------------
+ 2 files changed, 28 insertions(+), 41 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/events/native_readiness.dart b/packages/filament_scene/example/lib/events/native_readiness.dart
+index 2ca9bac..6345b09 100644
+--- a/packages/filament_scene/example/lib/events/native_readiness.dart
++++ b/packages/filament_scene/example/lib/events/native_readiness.dart
+@@ -7,31 +7,47 @@ class NativeReadiness {
+     'plugin.filament_view.readiness_checker',
+   );
+   static int _readinessCallCount = 0;
++  final List<Function> _callbacks = <Function>[];
++  bool _pollingStarted = false;
++  bool _nativeReady = false;
+ 
+-  /// Adds a one-time callback to be called when the native side is ready.
+-  /// If a the native side is already ready, a check is scheduled immediately,
+-  /// and retried  until the callback is called.
+-  void addCallback(
+-    Function callback, [
++  /// Registers a callback without starting a MethodChannel call.
++  ///
++  /// Polling is started explicitly after the native Platform View has been
++  /// created. This prevents a scene widget mounted in the same Flutter frame
++  /// from calling the readiness channel before its plugin handler exists.
++  void addCallback(Function callback) {
++    if (_nativeReady) {
++      callback();
++      return;
++    }
++    _callbacks.add(callback);
++  }
++
++  /// Starts the single readiness poll owned by the native Platform View.
++  void startPolling([
+     int maxRetries = 60 * 30,
+     Duration retryInterval = const Duration(milliseconds: 16),
+   ]) {
++    if (_pollingStarted) return;
++    _pollingStarted = true;
+     int attempt = 0;
+     bool firstFalseReported = false;
+ 
+     print('FLR0247_READINESS_POLL_START');
+-
+-    // print('Ready?');
+-
+     unawaited(() async {
+       for (attempt = 1; attempt <= maxRetries; attempt++) {
+-        // print('Checking native readiness, attempt $attempt...');
+         try {
+           final bool nativeReady = await isNativeReady();
+ 
+           if (nativeReady) {
++            _nativeReady = true;
+             print('FLR0247_READINESS_READY attempt=$attempt');
+-            callback();
++            final callbacks = List<Function>.of(_callbacks);
++            _callbacks.clear();
++            for (final callback in callbacks) {
++              callback();
++            }
+             print('FLR0247_READINESS_CALLBACK_DISPATCHED');
+             return;
+           }
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 8a42b33..7d6a815 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -98,8 +98,6 @@ class _MyAppState extends State<MyApp> {
+   late SceneController poController;
+ 
+   final NativeReadiness _nativeReadiness = NativeReadiness();
+-  bool isReady = false;
+-
+   final filamentViewApi = FilamentViewApi();
+ 
+   /// field to store the scene widget so it's created only once
+@@ -170,34 +168,6 @@ class _MyAppState extends State<MyApp> {
+     super.dispose();
+   }
+ 
+-  Future<bool> initializeReadiness() async {
+-    const int maxRetries = 30;
+-    const Duration retryInterval = Duration(seconds: 1);
+-
+-    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+-      try {
+-        print('Checking native readiness, attempt $attempt...');
+-        final bool nativeReady = await _nativeReadiness.isNativeReady();
+-
+-        if (nativeReady) {
+-          print('Native is ready. Proceeding...');
+-          startListeningForEvents();
+-          return true;
+-        } else {
+-          print('Native is not ready. Retrying...');
+-        }
+-      } catch (e) {
+-        print('Error checking readiness: $e');
+-        return false;
+-      }
+-
+-      await Future.delayed(retryInterval);
+-    }
+-
+-    print('Failed to confirm native readiness after $maxRetries attempts.');
+-    return false;
+-  }
+-
+   ////////////////////////////////////////////////////////////////////////
+   void startListeningForEvents() {
+     print('Creating Event Channels');
+@@ -319,7 +289,8 @@ class _MyAppState extends State<MyApp> {
+ 
+         print('poGetFilamentScene onCreated completed');
+         print('FLR0249_READINESS_START_AFTER_PLATFORM_VIEW');
+-        unawaited(initializeReadiness());
++        _nativeReadiness.addCallback(startListeningForEvents);
++        _nativeReadiness.startPolling();
+       },
+     );
+   }

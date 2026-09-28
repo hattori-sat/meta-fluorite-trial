@@ -1,0 +1,34 @@
+From 0f910c9139aac2a2dff83950fc45be600ed83e5e Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 15:38:18 +0000
+Subject: [PATCH] fix: issue native readback inside frame
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 6fbd477..1eef30b 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -949,8 +949,6 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     // TODO(kerberjg): send kPreRenderFrame event, async with wait
+     // spdlog::debug("=== RENDER FRAME ===");
+     renderer->render(fview_);
+-    // spdlog::debug("=== END FRAME ===");
+-    renderer->endFrame();
+     if (native_readback_probe_enabled_ && native_readback_view_ && native_readback_target_ &&
+         !native_readback_probe_queued_) {
+       native_readback_probe_queued_ = true;
+@@ -987,6 +985,8 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+         readbackHeight
+       );
+     }
++    // spdlog::debug("=== END FRAME ===");
++    renderer->endFrame();
+     if (shouldLogFrame) {
+       spdlog::info("FLR0026_FRAME_END seq={}", frameSequence);
+     }
+-- 
+2.34.1
+

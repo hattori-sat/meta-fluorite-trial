@@ -1,0 +1,51 @@
+From 22e21c2b969ec57e95bb47445955f9f57a0ad0cf Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 12:03:19 +0000
+Subject: [PATCH] diag: log Vulkan present fence status
+
+---
+ filament/backend/src/vulkan/VulkanCommands.h    | 9 +++++++++
+ filament/backend/src/vulkan/VulkanSwapChain.cpp | 7 +++++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanCommands.h b/filament/backend/src/vulkan/VulkanCommands.h
+index d24f2e715..37279db61 100644
+--- a/filament/backend/src/vulkan/VulkanCommands.h
++++ b/filament/backend/src/vulkan/VulkanCommands.h
+@@ -234,6 +234,15 @@ public:
+         return mLastFence;
+     }
+ 
++    // Diagnostic-only query used to distinguish an unfinished GPU submission
++    // from a present/WSI boundary stall.
++    VkResult getMostRecentFenceStatusFromDriver() const {
++        if (mLastFence == VK_NULL_HANDLE) {
++            return VK_NOT_READY;
++        }
++        return vkGetFenceStatus(mDevice, mLastFence);
++    }
++
+     std::shared_ptr<VulkanCmdFence> getMostRecentFenceStatus() {
+         return mLastFenceStatus;
+     }
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index dc3ef3eab..09ec8f0d8 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -133,6 +133,13 @@ void VulkanSwapChain::present(DriverBase& driver) {
+         std::fprintf(stderr, "FLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=%s\\n",
+                 finishedDrawing ? "true" : "false");
+         mFinishedDrawing[mCurrentSwapIndex] = finishedDrawing;
++        if (std::getenv("FLR0026_PRESENT_FENCE_DIAGNOSTIC") != nullptr) {
++            const VkResult fenceStatus = mCommands->getMostRecentFenceStatusFromDriver();
++            std::fprintf(stderr,
++                    "FLR0026_VK_PRESENT_FENCE_STATUS result=%d fence=%p\n",
++                    static_cast<int32_t>(fenceStatus),
++                    static_cast<void*>(mCommands->getMostRecentFence()));
++        }
+         VkResult const result =
+                 mPlatform->present(swapChain, mCurrentSwapIndex, finishedDrawing->getVkSemaphore());
+         FILAMENT_CHECK_POSTCONDITION(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR ||
+-- 
+2.34.1
+

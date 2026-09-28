@@ -1,0 +1,25 @@
+From 0ec05ba10f4be3ae7deeaace28f6215f7ed65f4e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 15:15:56 +0000
+Subject: [PATCH] fix: detach cameras until activation
+
+---
+ packages/filament_scene/lib/components/camera.dart | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/lib/components/camera.dart b/packages/filament_scene/lib/components/camera.dart
+index 54f8aa5..ba3cbb7 100644
+--- a/packages/filament_scene/lib/components/camera.dart
++++ b/packages/filament_scene/lib/components/camera.dart
+@@ -29,9 +29,8 @@ mixin class Camera {
+ 
+   // NOTE: expose this to properly support multiview
+   // ignore: prefer_final_fields
+-  // Keep the historical default so the first native frame has a camera.
+-  // Explicit setActive() remains the route-selection mechanism.
+-  int _viewId = 0;
++  // Keep cameras detached until setActive() selects one for a view.
++  int _viewId = -1;
+ 
+   void setProjection({final Projection? projection, final LensProjection? lens}) {
+     assert(

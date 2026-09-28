@@ -1,0 +1,30 @@
+From b4368f6c1ea9c6163a7dc72745caa6473ab45a2b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 18:26:07 +0000
+Subject: [PATCH] diag: dispatch pending wayland events before frame
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 09864ff..df96fc7 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -928,6 +928,13 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+ 
+   pollNativeReadbackFence();
+ 
++  if (std::getenv("FLR0026_WAYLAND_DISPATCH_PENDING") != nullptr && display_ != nullptr) {
++    wl_display_dispatch_pending(display_);
++    if (shouldLogFrame) {
++      spdlog::info("FLR0026_WAYLAND_DISPATCH_PENDING dispatched=true seq={}", frameSequence);
++    }
++  }
++
+   if (std::getenv("FLR0026_NATIVE_CLEAR_PROBE") != nullptr) {
+     filament::Renderer::ClearOptions clearOptions{};
+     clearOptions.clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+-- 
+2.34.1
+

@@ -1,0 +1,32 @@
+From 42e13f346e216503004e280fe726004efa43161d Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Tue, 1 Sep 2026 00:05:26 +0000
+Subject: [PATCH] diag: allow opaque native clear probe
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index aee77c5..60a1e3f 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -245,7 +245,14 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+ 
+   _engine = filamentSystem->getFilamentEngine();
+   setupShmProbe(width, height);
+-  fswapChain_ = _engine->createSwapChain(&native_window_, filament::SwapChain::CONFIG_TRANSPARENT);
++  const bool nativeClearProbe = std::getenv("FLR0026_NATIVE_CLEAR_PROBE") != nullptr;
++  const uint64_t swapChainConfig = nativeClearProbe
++    ? 0u
++    : filament::SwapChain::CONFIG_TRANSPARENT;
++  fswapChain_ = _engine->createSwapChain(&native_window_, swapChainConfig);
++  if (nativeClearProbe) {
++    spdlog::info("FLR0026_NATIVE_CLEAR_PROBE_SWAPCHAIN opaque=true");
++  }
+   fview_ = _engine->createView();
+ 
+   setupView(width, height);
+-- 
+2.34.1
+

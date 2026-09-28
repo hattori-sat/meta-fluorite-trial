@@ -1,0 +1,29 @@
+From ef5de2e401b4497499c3ea1ffa20d3ca1e8380df Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 12 Sep 2026 17:28:26 +0000
+Subject: [PATCH] test: restore self-made 3D fixture wiring
+
+---
+ packages/filament_scene/example/lib/main.dart | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 03450cd..8280f99 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -299,10 +299,11 @@ class _MyAppState extends State<MyApp> {
+   SceneView poGetFilamentScene() {
+     return SceneView(
+       filament: filamentViewApi,
+-      models: poGetModelList(),
+-      scene: poGetScene(),
+-      shapes: poGetScenesShapes(),
+-      cameras: poGetScenesCameras(),
++      // Isolate the previously proven self-made native 3D fixture.
++      models: <Model>[],
++      scene: poGetMinimal3dFixtureScene(),
++      shapes: poGetMinimal3dFixtureShapes(),
++      cameras: poGetMinimal3dFixtureCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 

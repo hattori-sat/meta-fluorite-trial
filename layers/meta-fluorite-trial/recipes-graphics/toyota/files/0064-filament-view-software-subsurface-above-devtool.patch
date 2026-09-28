@@ -1,0 +1,24 @@
+From 1b64e7694f33c2bd20642a6e589b5701d7a8e556 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 18:47:07 +0000
+Subject: [PATCH] diag: place software subsurface above parent
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 65e791f..87c6e02 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -692,6 +692,10 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+       obj->DrawFrame(frameTime);
+       if (obj->surface_ != nullptr) {
++        if (obj->subsurface_ != nullptr && obj->parent_surface_ != nullptr) {
++          wl_subsurface_place_above(obj->subsurface_, obj->parent_surface_);
++          spdlog::info("FLR0026_WAYLAND_SUBSURFACE_PLACED_ABOVE placed=true");
++        }
+         wl_surface_commit(obj->surface_);
+         const auto flushResult = wl_display_flush(obj->display_);
+         spdlog::info(
