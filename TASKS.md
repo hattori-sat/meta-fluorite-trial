@@ -12,7 +12,7 @@ Last updated: 2026-09-29
 
 **Handoff prerequisite:** [FLR-0351](work/tickets/FLR-0351-validate-mini-handoff-before-receiver-update.md) is Done. A bounded, read-only check independently confirmed the Mini receiver at exact feature tip `5e46a1ecc97cb1e5e0df76ea1cbecceaa83df103`, clean, with BitBake idle and fixed `TOPDIR`/effective `TMPDIR` roles matching. The existing bundle SHA and tip were verified. The original helper's final client marker/exit code is still UNKNOWN, but receiver state is proven; no retransmission is warranted. No build or QEMU run occurred in FLR-0351.
 
-**[FLR-0350](work/tickets/FLR-0350-correlate-lavapipe-sync-release-producer.md) is unblocked and next:** its exact runtime symbols and deterministic FIFO/GDB/QMP runner are ready; producer-to-waiter lifetime correlation remains open. Fresh Mini preflight passed with no QEMU collision and matching pinned image inputs. No FLR-0350 QEMU attempt has run yet.
+**FLR-0350 is Done as a bounded partial experiment:** its one QEMU attempt failed closed at the pre-exec FIFO gate, before Flutter or GDB started. The QMP still/eight frames and host teardown are recorded; the black frame is not a Flutter render result. Producer correlation and the overall 3D objective remain UNKNOWN/open. The follow-up is a separate runner-gate/cleanup task.
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -28,7 +28,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| [FLR-0348](work/tickets/FLR-0348-watch-lavapipe-signal-without-fence-type.md) | observe both Lavapipe wait-release predicates without unavailable DWARF types | bounded GDB script / Mini runtime / QMP evidence roles | Done: exact image, both hardware watches armed; 8.07-second no-hit with fields false/null; QMP HUD visible and 768,000-pixel 3D ROI black; app/QEMU/QMP teardown passed | FLR-0350 correlates the exact wait sync object with its producer |
+| [FLR-0348](work/tickets/FLR-0348-watch-lavapipe-signal-without-fence-type.md) | observe both Lavapipe wait-release predicates without unavailable DWARF types | bounded GDB script / Mini runtime / QMP evidence roles | Done: exact image, both hardware watches armed; 8.07-second no-hit with fields false/null; QMP HUD visible and 768,000-pixel 3D ROI black; app/QEMU/QMP teardown passed | FLR-0350 stopped before app launch; FLR-0354 repairs the FIFO gate before a new producer-correlation run |
 | [FLR-0335](work/tickets/FLR-0335-compare-present-without-gdb.md) | compare production present behavior with and without GDB | production Example Demo / FEngine / QMP runtime roles | Done: no-GDB control reproduced the same FEngine/libLLVM `isOrdered+1` fault at 284.16s; QMP remained HUD-only/native-black; the planned 720s was not reached because the fault occurred first | FLR-0338 captures pre-instruction control-flow context |
 | [FLR-0332](work/tickets/FLR-0332-trace-native-buffer-publish-trigger.md) | trace native buffer publish trigger after surface creation | native render target publish / Wayland buffer attach roles | Done: current ViewTarget reaches draw and explicit commit A/B, but Vulkan queue-present does not return; child surface has no attach and QMP remains HUD-only/native-black | FLR-0333/0335 classify the recurring fault boundary; FLR-0338 captures pre-fault caller state |
 | [FLR-0331](work/tickets/FLR-0331-trace-current-native-wayland-surface-composition.md) | trace current native Wayland surface composition after draw submit | native Wayland surface attach/commit/import and QMP composition | Done: parent surface commits, but native `wl_surface@39` never attaches/damages/commits in the bounded current-image run | FLR-0332 owns native buffer publish trigger |
@@ -221,6 +221,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Result |
 | --- | --- | --- |
+| [FLR-0350](work/tickets/FLR-0350-correlate-lavapipe-sync-release-producer.md) | correlate the exact Lavapipe Present-wait sync object with its release producer | Done as a bounded partial experiment: the only run failed at `FLR0350_FIFO_READ_GATE` before app/GDB start. QMP AGL splash/black post-run still and 8-frame video saved; producer correlation UNKNOWN. Host QEMU/QMP cleanup verified; guest stop reported unknown process identity. FLR-0354 owns runner gate/cleanup correction; 3D objective remains open |
 | [FLR-0351](work/tickets/FLR-0351-validate-mini-handoff-before-receiver-update.md) | validate effective TMPDIR and Mini handoff preconditions before receiver update | Done: read-only Mini evidence independently confirmed exact requested receiver tip, clean worktree, idle BitBake, effective `TOPDIR`/`TMPDIR` role agreement, and matching existing bundle SHA. Original helper terminal marker remains UNKNOWN; receiver state is proven, so no retransfer was made. No build/QEMU side effect |
 | [FLR-0345](work/tickets/FLR-0345-retrospective-3d-visibility-checklist.md) | consolidate 3D visibility interventions, effects, and regression risk | Done as an evidence-indexed retrospective: fixture + HUD composition is proven, production Sequoia + HUD is historical but unstable, current QMP is HUD-only with black 3D ROI, and regression is plausible but unproven. Photo 1 is a static texture atlas; exact-current HUD-off Sequoia is untested. FLR-0344 ran and isolated an arm-wait helper failure; local commit `fe85290` |
 | [FLR-0346](work/tickets/FLR-0346-tolerate-empty-gdb-log-during-arm-poll.md) | distinguish a fresh empty GDB transcript from missing state | Done: actual helper red/green regression proves the old guard rejects an existing empty log; corrected helper waits for a delayed marker and reports missing PID/log independently. 86 Python tests, 51 shell syntax checks, privacy, 1,051 links, canonical/checkpoint gates pass. Does not determine FLR-0344's exact false predicate or renderer cause; FLR-0347 owns the exact-image retest |
@@ -280,12 +281,12 @@ Present entered and did not return. QMP showed the HUD/metrics/Scenes control;
 the fixed lower ROI `[0,200,1280,600]` was 768,000/768,000 black pixels in the
 still and all eight frames. Cleanup passed; no image build or product patch was
 made. This does not show production Sequoia or prove that the sync wait causes
-the black ROI. FLR-0350 now owns one unchanged-image measurement of the exact
-sync-object-to-release-producer relationship. Arm before the first relevant
-submission, identify object lifetime/generation, and observe producer entry,
-exit, predicate publication, and Present return for at most ten seconds after
-the matched wait. Stop UNKNOWN if the object association is incomplete. No
-speculative scene/light/camera/HUD change is in scope.
+the black ROI. FLR-0350 later failed its pre-exec gate before Flutter/GDB
+launch; no producer or rendering conclusion can be drawn from its black QMP
+frame. FLR-0354 owns correcting the FIFO descriptor check and safe cleanup.
+After deterministic repair tests pass, create a new one-shot producer
+correlation run ticket. No speculative scene/light/camera/HUD change is in
+scope.
 FLR-0326 reached the fixed-color production replacement, Scene draw/present,
 and Vulkan readback command-recording boundary, but no completion/result/
 callback marker appeared and the QMP native ROI remained zero while the HUD
@@ -686,13 +687,6 @@ FLR-0026は、0197/0198/0199の証拠済み範囲を固定した履歴ticketと�
 | [FLR-0023](work/tickets/FLR-0023-flutter-engine-3d-fixture.md) | fixtureのnative crash boundaryからentity/renderable/frame/child surfaceの未達を切り分ける | FLR-0019, FLR-0021 |
 
 ## Waiting
-
-- [FLR-0350](work/tickets/FLR-0350-correlate-lavapipe-sync-release-producer.md):
-  Exact runtime symbol mapping and the bounded FIFO/GDB/QMP runner are ready;
-  producer-to-waiter lifetime correlation and the one Mini QEMU attempt remain
-  pending. FLR-0351 is Done; exact receiver tip, clean state, idle BitBake, and
-  the fresh no-collision QEMU preflight are proven. It is ready to move to
-  In Progress on its dedicated feature branch; no retransfer is needed.
 
 - [FLR-0344](work/tickets/FLR-0344-capture-lavapipe-watch-failure-deterministically.md):
   One exact-image run reproduced Present-enter/no-return and a HUD-only QMP
