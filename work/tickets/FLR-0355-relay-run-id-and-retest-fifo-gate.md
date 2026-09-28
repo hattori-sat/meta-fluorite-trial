@@ -26,11 +26,11 @@ gate, not a promise that the producer will be observed or that 3D will render.
   this branch; no product source/image changed.
 - `work/commands/FLR-0350-run-sync-producer.sh` accepts a positional fresh ID,
   uses it for the evidence parent, and validates `flr0355-0001` in `--check`.
-- Static inspection found it invokes `bash "$start_script"` without passing
-  the ID or a mode.
-- `work/commands/FLR-0350-qemu-start.sh` defaults to consumed
-  `flr0350-0001` and rejects any other ID. Therefore the new runner and starter
-  currently disagree before QEMU launch.
+- The original pre-fix inspection found it invoked `bash "$start_script"`
+  without passing the ID or a mode.
+- In that initial baseline, `work/commands/FLR-0350-qemu-start.sh` defaulted to
+  consumed `flr0350-0001` and rejected any other ID. The runner and starter
+  therefore disagreed before QEMU launch.
 - The handoff is now repaired locally: the runner calls an ID-bearing,
   non-mutating `preflight` before creating the evidence parent, records that
   successful result, then calls `start` with the same ID. The starter requires
@@ -68,9 +68,10 @@ gate, not a promise that the producer will be observed or that 3D will render.
 - The current agent shell has no `BUILD_*` role variables loaded. The fixed
   local role configuration must be made available without recording its
   values before bundle transfer; no network action has occurred in FLR-0355.
-- No `CONTEXT.md` or area ADR was found in this checkout. The relevant source
-  of truth is `TASKS.md`, FLR-0350/0354 tickets and logs, the starter/runner,
-  and the runtime evidence procedure.
+- No `CONTEXT.md` or runtime/graphics ADR was found in this checkout. The
+  accepted branch workflow in [ADR-0002](../decisions/ADR-0002-git-branch-workflow.md)
+  applies; the behavior/evidence source of truth is `TASKS.md`, FLR-0350/0354
+  tickets and logs, the starter/runner, and the runtime evidence procedure.
 
 ## Capability contract
 
@@ -89,7 +90,7 @@ gate, not a promise that the producer will be observed or that 3D will render.
 
 | Dimension | Observation |
 | --- | --- |
-| What | Host accepts `flr0355-0001`, but the QEMU starter falls back to `flr0350-0001`; the runtime attempt cannot be attributed to a fresh ID. |
+| What | At the initial baseline, the host accepted `flr0355-0001`, but the QEMU starter fell back to `flr0350-0001`; that runtime attempt could not be attributed to a fresh ID. The local relay fix is now committed; target retest is pending. |
 | Where | Mac-side runner → QEMU starter handoff → Mini `runqemu`/QMP boundary. |
 | When | Before the first runtime process launch in the next producer-correlation attempt. |
 | Who | Mac harness role validates and transfers the committed runner; Mini QEMU role validates image/process identity and starts/stops the owned VM; QMP evidence role captures pixels. |
@@ -97,7 +98,7 @@ gate, not a promise that the producer will be observed or that 3D will render.
 
 ### Ranked hypotheses
 
-1. **Confirmed from current code:** absent ID propagation makes the starter use the consumed default and reject or collide before QEMU starts. The runner/start source lines are direct evidence.
+1. **Confirmed in the pre-fix baseline:** absent ID propagation made the starter use the consumed default and reject or collide before QEMU started. The current source fix is locally tested; the Mini runtime retest remains pending.
 2. **Unknown until target observation:** the guest supports the exact `stat -L -c` observation command. If unsupported, the corrected fail-closed gate stops before GDB/GO.
 3. **Unknown until target observation:** the actual blocked syscall FD resolves to the same FIFO object as the owned gate. A name-only match is insufficient.
 4. **Unknown until target observation:** after the gate passes, GDB can attach and the producer/wait path reaches the selected watch window.
