@@ -1,6 +1,6 @@
 # FLR-0351 — validate Mini handoff before receiver update
 
-- Status: In Progress
+- Status: Done
 - Priority: High (blocks the FLR-0350 Mini bundle handoff)
 - Created: 2026-09-28
 - Found during: [FLR-0350](FLR-0350-correlate-lavapipe-sync-release-producer.md)
@@ -71,14 +71,39 @@ unchanged.
   role identity after the privacy gate rejected the initial Git metadata.
   No push or Mini transfer had been performed at that original checkpoint.
 
-## Inferences
+## Reconciliation (2026-09-29)
+
+The earlier client-side outcome was unresolved, so the existing fixed Mini
+receiver was checked read-only, without retransferring or mutating it. The
+receiver independently proves the requested state:
+
+| Gate | Observed evidence | Result |
+| --- | --- | --- |
+| Requested feature tip | Receiver `HEAD` is `5e46a1ecc97cb1e5e0df76ea1cbecceaa83df103` | PASS |
+| Receiver safety | Non-evidence worktree is clean; BitBake is idle | PASS |
+| Fixed build roles | Effective `TOPDIR` and `TMPDIR` match saved roles | PASS |
+| Bundle identity | Existing bundle SHA-256 `a70bcd7e1477cc13a55d3898cef6454be89684591522a247f253a7e361c5fa93`; requested tip is present at receiver | PASS |
+| Helper process exit marker | Original client transcript did not retain final marker/exit status | UNKNOWN; receiver state is independently proven |
+| Build/QEMU side effects | No build or QEMU was run during reconciliation | PASS |
+
+Separate FLR-0350 preflight confirmed zero QEMU, `runqemu`, or Flutter-auto
+processes; QEMU ports 10930--10932 free; fixed run ID unused; pinned
+kernel/rootfs/qemuboot/helper hashes matching; and adequate RAM, disk, and
+inode headroom. Its command/result belongs to the FLR-0350 working log.
+
+**Conclusion:** FLR-0351's intended receiver state is proven and this
+prerequisite is Done. The missing client exit marker remains UNKNOWN; it is
+not grounds to retransmit because receiver `HEAD`, bundle identity, and clean
+state are independently verified. No push was made.
+
+## Inferences (initial implementation checkpoint)
 
 - If the handoff helper reaches the current TMPDIR check with this configuration,
   it can report failure after already moving the receiver to the bundle tip.
 - The check must use an authoritative effective setting or a narrowly proven
   default, and must run before any receiver fetch/checkout.
 
-## Hypotheses
+## Hypotheses (initial implementation checkpoint)
 
 1. The effective `TMPDIR` is the resolved `TOPDIR/tmp` value, whether it comes
    from BitBake's default or an override that evaluates to the same path.
