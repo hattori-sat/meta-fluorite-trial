@@ -1,27 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-evidence_root=/mnt/yocto/evidence
-prior_run_dir=$evidence_root/flr0335-0001/qemu
-run_id=${FLR0350_RUN_ID:-flr0350-0001}
-[ "$run_id" = flr0350-0001 ] || { echo 'FLR0350_QEMU_START=FAIL reason=invalid-run-id' >&2; exit 2; }
-new_run_parent=$evidence_root/$run_id
-run_dir=$new_run_parent/qemu
-qmp=$run_dir/qmp-0350.sock
-harness=$prior_run_dir/qemu-runtime-harness.sh
-
 fail() {
     echo "FLR0350_QEMU_START=FAIL reason=$1" >&2
     exit 1
 }
 
+repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
+[ "$#" -eq 1 ] || fail 'usage: preflight|start'
+mode=$1
+case "$mode" in
+    preflight) ;;
+    start) ;;
+    *) fail invalid-mode ;;
+esac
+: "${FLR0350_RUN_ID:?FLR0350_RUN_ID-is-required}"
+run_id=$FLR0350_RUN_ID
+python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id "$run_id" >/dev/null ||
+    fail invalid-or-consumed-run-id
+
+evidence_root=/mnt/yocto/evidence
+prior_run_dir=$evidence_root/flr0335-0001/qemu
+new_run_parent=$evidence_root/$run_id
+run_dir=$new_run_parent/qemu
+qmp=$run_dir/qmp-0350.sock
+harness=$prior_run_dir/qemu-runtime-harness.sh
+capture=$prior_run_dir/qemu-pixel-capture.py
+
+if [ "$mode" = preflight ]; then
+    { [ ! -e "$new_run_parent" ] && [ ! -L "$new_run_parent" ]; } ||
+        fail evidence-parent-already-exists
+else
+    [ -d "$new_run_parent" ] || fail evidence-parent-missing
+fi
+{ [ ! -e "$run_dir" ] && [ ! -L "$run_dir" ]; } || fail run-directory-already-exists
+
 test "$(sha256sum "$harness" | awk '{print $1}')" = \
     339472336f14387fd1b72c3d702e510de19ff710c5c203441733a7a59d79aa6d ||
     fail harness-identity
-test "$(sha256sum "$prior_run_dir/qemu-pixel-capture.py" | awk '{print $1}')" = \
+test "$(sha256sum "$capture" | awk '{print $1}')" = \
     992c0428cc85dc61ebdea1e49dc544eed528a961f06faf9dd7fe7de30795ec24 ||
     fail capture-helper-identity
-[ ! -e "$run_dir" ] || fail run-directory-already-exists
 
 target_lines=$(ps -axo pid=,ppid=,stat=,args= | awk '
     $3 !~ /^Z/ {
@@ -34,6 +53,25 @@ target_lines=$(ps -axo pid=,ppid=,stat=,args= | awk '
     }
 ')
 [ -z "$target_lines" ] || fail residual-runtime-process
+
+check_port_free() {
+    local port=$1
+    if command -v lsof >/dev/null 2>&1; then
+        if lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null |
+            awk 'NR > 1 { found=1 } END { exit found ? 0 : 1 }'; then
+            fail "port-in-use:$port"
+        fi
+    elif command -v ss >/dev/null 2>&1; then
+        if ss -H -ltn "( sport = :$port )" 2>/dev/null | grep -q .; then
+            fail "port-in-use:$port"
+        fi
+    else
+        fail missing-command:lsof-or-ss
+    fi
+}
+for port in 10930 10931 10932; do
+    check_port_free "$port"
+done
 
 mapfile -d '' -t saved_args < <(python3 - "$prior_run_dir/runqemu-1-command.txt" <<'PY'
 import shlex
@@ -79,7 +117,11 @@ test "$(sha256sum "$qemuboot" | awk '{print $1}')" = \
     ef5309f471e4bd159febbbc2c630368ec609d21900179b3694a6fb6c16f8c44a ||
     fail qemuboot-sha256
 
-mkdir -p -- "$new_run_parent"
+if [ "$mode" = preflight ]; then
+    echo "FLR0350_QEMU_PREFLIGHT=PASS id=$run_id qemu=NOT_STARTED"
+    exit 0
+fi
+
 mkdir -- "$run_dir"
 cp -- "$(readlink -f "$0")" "$run_dir/FLR-0350-qemu-start.sh"
 

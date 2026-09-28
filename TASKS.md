@@ -16,6 +16,8 @@ Last updated: 2026-09-29
 
 **[FLR-0354 — repair and deterministically test the pre-exec FIFO launch gate](work/tickets/FLR-0354-fix-flr0350-fifo-launch-gate.md) is Done as a harness-only correction.** It adds object-identity validation, early process identity capture, deterministic tests, and fresh-ID enforcement. It does not change the product or establish a rendering result; the 3D objective remains open for a separate fresh runtime ticket.
 
+**[FLR-0355 — relay a fresh run ID and retest the FIFO gate on QEMU](work/tickets/FLR-0355-relay-run-id-and-retest-fifo-gate.md) is In Progress.** Static review found that the runner accepts a fresh ID but does not pass it to the QEMU starter, which still defaults to the consumed FLR-0350 ID. This ticket repairs that handoff and performs one exact-image Mini QEMU attempt with QMP screenshot/video evidence.
+
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
 ## Ticket unit policy
@@ -30,6 +32,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
+| [FLR-0355](work/tickets/FLR-0355-relay-run-id-and-retest-fifo-gate.md) | propagate a fresh ticket run ID through preflight/start, then test the corrected FIFO gate on the pinned QEMU image | Mac runner / Mini QEMU / QMP evidence roles | Plan: source fix passes 27 focused tests and static `--check`; pinned image/profile unchanged; Mini runtime not yet run | Run privacy/PDCA review, commit locally, load the documented Mini role config without exposing values, transfer the exact bundle tip, then do one QMP-evidenced runtime attempt |
 | [FLR-0348](work/tickets/FLR-0348-watch-lavapipe-signal-without-fence-type.md) | observe both Lavapipe wait-release predicates without unavailable DWARF types | bounded GDB script / Mini runtime / QMP evidence roles | Done: exact image, both hardware watches armed; 8.07-second no-hit with fields false/null; QMP HUD visible and 768,000-pixel 3D ROI black; app/QEMU/QMP teardown passed | FLR-0350 stopped before app launch; FLR-0354 repairs the FIFO gate before a new producer-correlation run |
 | [FLR-0335](work/tickets/FLR-0335-compare-present-without-gdb.md) | compare production present behavior with and without GDB | production Example Demo / FEngine / QMP runtime roles | Done: no-GDB control reproduced the same FEngine/libLLVM `isOrdered+1` fault at 284.16s; QMP remained HUD-only/native-black; the planned 720s was not reached because the fault occurred first | FLR-0338 captures pre-instruction control-flow context |
 | [FLR-0332](work/tickets/FLR-0332-trace-native-buffer-publish-trigger.md) | trace native buffer publish trigger after surface creation | native render target publish / Wayland buffer attach roles | Done: current ViewTarget reaches draw and explicit commit A/B, but Vulkan queue-present does not return; child surface has no attach and QMP remains HUD-only/native-black | FLR-0333/0335 classify the recurring fault boundary; FLR-0338 captures pre-fault caller state |

@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import io
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -237,6 +239,70 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
         )
         self.assertIn(guarded_signal, stop)
         self.assertLess(stop.index(guarded_signal), stop.index('kill -TERM "$pid"'))
+
+
+class StarterRunIdPropagationTests(unittest.TestCase):
+    def test_runner_passes_the_same_run_id_to_preflight_and_start(self) -> None:
+        runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        preflight = 'FLR0350_RUN_ID="$run_id" bash "$start_script" preflight'
+        start = 'FLR0350_RUN_ID="$run_id" bash "$start_script" start'
+        evidence_create = 'mkdir -- "$parent"'
+        self.assertTrue(preflight in runner, "runner omits the ID-bearing preflight")
+        self.assertTrue(start in runner, "runner omits the ID-bearing start")
+        self.assertLess(runner.rindex(preflight), runner.rindex(evidence_create))
+        self.assertGreater(runner.rindex(start), runner.rindex(evidence_create))
+
+    def test_starter_requires_shared_fresh_id_validation_without_old_default(self) -> None:
+        starter = (ROOT / "work/commands/FLR-0350-qemu-start.sh").read_text()
+        self.assertFalse(
+            "${FLR0350_RUN_ID:-flr0350-0001}" in starter,
+            "starter retains the consumed-ID fallback",
+        )
+        self.assertTrue("${FLR0350_RUN_ID:?" in starter, "starter does not require an ID")
+        self.assertTrue(
+            "scripts/flr0350_launch_gate.py" in starter,
+            "starter does not use the shared run-ID validator",
+        )
+        self.assertTrue('--check-run-id "$run_id"' in starter, "starter does not validate the ID")
+        self.assertTrue("preflight)" in starter, "starter has no preflight mode")
+        self.assertTrue("start)" in starter, "starter has no start mode")
+
+    def test_starter_preflight_rejects_missing_or_consumed_ids_before_target_access(self) -> None:
+        starter = ROOT / "work/commands/FLR-0350-qemu-start.sh"
+        env = os.environ.copy()
+        env.pop("FLR0350_RUN_ID", None)
+        missing = subprocess.run(
+            ["bash", str(starter), "preflight"],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(missing.returncode, 0)
+        self.assertIn("FLR0350_RUN_ID-is-required", missing.stderr)
+
+        env["FLR0350_RUN_ID"] = "flr0350-0001"
+        consumed = subprocess.run(
+            ["bash", str(starter), "preflight"],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(consumed.returncode, 0)
+        self.assertIn("invalid-or-consumed-run-id", consumed.stderr)
+
+    def test_starter_preflight_is_non_mutating_and_start_repeats_runtime_guards(self) -> None:
+        starter = (ROOT / "work/commands/FLR-0350-qemu-start.sh").read_text()
+        preflight_exit = starter.rindex('if [ "$mode" = preflight ]; then')
+        start_mutation = starter.index('mkdir -- "$run_dir"')
+        qemu_start = starter.index('"$harness" start')
+        self.assertLess(preflight_exit, start_mutation)
+        self.assertLess(start_mutation, qemu_start)
+        self.assertIn("residual-runtime-process", starter)
+        self.assertIn("check_port_free \"$port\"", starter)
+        self.assertIn("kernel-sha256", starter)
+        self.assertIn("rootfs-sha256", starter)
 
     def test_run_id_must_be_fresh_and_ticket_correlated(self) -> None:
         self.assertTrue(is_fresh_run_id("flr0355-0001"))

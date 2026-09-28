@@ -23,6 +23,20 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 runner_text = (root / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+starter_text = (root / "work/commands/FLR-0350-qemu-start.sh").read_text()
+preflight_call = 'FLR0350_RUN_ID="$run_id" bash "$start_script" preflight'
+start_call = 'FLR0350_RUN_ID="$run_id" bash "$start_script" start'
+evidence_create = 'mkdir -- "$parent"'
+try:
+    if not (runner_text.rindex(preflight_call) < runner_text.rindex(evidence_create)
+            < runner_text.rindex(start_call)):
+        raise SystemExit("fresh run-ID preflight/start order failed")
+except ValueError as exc:
+    raise SystemExit("fresh run-ID preflight/start contract missing") from exc
+if "${FLR0350_RUN_ID:?" not in starter_text or \
+   '--check-run-id "$run_id"' not in starter_text or \
+   "${FLR0350_RUN_ID:-flr0350-0001}" in starter_text:
+    raise SystemExit("QEMU starter run-ID validation contract failed")
 cleanup_body = runner_text.split("cleanup() {", 1)[1].split("\n}\ntrap cleanup EXIT", 1)[0]
 if not (
     cleanup_body.index("FLR-0350-interrupt-gdb.cmd")
@@ -98,6 +112,7 @@ if any(len("printf %s '" + chunk + "' | base64 -d >> /run/user/1001/flr0350-sync
 print("FLR0350_STATIC_CHECK=PASS commands=%d gdb_python_blocks=%d transfer_chunks=%d" %
       (len(command_names), len(blocks), len(chunks)))
 print("FLR0350_PROFILE_MATCH=PASS environment=exact cli=exact target=qemux86-64")
+print("FLR0350_RUN_ID_HANDOFF=PASS preflight-before-evidence start-same-id")
 PY
     python3 "$repo_root/tests/test_flr0350_launch_gate.py"
     python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id flr0355-0001
@@ -134,9 +149,20 @@ window_result=NOT_REACHED
 match_lifetime=UNKNOWN
 run_result=UNKNOWN
 
-[ ! -e "$parent" ] || { echo 'FLR0350_RUN_FAIL reason=evidence-run-id-already-used' >&2; exit 1; }
+{ [ ! -e "$parent" ] && [ ! -L "$parent" ]; } || {
+    echo 'FLR0350_RUN_FAIL reason=evidence-run-id-already-used' >&2
+    exit 1
+}
+if preflight_output=$(FLR0350_RUN_ID="$run_id" bash "$start_script" preflight 2>&1); then
+    :
+else
+    preflight_rc=$?
+    printf '%s\n' "$preflight_output" >&2
+    exit "$preflight_rc"
+fi
 mkdir -- "$parent"
 exec > >(tee -a "$parent/FLR-0350-runner.log") 2>&1
+printf '%s\n' "$preflight_output" | tee "$parent/qemu-preflight.log"
 
 guest_run() {
     local label=$1
@@ -232,7 +258,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "FLR0350_RUN_BEGIN id=$run_id diagnostic_profile=FLR0344-0348 memory_mib=6144"
-bash "$start_script" >"$parent/qemu-start.log" 2>&1 || {
+FLR0350_RUN_ID="$run_id" bash "$start_script" start >"$parent/qemu-start.log" 2>&1 || {
     tail -n 60 "$parent/qemu-start.log"
     exit 1
 }
