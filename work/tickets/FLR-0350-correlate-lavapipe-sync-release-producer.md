@@ -1,6 +1,6 @@
 # FLR-0350 — correlate blocked Present sync with its release producer
 
-- Status: Waiting
+- Status: Done
 - Priority: High
 - Owner: Mesa sync producer / FEngine submit / GDB / Mini QEMU evidence roles
 - Created: 2026-09-28
@@ -42,6 +42,19 @@ Devtool patch or BitBake build is in scope.
   expected producer, establish object lifetime, or prove causality between
   the stalled wait and the black ROI. Historical fixture and GLB screenshots
   are not production success evidence for this run.
+
+## Current handoff state (2026-09-29)
+
+- FLR-0351 is Done. Read-only Mini evidence proves the fixed receiver is clean
+  at the exact delivered diagnostic tip, BitBake is idle, effective build
+  roles match, and the existing bundle identity is verified.
+- The original helper's terminal marker is UNKNOWN, but receiver state is
+  independently proven. Do not retransmit or build; verify the runner hash
+  against this source worktree before the one authorized launch.
+- A fresh Mini runtime preflight found no QEMU, `runqemu`, or Flutter-auto
+  process, free diagnostic ports/run ID, matching pinned image inputs, and
+  sufficient memory/storage headroom. Recheck the runner hash and use the
+  fixed one-shot runner; do not retry if any gate differs.
 
 ## Diagnostic-profile boundary
 
@@ -213,26 +226,64 @@ Devtool patch or BitBake build is in scope.
 | Canonical source/ticket | Guard, privacy, checkpoint, and full verification pass; one In Progress unit | Guard, privacy, checkpoint, and `make verify` PASS; FLR-0350 remains sole In Progress | PASS (local) |
 | Runtime identity/symbol map | Exact ELF/debug Build ID, producer fields, call and lifecycle locations | PASS for runtime/debug ELF hashes, Build ID, addresses/lines, field operations, and direct `lvp_queue_submit` → `_with_fence` call; callback registration and downstream Mesa patch provenance UNKNOWN | PARTIAL |
 | Diagnostic-profile boundary | Fixed known reproducer; no claim of neutral production behavior | FLR-0348 launch has unlinked-fence-ready and light/model/camera/unlit diagnostic overrides; Astra recommends preserve for this producer gate and limit conclusions to this profile | PASS (scope fixed) |
-| Pre-exec FIFO gate source | One explicit, fail-closed token authorizes direct app exec | Exact FLR-0344 environment/CLI match; all guest commands are one line and <=4096 bytes; Linux guest `/proc` evidence not yet exercised | PASS (static only) |
-| Bundle handoff preflight | Fixed role configuration and TMPDIR validation pass before receiver mutation | Current shell lacks required `BUILD_*` roles; pinned build has no active literal TMPDIR assignment, but helper checks that string after receiver checkout; FLR-0351 owns the correction | BLOCKED (no transfer or receiver mutation) |
+| Pre-exec FIFO gate source | One explicit, fail-closed token authorizes direct app exec | Static check passed, but runtime gate returned `FLR0350_FIFO_READ_GATE=FAIL`: fd 3 points to the FIFO while the blocked `read` syscall reported fd 0; the gate required fd 3 and stopped before GDB attach/app exec | FAIL (harness gate; no producer observation) |
+| Bundle handoff preflight | Fixed role configuration and TMPDIR validation pass before receiver mutation | FLR-0351 is Done; receiver exact tip, clean worktree, idle BitBake, effective `TOPDIR`/`TMPDIR` agreement, and existing bundle SHA are independently verified; no retransmission needed | PASS (receiver state) |
 | Debug-symbol loading | Correct debug ELF identified and usable by FLR-0335 guest GDB | Build IDs match and `addr2line` works; Mini evidence-copy debuglink CRC warning; prior auto-load was on another rootfs; exact guest lookup not yet proven | Pending |
-| Pre-submit instrumentation and teardown | All relevant producer paths observable before first submission; no post-window observation after failed debugger stop | Seven embedded GDB Python blocks parse; static gate enforces confirmed GDB stop before QMP evidence collection; target behavior not run | PENDING (static implementation only) |
-| Runtime association | Submit, waiter, producer, predicate, and Present result attributable | Not run | Pending |
-| QMP and teardown | Same-run screenshot/ROI plus zero residuals | Not run | Pending |
+| Pre-submit instrumentation and teardown | All relevant producer paths observable before first submission; no post-window observation after failed debugger stop | Seven embedded GDB Python blocks parse, but GDB never attached because the launch gate failed | UNKNOWN (runtime instrumentation not reached) |
+| Runtime association | Submit, waiter, producer, predicate, and Present result attributable | No attach-GDB/GO/matched-wait stage ran because launch gate failed; producer/object relationship not observed | UNKNOWN (not reached) |
+| QMP and teardown | Same-run screenshot/ROI plus zero residuals | Full-frame still and eight frames captured; post-run frame uniformly black, but app did not launch. QMP quit accepted and independent host check found zero QEMU/runqemu/flutter-auto processes and no QMP socket; guest app-stop reported unknown identity and runner cleanup exited 1 | PARTIAL (host resources clear; guest stop not proven) |
 
 ### Act
 
-- Privacy/checkpoint/`make verify` and self-review now pass. Commit the
-  FLR-0350 diagnostics locally without pushing. Do not transfer or mutate the
-  fixed receiver until FLR-0351 validates TMPDIR and proves rejected handoffs
-  leave receiver `HEAD` unchanged; then verify the exact bundled revision
-  before the one fixed QEMU attempt.
-- If the producer gate completes, create a separate ticket for the next
-  boundary only after the exact observed result is reviewed.
-- If association, lifetime, or instrumentation coverage is incomplete, stop
-  with UNKNOWN and preserve the evidence; do not patch a guessed cause.
+- This one-shot experiment is complete as a partial diagnostic result. The
+  producer correlation acceptance criteria were not met; do not interpret the
+  black post-run image as Flutter output because the fail-closed launch gate
+  prevented the app exec. The syscall/fd mismatch and conservative guest
+  cleanup are transferred to a separate harness-correction ticket. A later
+  runtime attempt must use a new ticket and run ID.
+- FLR-0354 owns the launch-FIFO descriptor check and safe failed-launch
+  cleanup behavior. Validate the gate against the observed guest process
+  before authorizing any new QEMU run.
 - Keep the overall 2D+production-3D capability open until both appear in the
   same QMP frame under the intended production flow.
+
+## Run outcome (2026-09-29; bounded attempt complete, producer result UNKNOWN)
+
+- Fixed run `flr0350-0001` ran once and exited 1 at the pre-exec FIFO gate.
+  The guest reported `pid=708`, `comm=sh`, `state=S`, `uid=1001`, fd 3 linked
+  to `/run/user/1001/flr0350-go.fifo`, while `/proc/<pid>/syscall` began
+  `0 0x0` (read syscall, descriptor 0). The current gate expects `0x3` and
+  reports `FLR0350_FIFO_READ_GATE=FAIL`. The guest's fd 0 target was not
+  recorded, so whether that descriptor was the same FIFO remains UNKNOWN.
+- No attach-GDB, GO release, symbol gate, or matched-wait stage ran; guest
+  reported `flutter_processes=0`. Therefore this run says nothing about
+  Flutter rendering, the 3D producer, or the prior colored Sequoia evidence.
+- QMP pre-launch showed the AGL startup splash. The post-run full frame and
+  all eight video frames were black (post-run PPM SHA-256
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`;
+  every sequence frame had the same hash). The 1280x800 analysis reported
+  luma `[0,0]`, zero chromatic pixels, and an undetectable geometry indicator.
+  Since Flutter never launched, this black frame is not a renderer result.
+- Runner cleanup reported `FLR0350_APP_STOP=FAIL` and
+  `FLR0350_FIFO_CLEANUP=FAIL` because the expected process identity was
+  unknown. QMP quit was accepted; an independent Mini check found zero
+  residual QEMU/runqemu/flutter-auto targets and no QMP socket. Host cleanup
+  is proven; guest app-stop is not.
+- Evidence (QMP-only):
+
+  ![Pre-launch AGL splash](../evidence/FLR-0350-qmp-run-0001-pre-launch.png)
+
+  ![Post-run QMP frame after the failed pre-exec gate](../evidence/FLR-0350-qmp-run-0001-post-run.png)
+
+  [Eight-frame QMP sequence (H.264, 8 seconds)](../evidence/FLR-0350-qmp-run-0001-post-run.mp4)
+
+  PNG hashes: pre-launch `36f52fb5ea8b95fbe9ceb5415efca8c20bf355b511bdb057c0670ea020ac689d`;
+  post-run `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`.
+  Video SHA-256: `51dd4a38b3541618548e81450c678c721c8cbc50b261e95c57444cc1cb091f6c`.
+- Conclusion: FLR-0350 is closed as the completed one-shot experiment record,
+  not as a producer-correlation or 3D success. The producer result and
+  original correlation acceptance remain UNKNOWN. The overall 3D objective
+  stays open; the next task is a separately ticketed runner gate/cleanup fix.
 
 ## UNKNOWN
 
@@ -242,6 +293,8 @@ Devtool patch or BitBake build is in scope.
   static and runtime gates prove them.
 - Whether `lvp_pipe_sync_signal` is installed in the runtime sync-type callback
   table and the complete indirect producer call chain.
+- Whether guest fd 0, used by the blocked shell `read`, resolved to the exact
+  pre-exec FIFO; the run recorded fd 3's target but not fd 0's target.
 - Whether FLR-0335 guest GDB automatically resolves the matching debug ELF;
   explicit symbol loading may be needed if the exact-image check fails.
 - Whether the diagnostic unlinked-fence-ready override causes, exposes, or
