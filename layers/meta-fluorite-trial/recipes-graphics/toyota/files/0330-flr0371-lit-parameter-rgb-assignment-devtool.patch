@@ -1,0 +1,22 @@
+From 7548f28bf50b3c3241efcfe8d4612440c0da0825 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 29 Sep 2026 19:40:44 +0000
+Subject: [PATCH] fix: assign fixture parameter to material baseColor RGB
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 7f90626..b581619 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -929,7 +929,7 @@ void ViewTarget::setupNativeMinimalGeometry() {
+       "}"
+     : "void material(inout MaterialInputs material) {"
+       "  prepareMaterial(material);"
+-      "  material.baseColor = vec4(materialParams.color, 1.0);"
++      "  material.baseColor.rgb = materialParams.color;"
+       "}";
+   materialBuilder
+     .name(fixtureLight ? "fluorite_native_minimal_lit" : "fluorite_native_minimal_unlit")
