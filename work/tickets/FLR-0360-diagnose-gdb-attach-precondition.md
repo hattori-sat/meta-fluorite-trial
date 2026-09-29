@@ -81,14 +81,18 @@ Do not weaken the gate based on the observer-only `read(0)` record. The current 
 
 ### Do
 
-- Promoted as the sole active unit on `feature-flr-0360-diagnose-gdb-attach-precondition`, based on FLR-0359 closeout commit `7f6c4ba`. No source edits, tests, bundle transfer, or runtime ID have been used yet.
+- Promoted as the sole active unit on `feature-flr-0360-diagnose-gdb-attach-precondition`, based on FLR-0359 closeout commit `7f6c4ba`.
+- Added the same-point preflight marker and named fail list to the guest attach command. fd 0/3 inode comparisons are diagnostic only; original attach acceptance predicates remain required.
+- Test-first result: `test_attach_preflight_reports_each_existing_predicate` failed against the old generic marker, then passed after the change. `test_attach_failure_stays_before_gdb_and_release_go` verifies failure remains before GDB and the runner checks attach PASS before GO. A temporary-proc behavior test executes the actual pre-GDB prefix and passes all predicates, rejects only a wrong syscall fd, and proves an fd0-only mismatch does not reject the attach gate.
+- `python3 tests/test_flr0350_launch_gate.py` → 34 tests PASS; `bash work/commands/FLR-0350-run-sync-producer.sh --check` → all static/helper markers and 34 tests PASS; POSIX shell syntax PASS; one-line command is 4041 bytes of 4096.
+- No Mini bundle transfer, BitBake/Devtool, QEMU launch, or run ID has been used yet.
 
 ### Check
 
 | Gate | Expected | Result |
 | --- | --- | --- |
-| Test-first static contract | Fails on current generic attach marker, then passes on named per-predicate output | NOT RUN |
-| Guest command limit/syntax | One line, <=4096 bytes, `sh -n` passes | NOT RUN |
+| Test-first/static + fixture contract | Fails on current generic attach marker, then passes on named per-predicate output; executes all-pass/fail-closed/fd0-diagnostic cases | PASS; 34 focused tests pass |
+| Guest command limit/syntax | One line, <=4096 bytes, `sh -n` passes | PASS; 4041 bytes |
 | Mini source/image identity | Exact bundle tip, fixed receiver, pinned artifacts, one fresh ID | NOT RUN |
 | Attach predicate result | First failing predicate named; no GDB/GO on failure | NOT RUN |
 | QMP evidence/cleanup | Still + eight-frame video, GO classification, FIFO removed, residuals zero | NOT RUN |

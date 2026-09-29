@@ -197,6 +197,191 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
                 self.assertNotIn("awk '{print $22}'", source)
                 self.assertIn(PROC_STAT_START_AWK, source)
 
+    def test_attach_preflight_reports_each_existing_predicate(self) -> None:
+        attach = (
+            ROOT / "work/commands/FLR-0350-attach-pre-submit.cmd"
+        ).read_text()
+        fields = (
+            "pid_present",
+            "expected_start_present",
+            "start_match",
+            "comm_match",
+            "uid_match",
+            "fd3_path_match",
+            "syscall_read",
+            "syscall_fd3",
+            "script_readable",
+            "armed_clear",
+            "gdb_pid_clear",
+            "gdb_start_clear",
+            "log_clear",
+        )
+        self.assertTrue(
+            "FLR0350_GDB_ATTACH_PREFLIGHT" in attach,
+            "guest attach command lacks the bounded preflight marker",
+        )
+        self.assertTrue(
+            'v="$v $n=PASS"' in attach and 'v="$v $n=FAIL"' in attach,
+            "preflight marker does not serialize individual PASS/FAIL values",
+        )
+        for field in fields:
+            with self.subTest(field=field):
+                self.assertTrue(
+                    f"c {field} " in attach,
+                    f"preflight marker omits predicate {field}",
+                )
+        for field in (
+            "fd0_same_gate",
+            "fd3_same_gate",
+            "syscall_nr",
+            "syscall_fd",
+        ):
+            with self.subTest(diagnostic=field):
+                self.assertTrue(
+                    f"{field}=" in attach,
+                    f"preflight marker omits diagnostic {field}",
+                )
+
+    def test_attach_failure_stays_before_gdb_and_release_go(self) -> None:
+        attach = (
+            ROOT / "work/commands/FLR-0350-attach-pre-submit.cmd"
+        ).read_text()
+        runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        failure = attach.index('if [ -n "$b" ]; then')
+        failure_marker = attach.index(
+            'echo "FLR0350_GDB_ATTACH=FAIL precondition failed=$b"', failure
+        )
+        alternate = attach.index("; else /bin/sh -c", failure)
+        gdb = attach.index("exec /usr/bin/gdb", alternate)
+        self.assertLess(failure, failure_marker)
+        self.assertLess(failure_marker, alternate)
+        self.assertLess(alternate, gdb)
+
+        attach_call = runner.index(
+            "guest_run attach-gdb FLR-0350-attach-pre-submit.cmd"
+        )
+        attach_pass = runner.index(
+            "grep -F 'FLR0350_GDB_ATTACH=PASS'", attach_call
+        )
+        release_go = runner.index(
+            "guest_run release-go FLR-0350-release-go.cmd", attach_call
+        )
+        self.assertLess(attach_call, attach_pass)
+        self.assertLess(attach_pass, release_go)
+
+    def test_attach_preflight_evaluates_failures_and_keeps_fd0_diagnostic_only(
+        self,
+    ) -> None:
+        attach = (
+            ROOT / "work/commands/FLR-0350-attach-pre-submit.cmd"
+        ).read_text()
+        preflight = attach.split(" else /bin/sh -c", 1)[0]
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            run_dir = root / "run"
+            proc_root = root / "proc"
+            fake_bin = root / "bin"
+            run_dir.mkdir()
+            fake_bin.mkdir()
+            pid = "4242"
+            proc = proc_root / pid
+            (proc / "fd").mkdir(parents=True)
+
+            gate = run_dir / "flr0350-go.fifo"
+            decoy = run_dir / "other.fifo"
+            os.mkfifo(gate)
+            os.mkfifo(decoy)
+            (run_dir / "flr0350-flutter.pid").write_text(f"{pid}\n")
+            (run_dir / "flr0350-wrapper.start").write_text("424242\n")
+            (run_dir / "flr0350-sync-producer.gdb").write_text("# test script\n")
+            (proc / "stat").write_text(
+                f"{pid} (wrapper) "
+                + " ".join(["S", *(["0"] * 18), "424242"])
+                + "\n"
+            )
+            (proc / "comm").write_text("sh\n")
+            (proc / "status").write_text("Uid:\t1001\t1001\t1001\t1001\n")
+            syscall_file = proc / "syscall"
+            syscall_file.write_text("0 0x3 0 0\n")
+            (proc / "fd" / "0").symlink_to(gate)
+            (proc / "fd" / "3").symlink_to(gate)
+
+            fake_id = fake_bin / "id"
+            fake_id.write_text("#!/bin/sh\nprintf '%s\\n' 1001\n")
+            fake_id.chmod(0o755)
+            fake_stat = fake_bin / "stat"
+            fake_stat.write_text(
+                "#!/bin/sh\n"
+                "for p do last=$p; done\n"
+                "exec python3 -c 'import os,sys; s=os.stat(sys.argv[1]); "
+                "print(\"%s:%s\" % (s.st_dev, s.st_ino))' \"$last\"\n"
+            )
+            fake_stat.chmod(0o755)
+
+            command = preflight.replace("/run/user/1001", str(run_dir)).replace(
+                "/proc/$pid", "$PROC_ROOT/$pid"
+            ) + " else echo TEST_GDB_BRANCH; fi"
+            env = os.environ.copy()
+            env.update(
+                PATH=f"{fake_bin}:{env['PATH']}",
+                PROC_ROOT=str(proc_root),
+            )
+
+            def run_preflight() -> subprocess.CompletedProcess[str]:
+                return subprocess.run(
+                    ["sh", "-c", command],
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+
+            passed = run_preflight()
+            self.assertEqual(passed.returncode, 0, passed.stderr)
+            self.assertIn("fd0_same_gate=PASS", passed.stdout)
+            self.assertIn("fd3_same_gate=PASS", passed.stdout)
+            self.assertIn("syscall_nr=0 syscall_fd=0x3", passed.stdout)
+            self.assertIn("TEST_GDB_BRANCH", passed.stdout)
+            for field in (
+                "pid_present",
+                "expected_start_present",
+                "start_match",
+                "comm_match",
+                "uid_match",
+                "fd3_path_match",
+                "syscall_read",
+                "syscall_fd3",
+                "script_readable",
+                "armed_clear",
+                "gdb_pid_clear",
+                "gdb_start_clear",
+                "log_clear",
+            ):
+                with self.subTest(predicate=field):
+                    self.assertIn(f"{field}=PASS", passed.stdout)
+
+            syscall_file.write_text("0 0x0 0 0\n")
+            failed = run_preflight()
+            self.assertEqual(failed.returncode, 0, failed.stderr)
+            self.assertIn("syscall_read=PASS", failed.stdout)
+            self.assertIn("syscall_fd3=FAIL", failed.stdout)
+            self.assertIn(
+                "FLR0350_GDB_ATTACH=FAIL precondition failed=syscall_fd3",
+                failed.stdout,
+            )
+            self.assertNotIn("TEST_GDB_BRANCH", failed.stdout)
+
+            syscall_file.write_text("0 0x3 0 0\n")
+            (proc / "fd" / "0").unlink()
+            (proc / "fd" / "0").symlink_to(decoy)
+            diagnostic_only = run_preflight()
+            self.assertEqual(diagnostic_only.returncode, 0, diagnostic_only.stderr)
+            self.assertIn("fd0_same_gate=FAIL", diagnostic_only.stdout)
+            self.assertIn("fd3_same_gate=PASS", diagnostic_only.stdout)
+            self.assertIn("TEST_GDB_BRANCH", diagnostic_only.stdout)
+            self.assertNotIn("FLR0350_GDB_ATTACH=FAIL", diagnostic_only.stdout)
+
     def test_host_runner_validates_before_attach_and_go(self) -> None:
         runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
         launch = runner.index(

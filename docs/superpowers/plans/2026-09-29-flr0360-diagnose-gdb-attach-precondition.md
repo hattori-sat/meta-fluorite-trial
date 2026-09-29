@@ -32,9 +32,10 @@
 
 **Interface under test:** the one-line guest attach command emits a bounded serial marker named `FLR0350_GDB_ATTACH_PREFLIGHT`. It identifies each current check individually, reports `syscall_nr`, `syscall_fd`, `fd0_same_gate`, and `fd3_same_gate`, then emits the existing PASS/FAIL attach marker. A failure must not enter `/usr/bin/gdb`.
 
-- [ ] Add `test_attach_preflight_reports_each_existing_predicate` asserting the guest command contains named fields for process/pid-start/comm/uid, fd3 gate identity, syscall read number/fd, script readability, and each pre-existing collision path.
-- [ ] Add `test_attach_preflight_failure_stays_before_gdb` asserting the named preflight failure branch occurs before the GDB command and does not write the arm marker or release GO.
-- [ ] Run `python3 tests/test_flr0350_launch_gate.py`; expect these new tests to FAIL because the current command emits only `FLR0350_GDB_ATTACH=FAIL precondition`.
+- [x] Add `test_attach_preflight_reports_each_existing_predicate` asserting the guest command contains named fields for process/pid-start/comm/uid, fd3 gate identity, syscall read number/fd, script readability, and each pre-existing collision path.
+- [x] Add `test_attach_failure_stays_before_gdb_and_release_go` asserting the named preflight failure branch precedes GDB and the runner requires the attach PASS marker before release-GO.
+- [x] Add `test_attach_preflight_evaluates_failures_and_keeps_fd0_diagnostic_only` using a temporary proc-shaped fixture to execute the actual pre-GDB command prefix for all-pass, syscall-fd failure, and fd0-only mismatch cases.
+- [x] Run the per-predicate test against the old command; it failed because only the generic `FLR0350_GDB_ATTACH=FAIL precondition` existed. The first assertion initially dumped the 3528-byte command; it was shortened to a bounded failure message before rerunning the red check.
 - [ ] Keep the test assertions on the serial-output contract and gate ordering; do not add a fake rule that treats fd 0 as acceptable.
 
 ### Task 2: Emit same-point named predicates without changing the gate
@@ -53,13 +54,14 @@ FLR0350_GDB_ATTACH=FAIL precondition failed=syscall_fd3
 
 The observed example is a format example, not an expected Mini result. Implementation steps:
 
-- [ ] Read the current command and enumerate its exact original predicate set: pid present; expected/current start match; `comm=sh`; target UID match; fd 3 path equals gate; syscall is `read(3)`; GDB script readable; armed/GDB PID/GDB start/log paths absent.
-- [ ] Compute each result once from the command's current snapshot. Also compare `/proc/$pid/fd/0` and `/proc/$pid/fd/3` device/inode with the run-owned gate for diagnosis; do not use fd 0 equality as an acceptance predicate.
-- [ ] Emit one bounded `FLR0350_GDB_ATTACH_PREFLIGHT` line containing every check plus syscall number/fd and both descriptor-identity results.
-- [ ] Build a named `failed=` token list from the same original checks. If non-empty, emit `FLR0350_GDB_ATTACH=FAIL precondition failed=<tokens>` and do not start GDB. If empty, proceed to the existing GDB code unchanged.
-- [ ] Run the two focused tests and verify both pass.
-- [ ] Run `sh -n work/commands/FLR-0350-attach-pre-submit.cmd`; verify exactly one command line and `<=4096` bytes; run `bash work/commands/FLR-0350-run-sync-producer.sh --check` and require every existing static/helper marker PASS.
-- [ ] Review the diff to confirm no predicate was removed, inverted, or broadened; commit the tested change and update the FLR-0360 working log.
+- [x] Read the current command and enumerate its exact original predicate set: pid present; expected/current start match; `comm=sh`; target UID match; fd 3 path equals gate; syscall is `read(3)`; GDB script readable; armed/GDB PID/GDB start/log paths absent.
+- [x] Compute each result once from the command's current snapshot. Also compare `/proc/$pid/fd/0` and `/proc/$pid/fd/3` device/inode with the run-owned gate for diagnosis; do not use fd 0 equality as an acceptance predicate.
+- [x] Emit one bounded `FLR0350_GDB_ATTACH_PREFLIGHT` line containing every check plus syscall number/fd and both descriptor-identity results.
+- [x] Build a named `failed=` token list from the same original checks. If non-empty, emit `FLR0350_GDB_ATTACH=FAIL precondition failed=<tokens>` and do not start GDB. If empty, proceed to the existing GDB code unchanged.
+- [x] Run all three focused tests; the behavioral fixture proves the exact failed syscall-FD predicate is named and that an fd0 mismatch remains diagnostic-only. The failure-before-GDB/GO test preserves an existing boundary rather than changing it.
+- [x] Run `sh -n work/commands/FLR-0350-attach-pre-submit.cmd`; it remains one command of 4041 bytes (limit 4096). `bash work/commands/FLR-0350-run-sync-producer.sh --check` passes all static/helper markers and 34 tests.
+- [x] Review the diff: all thirteen original acceptance predicates remain required; fd0/fd3 inode values are diagnostic only. Astra's judgment-only audit found no blocker and its mutation checks confirmed the test catches an inverted syscall-fd predicate or cleared failure accumulator.
+- [ ] Commit the tested change locally and record the exact commit in the FLR-0360 working log.
 
 ### Task 3: Bundle the exact commit and make one Mini diagnostic attempt
 
