@@ -113,14 +113,16 @@ historical FLR-0286 rootfs SHA (`08ee47d01cced5139a724284462c6b3f23bf687c05a3422
 
 ### Do
 
-- Ticket opened. Runtime run `flr0367-0001` is pending; no QEMU/app command has
-  been issued under this ticket.
+- Run ID `flr0367-0001` evidence directory was created once. Standard QEMU
+  harness preflight passed for the exact current kernel/rootfs/qemuboot hashes,
+  6144 MiB profile, free ports 10930–10932, empty run-owned QMP slot, and zero
+  QEMU/runqemu/flutter-auto targets. QEMU and Flutter have not started yet.
 
 ### Check
 
 | Gate | Expected | Actual | Result |
 | --- | --- | --- | --- |
-| Current image/session preflight | Exact rootfs, guest SSH, bundle, tools, no stale app | Pending | PENDING |
+| Current image/session preflight | Exact rootfs, guest SSH, bundle, tools, no stale app | QEMU helper preflight PASS; rootfs SHA matches. Guest bundle/SSH/app checks follow boot | PASS — host gate |
 | Manual fixture launch | One agl-driver app with exact FLR-0286 environment | Pending | PENDING |
 | HUD + fixture QMP pixels | Both visible in same full frame with separate ROI metrics | Pending | PENDING |
 | Repeated present | Multiple begins with matching successful returns, or first divergence | Pending | PENDING |
