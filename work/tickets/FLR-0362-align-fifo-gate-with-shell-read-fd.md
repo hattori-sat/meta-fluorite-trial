@@ -91,21 +91,21 @@ Historical records are evidence with scope, not authority:
 
 - Ticket opened from FLR-0360's exact finding; that sentence describes the initial state only.
 - Updated the observer validator to bind fresh run ID and persisted FIFO/process identity; added committed-source guest helpers behind bounded serial adapters, run identity initialization, stale-helper collision preflight, and target-safe cleanup/abort checks.
-- Mac verification: 46/46 tests and runner `--check` passed. Mini received exact commit `e9df11d1031b2554ccc28d45bbed883e563a0957`; its first `--check` found one FIFO-swap fixture portability failure. No QEMU/GO run occurred; `flr0362-0001` remains unused.
+- Mac verification: 46/46 tests and runner `--check` passed after making the FIFO-swap fixture deterministic. Mini's first exact-commit `--check` found the old fixture failure. The test-only correction is local commit `5fc8ff833ca2ced34e1c87daa93e0501d92964f0`; the first follow-up handoff invocation was rejected locally because its supplied tip did not resolve, before bundle creation or transfer. Mini remains at `e9df11d1031b2554ccc28d45bbed883e563a0957`. No QEMU/GO run occurred; `flr0362-0001` remains unused.
 - Final local gates: privacy PASS, file-size PASS (1864 tracked/untracked files checked), checkpoint PASS (`active=1`), and `git diff --check` PASS. `make check-markdown` remains FAIL on nine pre-existing missing evidence targets in FLR-0338/0339/0340; FLR-0362 links pass and those unrelated historical references stay out of scope.
 
 ### Check
 
 | Gate | Expected | Result |
 | --- | --- | --- |
-| Persisted identity / transition regressions | Wrong ID, partial/substituted record, process change, or FIFO swap fails with zero GO bytes | Mac suite 46/46 PASS. First Mini exact-commit `--check`: one FIFO-swap fixture failure; QEMU/GO not started. Recheck required after fixture correction |
+| Persisted identity / transition regressions | Wrong ID, partial/substituted record, process change, or FIFO swap fails with zero GO bytes | Mac suite 46/46 PASS after deterministic fixture correction. First Mini `--check` found the old fixture flaw. The next one-shot runner invocation will rerun canonical/static/46-test gates before QEMU preflight; pending |
 | GDB stopped-attach authorization | Exact process/FIFO identity checked before authorization; target remains stopped until GO record validates | Static contract PASS; Mini attach/GO remains NOT RUN |
 | Guest command syntax/size and runner contract | POSIX syntax, <=4096 bytes, GO ordered after all checks | `--check` PASS (12 serial commands); helper install still awaits exact committed bundle |
 | Local repository gates | No privacy leak, size limit, invalid checkpoint, or whitespace errors | Privacy PASS; size PASS; checkpoint PASS; diff check PASS. Markdown gate reports 9 pre-existing missing FLR-0338/0339/0340 evidence links, not FLR-0362 |
-| Exact bundle / pinned Mini runtime | Receiver, effective TOPDIR/TMPDIR, image hashes, unique run ID all pass | First bundle SHA and exact receiver revision/TOPDIR/TMPDIR PASS; Mini `--check` then failed one FIFO-swap test before QEMU preflight |
+| Exact bundle / pinned Mini runtime | Receiver, effective TOPDIR/TMPDIR, image hashes, unique run ID all pass | First bundle/receiver/TOPDIR/TMPDIR PASS; first Mini `--check` found the fixture failure. Follow-up bundle was not created/transferred because the local handoff command rejected its unresolved tip; receiver remains at the first commit |
 | Attach/GO and QMP | Stable read-0 identity reaches GO or first new predicate stops; still/video labeled | NOT RUN |
 | Cleanup | Identity marker and run FIFO removed; app/QEMU/QMP residuals zero | NOT RUN |
 
 ### Act
 
-- After the Mini regression suite passes on a follow-up exact bundle and the branch is clean, use one fresh Mini `runqemu` ID `flr0362-0001`. No recipe/image build is in scope. Capture QMP still/eight-frame evidence and classify it by GO state; stop at the first named failed predicate and do not retry the ID.
+- On the clean follow-up exact bundle, invoke the runtime runner once with `flr0362-0001`. Its normal path runs canonical/static/46-test and helper-provenance gates, then target/image/port preflight, and only then starts QEMU. Do not run a separate duplicate `--check`; if any prelaunch gate fails, preserve it and stop without retrying the ID. No recipe/image build is in scope. Capture QMP still/eight-frame evidence and classify it by GO state.
