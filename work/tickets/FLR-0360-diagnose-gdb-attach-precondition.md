@@ -1,6 +1,6 @@
 # FLR-0360 — diagnose the GDB attach precondition at the same decision point
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Owner: QEMU guest attach gate / runtime evidence roles
 - Created: 2026-09-29
@@ -111,6 +111,6 @@ Do not weaken the gate based on the observer-only `read(0)` record. The current 
 
 ## PDCA checker
 
-- Status: PENDING FINAL REPOSITORY GATES
-- Checked by: runtime-checkpoint / privacy / evidence-link checks
-- Findings: the bounded diagnostic acceptance is met; 2D+3D renderer acceptance remains open and is not implied by pre-GO black pixels.
+- Status: PASS
+- Checked by: fresh runner, privacy, file-size, Markdown-link, and runtime-checkpoint gates
+- Findings: FLR-0360's bounded same-point diagnosis and QMP evidence are complete. Markdown check retains nine older missing links in FLR-0338/0339/0340; no FLR-0360 links are failing. Production 2D+3D acceptance remains open.
