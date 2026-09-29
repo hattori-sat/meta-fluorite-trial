@@ -1,6 +1,7 @@
 # FLR-0356 — stage the FIFO observer before QEMU launch
 
-- Status: In Progress
+- Status: Waiting
+- Wait reason: the observer ran, but the official FIFO gate failed closed at `marker-not-first`; FLR-0358 must repair serial framing and use a fresh run ID before this ticket can close.
 - Priority: High; blocks the actual-FD FIFO gate and next production runtime observation
 - Owner: Mac runtime-harness / Mini QEMU / QMP evidence roles
 - Created: 2026-09-29

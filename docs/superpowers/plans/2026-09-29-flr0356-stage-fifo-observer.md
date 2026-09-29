@@ -162,7 +162,7 @@ Require recorded wrapper/app stop, run-owned FIFO cleanup, QMP quit, QEMU exit, 
 ### Task 5: Close the bounded ticket
 
 - [x] Put the gate, rendering, screenshot, and teardown verdicts in the FLR-0356 ticket/log; preserve UNKNOWN where evidence did not reach a boundary.
-- [ ] Transition FLR-0356 to Done with its closeout/checkpoint commit. The staging objective and one target observation completed; serial-buffer framing is explicitly separate, and production 3D remains untested because GO was not reached.
+- [ ] Keep FLR-0356 Waiting while the official FIFO gate is FAIL. Resume only after FLR-0358 fixes serial framing and a fresh run ID passes the strict gate; do not infer a render result from the pre-GO black frame.
 
 ## Self-review
 
