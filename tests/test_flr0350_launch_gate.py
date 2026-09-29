@@ -312,9 +312,23 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
             (target / "fd" / "0").unlink()
             (target / "fd" / "0").symlink_to(decoy)
         elif fault == "fifo-swap":
+            replacement = gate.with_name("replacement-go.fifo")
+            os.mkfifo(replacement, 0o600)
+            os.chmod(replacement, 0o600)
+            replacement_stat = os.stat(replacement, follow_symlinks=False)
+            self.assertNotEqual(
+                (replacement_stat.st_dev, replacement_stat.st_ino),
+                (gate_stat.st_dev, gate_stat.st_ino),
+                "replacement FIFO must have a distinct identity while both exist",
+            )
             gate.unlink()
-            os.mkfifo(gate, 0o600)
-            os.chmod(gate, 0o600)
+            os.replace(replacement, gate)
+            swapped_stat = os.stat(gate, follow_symlinks=False)
+            self.assertNotEqual(
+                (swapped_stat.st_dev, swapped_stat.st_ino),
+                (gate_stat.st_dev, gate_stat.st_ino),
+                "FIFO substitution fixture must preserve a distinct inode",
+            )
         elif fault == "missing-auth":
             (root_dir / "attach.auth").unlink()
 

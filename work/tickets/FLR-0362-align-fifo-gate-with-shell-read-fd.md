@@ -91,21 +91,21 @@ Historical records are evidence with scope, not authority:
 
 - Ticket opened from FLR-0360's exact finding; that sentence describes the initial state only.
 - Updated the observer validator to bind fresh run ID and persisted FIFO/process identity; added committed-source guest helpers behind bounded serial adapters, run identity initialization, stale-helper collision preflight, and target-safe cleanup/abort checks.
-- Current host verification: 46/46 tests and the runner's `--check` pass. No source commit or bundle transfer yet; Mini/QEMU/GO have not run, and `flr0362-0001` remains unused.
+- Mac verification: 46/46 tests and runner `--check` passed. Mini received exact commit `e9df11d1031b2554ccc28d45bbed883e563a0957`; its first `--check` found one FIFO-swap fixture portability failure. No QEMU/GO run occurred; `flr0362-0001` remains unused.
 - Final local gates: privacy PASS, file-size PASS (1864 tracked/untracked files checked), checkpoint PASS (`active=1`), and `git diff --check` PASS. `make check-markdown` remains FAIL on nine pre-existing missing evidence targets in FLR-0338/0339/0340; FLR-0362 links pass and those unrelated historical references stay out of scope.
 
 ### Check
 
 | Gate | Expected | Result |
 | --- | --- | --- |
-| Persisted identity / transition regressions | Wrong ID, partial/substituted record, process change, or FIFO swap fails with zero GO bytes | Host suite 46/46 PASS; full runtime behavior remains UNKNOWN |
+| Persisted identity / transition regressions | Wrong ID, partial/substituted record, process change, or FIFO swap fails with zero GO bytes | Mac suite 46/46 PASS. First Mini exact-commit `--check`: one FIFO-swap fixture failure; QEMU/GO not started. Recheck required after fixture correction |
 | GDB stopped-attach authorization | Exact process/FIFO identity checked before authorization; target remains stopped until GO record validates | Static contract PASS; Mini attach/GO remains NOT RUN |
 | Guest command syntax/size and runner contract | POSIX syntax, <=4096 bytes, GO ordered after all checks | `--check` PASS (12 serial commands); helper install still awaits exact committed bundle |
 | Local repository gates | No privacy leak, size limit, invalid checkpoint, or whitespace errors | Privacy PASS; size PASS; checkpoint PASS; diff check PASS. Markdown gate reports 9 pre-existing missing FLR-0338/0339/0340 evidence links, not FLR-0362 |
-| Exact bundle / pinned Mini runtime | Receiver, effective TOPDIR/TMPDIR, image hashes, unique run ID all pass | NOT RUN |
+| Exact bundle / pinned Mini runtime | Receiver, effective TOPDIR/TMPDIR, image hashes, unique run ID all pass | First bundle SHA and exact receiver revision/TOPDIR/TMPDIR PASS; Mini `--check` then failed one FIFO-swap test before QEMU preflight |
 | Attach/GO and QMP | Stable read-0 identity reaches GO or first new predicate stops; still/video labeled | NOT RUN |
 | Cleanup | Identity marker and run FIFO removed; app/QEMU/QMP residuals zero | NOT RUN |
 
 ### Act
 
-- After final local gates and a clean ticket-scoped commit, use the established exact-bundle handoff and one fresh Mini `runqemu` ID `flr0362-0001`. No recipe/image build is in scope. Capture QMP still/eight-frame evidence and classify it by GO state; stop at the first named failed predicate and do not retry the ID.
+- After the Mini regression suite passes on a follow-up exact bundle and the branch is clean, use one fresh Mini `runqemu` ID `flr0362-0001`. No recipe/image build is in scope. Capture QMP still/eight-frame evidence and classify it by GO state; stop at the first named failed predicate and do not retry the ID.
