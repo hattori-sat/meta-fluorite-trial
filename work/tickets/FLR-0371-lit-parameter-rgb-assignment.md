@@ -5,6 +5,7 @@
 - Owner: Mac Podman Devtool / Mini build / direct guest SSH / Flutter / QMP roles
 - Created: 2026-09-30
 - Predecessor: [FLR-0370 material-color dataflow trace](FLR-0370-trace-fixture-material-color-dataflow.md)
+- Implementation plan: [FLR-0371 plan](../../docs/superpowers/plans/2026-09-30-flr-0371-lit-parameter-rgb-assignment.md)
 - Baseline: current rootfs SHA-256 `5c8ca252181fac1a64669ae78de5b3fa590db1048f95f156db306df2f9d821ec`
 - Branch: `feature-flr-0371-lit-parameter-rgb-assignment` (local, no push)
 - Working log: [FLR-0371 working log](../logs/2026-09-30-flr0371.md)
@@ -35,11 +36,42 @@ No app-launch script changes are allowed in this ticket.
 - Patch 0249 changes both source and assignment form between branches. Patch
   0248's active-instance setter, FLOAT3 parameter value, LIT/SUN setup, camera,
   geometry, and renderable binding remain unchanged in this test.
-- Read-only inspection found the existing Podman container running, but no
-  `view_target.cc` or `.git/HEAD` in its persistent source tree. FLR-0208 had
-  previously recorded a complete source baseline. The current missing-tree
-  cause is UNKNOWN; this ticket must first load the current recipe source via
-  official Devtool, not hand-repair or hand-create source history.
+- The fixed Mac `sources/fluorite-plugins` directory was incomplete at ticket
+  start. It has now been rehydrated in place from the current Mini effective
+  plugin source produced by recipe-scoped `do_patch` at exact
+  `PLUGINS_COMMIT=2163242e9973336153871ed63b34bb5ed8282145`; target
+  `view_target.cc` SHA-256 is
+  `fe283fc5412ccbcc2d161bac814bc1683cf75c78bd1b60b035ef63abc8393413`.
+- The patch-applied Devtool baseline is commit
+  `599bf4ea72b2a5874fd3f296b756941eb05de946`, parent the pinned plugin HEAD.
+  Official component-scoped `devtool add` succeeded and `devtool status`
+  contains exactly the `fluorite-plugins` component/source pair.
+- The one-line source change was committed as
+  `7548f28bf50b3c3241efcfe8d4612440c0da0825`, directly on the complete
+  baseline. The existing official Devtool helper generated the canonical
+  patch `0330-flr0371-lit-parameter-rgb-assignment-devtool.patch`, SHA-256
+  `069420d5293dc1f74ad739a18a4e9540cbf44efb16b4a3140d33113e122e3333`, and
+  registered it once after patch 0327. The patch body was not hand-edited.
+- Generated layer files were locally committed as
+  `0e8aa99190a248784ab811bfe0008d2d0827db79` on
+  `feature-flr-0371-layer-patch`, then fast-forwarded into the active feature
+  branch without cherry-pick. The Devtool mount was restored clean to its
+  original `devtool-flr-0371-mount` at `a3e779976d5dc74b777918d151835cf4c14cfd57`.
+  A privacy-gate identity mismatch was repaired by amending only author and
+  committer metadata; tree and parent stayed identical, and privacy then
+  passed. No push occurred.
+- The first generation-helper attempt stopped at its `baseline-branch`
+  precondition because the source commit was on the baseline ref. This was a
+  local branch-ordering mistake; no patch was generated on that attempt. The
+  source commit was preserved on its own source branch, the baseline ref was
+  restored, and the same helper then passed.
+- `flutter-auto` is a composite recipe with a nested independent plugins Git
+  source. Recipe-level `devtool modify flutter-auto` failed at existing patch
+  0013's Git commit boundary; this was not a source hunk rejection. Historical
+  FLR-0033/0113 and the project runbook establish component-scoped Devtool for
+  this source. Continue from the exact Mini effective plugin baseline using
+  official `component-add`/`update-recipe`; do not retry recipe-level
+  `modify` or hand-edit generated patches.
 
 ## Hypotheses
 
@@ -58,16 +90,20 @@ No app-launch script changes are allowed in this ticket.
 - Use the one existing Mac Podman Devtool container and fixed persistent state.
   Do not initialize another Podman machine/container, create a second source
   workspace, edit `tmp/work`, or run Docker.
-- Run official Devtool against the currently registered `flutter-auto` recipe
-  and its committed `meta-fluorite-trial` patch stack. Confirm a complete source
-  Git baseline and the expected 0248/0249/0250/0251/0295 history before editing.
-  If Devtool cannot provide that source identity, stop without editing.
+- Import the Mini post-`do_patch` `ivi-homescreen-plugins` source into the
+  existing fixed Mac `fluorite-plugins` Devtool path, excluding only
+  Quilt-generated `.pc/` and root `patches/` metadata. Confirm its upstream
+  HEAD is exactly `PLUGINS_COMMIT`, record the effective source as a baseline
+  commit, then use official component-scoped `devtool add` for
+  `fluorite-plugins`. Verify the full patch-applied baseline before editing.
 - Change only the parameter-source assignment to `.baseColor.rgb`. Preserve
   parameter declaration/type, active-instance setter/value, `prepareMaterial`,
   LIT/SUN flag, geometry, camera, launch profile, and software Vulkan setup.
-- Generate the canonical recipe patch through official Yocto Devtool; never
-  hand-edit a patch or use `format-patch`/quilt as a replacement. Pass the Mac
-  `do_patch`/target compile gates before committing the layer change.
+- Generate the canonical recipe patch through official split-component
+  `devtool update-recipe`; never hand-edit a patch or substitute
+  `format-patch`/quilt. The Mini's recipe-scoped `do_patch` after bundle
+  transfer is authoritative. Do not retry recipe-level `modify` or spend a
+  Mac recipe-task loop on this nested Git source.
 - Commit locally on this feature branch, create and verify a Git bundle, and
   transfer it to the fixed Mini receiver. No push. The Mini must prove exact
   bundle tip, `do_patch`, target compile, and full image build before runtime.
@@ -106,26 +142,39 @@ No app-launch script changes are allowed in this ticket.
 ### Plan
 
 Use the 0367/0368/0369 three-way current-image comparison and FLR-0370's patch
-trace. Rehydrate the Devtool source through the active recipe so existing
-committed patches are part of its source history. Change one GLSL assignment,
-then follow Mac Devtool → canonical layer commit/bundle → Mini build → manual
-SSH Flutter launch → QMP pixel verdict. Do not edit or extend a launcher.
+trace. Rehydrate the split plugin source from the exact Mini post-`do_patch`
+tree, commit that effective source as the Devtool baseline, then register it
+with official component-scoped Devtool. Change one GLSL assignment and run
+official `update-recipe`; follow canonical layer commit/bundle → Mini build →
+manual guest-SSH Flutter launch → QMP pixel verdict. Do not edit or extend a
+launcher.
 
 ### Do
 
-- Pending Devtool source identity and one-variable assignment change.
+- Official `devtool modify flutter-auto` was attempted once through the
+  persistent Podman wrapper. It failed at existing patch 0013's Git commit
+  boundary before the source edit. Current source identity and historical
+  workflow records establish this as the wrong Devtool boundary for the nested
+  plugin Git source. No source or patch was edited.
+- Mini's fresh recipe-scoped clean→`do_patch` gate passed at the current pins
+  and exact active layer tree. It provides the current post-patch plugin source
+  for the component-scoped baseline; the earlier Sep 14 workdir/log is stale.
+- Replayed the existing-image LIT/constant-color positive control by manually
+  launching Flutter over strict guest SSH. This verifies the QEMU→SSH→Flutter
+  route, not the RGB-only assignment under test.
 
 ### Check
 
 | Gate | Expected | Actual | Result |
 | --- | --- | --- | --- |
-| Devtool source baseline | Current recipe and complete source Git history include the active patch stack | Pending | PENDING |
-| One-variable source diff | Only parameter-source assignment changes from whole vec4 to `.rgb` | Pending | PENDING |
-| Official patch / Mac gate | Devtool-generated patch applies and target compile succeeds | Pending | PENDING |
+| Devtool source baseline | Component-scoped source begins at exact PLUGINS_COMMIT and includes current recipe patches | 478-file source/index baseline committed; exact pinned parent; one Devtool registration | PASS |
+| One-variable source diff | Only parameter-source assignment changes from whole vec4 to `.rgb` | One file, one insertion/one deletion; source commit parent is full baseline | PASS |
+| Official patch generation | Official Devtool patch is generated and registered unchanged | Patch 0330 SHA `069420d5…`; one exact hunk; bbappend registration once; privacy and whitespace checks pass | PASS; Mini apply pending |
+| Mini candidate gate/build | Exact local commit is received; do_patch, compile, image pass | Local layer commit `0e8aa99…` is ready; not yet transferred. Current Mini `do_patch` is pre-candidate only | PENDING |
 | Bundle / Mini build | Exact local commit is received; do_patch, compile, image pass | Pending | PENDING |
-| Direct manual runtime | One `agl-driver` Flutter process; launch and native setup markers captured | Pending | PENDING |
-| QMP acceptance | Visible native geometry and 2D HUD in same complete frame; ROI/video evidence retained | Pending | PENDING |
-| Teardown | Exact app and QEMU stopped; process/socket/port checks clean | Pending | PENDING |
+| Direct manual runtime | One `agl-driver` Flutter process; launch and native setup markers captured | Existing-image LIT/constant-color control; 10 presents at first gate, 163 recorded by log retrieval; exact PID stopped | PASS (control only) |
+| QMP acceptance | Visible native geometry and 2D HUD in same complete frame; ROI/video evidence retained | QMP full frame shows dark-blue fixture and HUD together: native 92,352/144,000 chromatic pixels; HUD 2,845. RGB-only assignment remains unbuilt/unverified. Evidence retained under `$BUILD_EVIDENCE/flr0371-0001/qemu/` | PARTIAL |
+| Teardown | Exact app and QEMU stopped; process/socket/port checks clean | App PID 812 stopped; QMP quit accepted; independent checks found no QEMU/runqemu/Flutter, QMP socket, or listeners on run ports | PASS |
 
 ### Act
 
@@ -145,12 +194,21 @@ SSH Flutter launch → QMP pixel verdict. Do not edit or extend a launcher.
 - Baseline negative: [FLR-0367 QMP screenshot](../evidence/FLR-0367-qmp-run-0001.png).
 - UNLIT parameter positive: [FLR-0368 QMP screenshot](../evidence/FLR-0368-qmp-run-0001.png).
 - LIT/SUN constant positive: [FLR-0369 QMP screenshot](../evidence/FLR-0369-qmp-run-0001.png).
-- This ticket's result will add its own full QMP PNG and short video here.
+- Current-image positive control (not the assignment result): full QMP PPM
+  SHA-256 `65ccb48597d2f227bd80c9dab23a541a6a79feba6fc4d7b8bbb2cbf1312aed07`;
+  8-frame QMP video and original captures are retained under the Mini evidence
+  role path `$BUILD_EVIDENCE/flr0371-0001/qemu/`.
 
 ## UNKNOWN
 
-- Why the current persistent Devtool source files and Git HEAD are absent.
+- Exact lower-level Git operation that caused recipe-level `devtool modify`
+  to fail at the nested source commit boundary for existing patch 0013; its
+  ephemeral task log was no longer present. Component-scoped Devtool is now
+  used for the separately pinned plugin source.
 - Whether RGB-only parameter assignment makes the current LIT/SUN fixture
   visible.
+- Why the first manual screenshot had a black native ROI; that capture was
+  taken without waiting for a successful-present readiness gate, so it is not
+  evidence of a regression.
 - Why the FLR-0369 app process exited before intentional stop.
 - Whether the production Sequoia scene is correctly visible with HUD.
