@@ -1,6 +1,6 @@
 # FLR-0371 — test LIT parameter color with RGB-only assignment
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Owner: Mac Podman Devtool / Mini build / direct guest SSH / Flutter / QMP roles
 - Created: 2026-09-30
@@ -11,8 +11,14 @@
 - Working log: [FLR-0371 working log](../logs/2026-09-30-flr0371.md)
 - Build prerequisite: [FLR-0372](FLR-0372-fetch-plugin-git-submodules.md) is
   Done. The exact pinned `sdbus-cpp` gitlink is now fetched, and candidate
-  `do_patch`, `do_configure`, and `do_compile` pass. The full image and the
-  RGB-only candidate's runtime/QMP result remain unverified.
+  `do_patch`, `do_configure`, and `do_compile` pass. Candidate image
+  `FLR-0371-0003` built successfully (build output SHA-256
+  `3b627cfda1c255783b281a00b469b6c30c7a6bcef4823e8b655ca15c30eb84b3`;
+  rootfs SHA-256
+  `949921c8bed28c540bd06a593cf37bbb9d94591985a2e9c7e31aaa35af9b4086`).
+  Manual run `flr0371-0004` shows the RGB-only LIT/SUN diagnostic geometry and
+  HUD together. Production Sequoia visibility and patch-only causal
+  attribution remain open.
 
 ## Objective
 
@@ -37,6 +43,20 @@ No app-launch script changes are allowed in this ticket.
   with HUD when the constant-color flag was enabled (`119716` native chromatic
   pixels). The direct manual Flutter process later exited before the intended
   stop; that cause remains UNKNOWN.
+- Candidate run `flr0371-0004` launched the installed Example Demo bundle
+  version `3.32.5` on the exact candidate rootfs above. The package manifest
+  reports `flutter-engine 3.32.5`; the earlier positive-control rootfs reports
+  `flutter-engine 3.38.3`. This version difference is a comparison confound;
+  the candidate runtime result is valid for this image but does not isolate
+  patch 0330 as the sole cause of the changed pixels.
+- With the known manual LIT/SUN fixture profile and no hardcoded-color flag,
+  the app reported `hardcoded=false shading=lit source=parameter`, created an
+  8-vertex/36-index renderable, configured SUN intensity 110000, and completed
+  146 draw submits, successful queue presents, and present-boundary markers.
+  The full-frame QMP screenshot visibly contains the HUD and a dark-blue
+  self-made 3D cube face together. Fixed native ROI: `119716/144000`
+  chromatic pixels, bbox `[467,227,346,346]`, dominant RGB `0,32,96`; HUD ROI:
+  `2845` chromatic pixels.
 - Patch 0249 changes both source and assignment form between branches. Patch
   0248's active-instance setter, FLOAT3 parameter value, LIT/SUN setup, camera,
   geometry, and renderable binding remain unchanged in this test.
@@ -173,40 +193,41 @@ launcher.
 | --- | --- | --- | --- |
 | Devtool source baseline | Component-scoped source begins at exact PLUGINS_COMMIT and includes current recipe patches | 478-file source/index baseline committed; exact pinned parent; one Devtool registration | PASS |
 | One-variable source diff | Only parameter-source assignment changes from whole vec4 to `.rgb` | One file, one insertion/one deletion; source commit parent is full baseline | PASS |
-| Official patch generation | Official Devtool patch is generated and registered unchanged | Patch 0330 SHA `069420d5…`; one exact hunk; bbappend registration once; privacy and whitespace checks pass | PASS; Mini apply pending |
+| Official patch generation | Official Devtool patch is generated and registered unchanged | Patch 0330 SHA `069420d5…`; one exact hunk; bbappend registration once; privacy and whitespace checks pass | PASS |
 | Mini candidate patch gate | Exact candidate commit is received and `do_patch` passes | Bundle tip `f4e32cb2da2301ecb502e31bcda746084e32bddb` reached the clean Mini receiver; candidate `do_patch=PASS` | PASS |
-| Candidate configure / compile | Required plugin submodule is present; configure and compile pass | `do_compile -f` stopped at `do_configure`: required `sdbus-cpp/CMakeLists.txt` is missing; FLR-0372 owns the fetch prerequisite | BLOCKED |
-| Candidate image / runtime | Exact candidate image boots; manual Flutter/QMP shows assignment result | Not started; production and RGB-only candidate verdict remain UNKNOWN | PENDING |
-| Direct manual runtime | One `agl-driver` Flutter process; launch and native setup markers captured | Existing-image LIT/constant-color control; 10 presents at first gate, 163 recorded by log retrieval; exact PID stopped | PASS (control only) |
-| QMP acceptance | Visible native geometry and 2D HUD in same complete frame; ROI/video evidence retained | QMP full frame shows dark-blue fixture and HUD together: native 92,352/144,000 chromatic pixels; HUD 2,845. RGB-only assignment remains unbuilt/unverified. Evidence retained under `$BUILD_EVIDENCE/flr0371-0001/qemu/` | PARTIAL |
-| Teardown | Exact app and QEMU stopped; process/socket/port checks clean | App PID 812 stopped; QMP quit accepted; independent checks found no QEMU/runqemu/Flutter, QMP socket, or listeners on run ports | PASS |
+| Candidate configure / compile | Required plugin submodule is present; configure and compile pass | FLR-0372 fetched the exact pinned submodule; `do_patch`, `do_configure`, and `do_compile` passed | PASS |
+| Candidate image / runtime | Exact candidate image boots; manual Flutter/QMP shows the parameter-branch result | Image build run `FLR-0371-0003` passed; rootfs SHA `949921c8…`; engine/bundle `3.32.5`; manual run `flr0371-0004` reached the candidate parameter branch | PASS for candidate behavior; causal isolation limited by engine-version difference |
+| Direct manual runtime | One `agl-driver` Flutter process; launch and native setup markers captured | Strict guest SSH, compositor/Wayland, bundle, and zero-stale-app checks passed; PID 779 launched manually; 15 successful presents reached the readiness gate and 146 were recorded in the saved log | PASS |
+| QMP acceptance | Visible native geometry and 2D HUD in same complete frame; ROI/video evidence retained | Full 1280×800 QMP frame visibly shows HUD plus dark-blue self-made geometry: native `119716/144000` chromatic pixels; HUD `2845`; 8 QMP frames captured | PASS for diagnostic fixture; production Sequoia not tested |
+| Teardown | Exact app and QEMU stopped; process/socket/port checks clean | Flutter PID 779 received SIGTERM; recorded QMP quit accepted; supervisor/QEMU PIDs, QMP socket, ports 10930–10932, runqemu, and flutter-auto residual checks all clear | PASS |
 
 ### Act
 
-- If parameter RGB-only assignment becomes visible under LIT/SUN, preserve it
-  as the candidate fix and create a separate production Sequoia validation
-  ticket; do not infer production success from the fixture.
-- If it remains black while the constant branch remains visible, keep the
-  result as a falsification and open the next ticket to separate shader
-  parameter binding from LIT/SUN; do not alter launch scripts or multiple
-  source variables in this ticket.
-- If the app exits before controlled stop, keep the QMP result but split the
-  process-exit diagnosis into a separate ticket unless the evidence directly
-  identifies a blocker to this fixture verdict.
-- Resume this ticket only after FLR-0372 proves the exact plugin source and
-  its pinned `sdbus-cpp` submodule are fetched, patched, configured, and
-  compiled. Do not treat the existing-image positive control as the candidate
-  patch result.
+- Close this bounded candidate-fixture test. It proves that this exact
+  candidate image can display the self-made LIT/SUN geometry and 2D HUD
+  together with the parameter branch active.
+- Do not claim the production Sequoia vehicle is visible or that patch 0330
+  alone caused the positive result: the Flutter engine differs from the
+  previous control image. FLR-0373 separately tests the production Example
+  Demo scene on this same candidate image with fixture overrides unset.
+- No launcher/runtime script was edited. Keep the manual SSH → Flutter →
+  successful-present → QMP sequence as the reference procedure.
 
 ## Visual evidence
 
 - Baseline negative: [FLR-0367 QMP screenshot](../evidence/FLR-0367-qmp-run-0001.png).
 - UNLIT parameter positive: [FLR-0368 QMP screenshot](../evidence/FLR-0368-qmp-run-0001.png).
 - LIT/SUN constant positive: [FLR-0369 QMP screenshot](../evidence/FLR-0369-qmp-run-0001.png).
-- Current-image positive control (not the assignment result): full QMP PPM
-  SHA-256 `65ccb48597d2f227bd80c9dab23a541a6a79feba6fc4d7b8bbb2cbf1312aed07`;
-  8-frame QMP video and original captures are retained under the Mini evidence
-  role path `$BUILD_EVIDENCE/flr0371-0001/qemu/`.
+- Candidate parameter-branch frame: [full QMP screenshot](../evidence/FLR-0371-0004-qmp-candidate-parameter.png),
+  PNG SHA-256 `084847ddd93676e184d76755cdb5a3825a29daef9a6bebc38a8a765df2695ece`.
+  The original QMP PPM SHA-256 is
+  `04a6d8bdadfcce174555935a0c73c63a3fe64564895f712c102f8ea9bac93a3f`.
+- Eight-frame QMP review video SHA-256
+  `49e4799a1403f03bf626dcaa0a89f694d3eebc88bb648b7aed3f813962b22475`.
+  PPM, video, app log, selected signals, startup evidence, and teardown records
+  are retained under `$BUILD_EVIDENCE/flr0371-0004/qemu/`.
+
+![Full QMP frame: CPU/GPU HUD and the self-made dark-blue 3D geometry are visible together](../evidence/FLR-0371-0004-qmp-candidate-parameter.png)
 
 ## UNKNOWN
 
@@ -214,8 +235,8 @@ launcher.
   to fail at the nested source commit boundary for existing patch 0013; its
   ephemeral task log was no longer present. Component-scoped Devtool is now
   used for the separately pinned plugin source.
-- Whether RGB-only parameter assignment makes the current LIT/SUN fixture
-  visible.
+- Whether patch 0330 alone explains the change from the prior image remains
+  UNKNOWN because the Flutter engine version changed from `3.38.3` to `3.32.5`.
 - Why the first manual screenshot had a black native ROI; that capture was
   taken without waiting for a successful-present readiness gate, so it is not
   evidence of a regression.
