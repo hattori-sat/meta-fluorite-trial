@@ -13,7 +13,7 @@
 ## Constraints
 
 - Work in the canonical repository on `feature-flr-0359-committed-qemu-helper`; preserve prior ticket commits and unrelated changes.
-- Keep FLR-0358 in Waiting and FLR-0359 as the sole In Progress ticket.
+- During execution, keep FLR-0358 in Waiting and FLR-0359 as the sole In Progress ticket; close FLR-0359 after its bounded Mini gate result is recorded.
 - Do not edit Flutter/Filament, Yocto recipe/layer, image, camera/light/material/texture, or composition code.
 - Do not loosen the official FIFO parser or process/FIFO identity predicates.
 - Stage the helper from the exact repo commit into the unique run parent and prove both runner/starter use that same file; do not select an executable from a prior run.
@@ -63,28 +63,28 @@
 
 - [x] Run focused provenance tests, `bash work/commands/FLR-0350-run-sync-producer.sh --check`, QEMU/runtime harness contract, shell syntax, full Python suite, privacy, ticket checkpoint, file-size, and Markdown-link checks. The only suite environment rejection was sandbox loopback bind; the same 132-test run passed with loopback permission.
 - [x] Record the nine pre-existing repository-wide Markdown failures in FLR-0338/0339/0340; no new FLR-0359 link error appeared. Do not repair unrelated historical evidence links.
-- [ ] Inspect staged paths and privacy identity, then commit locally on this feature branch. Do not push.
+- [x] Inspect staged paths and privacy identity, then commit locally on this feature branch. Do not push. Code commit `f63956e`; exact-tip preflight record `8de11b0e`.
 
 ### Task 4 — Bundle exact tip and preflight existing Mini runtime
 
 **Files:**
 - Use: `scripts/handoff-fluorite-bundle.sh`, `scripts/reuse-mini-build-receiver.sh`, `work/commands/FLR-0350-run-sync-producer.sh`.
 
-- [ ] Transfer the exact local tip using the established bundle script. Record bundle SHA, local tip, receiver before/after tip, cleanliness, and inbox receipt.
-- [ ] Use the existing fixed receiver/build/TMPDIR. Reconfirm effective OE/template selection, targetless metadata only if the established helper requires it, pinned artifact hashes, idle BitBake, free ports, zero target processes, and absent fresh run directory.
-- [ ] No BitBake task, Devtool, image build, VM/cache cleanup, or QEMU artifact copy.
-- [ ] Verify the staged helper source in the receiver has the same SHA as the committed local helper before spending a run ID.
+- [x] Transfer the exact local tip using the established bundle script. Bundle SHA `201a298a90beeeeecc49a2f89a8323a4e6862d86c2d296f182d580e85cee228e`; receiver tip `8de11b0e47304724f436d5567b55e62640a237d3`.
+- [x] Use the existing fixed receiver/build/TMPDIR; exact bundle-handoff PASS and pinned artifact hashes are recorded. The runner/starter's freshness, process, and port guards executed and did not abort, but the exact preflight marker was not retained. The supplemental SSH process/port/run-directory inventory is UNKNOWN, not an observed PASS.
+- [x] No BitBake task, Devtool, image build, VM/cache cleanup, or QEMU artifact copy.
+- [x] Receiver HEAD helper SHA matched `088e8e39…` before the fresh runtime attempt.
 
 ### Task 5 — Make exactly one Mini runtime attempt and preserve QMP evidence
 
 **Files:**
 - Use: `work/commands/FLR-0350-run-sync-producer.sh`, existing serial validator, GDB and QMP capture helpers.
 
-- [ ] Use one fresh ID `flr0359-0001` only if still absent and preflight passes. Stage all 11 serial commands and the helper before QEMU start.
-- [ ] Confirm the run log identifies the exact commit/SHA and both orchestration call sites use the same run-scoped helper. If not, stop before serial commands and QEMU.
-- [ ] Require the unchanged official FIFO validator to pass before GDB attach/GO. On failure, retain bounded evidence, do not retry the ID, and label QMP as pre-GO.
-- [ ] If GO passes, collect the existing bounded wait/watch/runtime state and classify QMP full frame + fixed ROI using full-frame/eight-frame pixel summaries and SHA-256.
-- [ ] Prove the owned app, FIFO, QMP socket, QEMU/runqemu, and helper processes are cleaned up. Show the QMP still in the task; the video may be attached as a review artifact.
-- [ ] Update the next ticket only from the first measured post-correction divergence. Do not mix in renderer patches or a second hypothesis.
+- [x] Use one fresh ID `flr0359-0001`; stage all 11 serial commands and the helper before QEMU start.
+- [x] Confirm the run log identifies commit `8de11b0e…` and matching committed/source/staged helper SHA `088e8e39…`.
+- [x] The unchanged official FIFO validator passed. The next GDB attach stage failed its generic precondition and stopped before attach/GO; `FLR0350_EXEC` was absent.
+- [x] Capture QMP full-frame still and eight frames/video; classify as pre-GO. Post-run still and all eight frames were black/identical; this is not a renderer verdict.
+- [x] QMP quit was accepted and cleanup proved zero run-owned QEMU/app/QMP residuals.
+- [x] Hand off only the new GDB-attach predicate ambiguity; no renderer patch or second hypothesis was mixed into FLR-0359.
 
-**Acceptance:** exact source → staged file → runner/starter → bundle receiver provenance is proven deterministically; one real Mini run tests those bytes; its first gate result and QMP evidence are correctly classified; no consumed ID is reused.
+**Acceptance result:** the exercised exact source → staged file → runner/starter → bundle receiver path is proven and was observed on Mini. Static contracts assert the required source/staging/call-site relationship; missing/mismatch runtime branches were deferred and are not claimed executed. Mini passed the unchanged FIFO gate, then stopped at the GDB-attach precondition before GO. QMP evidence is preserved and classified as pre-GO; cleanup passed. The 3D objective remains open.

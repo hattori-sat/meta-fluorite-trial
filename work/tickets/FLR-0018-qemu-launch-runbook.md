@@ -1,6 +1,7 @@
 # FLR-0018 — Registered QEMU launch runbook
 
-- Status: In Progress — Do
+- Status: Waiting
+- Waiting reason: real runbook execution was never started and role-local session-bundle persistence remains a documented gap.
 - Priority: High
 - Depends on: FLR-0017
 - Context: Execution

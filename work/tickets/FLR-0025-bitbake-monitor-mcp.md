@@ -1,6 +1,7 @@
 # FLR-0025 — Bounded BitBake monitor MCP
 
-Status: In Progress (Do)
+Status: Waiting
+Waiting reason: local implementation checks are documented, but live Mini PID/PGID validation and end-to-end current-image acceptance remain unverified.
 
 ## Outcome
 

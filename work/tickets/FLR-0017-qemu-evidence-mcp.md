@@ -1,6 +1,7 @@
 # FLR-0017 — QEMU Fluorite evidence observer
 
-- Status: In Progress — Check
+- Status: Waiting
+- Waiting reason: the historical QEMU observer session is documented, but the ticket has no current closeout; persistent screen/coredump evidence and its downstream runbook handoff remain incomplete.
 - Priority: High
 - Depends on: FLR-0002, FLR-0005, FLR-0008, FLR-0016
 - Contexts: Target Validation, Flutter runtime, Graphics, Fluorite demo
