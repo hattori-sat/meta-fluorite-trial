@@ -130,10 +130,6 @@ or image in this experiment.
   control. FLR-0369 tests the LIT branch with only the hardcoded base-color
   override added, to test whether the dynamic material parameter path is the
   first visible-pixel boundary.
-- If UNLIT is black while setup/draw/present succeed, open a target/raster
-  boundary ticket; do not modify the launcher or lighting code.
-- If the guest/app/present gate fails first, open a new task for that exact
-  boundary and retain the failure evidence.
 
 ## Evidence
 
