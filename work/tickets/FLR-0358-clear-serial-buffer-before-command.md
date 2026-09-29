@@ -37,6 +37,39 @@ Preserve the strict FLR-0350 marker parser and process/FIFO identity checks.
   validator. Before the fix, the valid setup transcript reproduced
   `marker-not-first`, and unexpected setup chatter was accepted with
   `serial-exec=PASS`.
+- FLR-0358's exact bundle reached the clean fixed Mini receiver at commit
+  `5456ed220d5a657fc14a8012691c8448c8472434` (SHA-256
+  `15c71ea1d97ef7dc60de6af1ea839f472e7866534d9213bbec1fd39b9f61f87c`).
+- The one runtime attempt, `flr0358-0001`, staged all 11 guest commands and
+  reached `FLR0350_LAUNCH_WRAPPER=READY`, but the official validator stopped at
+  `marker-not-first` before GDB attach or GO. Its captured stream had three
+  tokens before the observer marker; the first was `stty`.
+- Runtime provenance explains the repeat: both the runner and QEMU starter
+  selected the prior FLR-0335 evidence copy (`339472336f14387fd1b72c3d702e510de19ff710c5c203441733a7a59d79aa6d`),
+  while the committed helper in the exact receiver was
+  `088e8e39ed1fc7dce175ad0fd2a027325b04815c68337a9e52fead2c9fb64fee`.
+  Therefore the new serial capture boundary was not exercised on this QEMU run.
+- The live receiver's pre-handoff HEAD was `51100f50cef01f88cfd048ae2c30344ad342b0e1`,
+  not the historical `5e46a1e…` cited by FLR-0351. Comparing its layer tree
+  with the received tip shows an added committed `0327` diagnostic patch and
+  bbappend registration, with no layer-file deletions; the exact receiver
+  update passed and the post-handoff HEAD is the bundle tip.
+
+## Visual evidence
+
+- QMP-only full-frame still: `$EVIDENCE_ROOT/flr0358-0001/qemu/post-run.ppm`
+  (1280×800; SHA-256
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`).
+- The frame was captured during cleanup before GO. It is uniformly black:
+  1,024,000 full-frame pixels and 768,000 pixels in the fixed lower 3D ROI,
+  all black; chromatic pixels 0. The eight QMP frames have one unique hash.
+- This is a pre-GO harness-stop frame, not evidence that the renderer or
+  production Sequoia failed. The raw still and eight frames remain on Mini;
+  the complete still was shown in the task. A local 8-second preview derived
+  from the eight identical frames is outside Git.
+- Teardown: QMP `quit` accepted; app stopped (`flutter_processes=0`),
+  run-owned FIFO removed, QMP socket absent, and residual QEMU/runqemu/
+  flutter-auto/BitBake processes 0.
 
 ## Competing approaches
 
@@ -103,3 +136,10 @@ Preserve the strict FLR-0350 marker parser and process/FIFO identity checks.
 - Integration risk: bounded to the serial prompt protocol. The loopback
   regression fixes the accepted transcript shape; Mini evidence must confirm
   the same deployed console response before interpreting the gate result.
+
+## Runtime attempt disposition
+
+The local fix and tests are committed, but the fresh Mini runtime selected a
+pinned previous-run helper rather than the exact committed helper. The
+independent source-selection correction and its new one-shot runtime gate will
+be tracked by FLR-0359. `flr0358-0001` is consumed and must not be retried.

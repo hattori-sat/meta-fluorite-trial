@@ -81,10 +81,10 @@
 **Files:**
 - Use: `scripts/handoff-fluorite-bundle.sh`, `scripts/reuse-mini-build-receiver.sh`, `work/commands/FLR-0350-run-sync-producer.sh`, existing QMP capture/pixel/cleanup harnesses
 
-- [ ] Transfer the exact committed tip as a Git bundle to the established Mini receiver; verify bundle hash, receiver tip/cleanliness, effective `TOPDIR`/`TMPDIR`, pinned image artifacts, ports/processes, and a fresh absent evidence directory before launch.
-- [ ] Use one fresh FLR-0358 run ID and the existing Mini QEMU image; no BitBake, Devtool, product build, or image change is in scope.
-- [ ] Require the official FIFO gate to pass before GDB attach/GO. If it fails, retain evidence and stop without retrying that ID.
-- [ ] Capture QMP full-frame still/eight frames, analyze the fixed 3D ROI, preserve the bounded serial/GDB result, and prove targeted QEMU/QMP/app cleanup.
-- [ ] Classify every screen as pre-GO or post-GO. Only post-GO product pixels may update the Sequoia/2D+3D capability verdict.
+- [x] Transfer exact tip `5456ed2` as a Git bundle; SHA, receiver cleanliness, effective `TOPDIR`/`TMPDIR`, pinned artifact hashes, process/port state, and fresh run directory preflight passed.
+- [x] Use exactly one fresh run ID, `flr0358-0001`, on the existing Mini image; no BitBake, Devtool, product build, or image change ran.
+- [x] The official FIFO validator failed closed at `marker-not-first` before GDB attach/GO; preserve the result and do not retry the consumed ID.
+- [x] Capture the QMP full-frame still and eight frames, analyze the fixed 3D ROI, and prove targeted app/FIFO/QMP/QEMU cleanup.
+- [x] Classify the frame as pre-GO. Only post-GO product pixels may update the Sequoia/2D+3D capability verdict; create FLR-0359 because runtime used a prior evidence copy, not the committed helper.
 
 **Acceptance:** The serial helper cannot carry the verified echo-off preamble into the observer capture, cannot silently discard an unexpected setup response, the unchanged official FIFO/identity gate is exercised once on Mini, and runtime evidence distinguishes a harness stop from a production render result.
