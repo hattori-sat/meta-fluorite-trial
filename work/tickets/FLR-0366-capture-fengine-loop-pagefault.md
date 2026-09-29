@@ -1,6 +1,6 @@
 # FLR-0366 — capture the FEngine loop page fault under GDB
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Owner: Mini QEMU / guest SSH / GDB / Vulkan present / QMP evidence roles
 - Created: 2026-09-29
@@ -21,6 +21,10 @@ On the pinned FLR-0335 rootfs, manually start the installed Example Demo under G
 - The app log read `sequoia_ngp.glb`; the second of two `FLR0026_VK_QUEUE_PRESENT_BEGIN` markers had no `result=0` return. At `13:18:05`, guest kernel 6.6.111 reported a page fault/Oops for TID 764 `FEngine::loop`; RIP `0x7f869bf6d541` fell inside the mapped `/usr/lib/libLLVM.so.18.1`. The thread later disappeared while the parent process survived.
 - The prior run did not have GDB attached at fault time and produced no captured backtrace. The temporal relationship between the fault, unmatched present, and pixels is not causal proof.
 - GDB, strace, and coredumpctl are present in the pinned guest. Whether usable LLVM symbols/debug files exist is UNKNOWN.
+- FLR-0366 repeated the kernel Oops under a manually GDB-launched Example Demo. GDB recorded no SIGSEGV/SIGBUS; the kernel identified `FEngine::loop` TID 806 while its parent `flutter-auto` PID 753 remained alive.
+- The Oops RIP mapped to Build-ID `359c1108040bc6bc1af64bb639d0b25385858051` in `/usr/lib/libLLVM.so.18.1`. Correct ELF VA `0xb1d541` resolves to `llvm::CmpInst::isOrdered(llvm::CmpInst::Predicate)`; the instruction sequence is register-only (`dec %edi; cmp $7,%edi; setb %al; ret`). Kernel CR2 was `0x000000008d207750`; RSP was `0x00007fff8d207750`, whose low 32 bits match CR2. This mismatch means the symbol cannot be called the proven invalid-memory access site.
+- QMP full-screen output was a white field with one large black polygon; no HUD, recognizable Sequoia, or chromatic pixels. Pre-fault and all eight post-fault frames were byte-identical at PPM SHA-256 `f686a3c2769cb2bc59b362bdc1d956c2d1d128cbcbfa6ea45ffe2eb92b4a5265`.
+- Two `FLR0026_VK_QUEUE_PRESENT_BEGIN` markers had one `result=0`; the kernel Oops occurred later. Ordering is observed; causality is UNKNOWN.
 
 ## Problem stratification — 4W1H (Why excluded)
 
@@ -81,31 +85,41 @@ On the pinned FLR-0335 rootfs, manually start the installed Example Demo under G
 
 ### Do
 
-- Ticket opened on a fresh run ID. No QEMU or app command has been issued for FLR-0366.
+- Run `flr0366-0001` used the pinned rootfs SHA-256 `5c8ca252181fac1a64669ae78de5b3fa590db1048f95f156db306df2f9d821ec`, 6144 MiB, the installed Example Demo, and a manually composed GDB command. App launch added only app-id `fluorite` and 1280×800 dimensions; the diagnostic environment-variable count was zero.
+- The copied FLR-0350 wrapper's preflight failed before QEMU because it resolved its repository root relative to the evidence directory and could not find `scripts/flr0350_launch_gate.py`. The direct validator at the receiver passed; the already-committed QEMU harness was then invoked directly. No launcher was edited.
+- Guest identity/preflight passed; GDB PID 746 and `flutter-auto` PID 753 ran as UID 1001. Two bounded 15-second observations showed two present begins and one return, then the kernel Oops. GDB's signal-marker count remained zero; the faulting FEngine thread disappeared while the parent app remained alive with 38 threads.
+- Corrected ELF mapping arithmetic using the PT_LOAD segment/load bias: an initial `0xb63541` calculation was wrong; the verified VA is `0xb1d541`. No source line/debug sections or split-debug file were present. Bounded `coredumpctl` listing had no entries.
+- A guest-shell preflight command first failed due to quoting before guest mutation; a simpler preflight passed. At cleanup, two strict guest SSH attempts as `agl-driver` were denied public-key authentication, so the recorded QMP socket was used to shut down only this VM. The QMP harness reported `cleanup=PASS residual_targets=0 residual_qmp=0`; independent checks found recorded QEMU PIDs 2753106/2753133 absent, QMP socket absent, and ports 10930–10932 unbound.
+- QMP evidence was copied as image data only; no disk image/rootfs/kernel was copied to Mac. Full-frame still and eight-frame video are linked below.
 
 ### Check
 
 | Gate | Expected | Actual | Result |
 | --- | --- | --- | --- |
-| Image/guest preflight | Pinned rootfs and strict SSH ready | Pending | PENDING |
-| Manual GDB app launch | One agl-driver process; diagnostic env absent | Pending | PENDING |
-| Fault-time GDB evidence | Signal/backtrace/register/map or bounded no-hit | Pending | PENDING |
-| Vulkan/kernel correlation | Exact present sequence and bounded Oops evidence | Pending | PENDING |
-| QMP visual evidence | Full still/eight frames and HUD/3D ROIs | Pending | PENDING |
-| Teardown | App/QEMU/QMP/port residuals zero | Pending | PENDING |
+| Image/guest preflight | Pinned rootfs and guest tools verified | Rootfs hash, app/bundle/session, GDB 14.2, LLVM Build-ID, symbol tools verified; zero prior app | PASS |
+| Manual GDB app launch | One agl-driver process; diagnostic env absent | GDB PID 746, inferior PID 753, UID 1001; zero diagnostic variables; app-id/size fixed | PASS |
+| Fault-time GDB evidence | Signal/backtrace/register/map or bounded no-hit | Kernel Oops recurred; GDB caught no signal and no fault-time backtrace. RIP resolves to register-only LLVM predicate; CR2=RSP. Fault mechanism remains UNKNOWN | BOUNDED RESULT |
+| Vulkan/kernel correlation | Exact present sequence and bounded Oops evidence | 2 present begins / 1 successful result; later Oops in `FEngine::loop`; causal relation not established | PASS — correlation only |
+| QMP visual evidence | Full still/eight frames and HUD/3D verdict | White field + black polygon; no HUD/recognizable Sequoia/chroma; eight post-fault frames identical. PNG/MP4 saved and visually reviewed | PASS — visual failure recorded |
+| Teardown | App/QEMU/QMP/port residuals zero | Guest SSH cleanup was denied; exact QMP quit shut down the guest. Harness and independent host checks show zero recorded PIDs/socket/ports | PASS — VM shutdown cleanup |
 
 ### Act
 
-- If the faulting caller resolves to a controllable app/Filament/LLVM boundary, open a separate minimal source-analysis or patch ticket only after recording the call path and falsifier. If the fault does not recur, preserve this as a bounded no-hit; do not re-enable the entire historical override bundle or edit the runner.
+- Close this bounded diagnosis without claiming `isOrdered` is the root cause. Do not patch LLVM or the renderer from this evidence. [FLR-0367](FLR-0367-replay-manual-known-good-fixture-on-current-image.md) now replays the historical manually launched lit Filament fixture on the exact current image as a positive control. Flutter launch remains a direct guest-SSH command; no launch-script edit is authorized by this result.
 
 ## Evidence
 
 - Mini evidence root: `$EVIDENCE_ROOT/flr0366-0001/qemu`
 - Predecessor visual/log evidence: [FLR-0365 QMP still](../evidence/FLR-0365-qmp-run-0001.png), [FLR-0365 QMP video](../evidence/FLR-0365-qmp-run-0001.mp4), and the exact Mini evidence root in FLR-0365.
-- Fresh FLR-0366 visual evidence, logs, and hashes: pending; no result is claimed.
+![FLR-0366 QMP full-frame capture after the FEngine Oops](../evidence/FLR-0366-qmp-run-0001.png)
+
+- QMP PNG SHA-256 `3d5f4eda7adc85171514bb0c112dc3658342262e831c1b8e528f56740aefaf99`.
+- [FLR-0366 QMP eight-frame video](../evidence/FLR-0366-qmp-run-0001-sequence.mp4), 1280×800, 1 fps, 8 seconds, SHA-256 `b67aeeede624b417948d1a6b2bba9ae9ce8e0f166f261572fd3d20c3dad18cbf`.
+- Raw QMP PPM SHA-256 `f686a3c2769cb2bc59b362bdc1d956c2d1d128cbcbfa6ea45ffe2eb92b4a5265`; all eight post-fault frames matched it. Guest kernel excerpt, marker counts, ELF mapping/disassembly, and preflight remain under the Mini evidence root above.
 
 ## UNKNOWN
 
-- Whether GDB catches the kernel-reported user-thread fault and whether the RIP can resolve to a symbol with currently installed debug data.
-- Whether the fault causes or merely coincides with the unmatched present and monochrome/no-HUD QMP result.
-- Whether debugger timing changes the failure window.
+- Why a register-only `isOrdered` instruction coincides with a supervisor read page fault at CR2=RSP, and whether kernel register/stack context is corrupted.
+- Whether the Oops causes or merely coincides with the unmatched present and monochrome/no-HUD QMP result.
+- Whether debugger timing changes the failure window; GDB observed no signal despite the repeated kernel Oops.
+- Whether production Sequoia appears with HUD removed on the current image; this ticket made no HUD-off run.
