@@ -1,6 +1,7 @@
 # FLR-0363 — fix FLR-0350 guest-script staging and capture the actual runtime
 
-- Status: In Progress
++- Status: Waiting
++- Waiting reason: the runner's latest guest-helper handoff still violates guest_run's relative-filename contract; do not spend another runtime cycle on that wrapper until the direct guest-SSH launch is reproduced under FLR-0364.
 - Priority: High
 - Owner: Mac runner / Mini runtime / QMP evidence roles
 - Created: 2026-09-29
@@ -9,7 +10,7 @@
 - Plan: [implementation plan](../../docs/superpowers/plans/2026-09-29-flr0363-fix-flr0350-guest-script-stage.md)
 - Working log: [FLR-0363 working log](../logs/2026-09-29-flr0363.md)
 - Historical procedure: [FLR-0116 production launch](../logs/2026-09-13-flr0116.md), [FLR-0235 HUD + native fixture](FLR-0235-replace-material-hover-button.md), [FLR-0286 lit fixture + HUD](FLR-0286-reproduce-known-good-combined-sequoia-hud.md)
-- Run ID: `flr0363-0001` (fresh; use at most once)
++- Run ID: `flr0363-0001` (consumed; never retry)
 
 ## Objective
 
