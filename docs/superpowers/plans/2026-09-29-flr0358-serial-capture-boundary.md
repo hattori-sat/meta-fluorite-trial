@@ -17,6 +17,9 @@
 - Validate the exact echo-off handshake; never discard arbitrary unverified serial bytes.
 - The change is host-side QEMU harness only; do not change product source, Yocto recipe/layer, image, or build state.
 - Use the existing Mac-to-Mini Git bundle flow and pinned Mini QEMU image; do not build another image.
+- Resolve OE initialization from the existing AGL checkout associated with the
+  fixed build; validate it against the build's persisted `TEMPLATECONF` before
+  any receiver update. Do not assume the source checkout is a build ancestor.
 - Use one fresh Mini runtime ID only after local checks and exact bundle/preflight; never reuse a consumed ID.
 - Capture QMP still/eight frames, pixel summary, bounded logs, and exact cleanup; a pre-GO black frame is not a render verdict.
 
@@ -56,12 +59,29 @@
 - [x] Run canonical guard, ticket checkpoint, privacy, file-size, staged-whitespace, and scoped Markdown-link checks; record the unrelated repository-wide missing-link baseline without repairing unrelated tickets. Canonical/checkpoint/privacy/file-size/staged whitespace/scoped links pass; global Markdown has nine unrelated existing failures.
 - [x] Commit only FLR-0358 files locally on `feature-flr-0358-clear-serial-buffer`; do not push (`3a54e83`).
 
-### Task 4: Transfer and validate once on Mini QEMU
+### Task 4: Make the existing bundle preflight match the documented Mini layout
+
+**Files:**
+- Modify: `scripts/reuse-mini-build-receiver.sh`
+- Test: `tests/test_reuse_mini_build_receiver.py`
+- Test: `tests/test-podman-bundle-handoff.sh`
+
+- [x] Reproduce the helper's ancestor-only OE-init lookup failure with a build
+  directory separate from the AGL source checkout.
+- [x] Reuse FLR-0109's established correction: select the AGL
+  `external/poky/oe-init-build-env`, and require exactly one candidate whose
+  template directory matches the fixed build's `conf/templateconf.cfg`.
+- [x] Add explicit stop reasons for missing, mismatched, or ambiguous source
+  selection and for OE-init versus BitBake metadata-query failure.
+- [x] Verify all rejected preflights leave receiver `HEAD`, index, worktree,
+  and `FETCH_HEAD` unchanged; preserve Mac Bash 3.2 compatibility.
+
+### Task 5: Transfer and validate once on Mini QEMU
 
 **Files:**
 - Use: `scripts/handoff-fluorite-bundle.sh`, `scripts/reuse-mini-build-receiver.sh`, `work/commands/FLR-0350-run-sync-producer.sh`, existing QMP capture/pixel/cleanup harnesses
 
-- [ ] Transfer the exact committed tip as a Git bundle to the established Mini receiver; verify bundle hash, receiver tip/cleanliness, pinned image artifacts, ports/processes, and a fresh absent evidence directory before launch.
+- [ ] Transfer the exact committed tip as a Git bundle to the established Mini receiver; verify bundle hash, receiver tip/cleanliness, effective `TOPDIR`/`TMPDIR`, pinned image artifacts, ports/processes, and a fresh absent evidence directory before launch.
 - [ ] Use one fresh FLR-0358 run ID and the existing Mini QEMU image; no BitBake, Devtool, product build, or image change is in scope.
 - [ ] Require the official FIFO gate to pass before GDB attach/GO. If it fails, retain evidence and stop without retrying that ID.
 - [ ] Capture QMP full-frame still/eight frames, analyze the fixed 3D ROI, preserve the bounded serial/GDB result, and prove targeted QEMU/QMP/app cleanup.

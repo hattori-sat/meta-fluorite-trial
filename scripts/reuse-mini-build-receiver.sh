@@ -87,24 +87,78 @@ canonical_dir() {
 
 selected_build=$(canonical_dir "$build_dir") || { echo "cannot resolve fixed build directory" >&2; exit 1; }
 selected_tmpdir=$(canonical_dir "$tmpdir") || { echo "cannot resolve fixed TMPDIR" >&2; exit 1; }
-search_dir=$selected_build
-oe_init=
-while [ "$search_dir" != / ]; do
-    candidate="$search_dir/external/poky/oe-init-build-env"
-    if test -r "$candidate"; then
-        oe_init=$candidate
-        break
+
+# The active AGL source checkout may be separate from /mnt/yocto's build and
+# receiver trees. Find only AGL's external/poky layout, then bind it to the
+# existing build through that build's persisted TEMPLATECONF value. This
+# excludes a nearby standalone Poky checkout that can select a nonexistent
+# template and terminate OE initialization.
+test -n "${HOME:-}" && test -d "$HOME" || {
+    echo "oe-init-search-root-missing: HOME" >&2
+    exit 1
+}
+search_roots=("$HOME")
+test ! -d /mnt/yocto || search_roots+=(/mnt/yocto)
+oe_init_candidates=()
+while IFS= read -r candidate; do
+    test -n "$candidate" && oe_init_candidates+=("$candidate")
+done < <(
+    find "${search_roots[@]}" -maxdepth 10 \
+        \( -name .git -o -name .cache -o -name .local -o -name .npm \
+        -o -name node_modules -o -name tmp -o -name downloads \
+        -o -name sstate-cache \) -prune -o \
+        -type f -path '*/external/poky/oe-init-build-env' -print 2>/dev/null |
+        sort -u
+)
+test "${#oe_init_candidates[@]}" -gt 0 || {
+    echo "oe-init-not-found: expected AGL external/poky under fixed search roots" >&2
+    exit 1
+}
+test -r "$build_dir/conf/templateconf.cfg" || {
+    echo "build-templateconf-missing: refusing to guess the OE source tree" >&2
+    exit 1
+}
+templateconf=$(sed -n '1p' "$build_dir/conf/templateconf.cfg")
+test -n "$templateconf" || {
+    echo "build-templateconf-empty: refusing to guess the OE source tree" >&2
+    exit 1
+}
+matching_oe_inits=()
+for candidate in "${oe_init_candidates[@]}"; do
+    candidate_poky=${candidate%/oe-init-build-env}
+    if [[ "$templateconf" = /* ]]; then
+        template_dir=$templateconf
+    else
+        template_dir="$candidate_poky/$templateconf"
     fi
-    search_dir=$(dirname "$search_dir")
+    test -d "$template_dir" && matching_oe_inits+=("$candidate")
 done
-test -n "$oe_init" || { echo "OE initialization script is not reachable from the fixed build" >&2; exit 1; }
+test "${#matching_oe_inits[@]}" -gt 0 || {
+    echo "oe-init-template-mismatch: no AGL external/poky contains the fixed build template" >&2
+    exit 1
+}
+test "${#matching_oe_inits[@]}" -eq 1 || {
+    echo "oe-init-ambiguous: multiple AGL external/poky trees match the fixed build template" >&2
+    exit 1
+}
+oe_init=${matching_oe_inits[0]}
 
 metadata_rc=0
 metadata=$( (
     set +u
-    source "$oe_init" "$build_dir" >/dev/null 2>&1 || exit 70
-    timeout --foreground --signal=TERM --kill-after=5s 120s bitbake -e -T 5
+    if source "$oe_init" "$build_dir" >/dev/null 2>&1; then :; else
+        source_rc=$?
+        printf '__OE_INIT_FAILURE__=%s\n' "$source_rc"
+        exit 0
+    fi
+    if timeout --foreground --signal=TERM --kill-after=5s 120s bitbake -e -T 5; then :; else
+        bitbake_rc=$?
+        printf '__BITBAKE_FAILURE__=%s\n' "$bitbake_rc"
+        exit 0
+    fi
 ) 2>/dev/null | awk -F'"' '
+    /^__OE_INIT_FAILURE__=/ { init_failure = substr($0, index($0, "=") + 1); next }
+    /^__BITBAKE_FAILURE__=/ { bitbake_failure = substr($0, index($0, "=") + 1); next }
     /^(TMPDIR|TOPDIR)=/ {
         key = substr($0, 1, index($0, "=") - 1)
         if (NF < 3 || $2 == "") invalid = 1
@@ -112,6 +166,14 @@ metadata=$( (
         value[key] = $2
     }
     END {
+        if (init_failure != "") {
+            print "OE_INIT_FAILURE=" init_failure
+            exit 70
+        }
+        if (bitbake_failure != "") {
+            print "BITBAKE_FAILURE=" bitbake_failure
+            exit 71
+        }
         if (invalid || count["TMPDIR"] != 1 || count["TOPDIR"] != 1) exit 3
         print "TMPDIR=" value["TMPDIR"]
         print "TOPDIR=" value["TOPDIR"]
@@ -128,10 +190,27 @@ for attempt in $(seq 1 15); do
 done
 test "$idle" = true || { echo "BitBake metadata query left a process active; refusing receiver update" >&2; exit 1; }
 if test "$metadata_rc" -eq 124 || test "$metadata_rc" -eq 137; then
-    echo "effective BitBake configuration query timed out; refusing receiver update" >&2
+    echo "bitbake-metadata-timeout: refusing receiver update" >&2
     exit 1
 fi
-test "$metadata_rc" -eq 0 || { echo "effective BitBake configuration query failed; refusing receiver update" >&2; exit 1; }
+if test "$metadata_rc" -eq 70; then
+    init_rc=$(printf '%s\n' "$metadata" | sed -n 's/^OE_INIT_FAILURE=//p')
+    echo "oe-init-failed: source rc=$init_rc; refusing receiver update" >&2
+    exit 1
+fi
+if test "$metadata_rc" -eq 71; then
+    bitbake_rc=$(printf '%s\n' "$metadata" | sed -n 's/^BITBAKE_FAILURE=//p')
+    if test "$bitbake_rc" -eq 124 || test "$bitbake_rc" -eq 137; then
+        echo "bitbake-metadata-timeout: refusing receiver update" >&2
+    else
+        echo "bitbake-metadata-query-failed: rc=$bitbake_rc; refusing receiver update" >&2
+    fi
+    exit 1
+fi
+test "$metadata_rc" -eq 0 || {
+    echo "bitbake-metadata-incomplete: rc=$metadata_rc; refusing receiver update" >&2
+    exit 1
+}
 effective_tmpdir=$(printf '%s\n' "$metadata" | sed -n 's/^TMPDIR=//p')
 effective_topdir=$(printf '%s\n' "$metadata" | sed -n 's/^TOPDIR=//p')
 test -n "$effective_tmpdir" && test -n "$effective_topdir" || {

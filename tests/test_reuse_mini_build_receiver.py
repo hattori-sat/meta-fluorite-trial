@@ -17,16 +17,20 @@ class ReuseMiniBuildReceiverTests(unittest.TestCase):
         self.root = Path(self.tempdir.name)
         self.bin_dir = self.root / "bin"
         self.bin_dir.mkdir()
-        self.agl_root = self.root / "agl"
-        self.build_dir = self.agl_root / "trout" / "build-test"
+        self.home = self.root / "home"
+        self.home.mkdir()
+        self.agl_root = self.home / "agl"
+        self.build_dir = self.root / "build" / "build-test"
         (self.build_dir / "conf").mkdir(parents=True)
-        (self.agl_root / "external" / "poky").mkdir(parents=True)
+        poky_root = self.agl_root / "external" / "poky"
+        (poky_root / "meta" / "conf" / "templates" / "default").mkdir(parents=True)
         self.receiver = self.root / "receiver"
         self.source = self.root / "source"
         self.source.mkdir()
         self.ssh_marker = self.root / "ssh-invoked"
         self.expected_tmpdir = self.root / "fixed-tmp"
         self.other_tmpdir = self.root / "other-tmp"
+        self.templateconf_file = self.build_dir / "conf" / "templateconf.cfg"
         self.expected_tmpdir.mkdir()
         self.other_tmpdir.mkdir()
 
@@ -50,11 +54,19 @@ class ReuseMiniBuildReceiverTests(unittest.TestCase):
             "done\n"
             "exec \"$@\"\n",
         )
-        (self.agl_root / "external" / "poky" / "oe-init-build-env").write_text(
+        (poky_root / "oe-init-build-env").write_text(
             "#!/usr/bin/env bash\n"
-            "test \"${FLUORITE_TEST_OE_INIT_FAIL:-0}\" = 0 || exit 9\n"
+            "test \"${FLUORITE_TEST_OE_INIT_FAIL:-0}\" = 0 || return 9\n"
             "export TOPDIR=\"$1\"\n"
             "export TMPDIR=\"$FLUORITE_TEST_EFFECTIVE_TMPDIR\"\n",
+            encoding="utf-8",
+        )
+        # A stale, non-AGL Poky tree has caused TEMPLATECONF failures before.
+        # It must not be selected instead of the AGL checkout's external/poky.
+        wrong_poky = self.home / "yocto" / "rpi4" / "poky"
+        wrong_poky.mkdir(parents=True)
+        (wrong_poky / "oe-init-build-env").write_text(
+            "#!/usr/bin/env bash\nreturn 9\n",
             encoding="utf-8",
         )
         self._write_executable(
@@ -88,6 +100,10 @@ class ReuseMiniBuildReceiverTests(unittest.TestCase):
         (self.build_dir / "conf" / "local.conf").write_text("# fixed build\n", encoding="utf-8")
         (self.build_dir / "conf" / "bblayers.conf").write_text(
             f'BBLAYERS += "{self.receiver}/layers/meta-fluorite-trial"\n',
+            encoding="utf-8",
+        )
+        self.templateconf_file.write_text(
+            "meta/conf/templates/default\n",
             encoding="utf-8",
         )
         self.fetch_head = self.receiver / ".git" / "FETCH_HEAD"
@@ -133,6 +149,7 @@ class ReuseMiniBuildReceiverTests(unittest.TestCase):
                 "BUILD_RECEIVER": str(self.receiver),
                 "BUILD_DIR": str(self.build_dir),
                 "BUILD_TMPDIR": str(expected_tmpdir),
+                "HOME": str(self.home),
                 "FLUORITE_TEST_EFFECTIVE_TMPDIR": str(effective_tmpdir),
                 "FLUORITE_TEST_BITBAKE_FAIL": "1" if query_failure else "0",
                 "FLUORITE_TEST_OE_INIT_FAIL": "1" if oe_init_failure else "0",
@@ -168,7 +185,7 @@ class ReuseMiniBuildReceiverTests(unittest.TestCase):
         )
 
         self.assertNotEqual(0, result.returncode, result.stdout)
-        self.assertIn("effective BitBake configuration query failed", result.stderr)
+        self.assertIn("bitbake-metadata-query-failed:", result.stderr)
         self.assertEqual(self.before_head, self._git(self.receiver, "rev-parse", "HEAD").stdout.strip())
         self.assertEqual(self.before_tree, self._git(self.receiver, "write-tree").stdout.strip())
         self.assertEqual(self.before_status, self._git(self.receiver, "status", "--porcelain").stdout)
@@ -182,7 +199,48 @@ class ReuseMiniBuildReceiverTests(unittest.TestCase):
         )
 
         self.assertNotEqual(0, result.returncode, result.stdout)
-        self.assertIn("effective BitBake configuration query failed", result.stderr)
+        self.assertIn("oe-init-failed:", result.stderr)
+        self.assertEqual(self.before_head, self._git(self.receiver, "rev-parse", "HEAD").stdout.strip())
+        self.assertEqual(self.before_tree, self._git(self.receiver, "write-tree").stdout.strip())
+        self.assertEqual(self.before_status, self._git(self.receiver, "status", "--porcelain").stdout)
+        self.assertEqual("sentinel-before-preflight\n", self.fetch_head.read_text(encoding="utf-8"))
+
+    def test_unresolvable_template_rejects_before_receiver_mutation(self) -> None:
+        self.templateconf_file.write_text("meta/missing/template\n", encoding="utf-8")
+
+        result = self._run_helper(self.expected_tmpdir, self.expected_tmpdir)
+
+        self.assertNotEqual(0, result.returncode, result.stdout)
+        self.assertIn("oe-init-template-mismatch", result.stderr)
+        self.assertEqual(self.before_head, self._git(self.receiver, "rev-parse", "HEAD").stdout.strip())
+        self.assertEqual(self.before_tree, self._git(self.receiver, "write-tree").stdout.strip())
+        self.assertEqual(self.before_status, self._git(self.receiver, "status", "--porcelain").stdout)
+        self.assertEqual("sentinel-before-preflight\n", self.fetch_head.read_text(encoding="utf-8"))
+
+    def test_missing_templateconf_rejects_before_receiver_mutation(self) -> None:
+        self.templateconf_file.unlink()
+
+        result = self._run_helper(self.expected_tmpdir, self.expected_tmpdir)
+
+        self.assertNotEqual(0, result.returncode, result.stdout)
+        self.assertIn("build-templateconf-missing", result.stderr)
+        self.assertEqual(self.before_head, self._git(self.receiver, "rev-parse", "HEAD").stdout.strip())
+        self.assertEqual(self.before_tree, self._git(self.receiver, "write-tree").stdout.strip())
+        self.assertEqual(self.before_status, self._git(self.receiver, "status", "--porcelain").stdout)
+        self.assertEqual("sentinel-before-preflight\n", self.fetch_head.read_text(encoding="utf-8"))
+
+    def test_ambiguous_matching_oe_init_rejects_before_receiver_mutation(self) -> None:
+        second_poky = self.home / "second-agl" / "external" / "poky"
+        (second_poky / "meta" / "conf" / "templates" / "default").mkdir(parents=True)
+        (second_poky / "oe-init-build-env").write_text(
+            "#!/usr/bin/env bash\nreturn 0\n",
+            encoding="utf-8",
+        )
+
+        result = self._run_helper(self.expected_tmpdir, self.expected_tmpdir)
+
+        self.assertNotEqual(0, result.returncode, result.stdout)
+        self.assertIn("oe-init-ambiguous", result.stderr)
         self.assertEqual(self.before_head, self._git(self.receiver, "rev-parse", "HEAD").stdout.strip())
         self.assertEqual(self.before_tree, self._git(self.receiver, "write-tree").stdout.strip())
         self.assertEqual(self.before_status, self._git(self.receiver, "status", "--porcelain").stdout)
@@ -218,6 +276,13 @@ class ReuseMiniBuildReceiverTests(unittest.TestCase):
         self.assertEqual(self.before_status, self._git(self.receiver, "status", "--porcelain").stdout)
 
     def test_valid_handoff_checks_out_exact_bundle_tip(self) -> None:
+        unrelated_poky = self.home / "old-agl" / "external" / "poky"
+        (unrelated_poky / "meta" / "conf" / "templates" / "other").mkdir(parents=True)
+        (unrelated_poky / "oe-init-build-env").write_text(
+            "#!/usr/bin/env bash\nreturn 9\n",
+            encoding="utf-8",
+        )
+
         result = self._run_helper(self.expected_tmpdir, self.expected_tmpdir)
 
         self.assertEqual(0, result.returncode, result.stderr)

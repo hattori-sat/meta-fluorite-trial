@@ -60,6 +60,10 @@ Preserve the strict FLR-0350 marker parser and process/FIFO identity checks.
   serial prompt handling, and all FLR-0350 launch/FIFO identity predicates.
 - Run local focused tests, shell syntax, runner `--check`, privacy,
   checkpoint, and staged-diff checks.
+- Make the established bundle preflight work with the actual split Mini layout:
+  resolve the AGL `external/poky` environment from a bounded, unique candidate
+  matched to the fixed build's persisted `TEMPLATECONF`; stop with a specific
+  reason before receiver mutation if it is missing, mismatched, or ambiguous.
 - After exact committed bundle handoff and Mini preflight, use exactly one new
   run ID. Require the official FIFO gate to pass before GDB attach/GO; if any
   later gate fails, retain evidence and create a new task rather than reusing
