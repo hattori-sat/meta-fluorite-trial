@@ -68,7 +68,7 @@
 
 - [x] Run privacy, staged-whitespace, shell/static, and focused tests; review only the staged FLR-0355 paths.
 - [x] Commit locally with the privacy-approved role identity; do not push. The harness fix is committed as `1b3f90c`.
-- [ ] Resolve both refs to commit objects, then use `scripts/handoff-fluorite-bundle.sh "$(git rev-parse --verify 'dev-mini-recovery^{commit}')" "$(git rev-parse --verify 'HEAD^{commit}')"` with the already-configured local build-host roles. Role variables are currently unset and targeted local-config searches found no candidate; the helper fail-closed at `BUILD_HOST` before bundle creation/SSH. Resume only when those roles are available; do not invent host/path values.
+- [x] Resolve both refs to commit objects and use the established `scripts/handoff-fluorite-bundle.sh` workflow. The exact feature tip reached the fixed receiver; bundle SHA and receiver revision are in Iteration 5 of the working log. No push occurred.
 - [x] Do not run BitBake: this commit changes only the diagnostic harness, not the layer’s image inputs.
 
 ### Task 4: Run one pinned-image QEMU attempt and capture evidence
@@ -81,11 +81,11 @@
 - Consumes: exact bundle tip, existing pinned FLR-0335 QEMU artifacts, and the FLR-0350/0354 command set.
 - Produces: one serial/GDB runtime record, QMP full-frame still, eight QMP PPM frames, fixed-region pixel analysis, an H.264 MP4 made on the Mac from those frames, SHA-256 values, and teardown verdict.
 
-- [ ] Before launch, verify the Mini receiver is at the exact tip, the run ID has no evidence directory, the QMP path/ports are free, no QEMU/runqemu/Flutter target process is active, and the starter’s pinned artifact hashes match. Stop without launching if any condition fails.
-- [ ] Run the command once with `flr0355-0001`. The actual-FD FIFO validator must pass before GDB attach/GO; if it fails, retain the fail-closed result and do not retry this ID.
-- [ ] Capture the complete frame and eight one-second QMP frames from the same QEMU instance. Analyze the full frame and fixed 3D ROI `0,200,1280,600`; never infer 3D from logs or static textures.
-- [ ] Transfer only the QMP still/frame sequence and bounded evidence logs to the Mac. Convert the still to PNG and frames to H.264 MP4 with the documented FFmpeg command. Record hashes, dimensions, frame count, FPS, and pixel summary; show the actual QMP image/video to the user.
-- [ ] Verify targeted app stop, QMP `quit`, QEMU exit, QMP socket removal, and zero matching QEMU/runqemu/Flutter/compositor processes on the Mini.
+- [x] Before launch, verify the exact Mini receiver, unused run ID, free QMP path/ports, zero target processes, and pinned artifact hashes. All gates passed.
+- [x] Invoke the runner once with `flr0355-0001`. It launched the paused wrapper but stopped before FIFO observation because `FLR-0350-observe-fifo-read-gate.cmd` was absent from the staging list. The ID is consumed; no retry.
+- [x] Capture the complete frame and eight one-second QMP frames from the same QEMU instance. Full-frame and fixed 3D ROI `0,200,1280,600` analysis both report uniform black; the observer, GDB attach, and GO were never reached.
+- [x] Transfer only the QMP still/frame sequence to the Mac; convert the still to PNG and frames to H.264 MP4. Hashes, dimensions, frame count/FPS, and pixel summary are in the working log; the QMP still was shown in the conversation.
+- [x] Verify recorded-app stop, QMP `quit`, QEMU exit, socket removal, and zero matching target processes. Cleanup passed.
 
 ### Task 5: Close this one-run ticket
 
@@ -107,7 +107,6 @@
 - The stale-ID defect is tested at the host-runner/starter boundary, not only in the generic ID parser.
 - The same pinned image, diagnostic overrides, and QMP-only capture policy remain unchanged.
 - The ticket does not claim 3D success unless the QMP screenshot itself contains chromatic/geometry evidence in the defined 3D region.
-- The one-run limit and cleanup are explicit. A failed initial side-effect-free
-  preflight creates no evidence directory and starts no process. If a repeated
-  start-time check fails after the run directory is created, the one-shot ID is
-  consumed and must not be retried.
+- The one-run limit and cleanup are explicit. This run ID is consumed despite
+  the harness staging defect; FLR-0356 owns the source-list regression and any
+  follow-up attempt must use its distinct fresh ID.

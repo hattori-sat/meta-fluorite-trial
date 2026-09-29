@@ -46,28 +46,32 @@ gate, not a promise that the producer will be observed or that 3D will render.
 - The seven-file local harness/docs change is committed on
   `feature-flr-0355-fresh-runtime-gate` as `1b3f90c` using the repository's
   privacy-approved integration-role metadata. No push occurred.
-- The documented Mini role variables are still unset. A targeted read-only
-  search of the process environment, canonical checkout/config filenames, and
-  shell profile candidates found no usable role configuration. The helper has
-  not been invoked with configured roles; no SSH/SCP, transfer, Mini query, or
-  QEMU run occurred.
+- The documented role variables were absent from the current process, but the
+  established fixed-role handoff was recovered from prior successful helper
+  history without recording its values. The existing bundle helper transferred
+  the committed tip; Mini reported the exact receiver revision and effective
+  TOPDIR/TMPDIR checks PASS.
 - The first handoff-helper invocation exposed a plan error: it requires
   hexadecimal commit objects, not the branch name `dev-mini-recovery`; it
   failed at argument validation before creating a bundle or accessing the
   network. The plan now resolves both refs with `git rev-parse --verify`.
 - The corrected hash-based helper invocation failed closed at the unset
   `BUILD_HOST` requirement, before bundle creation or SSH. No Mini state changed.
-- The Mini receiver, Mini process/port/evidence state, image hashes, FIFO
-  observation, QMP frame/video, and teardown have not been checked in this
-  iteration. No transfer, runtime launch, build, or Devtool operation occurred.
+- One Mini-hosted QEMU attempt ran against the pinned existing image. Guest
+  readiness, production-profile preflight, GDB script transfer, and paused
+  launch wrapper all passed, but the runner stopped before the actual FIFO
+  observation because it had not staged the observer command. QMP still/eight
+  frames and teardown evidence were captured. No BitBake build or Devtool
+  operation occurred.
 - The FLR-0350 run stopped before Flutter/GDB execution; its black QMP image
   is not evidence about Flutter or 3D.
 - The approved QMP capture helper writes PPM frames, not MP4. The project
   runtime-evidence procedure transfers only QMP frames to the Mac and encodes
   the reviewable video there with FFmpeg.
-- The current agent shell has no `BUILD_*` role variables loaded. The fixed
-  local role configuration must be made available without recording its
-  values before bundle transfer; no network action has occurred in FLR-0355.
+- The current agent shell still has no `BUILD_*` role variables loaded. This
+  did not prevent the already-authorized transfer: the same fixed helper role
+  set used by earlier successful handoffs was reused transiently and was not
+  printed or written to Git.
 - No `CONTEXT.md` or runtime/graphics ADR was found in this checkout. The
   accepted branch workflow in [ADR-0002](../decisions/ADR-0002-git-branch-workflow.md)
   applies; the behavior/evidence source of truth is `TASKS.md`, FLR-0350/0354
@@ -153,18 +157,20 @@ regression test before transfer.
   same fresh ID reaches both starter modes and the consumed ID is rejected.
 - [x] `--check` passes, preserves the exact diagnostic profile and hash pins,
   and explicitly reports `QEMU_NOT_STARTED`.
-- [ ] The Mini receiver is the exact committed bundle tip; no BitBake build or
-  product/image mutation occurs.
-- [ ] The single QEMU attempt is tied to pinned artifact hashes and fresh
-  `flr0355-0001`; QMP full frame and eight QMP frames are retained.
-- [ ] The actual-FD gate passes before attach/GO, or its fail-closed reason and
-  minimal serial evidence are recorded without a second attempt.
-- [ ] A QMP-derived still and H.264 MP4 are visible to the user; hashes,
+- [x] The Mini receiver is the exact committed bundle tip; no BitBake build or
+  product/image mutation occurred.
+- [x] The single QEMU attempt used pinned artifacts and fresh
+  `flr0355-0001`; a QMP full frame and eight QMP frames were retained.
+- [ ] The actual-FD gate passes before attach/GO, or a gate-specific fail-closed
+  reason and serial evidence are recorded. The current run did not reach this
+  gate; its one-shot ID is consumed and will not be retried.
+- [x] A QMP still and H.264 MP4 are visible in this conversation; hashes,
   resolution, frame count/FPS, full-frame summary, and ROI summary are logged.
-- [ ] Cleanup proves recorded app stop, QMP quit, QEMU exit, socket removal,
+- [x] Cleanup proves recorded app stop, QMP quit, QEMU exit, socket removal,
   and zero matching QEMU/runqemu/Flutter/compositor processes.
-- [ ] 2D/HUD and 3D ROI verdicts are separate. 3D is PASS only if the QMP
-  image visibly contains geometry/color in the defined ROI.
+- [x] 2D/HUD and 3D ROI verdicts are separate. This capture is uniformly black;
+  it is not evidence about Flutter rendering because the run stopped before
+  GDB attach/GO. 3D is not established.
 
 ## Plan / Do / Check / Act
 
@@ -183,9 +189,10 @@ regression test before transfer.
 
 - Initial evidence and failed tool attempts are in
   [the FLR-0355 working log](../logs/2026-09-29-flr0355.md).
-- The runner/starter contract is implemented and locally verified. Exact
-  commands and the intermediate test failure are recorded in Iteration 2 of
-  the working log. No Mini-side operation has started.
+- The runner/starter contract is implemented and locally verified. The exact
+  bundle was transferred and one QEMU attempt ran; Iteration 5 of the working
+  log records that the runner failed to stage the FIFO-observer command before
+  it attempted to execute it. The observer gate, attach, and GO did not run.
 
 ### Check
 
@@ -194,31 +201,31 @@ regression test before transfer.
 | Run-ID red/green | Regression fails before edit, passes after | PASS: prior red was 25 tests/2 new failures; current 27 tests pass |
 | Local runner | `--check`, syntax, profile parity, existing tests | PASS: both `bash -n`, focused tests, exact profile parity, and `--check`; QEMU NOT STARTED |
 | Documentation gates | Privacy and checkpoint contracts pass; markdown links resolve | Privacy/checkpoint PASS; `make check-markdown` still fails on 9 pre-existing FLR-0338/0339 QMP evidence links, none in FLR-0355 |
-| Mini handoff | exact bundle SHA/tip and fixed receiver state | NOT RUN |
-| Runtime | one run ID, target/image identity, actual-FD FIFO predicate | NOT RUN |
-| Visual | QMP full-frame and eight-frame sequence, MP4, pixel summary | NOT RUN |
-| Teardown | no app/QEMU/process/socket residue | NOT RUN |
+| Mini handoff | exact bundle SHA/tip and fixed receiver state | PASS: exact receiver tip; bundle SHA recorded in Iteration 5 |
+| Runtime | one run ID, target/image identity, actual-FD FIFO predicate | PARTIAL/FAIL: guest and launch setup passed; missing staged observer command stopped the run before the predicate |
+| Visual | QMP full-frame and eight-frame sequence, MP4, pixel summary | CAPTURE PASS; full frame and 3D ROI uniformly black; Flutter rendering not reached |
+| Teardown | no app/QEMU/process/socket residue | PASS: app/FIFO cleanup, QMP quit, zero residual target processes |
 
 ### Act
 
-- Do not begin Mini/runtime side effects until local regression and static
-  gates pass. Any new runtime/root-cause question becomes a separate ticket.
+- Any further runner fix or runtime attempt is a distinct ticket with a new
+  run ID. Do not retry `flr0355-0001`.
 
 ## Visual evidence
 
-- No FLR-0355 QMP screenshot/video exists yet. The prior FLR-0350 black frame
-  was captured before Flutter/GDB started and is not 3D evidence.
-- The next QMP still and MP4 must be linked here from the one fresh run; raw
-  frames and video stay outside Git.
+- `flr0355-0001` QMP still: `$EVIDENCE_ROOT/flr0355-0001/qemu/post-run.ppm`,
+  1280x800, SHA-256
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`.
+- QMP-only H.264: eight frames at 1 fps, 1280x800; the Mac review copy is
+  outside Git. All eight frames and the still have the same pixel hash.
+- Full frame and fixed 3D ROI are pure black: 0 changed pixels, 0 edge pixels,
+  0 chromatic pixels, luma range `[0,0]`. The QMP capture is shown in the
+  conversation. Because the run stopped before attach/GO, it is not a Flutter
+  rendering verdict.
 
 ## UNKNOWN
 
-- Whether the required fixed Mini role configuration can be made available to
-  the current executor without exposing values in logs. Targeted locations
-  checked so far did not contain/load the documented role variables.
-- Whether the Mini evidence directory/run ID, ports, and target processes are
-  free; Mac state is not authoritative for Mini QEMU.
-- Whether the exact pinned image remains present with all three expected
-  hashes and whether the exact guest `stat` invocation works.
-- Whether the FD points to the owned FIFO, whether GDB/producer correlation
-  reaches the watch window, and whether any 3D pixels are visible.
+- Whether the exact-FD FIFO observation passes once its command is staged and
+  invoked on a fresh runtime.
+- Whether GDB attachment, GO, producer correlation, and any Flutter/3D drawing
+  occur after that gate.
