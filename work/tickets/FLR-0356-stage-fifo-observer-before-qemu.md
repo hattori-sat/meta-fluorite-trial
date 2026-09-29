@@ -206,6 +206,7 @@ impact. Integration risk is isolated to the shell runner and its tests.
   `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`.
   The screenshot was shown during this task. It is uniformly black because the
   observer parser stopped the paused wrapper before GDB attach/GO.
+- ![FLR-0356 QMP-only full frame captured before GO](../evidence/FLR-0356-qmp-pre-go-black.png)
 - H.264 review video: 1280×800, 1 fps, 8 frames / 8 seconds, SHA-256
   `82e5f5a0490e7354ff44f6105d4eb6c17c31e16c51e064e33648f0a7d42df2e4`.
 - The still, eight QMP PPMs, pixel reports, and bounded gate logs are retained
