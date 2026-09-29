@@ -6,7 +6,7 @@ cd -- "$repo_root"
 start_script=$repo_root/work/commands/FLR-0350-qemu-start.sh
 evidence_root=/mnt/yocto/evidence
 prior_run_dir=$evidence_root/flr0335-0001/qemu
-harness=$prior_run_dir/qemu-runtime-harness.sh
+harness_source=$repo_root/scripts/qemu-runtime-harness.sh
 capture=$prior_run_dir/qemu-pixel-capture.py
 runtime_command_files=(
     FLR-0350-preflight.cmd
@@ -46,6 +46,32 @@ try:
         raise SystemExit("fresh run-ID preflight/start order failed")
 except ValueError as exc:
     raise SystemExit("fresh run-ID preflight/start contract missing") from exc
+helper_stage = 'cp -- "$harness_source" "$parent/qemu-runtime-harness.sh"'
+helper_select = 'harness=$parent/qemu-runtime-harness.sh'
+runner_runtime = runner_text.split("run_id=$1\n", 1)[1]
+if not re.search(r"(?m)^harness_source=\$repo_root/scripts/qemu-runtime-harness\.sh$", runner_text) or \
+   helper_stage not in runner_runtime or helper_select not in runner_runtime:
+    raise SystemExit("runtime helper source/staging/selection contract missing")
+if not (runner_runtime.index(helper_stage) < runner_runtime.index(helper_select)
+        < runner_runtime.rindex(start_call)):
+    raise SystemExit("runtime helper must be staged and selected before QEMU start")
+if not re.search(r"(?m)^harness_source=\$repo_root/scripts/qemu-runtime-harness\.sh$", starter_text) or \
+   not re.search(r"(?m)^harness=\$new_run_parent/qemu-runtime-harness\.sh$", starter_text) or \
+   'cmp -s "$harness_source" "$harness"' not in starter_text:
+    raise SystemExit("QEMU starter runtime helper provenance contract missing")
+head_blob = 'git -C "$repo_root" show "HEAD:scripts/qemu-runtime-harness.sh"'
+if head_blob not in runner_runtime or head_blob not in starter_text or \
+   '[ -x "$harness_source" ]' not in runner_runtime or \
+   '[ -x "$harness" ]' not in starter_text:
+    raise SystemExit("runtime helper must be executable and byte-identical to committed HEAD")
+if "harness=$prior_run_dir/qemu-runtime-harness.sh" in runner_text.splitlines() or \
+   "harness=$prior_run_dir/qemu-runtime-harness.sh" in starter_text.splitlines():
+    raise SystemExit("runtime helper still selects or pins a prior-run copy")
+capture_sha = "992c0428cc85dc61ebdea1e49dc544eed528a961f06faf9dd7fe7de30795ec24"
+if 'capture=$prior_run_dir/qemu-pixel-capture.py' not in runner_text or \
+   'capture=$prior_run_dir/qemu-pixel-capture.py' not in starter_text or \
+   capture_sha not in starter_text:
+    raise SystemExit("historical QMP pixel-capture helper identity changed")
 if "${FLR0350_RUN_ID:?" not in starter_text or \
    '--check-run-id "$run_id"' not in starter_text or \
    "${FLR0350_RUN_ID:-flr0350-0001}" in starter_text:
@@ -129,6 +155,9 @@ print("FLR0350_STATIC_CHECK=PASS commands=%d gdb_python_blocks=%d transfer_chunk
       (len(command_names), len(blocks), len(chunks)))
 print("FLR0350_PROFILE_MATCH=PASS environment=exact cli=exact target=qemux86-64")
 print("FLR0350_RUN_ID_HANDOFF=PASS preflight-before-evidence start-same-id")
+print("FLR0350_RUNTIME_HELPER_CONTRACT=PASS source=repo staged=run-parent callers=runner+starter")
+print("FLR0350_RUNTIME_HELPER_HEAD=PASS committed-blob=source=staged executable=true")
+print("FLR0350_PIXEL_CAPTURE_IDENTITY=PASS historical-helper-sha-pinned")
 PY
     python3 "$repo_root/tests/test_flr0350_launch_gate.py"
     python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id flr0356-0001
@@ -182,12 +211,39 @@ else
     printf '%s\n' "$preflight_output" >&2
     exit "$preflight_rc"
 fi
+[ -x "$harness_source" ] || {
+    echo 'FLR0350_RUNTIME_HELPER=FAIL reason=source-not-executable' >&2
+    exit 1
+}
+source_commit=$(git -C "$repo_root" rev-parse HEAD) || {
+    echo 'FLR0350_RUNTIME_HELPER=FAIL reason=commit-unavailable' >&2
+    exit 1
+}
+committed_harness_sha=$(git -C "$repo_root" show "HEAD:scripts/qemu-runtime-harness.sh" |
+    sha256sum | awk '{print $1}')
+source_harness_sha=$(sha256sum "$harness_source" | awk '{print $1}')
+[ "$source_harness_sha" = "$committed_harness_sha" ] || {
+    echo 'FLR0350_RUNTIME_HELPER=FAIL reason=source-not-at-HEAD' >&2
+    exit 1
+}
 mkdir -- "$parent"
 exec > >(tee -a "$parent/FLR-0350-runner.log") 2>&1
 printf '%s\n' "$preflight_output" | tee "$parent/qemu-preflight.log"
 for file in "${runtime_command_files[@]}"; do
     cp -- "$repo_root/work/commands/$file" "$parent/$file"
 done
+cp -- "$harness_source" "$parent/qemu-runtime-harness.sh"
+harness=$parent/qemu-runtime-harness.sh
+if ! cmp -s "$harness_source" "$harness"; then
+    echo 'FLR0350_RUNTIME_HELPER=FAIL reason=staged-source-mismatch' >&2
+    exit 1
+fi
+harness_sha=$(sha256sum "$harness" | awk '{print $1}')
+[ -x "$harness" ] && [ "$harness_sha" = "$committed_harness_sha" ] || {
+    echo 'FLR0350_RUNTIME_HELPER=FAIL reason=staged-not-committed-bytes' >&2
+    exit 1
+}
+echo "FLR0350_RUNTIME_HELPER=PASS source_commit=$source_commit committed_sha256=$committed_harness_sha source_sha256=$source_harness_sha staged_sha256=$harness_sha"
 echo "FLR0350_COMMAND_STAGE=PASS location=evidence-parent count=${#runtime_command_files[@]}"
 
 guest_run() {

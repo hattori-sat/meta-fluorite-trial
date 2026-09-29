@@ -1,6 +1,6 @@
 # FLR-0358 — clear serial receive bytes before each command
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High; blocks the next bounded production runtime observation
 - Owner: QEMU serial harness / runtime-gate roles
 - Created: 2026-09-29
@@ -9,6 +9,7 @@
 - Plan: [FLR-0358 plan](../../docs/superpowers/plans/2026-09-29-flr0358-serial-capture-boundary.md)
 - Working log: [FLR-0358 log](../logs/2026-09-29-flr0358.md)
 - Branch: `feature-flr-0358-clear-serial-buffer` (created from the FLR-0357 closeout commit)
+- Follow-up: [FLR-0359 — use the committed QEMU runtime helper](FLR-0359-use-committed-qemu-runtime-helper.md)
 
 ## Objective
 

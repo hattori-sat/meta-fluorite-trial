@@ -24,7 +24,8 @@ prior_run_dir=$evidence_root/flr0335-0001/qemu
 new_run_parent=$evidence_root/$run_id
 run_dir=$new_run_parent/qemu
 qmp=$run_dir/qmp-0350.sock
-harness=$prior_run_dir/qemu-runtime-harness.sh
+harness_source=$repo_root/scripts/qemu-runtime-harness.sh
+harness=$new_run_parent/qemu-runtime-harness.sh
 capture=$prior_run_dir/qemu-pixel-capture.py
 
 if [ "$mode" = preflight ]; then
@@ -35,9 +36,26 @@ else
 fi
 { [ ! -e "$run_dir" ] && [ ! -L "$run_dir" ]; } || fail run-directory-already-exists
 
-test "$(sha256sum "$harness" | awk '{print $1}')" = \
-    339472336f14387fd1b72c3d702e510de19ff710c5c203441733a7a59d79aa6d ||
-    fail harness-identity
+if [ "$mode" = preflight ]; then
+    [ -x "$harness_source" ] || fail runtime-helper-source-not-executable
+    source_commit=$(git -C "$repo_root" rev-parse HEAD) || fail runtime-helper-commit-unavailable
+    helper_commit_sha=$(git -C "$repo_root" show "HEAD:scripts/qemu-runtime-harness.sh" |
+        sha256sum | awk '{print $1}')
+    helper_source_sha=$(sha256sum "$harness_source" | awk '{print $1}')
+    [ "$helper_source_sha" = "$helper_commit_sha" ] || fail runtime-helper-not-committed
+    echo "FLR0350_RUNTIME_HELPER_PREFLIGHT=PASS source_commit=$source_commit committed_sha256=$helper_commit_sha source_sha256=$helper_source_sha staged=NOT_CREATED"
+else
+    [ -x "$harness" ] || fail runtime-helper-not-staged-or-executable
+    cmp -s "$harness_source" "$harness" || fail runtime-helper-source-mismatch
+    source_commit=$(git -C "$repo_root" rev-parse HEAD) || fail runtime-helper-commit-unavailable
+    helper_commit_sha=$(git -C "$repo_root" show "HEAD:scripts/qemu-runtime-harness.sh" |
+        sha256sum | awk '{print $1}')
+    helper_source_sha=$(sha256sum "$harness_source" | awk '{print $1}')
+    helper_staged_sha=$(sha256sum "$harness" | awk '{print $1}')
+    [ "$helper_source_sha" = "$helper_commit_sha" ] || fail runtime-helper-not-committed
+    [ "$helper_source_sha" = "$helper_staged_sha" ] || fail runtime-helper-sha-mismatch
+    echo "FLR0350_RUNTIME_HELPER=PASS source_commit=$source_commit committed_sha256=$helper_commit_sha source_sha256=$helper_source_sha staged_sha256=$helper_staged_sha"
+fi
 test "$(sha256sum "$capture" | awk '{print $1}')" = \
     992c0428cc85dc61ebdea1e49dc544eed528a961f06faf9dd7fe7de30795ec24 ||
     fail capture-helper-identity

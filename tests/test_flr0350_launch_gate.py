@@ -362,5 +362,69 @@ class StarterRunIdPropagationTests(unittest.TestCase):
         self.assertIn("FLR0350_RUN_ID=REJECTED", output.getvalue())
 
 
+class RuntimeHelperProvenanceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        self.starter = (ROOT / "work/commands/FLR-0350-qemu-start.sh").read_text()
+
+    def test_runner_stages_current_helper_before_start_and_uses_that_copy(self) -> None:
+        source = 'harness_source=$repo_root/scripts/qemu-runtime-harness.sh'
+        staged = 'cp -- "$harness_source" "$parent/qemu-runtime-harness.sh"'
+        selected = 'harness=$parent/qemu-runtime-harness.sh'
+        start = 'FLR0350_RUN_ID="$run_id" bash "$start_script" start'
+        runtime = self.runner.split("run_id=$1\n", 1)[1]
+
+        self.assertTrue(source in self.runner, "runner does not source the current repository helper")
+        self.assertTrue(staged in runtime, "runner does not stage the helper into the run parent")
+        self.assertTrue(selected in runtime, "runner does not select the staged run helper")
+        self.assertLess(runtime.index(staged), runtime.index(selected))
+        self.assertLess(runtime.index(selected), runtime.rindex(start))
+        self.assertTrue(
+            'git -C "$repo_root" show "HEAD:scripts/qemu-runtime-harness.sh"' in runtime,
+            "runner does not compare source bytes with committed HEAD",
+        )
+        self.assertTrue('[ -x "$harness_source" ]' in runtime,
+                        "runner does not reject a non-executable source helper")
+        self.assertTrue('sha256sum "$harness"' in self.runner, "runner does not calculate staged helper SHA")
+        self.assertTrue("FLR0350_RUNTIME_HELPER=PASS" in self.runner, "runner omits helper provenance marker")
+        self.assertFalse("harness=$prior_run_dir/qemu-runtime-harness.sh" in self.runner.splitlines(),
+                         "runner still selects the prior-run helper")
+
+    def test_starter_validates_and_uses_the_same_run_scoped_helper(self) -> None:
+        source = 'harness_source=$repo_root/scripts/qemu-runtime-harness.sh'
+        staged = 'harness=$new_run_parent/qemu-runtime-harness.sh'
+        self.assertTrue(source in self.starter, "starter does not source the current repository helper")
+        self.assertTrue(staged in self.starter, "starter does not select the run-scoped helper")
+        self.assertTrue('cmp -s "$harness_source" "$harness"' in self.starter,
+                        "starter does not compare staged bytes with source")
+        self.assertTrue(
+            'git -C "$repo_root" show "HEAD:scripts/qemu-runtime-harness.sh"' in self.starter,
+            "starter does not compare source bytes with committed HEAD",
+        )
+        self.assertTrue('[ -x "$harness" ]' in self.starter,
+                        "starter does not reject a non-executable run helper")
+        self.assertLess(
+            self.starter.index('cmp -s "$harness_source" "$harness"'),
+            self.starter.index('"$harness" preflight'),
+            "starter invokes the helper before validating staged bytes",
+        )
+        self.assertTrue("runtime-helper-source-mismatch" in self.starter,
+                        "starter has no fail-closed source mismatch reason")
+        self.assertTrue('"$harness" preflight' in self.starter and '"$harness" start' in self.starter,
+                        "starter does not invoke the validated helper for both operations")
+        self.assertFalse("harness=$prior_run_dir/qemu-runtime-harness.sh" in self.starter.splitlines(),
+                         "starter still selects the prior-run helper")
+        self.assertFalse(
+            "339472336f14387fd1b72c3d702e510de19ff710c5c203441733a7a59d79aa6d" in self.starter,
+            "starter still pins the old runtime helper SHA",
+        )
+
+    def test_pixel_capture_helper_remains_pinned_to_historical_evidence(self) -> None:
+        capture_identity = "992c0428cc85dc61ebdea1e49dc544eed528a961f06faf9dd7fe7de30795ec24"
+        self.assertIn("capture=$prior_run_dir/qemu-pixel-capture.py", self.runner)
+        self.assertIn("capture=$prior_run_dir/qemu-pixel-capture.py", self.starter)
+        self.assertIn(capture_identity, self.starter)
+
+
 if __name__ == "__main__":
     unittest.main()
