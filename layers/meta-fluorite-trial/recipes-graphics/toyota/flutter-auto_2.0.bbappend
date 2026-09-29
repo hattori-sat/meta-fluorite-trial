@@ -35,6 +35,13 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 HOMESCREEN_COMMIT = "dd6d9224de807e24f0f9150e5a2e4ee1b896ac3c"
 PLUGINS_COMMIT = "2163242e9973336153871ed63b34bb5ed8282145"
 
+# The pinned plugin source contains sdbus-cpp as a Git submodule. Fetch the
+# plugin component recursively so its CMakeLists.txt is present at configure
+# time; preserve the repository, protocol, branch, source name, destination,
+# and pinned revision.
+SRC_URI:remove = "git://github.com/toyota-connected/ivi-homescreen-plugins.git;protocol=https;branch=v2.0;name=plugins;destsuffix=${S}/ivi-homescreen-plugins"
+SRC_URI:append = " gitsm://github.com/toyota-connected/ivi-homescreen-plugins.git;protocol=https;branch=v2.0;name=plugins;destsuffix=${S}/ivi-homescreen-plugins"
+
 # The upstream v2.0 source refactored Camera from
 # core/scene/camera/camera.cc into core/components/derived/camera.cc. The
 # historical patch only initialized a field on the removed Camera class and

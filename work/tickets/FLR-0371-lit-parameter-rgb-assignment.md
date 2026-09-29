@@ -1,6 +1,6 @@
 # FLR-0371 — test LIT parameter color with RGB-only assignment
 
-- Status: In Progress
+- Status: Waiting — blocked by [FLR-0372](FLR-0372-fetch-plugin-git-submodules.md)
 - Priority: High
 - Owner: Mac Podman Devtool / Mini build / direct guest SSH / Flutter / QMP roles
 - Created: 2026-09-30
@@ -9,6 +9,10 @@
 - Baseline: current rootfs SHA-256 `5c8ca252181fac1a64669ae78de5b3fa590db1048f95f156db306df2f9d821ec`
 - Branch: `feature-flr-0371-lit-parameter-rgb-assignment` (local, no push)
 - Working log: [FLR-0371 working log](../logs/2026-09-30-flr0371.md)
+- Current blocker: candidate patch 0330 passes Mini `do_patch`, but the
+  candidate compile stops in `flutter-auto:do_configure` because the pinned
+  plugin's `sdbus-cpp` submodule is absent. FLR-0372 owns only the fetch-mode
+  correction; this ticket resumes after that prerequisite is verified.
 
 ## Objective
 
@@ -170,8 +174,9 @@ launcher.
 | Devtool source baseline | Component-scoped source begins at exact PLUGINS_COMMIT and includes current recipe patches | 478-file source/index baseline committed; exact pinned parent; one Devtool registration | PASS |
 | One-variable source diff | Only parameter-source assignment changes from whole vec4 to `.rgb` | One file, one insertion/one deletion; source commit parent is full baseline | PASS |
 | Official patch generation | Official Devtool patch is generated and registered unchanged | Patch 0330 SHA `069420d5…`; one exact hunk; bbappend registration once; privacy and whitespace checks pass | PASS; Mini apply pending |
-| Mini candidate gate/build | Exact local commit is received; do_patch, compile, image pass | Local layer commit `0e8aa99…` is ready; not yet transferred. Current Mini `do_patch` is pre-candidate only | PENDING |
-| Bundle / Mini build | Exact local commit is received; do_patch, compile, image pass | Pending | PENDING |
+| Mini candidate patch gate | Exact candidate commit is received and `do_patch` passes | Bundle tip `f4e32cb2da2301ecb502e31bcda746084e32bddb` reached the clean Mini receiver; candidate `do_patch=PASS` | PASS |
+| Candidate configure / compile | Required plugin submodule is present; configure and compile pass | `do_compile -f` stopped at `do_configure`: required `sdbus-cpp/CMakeLists.txt` is missing; FLR-0372 owns the fetch prerequisite | BLOCKED |
+| Candidate image / runtime | Exact candidate image boots; manual Flutter/QMP shows assignment result | Not started; production and RGB-only candidate verdict remain UNKNOWN | PENDING |
 | Direct manual runtime | One `agl-driver` Flutter process; launch and native setup markers captured | Existing-image LIT/constant-color control; 10 presents at first gate, 163 recorded by log retrieval; exact PID stopped | PASS (control only) |
 | QMP acceptance | Visible native geometry and 2D HUD in same complete frame; ROI/video evidence retained | QMP full frame shows dark-blue fixture and HUD together: native 92,352/144,000 chromatic pixels; HUD 2,845. RGB-only assignment remains unbuilt/unverified. Evidence retained under `$BUILD_EVIDENCE/flr0371-0001/qemu/` | PARTIAL |
 | Teardown | Exact app and QEMU stopped; process/socket/port checks clean | App PID 812 stopped; QMP quit accepted; independent checks found no QEMU/runqemu/Flutter, QMP socket, or listeners on run ports | PASS |
@@ -188,6 +193,10 @@ launcher.
 - If the app exits before controlled stop, keep the QMP result but split the
   process-exit diagnosis into a separate ticket unless the evidence directly
   identifies a blocker to this fixture verdict.
+- Resume this ticket only after FLR-0372 proves the exact plugin source and
+  its pinned `sdbus-cpp` submodule are fetched, patched, configured, and
+  compiled. Do not treat the existing-image positive control as the candidate
+  patch result.
 
 ## Visual evidence
 
