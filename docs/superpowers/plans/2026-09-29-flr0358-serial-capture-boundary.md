@@ -53,8 +53,8 @@
 - Verify: `scripts/qemu-runtime-harness.sh`, `tests/test_qemu_runtime_harness.py`, ticket, log, `TASKS.md`, this plan
 
 - [x] Run focused and full Python tests, `bash -n scripts/qemu-runtime-harness.sh`, `bash tests/test-qemu-runtime-harness.sh`, and `bash work/commands/FLR-0350-run-sync-producer.sh --check`.
-- [ ] Run canonical guard, ticket checkpoint, privacy, file-size, staged-whitespace, and scoped Markdown-link checks; record the unrelated repository-wide missing-link baseline without repairing unrelated tickets. Pre-stage results: canonical/checkpoint/privacy/file-size/scoped links pass; global Markdown has nine unrelated existing failures.
-- [ ] Commit only FLR-0358 files locally on `feature-flr-0358-clear-serial-buffer`; do not push.
+- [x] Run canonical guard, ticket checkpoint, privacy, file-size, staged-whitespace, and scoped Markdown-link checks; record the unrelated repository-wide missing-link baseline without repairing unrelated tickets. Canonical/checkpoint/privacy/file-size/staged whitespace/scoped links pass; global Markdown has nine unrelated existing failures.
+- [x] Commit only FLR-0358 files locally on `feature-flr-0358-clear-serial-buffer`; do not push (`3a54e83`).
 
 ### Task 4: Transfer and validate once on Mini QEMU
 
