@@ -1,6 +1,6 @@
 # FLR-0359 — use the committed QEMU runtime helper
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Owner: Mac runtime runner / Mini QEMU / QMP evidence roles
 - Created: 2026-09-29
@@ -163,7 +163,7 @@ Set the source to `$repo_root/scripts/qemu-runtime-harness.sh`, stage it once as
 
 ### Act
 
-- FLR-0359 can close only after the final PDCA/evidence/privacy checks pass. Its bounded runtime result is exact-helper provenance PASS, FIFO gate PASS, then GDB attach precondition STOP before GO. FLR-0360 now exists in Inbox to report each attach predicate at the same decision point without changing the acceptance rule; do not reuse `flr0359-0001`.
+- Closed as the bounded helper-provenance/runtime-attempt unit after the final evidence audit and Astra PDCA PASS. Local closeout commit: `7f6c4ba` on the FLR-0359 feature branch. Exact-helper provenance and FIFO gate passed; GDB attach stopped generically before GO, so this is not a renderer result. FLR-0360 is now the sole active ticket on its own feature branch and will report each attach predicate at the same decision point without changing the acceptance rule; do not reuse `flr0359-0001`.
 
 ## Decision log
 

@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- FLR-0359 remains the only In Progress ticket until its evidence audit and PDCA review pass.
+- FLR-0359 closed as a bounded helper-provenance/runtime-attempt unit in commit `7f6c4ba`; FLR-0360 is the only In Progress ticket on its dedicated feature branch.
 - Keep the existing syscall fd 3 requirement and every other current predicate exactly fail-closed; this plan adds observability, not alternate acceptance.
 - Modify only the guest attach diagnostic command, its static regression, ticket/log/plan, and task dashboard.
 - Use the established committed-bundle handoff to the fixed Mini receiver. Do not create another source receiver, build directory, TMPDIR, or cache.

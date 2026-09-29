@@ -1,6 +1,6 @@
 # FLR-0360 — diagnose the GDB attach precondition at the same decision point
 
-- Status: Inbox
+- Status: In Progress
 - Priority: High
 - Owner: QEMU guest attach gate / runtime evidence roles
 - Created: 2026-09-29
@@ -81,7 +81,7 @@ Do not weaken the gate based on the observer-only `read(0)` record. The current 
 
 ### Do
 
-- Not started. FLR-0359 remains the sole In Progress ticket until its closeout checker passes.
+- Promoted as the sole active unit on `feature-flr-0360-diagnose-gdb-attach-precondition`, based on FLR-0359 closeout commit `7f6c4ba`. No source edits, tests, bundle transfer, or runtime ID have been used yet.
 
 ### Check
 
@@ -95,7 +95,7 @@ Do not weaken the gate based on the observer-only `read(0)` record. The current 
 
 ### Act
 
-- Keep in Inbox until FLR-0359 is closed and this ticket is promoted to the sole In Progress work unit.
+- Add the red static contract first; do not weaken or bypass any existing attach predicate.
 
 ## PDCA checker
 
