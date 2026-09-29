@@ -124,9 +124,9 @@ Record facts, inferences, hypotheses, UNKNOWN, exact test commands/results, and 
 
 Run `bash scripts/assert-canonical-repository.sh`, `git diff --check`, `scripts/runtime-checkpoint.sh verify --ticket FLR-0356 --log work/logs/2026-09-29-flr0356.md`, and `make check-privacy`. Expected: canonical/privacy/checkpoint/whitespace PASS with exactly one ticket In Progress.
 
-- [ ] **Step 3: Commit only reviewed FLR-0356 paths locally**
+- [x] **Step 3: Commit only reviewed FLR-0356 paths locally**
 
-Stage named ticket, log, plan, task dashboard, runner, and test paths; run `git diff --cached --check`; commit as `fix: stage all FLR-0350 guest commands before QEMU`. Do not push.
+Stage named ticket, log, plan, task dashboard, runner, and test paths; run `git diff --cached --check`; commit as `fix: stage all FLR-0350 guest commands before QEMU`. Completed as `badc547`; do not push.
 
 ### Task 4: Handoff and run one fresh Mini QEMU attempt
 
