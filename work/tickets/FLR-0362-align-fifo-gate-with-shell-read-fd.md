@@ -1,6 +1,7 @@
 # FLR-0362 — align the FIFO gate with the shell read descriptor
 
-- Status: In Progress
+- Status: Waiting
+- Waiting reason: `flr0362-0001` stopped at the runner's independent guest-helper staging defect before Flutter launch; FLR-0363 will repair that handoff before this FIFO/attach gate is resumed.
 - Priority: High
 - Owner: QEMU guest FIFO/attach gate and runtime evidence roles
 - Created: 2026-09-29
@@ -109,3 +110,32 @@ Historical records are evidence with scope, not authority:
 ### Act
 
 - On the clean follow-up exact bundle, invoke the runtime runner once with `flr0362-0001`. Its normal path runs canonical/static/46-test and helper-provenance gates, then target/image/port preflight, and only then starts QEMU. Do not run a separate duplicate `--check`; if any prelaunch gate fails, preserve it and stop without retrying the ID. No recipe/image build is in scope. Capture QMP still/eight-frame evidence and classify it by GO state.
+
+## Runtime attempt addendum — `flr0362-0001` stopped before Flutter
+
+### Facts
+
+- The exact committed bundle tip `37ce70ece15907c642cfbd2c10688fd4d7e13965` reached the fixed Mini receiver; bundle SHA-256 was `5a9dfd3fbccc437bb55331dce6d7007485dba81ee235487ccb1ca93413e543f6`. Effective `TOPDIR` and `TMPDIR` checks passed.
+- The normal runner executed its embedded static suite (46/46 passed), verified helper provenance and pinned image inputs, started QEMU, reached `guest-ready=PASS` on SSH-port probe attempt 12, and captured the pre-launch QMP frame.
+- Guest helper staging then failed at the first `FLR-0350-gate-common.sh` chunk. The runner's install command file was created, but the serial bridge reported `command-file-not-readable`; the guest helper was not installed.
+- Read-only Mini artifact checks confirmed `launch.serial.log`, `release-go.serial.log`, `runtime-state.serial.log`, and `post-run.ppm` are absent. Only `pre-launch.ppm` exists; its SHA-256 is `2617e8773e7bf65962467a54d212e36715ea674fbe3b7d05dc322c0dec209dc6`. The QMP socket is absent after teardown.
+- QMP quit was accepted and cleanup reported `residual_targets=0 residual_qmp=0`. No `agl-driver` app wrapper, `/usr/bin/flutter-auto`, GDB attach, GO token, app startup log, scene/frame marker, or post-launch screen was produced.
+- The source computes `install_file=$run_dir/install-guest-script-$chunk_index.cmd`, but the `guest_run` call passes `"$install-guest-script-$chunk_index.cmd"`. Under Bash expansion this expands `$install` (the command body) instead of using the prepared filename.
+
+### Inferences
+
+- This is a confirmed host-runner argument-expansion defect at the guest-command staging boundary. It explains the earliest actionable divergence and is unrelated to Flutter rendering.
+- The black pre-launch QMP frame is expected before guest app launch. This run neither proves a black Flutter screen nor establishes a 3D regression; 2D and 3D are UNKNOWN for this attempt.
+- The historical execution contract remains explicit: start exactly one `flutter-auto` as `agl-driver`, inspect the launch/runtime log, and judge the post-launch QMP frame. FLR-0116 showed the app alive with HUD while the 3D ROI was black; FLR-0235 and FLR-0286 are separate positive controls for HUD plus self-made native geometry/lighting, not production Sequoia success.
+
+### Hypotheses
+
+1. **Confirmed:** the command-file path argument is malformed because the runner interpolates the shell command body instead of `$install_file`. Prediction: the failure disappears when the exact generated filename is passed; a regression test must fail on the old call site.
+2. **Not tested here:** after helper staging succeeds, the FIFO observer, GDB attach, GO, Flutter startup, and rendering may pass or stop at a later predicate. Each remains UNKNOWN until reached.
+
+### Plan / Do / Check / Act
+
+- **Plan:** keep FLR-0362 Waiting; fix the independently ticketed staging boundary first, then resume this gate with a fresh run ID without relaxing FIFO/PID identity checks.
+- **Do:** preserved the consumed run and its failure evidence; did not retry `flr0362-0001` or change the image/product source.
+- **Check:** guest-ready and pre-launch capture PASS; helper staging FAIL; app launch/GO/render NOT REACHED; QMP teardown and residual checks PASS.
+- **Act:** FLR-0363 owns the red-capable staging regression, the one-line path correction, and one post-launch Mini attempt. If that attempt reaches GO, its full-frame and 3D ROI are classified before deciding whether to resume the attach-gate work.
