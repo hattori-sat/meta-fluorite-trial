@@ -1,14 +1,115 @@
 import ast
 from pathlib import Path
 import re
+import socket
 import subprocess
+import tempfile
+import threading
 import unittest
 
 
 HARNESS = Path(__file__).resolve().parents[1] / 'scripts/qemu-runtime-harness.sh'
+GATE_VALIDATOR = Path(__file__).resolve().parents[1] / 'scripts/flr0350_launch_gate.py'
+SERIAL_PROMPT = b'qa-console# '
+GATE_OBSERVATION = (
+    b'FLR0350_GATE_OBSERVATION version=1 pid=706 start=3089 '
+    b'start_after=3089 recorded_start=3089 uid=1001 comm=sh state=S '
+    b'tracer=0 syscall=read nr=0 arg1=0x0 target_type=fifo target_dev=40 '
+    b'target_ino=23 gate_type=fifo gate_dev=40 gate_ino=23 gate_uid=1001 '
+    b'gate_mode=600'
+)
 
 
 class RuntimeHarnessTests(unittest.TestCase):
+    def run_serial_exec_fixture(self, directory, setup_reply):
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            listener.settimeout(5)
+            listener.bind(('localhost', 0))
+            listener.listen(1)
+        except OSError:
+            listener.close()
+            raise
+        port = listener.getsockname()[1]
+        state = {'requested_command': None, 'errors': []}
+
+        def receive_line(connection):
+            data = bytearray()
+            while not data.endswith(b'\n'):
+                chunk = connection.recv(4096)
+                if not chunk:
+                    return bytes(data)
+                data.extend(chunk)
+                if len(data) > 16384:
+                    raise RuntimeError('serial command exceeded test bound')
+            return bytes(data)
+
+        def serve_console():
+            try:
+                connection, _ = listener.accept()
+                with connection:
+                    connection.settimeout(5)
+                    if receive_line(connection) != b'\n':
+                        raise RuntimeError('serial helper did not request a prompt')
+                    connection.sendall(SERIAL_PROMPT)
+                    setup_command = receive_line(connection)
+                    if setup_command != b'stty -echo\n':
+                        raise RuntimeError('unexpected echo-off command')
+                    connection.sendall(setup_reply)
+                    requested_command = receive_line(connection)
+                    state['requested_command'] = requested_command
+                    if requested_command:
+                        connection.sendall(
+                            GATE_OBSERVATION
+                            + b'\r\nrc=0\r\n__FLR_SERIAL_COMMAND_DONE_7B31__\n'
+                            + SERIAL_PROMPT
+                        )
+            except (OSError, RuntimeError) as exc:
+                state['errors'].append(str(exc))
+            finally:
+                listener.close()
+
+        command_file = directory / 'observer.cmd'
+        output_file = directory / 'observer.out'
+        launch_file = directory / 'launch.out'
+        command_file.write_text('true\n', encoding='utf-8')
+        launch_file.write_text(
+            'FLR0350_LAUNCH_WRAPPER=READY pid=706 start=3089 '
+            'uid=1001 comm=sh\n',
+            encoding='utf-8',
+        )
+        thread = threading.Thread(target=serve_console, daemon=True)
+        thread.start()
+        try:
+            result = subprocess.run(
+                [
+                    'bash', str(HARNESS), 'serial-exec',
+                    '--serial-port', str(port), '--user', 'root',
+                    '--prompt', SERIAL_PROMPT.decode(),
+                    '--command-file', str(command_file),
+                    '--output', str(output_file),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+        finally:
+            thread.join(timeout=6)
+            listener.close()
+        self.assertFalse(thread.is_alive(), 'fake serial console did not finish')
+        self.assertEqual(state['errors'], [])
+        output = output_file.read_bytes() if output_file.exists() else b''
+        validator = subprocess.run(
+            [
+                'python3', str(GATE_VALIDATOR), '--validate',
+                str(launch_file), str(output_file),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        ) if output_file.exists() else None
+        return result, output, validator, state
+
     def test_embedded_python_compiles(self):
         blocks = re.findall(r"<<'PY'\n(.*?)\nPY", HARNESS.read_text(), re.S)
         self.assertGreaterEqual(len(blocks), 3)
@@ -44,7 +145,37 @@ ps() {
         self.assertIn('__FLR_SERIAL_COMMAND_DONE_7B31__', text)
         self.assertIn('timeout_seconds', text)
         self.assertIn('sock.sendall(b"\\n")', text)
-        self.assertEqual(text.count(r'\r\n'), 2)
+        self.assertIn("sock.sendall(b'{\"execute\":\"qmp_capabilities\"}\\r\\n')", text)
+        self.assertIn("sock.sendall(b'{\"execute\":\"quit\"}\\r\\n')", text)
+
+    def test_serial_exec_capture_passes_strict_gate_without_setup_preamble(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, validator, state = self.run_serial_exec_fixture(
+                Path(temporary),
+                b'stty -echo\r\n' + SERIAL_PROMPT,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(state['requested_command'])
+        self.assertIsNotNone(validator)
+        self.assertEqual(
+            validator.returncode,
+            0,
+            validator.stdout + validator.stderr,
+        )
+        self.assertNotIn(b'stty -echo', output)
+        self.assertEqual(output.count(b'FLR0350_GATE_OBSERVATION'), 1)
+
+    def test_serial_exec_fails_closed_on_unexpected_echo_off_response(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result, _, _, state = self.run_serial_exec_fixture(
+                Path(temporary),
+                b'unexpected serial chatter\r\n' + SERIAL_PROMPT,
+            )
+
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('reason=echo-off-response-unexpected', result.stderr)
+        self.assertFalse(state['requested_command'])
 
 
 if __name__ == '__main__':

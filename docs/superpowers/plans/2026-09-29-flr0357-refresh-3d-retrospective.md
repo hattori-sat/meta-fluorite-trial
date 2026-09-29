@@ -77,6 +77,6 @@
 
 - [x] Run canonical guard, `git diff --check`, staged-whitespace check, privacy check, ticket checkpoint, file-size check, and Markdown link check; record the repository-wide Markdown baseline failure separately.
 - [x] Record the nine unrelated pre-existing Markdown-link failures without silently repairing out-of-scope evidence files.
-- [ ] Commit only the retrospective and its explicit follow-up issue locally; do not push.
+- [x] Commit only the retrospective and its explicit follow-up issue locally; do not push (`6b43802`).
 
 **Acceptance:** The checklist supports the next action without replaying the conversation, reports the current production 3D state without overclaiming, attaches QMP evidence, leaves exactly one active ticket, and preserves the serial-framing fix as a separate future unit.

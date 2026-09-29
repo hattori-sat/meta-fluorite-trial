@@ -1,6 +1,6 @@
 # FLR-0357 — refresh the Fluorite 3D visibility retrospective
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Owner: runtime evidence synthesis / production rendering / QMP acceptance roles
 - Created: 2026-09-29
@@ -202,7 +202,8 @@ kernel/rootfs/QEMU disk image is copied to the Mac.
 
 ### Act
 
-- Close FLR-0357 after its evidence/links/checkpoint and local commit pass.
-- Make FLR-0358 the next sole In Progress ticket; use a fresh run ID and the
-  same pinned Mini QEMU workflow. Continue until post-GO QMP proves or falsifies
-  visible production 3D; this retrospective does not close the product goal.
+- Closed as a retrospective only; the production 3D acceptance contract remains
+  open.
+- FLR-0358 is now the sole In Progress ticket. It preserves the existing pinned
+  Mini QEMU workflow and requires a fresh run ID; only post-GO QMP can decide
+  production Sequoia visibility.

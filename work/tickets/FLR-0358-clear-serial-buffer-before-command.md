@@ -1,12 +1,14 @@
 # FLR-0358 — clear serial receive bytes before each command
 
-- Status: Inbox
+- Status: In Progress
 - Priority: High; blocks the next bounded production runtime observation
 - Owner: QEMU serial harness / runtime-gate roles
 - Created: 2026-09-29
 - Discovered by: [FLR-0356](FLR-0356-stage-fifo-observer-before-qemu.md)
 - Parent retrospective: [FLR-0357](FLR-0357-refresh-3d-visibility-retrospective.md)
-- Working log: to be created when this ticket becomes In Progress
+- Plan: [FLR-0358 plan](../../docs/superpowers/plans/2026-09-29-flr0358-serial-capture-boundary.md)
+- Working log: [FLR-0358 log](../logs/2026-09-29-flr0358.md)
+- Branch: `feature-flr-0358-clear-serial-buffer` (created from the FLR-0357 closeout commit)
 
 ## Objective
 
@@ -31,6 +33,10 @@ Preserve the strict FLR-0350 marker parser and process/FIFO identity checks.
   requires the marker as the first token.
 - `flr0356-0001` is consumed. Its QMP screenshot was taken before GO and is not
   a renderer verdict.
+- The loopback red/green tests invoke the public serial helper and unchanged
+  validator. Before the fix, the valid setup transcript reproduced
+  `marker-not-first`, and unexpected setup chatter was accepted with
+  `serial-exec=PASS`.
 
 ## Competing approaches
 
@@ -81,3 +87,15 @@ Preserve the strict FLR-0350 marker parser and process/FIFO identity checks.
   diagnostic boundary, or records one precise fail-closed reason without retry.
 - QMP evidence and zero-residue teardown are recorded; production 3D status is
   decided only from pixels captured after GO.
+
+## Impact and risk
+
+- Build-time: none; this changes only the Mac/Mini host-side diagnostic runner.
+- Packaging: none; no recipe, package, rootfs, or image changes.
+- Product runtime: none. The helper may now fail closed before GDB/GO if the
+  guest emits an undocumented echo-off transcript; that is preferable to
+  accepting a contaminated observation and must be diagnosed from a fresh
+  one-shot run.
+- Integration risk: bounded to the serial prompt protocol. The loopback
+  regression fixes the accepted transcript shape; Mini evidence must confirm
+  the same deployed console response before interpreting the gate result.

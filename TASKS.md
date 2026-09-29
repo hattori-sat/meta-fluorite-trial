@@ -16,7 +16,7 @@ Last updated: 2026-09-29
 
 **[FLR-0354 — repair and deterministically test the pre-exec FIFO launch gate](work/tickets/FLR-0354-fix-flr0350-fifo-launch-gate.md) is Done as a harness-only correction.** It adds object-identity validation, early process identity capture, deterministic tests, and fresh-ID enforcement. It does not change the product or establish a rendering result; the 3D objective remains open for a separate fresh runtime ticket.
 
-**[FLR-0355 — relay a fresh run ID and retest the FIFO gate on QEMU](work/tickets/FLR-0355-relay-run-id-and-retest-fifo-gate.md) is Waiting.** Its only run stopped before FIFO observation because the runner omitted that command from staging; its black QMP image is not a render verdict and `flr0355-0001` will never be retried. **[FLR-0356 — stage the FIFO observer before QEMU launch](work/tickets/FLR-0356-stage-fifo-observer-before-qemu.md) is Waiting**; 11-command pre-start staging and target FIFO observation passed, but strict host validation failed at `marker-not-first` before GDB/GO. Cleanup passed; its black QMP image is pre-GO. **[FLR-0357 — refresh the 3D visibility retrospective](work/tickets/FLR-0357-refresh-3d-visibility-retrospective.md) is In Progress**; FLR-0358 separately owns the serial-buffer framing repair.
+**[FLR-0355 — relay a fresh run ID and retest the FIFO gate on QEMU](work/tickets/FLR-0355-relay-run-id-and-retest-fifo-gate.md) is Waiting.** Its only run stopped before FIFO observation because the runner omitted that command from staging; its black QMP image is not a render verdict and `flr0355-0001` will never be retried. **[FLR-0356 — stage the FIFO observer before QEMU launch](work/tickets/FLR-0356-stage-fifo-observer-before-qemu.md) is Waiting**; target FIFO identity fields matched, but strict host validation failed at `marker-not-first` before GDB/GO. Its black QMP image is pre-GO and cleanup passed. **[FLR-0357 — refresh the 3D visibility retrospective](work/tickets/FLR-0357-refresh-3d-visibility-retrospective.md) is Done** as an evidence-only retrospective; it does not close the rendering goal. **[FLR-0358 — establish a fail-closed serial capture boundary](work/tickets/FLR-0358-clear-serial-buffer-before-command.md) is In Progress**; it will preserve the strict gate and use one fresh Mini run only after local regression and bundle checks.
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -32,7 +32,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| [FLR-0357](work/tickets/FLR-0357-refresh-3d-visibility-retrospective.md) | refresh the evidence-linked 3D visibility and countermeasure checklist | runtime evidence synthesis / production render / QMP acceptance roles | FLR-0356's one-run evidence is recorded; positive fixtures, historical candidates, post-GO production negatives, and workflow effects are separated | Finish the matrix, link FLR-0358, and commit the retrospective |
+| [FLR-0358](work/tickets/FLR-0358-clear-serial-buffer-before-command.md) | establish a fail-closed fresh serial capture boundary before the FLR-0350 gate | QEMU serial harness / runtime-gate roles | FLR-0356 observer identity fields matched, but host capture included the prior echo-off response and strict validation returned `marker-not-first`; Astra review requires explicit setup completion and no blind discard | Add a loopback CLI regression, validate exact setup transcript, commit, handoff exact bundle, and use one fresh Mini run ID |
 | [FLR-0356](work/tickets/FLR-0356-stage-fifo-observer-before-qemu.md) | stage every static guest serial command before QEMU start and evaluate the actual-FD FIFO gate once | Mac runner / Mini QEMU / QMP evidence roles | Waiting: 28 tests pass; Mini staged 11/11 commands and captured matching FIFO fields, but official host validation stopped at `marker-not-first`; pre-GO black QMP is not a render verdict; cleanup passed | Resume after FLR-0358 fixes framing and a fresh one-shot gate passes; do not reuse `flr0356-0001` |
 | [FLR-0355](work/tickets/FLR-0355-relay-run-id-and-retest-fifo-gate.md) | propagate a fresh ticket run ID through preflight/start, then test the corrected FIFO gate on the pinned QEMU image | Mac runner / Mini QEMU / QMP evidence roles | Waiting: one attempt consumed `flr0355-0001`; staging omitted the FIFO-observer command, so the gate/attach/GO did not run; QMP was uniformly black and teardown passed | FLR-0356 owns the staging fix and a fresh one-shot runtime attempt; never retry `flr0355-0001` |
 | [FLR-0348](work/tickets/FLR-0348-watch-lavapipe-signal-without-fence-type.md) | observe both Lavapipe wait-release predicates without unavailable DWARF types | bounded GDB script / Mini runtime / QMP evidence roles | Done: exact image, both hardware watches armed; 8.07-second no-hit with fields false/null; QMP HUD visible and 768,000-pixel 3D ROI black; app/QEMU/QMP teardown passed | FLR-0350 stopped before app launch; FLR-0355 repairs the run-ID handoff before fresh producer-correlation evidence |
@@ -101,8 +101,6 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 | [FLR-0307](work/tickets/FLR-0307-probe-production-fragment-output-target.md) | probe production fragment output versus target handoff | production Sequoia fragment emission and visible target handoff | Waiting: official patch/build/QMP gates pass, but FEngine::loop page-faults before the emissive/material seam | FLR-0308/0309 own the first runtime fault boundary |
 
 ## Inbox
-
-| [FLR-0358](work/tickets/FLR-0358-clear-serial-buffer-before-command.md) | clear serial receive-buffer bytes between echo-off setup and the requested guest command | QEMU serial harness / runtime-gate roles | Inbox: FLR-0356 captured the target marker, but stale echo-off output/prompt caused strict `marker-not-first` rejection | Add a red regression and clear only the consumed preamble; then use one fresh Mini run ID |
 
 | [FLR-0327](work/tickets/FLR-0327-align-mac-mini-source-baseline.md) | align Mac Devtool and Mini flutter-auto source baseline | Mac Devtool / authoritative Yocto source identity | Done: Mac effective revisions and do_patch plus Mini bundle/do_patch now match | keep the project-layer pins as the deterministic source contract |
 
@@ -278,12 +276,16 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 | Phase | State | Evidence / next gate |
 | --- | --- | --- |
 | Baseline and ticket scope | Completed | FLR-0027でshape/light分離の独立gateを完了し、FLR-0028へ分割 |
-| QEMU / Fluorite | Waiting | FLR-0089 neutral-fence ext4 run passed preflight/start/guest-ready/serial-exec; QMP screenshot/video and teardown PASS |
-| Native render path | Patch-stack baseline reconciliation paused for workflow improvement | FLR-0152〜0155でviewport/scissor/color-write/program/vertex-input/upload/binding/draw/presentとQMP HUDを確認。3D候補の最初のzero boundaryはfixture-local cameraのprojection未設定。0220は現行sourceへ公式Devtool rebase済み、0221は現行plugin mismatchで停止。FLR-0161で再現可能なrebase入口を固定する |
+| QEMU / Fluorite | Waiting on local FLR-0358 harness regression | FLR-0356 reached the target observer but failed host framing before GDB/GO; its pre-GO black screen is not a render result. FLR-0358 must prove the setup/capture boundary before one fresh Mini run |
+| Native render path | Production acceptance still open | The retrospective confirms positive same-frame fixture+HUD evidence, historical Sequoia candidates, and later post-GO production black ROIs as separate evidence classes. Return to production QMP only after the strict FIFO gate reaches GO |
 | Wayland composition | Completed for diagnostic path | FLR-0042でSHM child attachとQMP visible pixelsを確認 |
 | Mac → mini PC build | Completed | c1252c4のbundle、固定receiver、既存build/TMPDIR、do_patch/do_compile/full imageが成功 |
 
 ## Next
+
+**Current next gate (2026-09-29):** FLR-0357's retrospective is committed as `6b43802` and Done; FLR-0356 remains Waiting because its official FIFO gate failed before GO. FLR-0358 is the sole In Progress ticket. First reproduce the framing bug through the real `serial-exec` CLI and strict validator, then validate the echo-off setup boundary. No 0358 run ID has been consumed; after local checks and exact bundle handoff, run the existing pinned Mini QEMU image once, capture QMP, and prove teardown. The overall goal remains post-GO production Sequoia plus 2D HUD pixels.
+
+The diagnostic narrative below is retained as historical context; current ticket status and next action are recorded above and in the linked tickets.
 
 FLR-0348 ran once on the exact pinned image. Both wait-predicate watches armed;
 neither hit in 8.07 seconds, and `signaled=false` / `fence=NULL` persisted.

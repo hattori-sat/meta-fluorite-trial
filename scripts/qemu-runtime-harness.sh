@@ -421,6 +421,22 @@ if prompt_b not in buf:
     print("serial-exec=FAIL reason=echo-off-prompt-not-reached", file=sys.stderr)
     raise SystemExit(1)
 
+# Discard only a fully recognized setup transcript. A prompt substring in
+# arbitrary serial output is not enough to establish a fresh capture boundary.
+prompt_start = buf.find(prompt_b)
+if (
+    buf.count(prompt_b) != 1
+    or prompt_start + len(prompt_b) != len(buf)
+):
+    print("serial-exec=FAIL reason=echo-off-response-unexpected", file=sys.stderr)
+    raise SystemExit(1)
+setup_response = bytes(buf[:prompt_start]).replace(b"\r\n", b"\n")
+setup_response = setup_response.strip(b"\r\n")
+if setup_response not in (b"", b"stty -echo"):
+    print("serial-exec=FAIL reason=echo-off-response-unexpected", file=sys.stderr)
+    raise SystemExit(1)
+buf.clear()
+
 wrapped = (
     command
     + "; rc=$?; stty echo; printf '\\nrc=%s\\n"
