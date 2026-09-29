@@ -139,30 +139,30 @@ Stage named ticket, log, plan, task dashboard, runner, and test paths; run `git 
 - Consumes: exact committed FLR-0356 bundle, fixed receiver, the pinned FLR-0335 image and command set.
 - Produces: gate verdict before attach/GO, bounded diagnostic logs, QMP still/eight frames/video, pixel summary, hashes, and zero-residue teardown evidence.
 
-- [ ] **Step 1: Transfer exact bundle through the fixed helper**
+- [x] **Step 1: Transfer exact bundle through the fixed helper**
 
 Resolve `dev-mini-recovery^{commit}` and `HEAD^{commit}` to full commit IDs, call the existing bundle helper with the fixed role configuration, and record exact bundle SHA and receiver tip. Do not push or create another receiver.
 
-- [ ] **Step 2: Run read-only target preflight**
+- [x] **Step 2: Run read-only target preflight**
 
 Confirm the exact receiver tip is clean, `flr0356-0001` evidence directory is absent, QMP path and ports are free, target process count is zero, and the three pinned artifact hashes match. Run the receiver copy of `--check` and starter `preflight`; if any check fails, stop before the evidence directory is created.
 
-- [ ] **Step 3: Execute the runner once**
+- [x] **Step 3: Execute the runner once**
 
 Run `bash work/commands/FLR-0350-run-sync-producer.sh flr0356-0001` on `$BUILD_HOST`. Require `FLR0350_GATE_OBSERVATION` and `FLR0350_FIFO_READ_GATE=PASS` before GDB attach/GO. If the target gate fails, preserve its bounded reason and do not retry the ID.
 
-- [ ] **Step 4: Capture and inspect QMP evidence**
+- [x] **Step 4: Capture and inspect QMP evidence**
 
 Use the runner's QMP still and eight one-second QMP frames. Transfer only those display artifacts and bounded logs. Convert to PNG/H.264 on Mac, inspect full frame and ROI `0,200,1280,600`, compute hashes, resolution, frame count/FPS, and separate HUD versus 3D pixel verdicts; show the image/video.
 
-- [ ] **Step 5: Verify exact teardown**
+- [x] **Step 5: Verify exact teardown**
 
 Require recorded wrapper/app stop, run-owned FIFO cleanup, QMP quit, QEMU exit, removed QMP socket, and zero target processes. Do not use a global kill.
 
 ### Task 5: Close the bounded ticket
 
-- [ ] Put the gate, rendering, screenshot, and teardown verdicts in the FLR-0356 ticket/log; preserve UNKNOWN where evidence did not reach a boundary.
-- [ ] Mark Done only if the target attempt, QMP evidence, and cleanup criteria pass. If a new target-side defect appears, create a new ticket and run ID before changing scope.
+- [x] Put the gate, rendering, screenshot, and teardown verdicts in the FLR-0356 ticket/log; preserve UNKNOWN where evidence did not reach a boundary.
+- [ ] Transition FLR-0356 to Done with its closeout/checkpoint commit. The staging objective and one target observation completed; serial-buffer framing is explicitly separate, and production 3D remains untested because GO was not reached.
 
 ## Self-review
 

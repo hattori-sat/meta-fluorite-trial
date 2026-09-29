@@ -40,6 +40,37 @@ diagnostic harness task; it does not modify the image or claim 3D success.
   cleanup markers are recorded in its linked working log and Mini evidence
   root. The new run must use a new ID and retain its own evidence separately.
 
+## Runtime result — `flr0356-0001`
+
+- Bundle handoff reached receiver tip `969d93c331befba7579f5f376bcf03c80c771aa0`;
+  bundle SHA-256 `73d703ce6136bae2c097eb00c0ed5ae582e208de79b0f9991237bccc9102c831`.
+- Mini static check passed all 28 tests. The fixed QEMU artifact/hash, process,
+  port, and unused-ID preflight passed. Before QEMU start, all 11 serial command
+  files were staged into the run evidence parent.
+- Guest readiness passed on SSH attempt 12. Guest preflight, all four GDB
+  transfer chunks, script installation, and the paused launch wrapper passed.
+- The FIFO observer executed and emitted a complete record: the target process
+  was `read`-blocked on a FIFO; target and gate were both device 40 / inode 23;
+  PID/start-time/UID/command fields matched the launch record. However, the
+  host validator rejected the serial file as `marker-not-first`, so its
+  official gate verdict was FAIL and GDB attach/GO were correctly not run.
+- The captured serial file begins with the previous `stty -echo` response and
+  shell prompt immediately before `FLR0350_GATE_OBSERVATION`. The host parser
+  requires the marker to be the first token. Source review found that
+  `serial-exec` clears its receive buffer before the echo-off command, but does
+  not clear the accumulated echo-off response before sending the requested
+  command. This is the first proven host-side divergence; a fix belongs to a
+  separate ticket and is not included here.
+- QMP captured a 1280×800 still and eight 1-fps frames. Still and all frames
+  share SHA-256
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`.
+  Full frame: 1,024,000 black pixels, zero changed/edge/chromatic pixels,
+  luma `[0,0]`. Fixed 3D ROI `[0,200,1280,600]`: 768,000 black pixels and
+  zero changed/edge/chromatic pixels. Since the wrapper never received GO,
+  this is not a Flutter/Filament render verdict.
+- QMP teardown and targeted cleanup passed: zero residual target processes and
+  zero QMP socket. No image/build/product-source change occurred.
+
 ## Capability contract
 
 | Field | Contract |
@@ -118,15 +149,16 @@ impact. Integration risk is isolated to the shell runner and its tests.
   are source-readable and staged before the QEMU `start` invocation.
 - [x] Local focused tests, shell/static `--check`, privacy, and checkpoint
   validation pass; no product/image/build inputs change.
-- [ ] The exact committed bundle reaches the fixed Mini receiver; the new
+- [x] The exact committed bundle reaches the fixed Mini receiver; the new
   one-shot run ID, processes, ports, evidence path, and artifact hashes pass
   preflight.
-- [ ] One `flr0356-0001` QEMU run reaches the actual-FD observation before
-  GDB attach/GO, or records a precise guest-side fail-closed reason without a
-  retry.
-- [ ] QMP still/eight-frame capture, full-frame and fixed 3D ROI analysis,
-  H.264 video, hashes, and pixel evidence are recorded and shown.
-- [ ] Targeted app/FIFO/QMP/QEMU cleanup passes with no residual target process
+- [x] One `flr0356-0001` run reaches the actual-FD observation before GDB
+  attach/GO. The observation was captured but the host parser failed closed on
+  `marker-not-first`; no retry was made.
+- [x] QMP still/eight-frame capture, full-frame and fixed 3D ROI analysis,
+  H.264 video, hashes, and pixel evidence are recorded and shown. The frames
+  are black because GO was not sent; they do not establish a rendering result.
+- [x] Targeted app/FIFO/QMP/QEMU cleanup passes with no residual target process
   or socket. The 3D verdict remains pixel-based and separate from the gate.
 
 ## Plan / Do / Check / Act
@@ -156,28 +188,34 @@ impact. Integration risk is isolated to the shell runner and its tests.
 | Staging regression | Red before fix; green after; every fixed callsite covered | PASS: red was missing inventory; then all 28 focused tests passed, including the callsite-to-inventory check and pre-start order |
 | Local runner/static | Focused tests and `--check` | PASS: shell syntax, 28 tests, exact profile, 11 command files, and `QEMU_NOT_STARTED` |
 | Privacy/checkpoint/whitespace | privacy scan, ticket/log contract, and staged whitespace | PASS |
-| Bundle handoff | exact hash/tip and clean fixed receiver | NOT RUN |
-| Runtime | fresh ID, pinned artifact identity, actual-FD observation | NOT RUN |
-| Visual | QMP still/eight frames/video and ROI pixel summary | NOT RUN |
-| Teardown | app/FIFO/QMP/QEMU zero residue | NOT RUN |
+| Bundle handoff | exact hash/tip and clean fixed receiver | PASS: exact tip and bundle SHA recorded above |
+| Runtime | fresh ID, pinned artifact identity, actual-FD observation | Observation emitted; host validation failed closed at `marker-not-first`; no attach/GO |
+| Visual | QMP still/eight frames/video and ROI pixel summary | CAPTURE PASS; uniform black before GO, not a rendering verdict |
+| Teardown | app/FIFO/QMP/QEMU zero residue | PASS: zero residual targets and QMP socket |
 
 ### Act
 
-- If pre-launch command staging fails, preserve the failure without consuming a
-  QEMU run ID. If the runtime attempt starts, never retry the same ID; create a
-  new ticket for any newly discovered target-side condition.
+- The staging defect is fixed and directly exercised. Preserve
+  `flr0356-0001` as consumed. Track the independent serial receive-buffer
+  framing defect in a new ticket; do not broaden this staging change to include
+  it.
 
 ## Visual evidence
 
-- No FLR-0356 runtime screenshot/video exists yet. FLR-0355's uniform-black
-  frame is documented separately and was captured before GDB attach/GO.
-- Raw QMP evidence remains in the fixed Mini evidence root outside Git; transfer
-  only review still/frame evidence and bounded logs.
+- QMP still preview: local review PNG SHA-256
+  `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`.
+  The screenshot was shown during this task. It is uniformly black because the
+  observer parser stopped the paused wrapper before GDB attach/GO.
+- H.264 review video: 1280×800, 1 fps, 8 frames / 8 seconds, SHA-256
+  `82e5f5a0490e7354ff44f6105d4eb6c17c31e16c51e064e33648f0a7d42df2e4`.
+- The still, eight QMP PPMs, pixel reports, and bounded gate logs are retained
+  outside Git under the one per-run Mac review directory and the fixed Mini
+  evidence root. No kernel/rootfs/QEMU disk image was copied to the Mac.
 
 ## UNKNOWN
 
-- Whether the guest-side FIFO observer passes on a fresh run.
-- Whether the actual FD matches the owned FIFO and whether producer/GDB
-  correlation reaches its watch window.
+- Whether the official host validator accepts the gate after serial receive-
+  buffer framing is corrected.
+- Whether GDB attach/GO reaches producer correlation and its watch window.
 - Whether Flutter draws HUD or 3D once the paused wrapper is released.
 - Whether any 3D geometry/color is visible in the QMP ROI.
