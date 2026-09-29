@@ -1,0 +1,47 @@
+From 0209cc86e7083d61fe87578b5e42086ec1ce4268 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 19:30:54 +0000
+Subject: [PATCH] diag: limit production model load plan
+
+---
+ .../serialization/scene_text_deserializer.cc  | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 3f85bc4..32260fc 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -251,14 +251,33 @@ void SceneTextDeserializer::RunPostSetupLoad() {
+ void SceneTextDeserializer::setUpLoadingModels() {
+   SPDLOG_TRACE("++{}", __FUNCTION__);
+ 
++  std::size_t model_limit = models_.size();
++  if (const char* raw_limit = std::getenv("FLR0026_NATIVE_MODEL_LIMIT")) {
++    char* end = nullptr;
++    const auto parsed_limit = std::strtoul(raw_limit, &end, 10);
++    if (end != raw_limit && *end == '\0') {
++      model_limit = parsed_limit < model_limit ? parsed_limit : model_limit;
++    }
++  }
++
++  std::size_t queued_models = 0;
+   for (auto& iter : models_) {
++    if (queued_models >= model_limit) {
++      break;
++    }
+     // Note: Instancing or prefab of models is not currently supported but might
+     // affect the loading process here in the future. Backlogged.
+     //
+     // This will transfer ownership
+     loadModel(iter);
++    ++queued_models;
+   }
+ 
++  spdlog::info(
++    "FLR0026_MODEL_LOAD_PLAN total={} limit={} queued={}",
++    models_.size(), model_limit, queued_models
++  );
++
+   SPDLOG_TRACE("--{}", __FUNCTION__);
+ }
+ 

@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 10 Aug 2026 18:30:00 +0900
+Subject: [PATCH] filament_scene: keep v2 scene camera out of ECS init
+
+The v2 deserializer creates scene.camera as the ViewTarget primary camera,
+not as an ECS entity.  Do not initialize the Dart camera as an ECS entity
+after the platform view is created.
+
+---
+ packages/filament_scene/lib/scene/scene_widget.dart | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -200 +200,2 @@ class _SceneViewState extends State<SceneView> {
+-      widget.cameras?.forEach((final camera) => camera.initialize(widget.filament));
++      // v2 scene.camera is a native ViewTarget camera, not an ECS entity.
++      // Initializing it here would fail the native entity existence check.
+--
+2.34.1

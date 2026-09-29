@@ -1,6 +1,7 @@
 # FLR-0015 — Make MCP evidence explainable
 
-- Status: In Progress — Do
+- Status: Waiting
+- Waiting reason: implementation, full `make verify`, and delivery evidence are not recorded; this legacy foundation task is not active in the current feature.
 - Priority: High
 - Depends on: FLR-0001
 - Context: [evidence and handoff contract](../../docs/architecture/evidence-handoff-contract.md)

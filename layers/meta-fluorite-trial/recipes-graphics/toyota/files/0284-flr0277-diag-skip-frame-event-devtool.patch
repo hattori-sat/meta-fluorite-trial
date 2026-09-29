@@ -1,0 +1,46 @@
+From e8a37b6cfb2b60ef90dd0dd09323211745f8f3c5 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 04:24:42 +0000
+Subject: [PATCH] FLR-0277: add bounded frame-event skip discriminator
+
+---
+ .../filament_view/core/scene/view_target.cc   | 25 +++++++++++--------
+ 1 file changed, 15 insertions(+), 10 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 239326f..1ad8a98 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1529,17 +1529,22 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // const auto scriptStart = std::chrono::steady_clock::now();
+ 
+   // spdlog::debug("[{}] Calling Script event: preRenderFrame", __FUNCTION__);
+-  const auto scriptFuture = FilamentViewPlugin::CallEvent(
+-    kPreRenderFrame,
+-    {//
+-     std::make_pair(kParam_DeltaTime, EncodableValue(deltaTime)),
+-     std::make_pair(kParam_FPS, EncodableValue(fps)),
+-     std::make_pair(kParam_cpuFrametime, EncodableValue(cpuFrametime)),
+-     std::make_pair(kParam_gpuFrametime, EncodableValue(gpuFrametime))
+-    }
+-  );
++  const bool skipFrameEvent = std::getenv("FLR0026_SKIP_FRAME_EVENT") != nullptr;
++  if (skipFrameEvent) {
++    spdlog::info("FLR0026_FRAME_EVENT_SKIPPED");
++  } else {
++    const auto scriptFuture = FilamentViewPlugin::CallEvent(
++      kPreRenderFrame,
++      {//
++       std::make_pair(kParam_DeltaTime, EncodableValue(deltaTime)),
++       std::make_pair(kParam_FPS, EncodableValue(fps)),
++       std::make_pair(kParam_cpuFrametime, EncodableValue(cpuFrametime)),
++       std::make_pair(kParam_gpuFrametime, EncodableValue(gpuFrametime))
++      }
++    );
+ 
+-  scriptFuture.wait();
++    scriptFuture.wait();
++  }
+   // const auto scriptDuration = std::chrono::steady_clock::now() - scriptStart;
+   // spdlog::debug(
+   //   "[{}] Script frametime: {:.2f}ms", __FUNCTION__,

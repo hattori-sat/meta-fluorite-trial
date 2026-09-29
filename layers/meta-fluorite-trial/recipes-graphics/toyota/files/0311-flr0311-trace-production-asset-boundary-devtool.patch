@@ -1,0 +1,48 @@
+From a8740abcc3aabb29f9898f055d413e3c968fc7ea Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 01:10:00 +0000
+Subject: [PATCH] FLR-0311: trace production asset boundary
+
+---
+ .../core/systems/derived/model_system.cc      | 25 +++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index e0b6455..4cb4f01 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -825,9 +825,34 @@ void ModelSystem::loadModelFromFile(EntityGUID modelGuid, const std::string& bas
+         filament::gltfio::FilamentAsset* asset = nullptr;
+         filament::gltfio::FilamentInstance* assetInstance = nullptr;
+ 
++        const bool traceProductionAssetBoundary =
++          std::getenv("FLR0311_PRODUCTION_ASSET_BOUNDARY_TRACE") != nullptr;
++        if (traceProductionAssetBoundary) {
++          spdlog::info(
++            "FLR0311_PRODUCTION_ASSET_CREATE_BEGIN model={} path={} bytes={}",
++            modelGuid,
++            assetPath,
++            buffer.size()
++          );
++        }
++
+         asset = assetLoader_->createAsset(buffer.data(), static_cast<uint32_t>(buffer.size()));
++        if (traceProductionAssetBoundary) {
++          spdlog::info(
++            "FLR0311_PRODUCTION_ASSET_CREATE_DONE model={} asset_present={} renderable_entities={}",
++            modelGuid,
++            asset != nullptr,
++            asset != nullptr ? asset->getRenderableEntityCount() : 0
++          );
++        }
+         spdlog::trace("[loadModelFromFile] asyncBeginLoad");
++        if (traceProductionAssetBoundary) {
++          spdlog::info("FLR0311_PRODUCTION_ASYNC_BEGIN_LOAD_BEGIN model={}", modelGuid);
++        }
+         resourceLoader_->asyncBeginLoad(asset);
++        if (traceProductionAssetBoundary) {
++          spdlog::info("FLR0311_PRODUCTION_ASYNC_BEGIN_LOAD_DONE model={}", modelGuid);
++        }
+         model->setAsset(asset);
+         _assets[assetPath].asset = asset;  // important! if not set, secondaries cannot be created
+ 

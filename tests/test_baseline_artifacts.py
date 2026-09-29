@@ -87,10 +87,10 @@ class BaselineArtifactTests(unittest.TestCase):
             relative = path.relative_to(ROOT).as_posix().encode("utf-8")
             self.assertIn(relative, candidates, path.name)
 
-    def test_meta_local_matches_sanitized_baseline(self) -> None:
-        layer = ROOT / "layers/meta-local"
+    def test_project_layer_matches_sanitized_baseline(self) -> None:
+        layer = ROOT / "layers/meta-fluorite-trial"
         files = sorted(path for path in layer.rglob("*") if path.is_file())
-        self.assertEqual(len(files), int(self.lock["meta_local_file_count"]))
+        self.assertEqual(len(files), int(self.lock["meta_fluorite_trial_file_count"]))
         self.assertTrue((layer / "conf/layer.conf").is_file())
 
         repository_rows: list[bytes] = []
@@ -100,6 +100,8 @@ class BaselineArtifactTests(unittest.TestCase):
             flags=re.MULTILINE,
         )
         email_address = re.compile(
+            br"(?<![A-Za-z0-9._%+-])"
+            br"(?!(?:fluorite|fluorite-trial|fluorite-devtool)@example\.invalid(?![A-Za-z0-9.-]))"
             br"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
         )
         for path in files:
@@ -124,12 +126,12 @@ class BaselineArtifactTests(unittest.TestCase):
 
         repository_tree = hashlib.sha256(b"".join(repository_rows)).hexdigest()
         self.assertEqual(
-            repository_tree, self.lock["meta_local_repository_tree_sha256"]
+            repository_tree, self.lock["meta_fluorite_trial_repository_tree_sha256"]
         )
         normalized_tree = hashlib.sha256(b"".join(normalized_rows)).hexdigest()
         self.assertEqual(
             normalized_tree,
-            self.lock["meta_local_normalized_identity_tree_sha256"],
+            self.lock["meta_fluorite_trial_normalized_identity_tree_sha256"],
         )
 
     def test_target_layer_selection_contains_project_layers(self) -> None:
@@ -137,7 +139,7 @@ class BaselineArtifactTests(unittest.TestCase):
             bblayers = (
                 ROOT / "conf" / target / "bblayers.conf.template"
             ).read_text(encoding="utf-8")
-            self.assertIn("meta-local", bblayers)
+            self.assertIn("meta-fluorite-trial", bblayers)
             self.assertIn("meta-vulkan", bblayers)
 
         raspberry_setup = (
@@ -149,6 +151,24 @@ class BaselineArtifactTests(unittest.TestCase):
         self.assertIn('DIST_MACHINE="raspberrypi4"', raspberry_setup)
         self.assertIn('MACHINE = "raspberrypi4-64"', raspberry_local)
 
+    def test_qemu_quality_patch_is_target_scoped(self) -> None:
+        recipe = (
+            ROOT
+            / "layers/meta-fluorite-trial/recipes-graphics/toyota/flutter-auto_2.0.bbappend"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            'SRC_URI:append:qemux86-64 = " file://0228-filament-view-use-lowest-qemu-quality-current-plugin-devtool.patch;patchdir=ivi-homescreen-plugins"',
+            recipe,
+        )
+        self.assertIn(
+            'SRC_URI:append:qemuarm64 = " file://0228-filament-view-use-lowest-qemu-quality-current-plugin-devtool.patch;patchdir=ivi-homescreen-plugins"',
+            recipe,
+        )
+        self.assertNotRegex(
+            recipe,
+            r"^\s*file://0228-filament-view-use-lowest-qemu-quality-current-plugin-devtool\.patch",
+        )
+
     def test_build_conf_materializer_is_dry_run_then_create_only(self) -> None:
         script = ROOT / "scripts/materialize-build-conf.sh"
         with tempfile.TemporaryDirectory() as directory:
@@ -157,9 +177,9 @@ class BaselineArtifactTests(unittest.TestCase):
             output_dir = sandbox / "build"
             (agl_root / "meta-agl").mkdir(parents=True)
             (agl_root / "external/poky").mkdir(parents=True)
-            (agl_root / "meta-local/conf").mkdir(parents=True)
+            (agl_root / "meta-fluorite-trial/conf").mkdir(parents=True)
             (agl_root / "meta-vulkan/conf").mkdir(parents=True)
-            (agl_root / "meta-local/conf/layer.conf").write_text("", encoding="utf-8")
+            (agl_root / "meta-fluorite-trial/conf/layer.conf").write_text("", encoding="utf-8")
             (agl_root / "meta-vulkan/conf/layer.conf").write_text("", encoding="utf-8")
 
             arguments = [

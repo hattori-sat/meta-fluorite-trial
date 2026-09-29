@@ -1,0 +1,27 @@
+From 2c1bf4273508bc387b3c686867da6b36602a008e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 14:54:41 +0000
+Subject: [PATCH] fix: include BlueGL for target OpenGL builds
+
+---
+ CMakeLists.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8afbded5d..423ba4bb0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -882,6 +882,10 @@ if (NOT IS_HOST_PLATFORM)
+     add_subdirectory(${EXTERNAL}/tinyexr/tnt)
+ endif()
+ 
++if (FILAMENT_SUPPORTS_OPENGL AND NOT IS_HOST_PLATFORM)
++    add_subdirectory(${LIBRARIES}/bluegl)
++endif()
++
+ if (IS_HOST_PLATFORM)
+     if (FILAMENT_SUPPORTS_OPENGL)
+         add_subdirectory(${LIBRARIES}/bluegl)
+-- 
+2.34.1
+

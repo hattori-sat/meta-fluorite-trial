@@ -1,0 +1,31 @@
+From 75333a4fede19678517fe988282c1c748912bec4 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 03:33:49 +0000
+Subject: [PATCH] diag: fix Vulkan sync trace format
+
+---
+ filament/backend/src/vulkan/VulkanCommands.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanCommands.cpp b/filament/backend/src/vulkan/VulkanCommands.cpp
+index f6271aaad..42ea2d7ee 100644
+--- a/filament/backend/src/vulkan/VulkanCommands.cpp
++++ b/filament/backend/src/vulkan/VulkanCommands.cpp
+@@ -239,12 +239,12 @@ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+              << " fence=" << mFence;
+ #endif
+ 
+     if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
+         std::fprintf(stderr,
+-                "FLR0026_VK_SUBMIT_SYNC wait_count=%zu wait0=%p wait1=%p signal=%p\n",
+-                mWaitSemaphores.size(),
++                "FLR0026_VK_SUBMIT_SYNC wait_count=%u wait0=%p wait1=%p signal=%p\n",
++                static_cast<unsigned int>(mWaitSemaphores.size()),
+                 mWaitSemaphores.size() > 0 ? static_cast<void*>(mWaitSemaphores[0]) : nullptr,
+                 mWaitSemaphores.size() > 1 ? static_cast<void*>(mWaitSemaphores[1]) : nullptr,
+                 static_cast<void*>(submissionSemaphore));
+     }
+ 
+-- 
+2.34.1
+

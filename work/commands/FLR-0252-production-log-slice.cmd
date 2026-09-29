@@ -1,0 +1,1 @@
+log=/run/user/1001/flr0252-prod-readiness.log; printf '=== app markers ===\\n'; grep -E 'Scenes|Planetarium|pointer|input|TOUCH|BUTTON|route|SURFACE|EMPTY_INPUT|WAYLAND|FLR0026_MODEL' "$log" | tail -n 120 || true; printf '=== tail ===\\n'; tail -n 160 "$log"

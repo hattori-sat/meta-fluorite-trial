@@ -1,0 +1,43 @@
+From 2358e30c3e590b682ba3ca189cf18f1b650a86b8 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 19:03:25 +0000
+Subject: [PATCH] diag: isolate scene default indirect light
+
+---
+ .../core/scene/serialization/scene_text_deserializer.cc  | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 197c2e3..3f85bc4 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -421,6 +421,7 @@ void SceneTextDeserializer::setUpIndirectLight() const {
+   } else {
+     if (const auto indirectLight = indirect_light_.get();
+         dynamic_cast<KtxIndirectLight*>(indirectLight)) {
++      spdlog::info("FLR0026_INDIRECT_LIGHT_TYPE=KTX");
+       if (!indirectLight->getAssetPath().empty()) {
+         indirectlightSystem->setIndirectLightFromKtxAsset(
+           indirectLight->getAssetPath(), indirectLight->getIntensity()
+@@ -431,6 +432,7 @@ void SceneTextDeserializer::setUpIndirectLight() const {
+         );
+       }
+     } else if (dynamic_cast<HdrIndirectLight*>(indirectLight)) {
++      spdlog::info("FLR0026_INDIRECT_LIGHT_TYPE=HDR");
+       if (!indirectLight->getAssetPath().empty()) {
+         // val shouldUpdateLight = indirectLight->getAssetPath() !=
+         // scene?.skybox?.assetPath if (shouldUpdateLight) {
+@@ -449,7 +451,12 @@ void SceneTextDeserializer::setUpIndirectLight() const {
+         //}
+       }
+     } else if (dynamic_cast<DefaultIndirectLight*>(indirectLight)) {
+-      indirectlightSystem->setIndirectLight(dynamic_cast<DefaultIndirectLight*>(indirectLight));
++      spdlog::info("FLR0026_INDIRECT_LIGHT_TYPE=DEFAULT");
++      if (std::getenv("FLR0026_NATIVE_SKIP_SCENE_DEFAULT_INDIRECT_LIGHT") != nullptr) {
++        spdlog::info("FLR0026_NATIVE_SKIP_SCENE_DEFAULT_INDIRECT_LIGHT enabled=true");
++      } else {
++        indirectlightSystem->setIndirectLight(dynamic_cast<DefaultIndirectLight*>(indirectLight));
++      }
+     } else {
+       // Already called in the default constructor.
+       // plugin_filament_view::indirectlightSystem->setDefaultIndirectLight();

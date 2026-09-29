@@ -1,0 +1,1 @@
+sleep 15; printf 'FLR0308_FAULT_SUMMARY_BEGIN\n'; pid=$(pgrep -n -x flutter-auto || true); printf 'flutter_pid=%s\n' "$pid"; if test -n "$pid"; then ps -L -p "$pid" -o pid,tid,stat,wchan:24,etime,rss,comm; fi; journalctl -b --no-pager -n 100 2>/dev/null | grep -E 'FEngine|BUG:|#PF:|Oops:|CPU:|RIP:|CR2:' | tail -n 40 || true; printf 'FLR0308_FAULT_SUMMARY_END\n'

@@ -1,0 +1,29 @@
+From b93a28c5b924e198052cec85fd445f41d4cf642d Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 11:12:44 +0000
+Subject: [PATCH] diag: restore first-frame camera selection
+
+---
+ packages/filament_scene/lib/components/camera.dart | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/lib/components/camera.dart b/packages/filament_scene/lib/components/camera.dart
+index 3e92d56..54f8aa5 100644
+--- a/packages/filament_scene/lib/components/camera.dart
++++ b/packages/filament_scene/lib/components/camera.dart
+@@ -27,12 +27,13 @@ mixin class Camera {
+   Projection? projection;
+   LensProjection? lens;
+ 
+   // NOTE: expose this to properly support multiview
+   // ignore: prefer_final_fields
+-  // Keep cameras detached until setActive selects one for a view.
+-  int _viewId = -1;
++  // Keep the historical default so the first native frame has a camera.
++  // Explicit setActive() remains the route-selection mechanism.
++  int _viewId = 0;
+ 
+   void setProjection({final Projection? projection, final LensProjection? lens}) {
+     assert(
+       (projection == null && lens == null) ||
+           (projection != null && lens == null) ||

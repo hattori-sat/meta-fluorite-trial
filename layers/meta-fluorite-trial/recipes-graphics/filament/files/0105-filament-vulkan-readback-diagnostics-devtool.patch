@@ -1,0 +1,49 @@
+From d95da82310acf8b7d70dc7760bd1c411be0b53f6 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 20:07:32 +0000
+Subject: [PATCH] diag: trace Vulkan readback completion
+
+
+diff --git a/filament/backend/src/vulkan/VulkanReadPixels.cpp b/filament/backend/src/vulkan/VulkanReadPixels.cpp
+index 41ccc508b..50810a654 100644
+--- a/filament/backend/src/vulkan/VulkanReadPixels.cpp
++++ b/filament/backend/src/vulkan/VulkanReadPixels.cpp
+@@ -125,6 +125,9 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+         OnReadCompleteFunction const& readCompleteFunc) {
+     assert_invariant(mDevice != VK_NULL_HANDLE);
+ 
++    FVK_LOGI << "FLR0026_VK_READBACK_RUN width=" << width
++             << " height=" << height;
++
+     VkDevice& device = mDevice;
+ 
+     if (mCommandPool == VK_NULL_HANDLE) {
+@@ -291,7 +294,8 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+             .signalSemaphoreCount = 0,
+             .pSignalSemaphores = VK_NULL_HANDLE,
+     };
+-    vkQueueSubmit(queue, 1, &submitInfo, readCompleteFence);
++    VkResult const submitStatus = vkQueueSubmit(queue, 1, &submitInfo, readCompleteFence);
++    FVK_LOGI << "FLR0026_VK_READBACK_QUEUE_SUBMIT result=" << submitStatus;
+ 
+     auto* const pUserBuffer = new PixelBufferDescriptor(std::move(pbd));
+     auto cleanPbdFunc = [pUserBuffer, readCompleteFunc]() {
+@@ -303,6 +307,7 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+                                  cmdpool, cmdbuffer, pUserBuffer,
+                                  fence = readCompleteFence]() mutable {
+         VkResult status = vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
++        FVK_LOGI << "FLR0026_VK_READBACK_FENCE_WAIT result=" << status;
+         if (status != VK_SUCCESS) {
+             FVK_LOGE << "Failed to wait for readPixels fence";
+             return;
+@@ -330,6 +335,7 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+         vkFreeMemory(device, stagingMemory, VKALLOC);
+         vkDestroyFence(device, fence, VKALLOC);
+         vkFreeCommandBuffers(device, cmdpool, 1, &cmdbuffer);
++        FVK_LOGI << "FLR0026_VK_READBACK_WORK_COMPLETE";
+     };
+     mTaskHandler->post(std::move(waitFenceFunc), std::move(cleanPbdFunc));
+ }
+-- 
+2.34.1
+

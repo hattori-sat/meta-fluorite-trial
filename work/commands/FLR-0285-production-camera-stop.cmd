@@ -1,0 +1,1 @@
+if test -r /run/user/1001/flr0285-production-camera.pid; then pid=$(cat /run/user/1001/flr0285-production-camera.pid); kill -TERM "$pid" 2>/dev/null || true; fi; printf 'FLR0285_PRODUCTION_CAMERA_STOP_DONE\n'

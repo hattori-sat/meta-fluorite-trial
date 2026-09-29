@@ -1,0 +1,31 @@
+From 15d918df4fd1f01ab019c858ebeec19f29420a06 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 08:38:36 +0000
+Subject: [PATCH] diag: add mixed filter sampler fallback
+
+---
+ filament/backend/src/vulkan/VulkanSamplerCache.cpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanSamplerCache.cpp b/filament/backend/src/vulkan/VulkanSamplerCache.cpp
+index 8a3f94327..426c93218 100644
+--- a/filament/backend/src/vulkan/VulkanSamplerCache.cpp
++++ b/filament/backend/src/vulkan/VulkanSamplerCache.cpp
+@@ -60,6 +60,14 @@ VkSampler VulkanSamplerCache::getSampler(Params params) {
+         .borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+         .unnormalizedCoordinates = VK_FALSE,
+     };
++    if (std::getenv("FLR0026_SAMPLER_MIXED_FILTER_FALLBACK") != nullptr &&
++            samplerInfo.magFilter != samplerInfo.minFilter) {
++        std::fprintf(stderr,
++                "FLR0026_SAMPLER_MIXED_FILTER_FALLBACK mag=%d min=%d\n",
++                static_cast<int>(samplerInfo.magFilter),
++                static_cast<int>(samplerInfo.minFilter));
++        samplerInfo.magFilter = samplerInfo.minFilter;
++    }
+     const bool traceSampler = std::getenv("FLR0026_SAMPLER_TRACE") != nullptr;
+     if (traceSampler) {
+         std::fprintf(stderr,
+-- 
+2.34.1
+

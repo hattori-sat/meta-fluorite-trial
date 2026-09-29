@@ -1,0 +1,57 @@
+From ff39c990296c0b127881ce99055011ca750b8edb Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 20:06:11 +0000
+Subject: [PATCH] diag: select production model asset by match
+
+---
+ .../serialization/scene_text_deserializer.cc    | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 32260fc..14e8812 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -252,6 +252,10 @@ void SceneTextDeserializer::setUpLoadingModels() {
+   SPDLOG_TRACE("++{}", __FUNCTION__);
+ 
+   std::size_t model_limit = models_.size();
++  std::string model_match;
++  if (const char* raw_match = std::getenv("FLR0026_NATIVE_MODEL_MATCH")) {
++    model_match = raw_match;
++  }
+   if (const char* raw_limit = std::getenv("FLR0026_NATIVE_MODEL_LIMIT")) {
+     char* end = nullptr;
+     const auto parsed_limit = std::strtoul(raw_limit, &end, 10);
+@@ -261,7 +265,13 @@ void SceneTextDeserializer::setUpLoadingModels() {
+   }
+ 
+   std::size_t queued_models = 0;
++  std::size_t inspected_models = 0;
+   for (auto& iter : models_) {
++    const auto asset_path = iter->getAssetPath();
++    ++inspected_models;
++    if (!model_match.empty() && asset_path.find(model_match) == std::string::npos) {
++      continue;
++    }
+     if (queued_models >= model_limit) {
+       break;
+     }
+@@ -269,13 +279,16 @@ void SceneTextDeserializer::setUpLoadingModels() {
+     // affect the loading process here in the future. Backlogged.
+     //
+     // This will transfer ownership
++    spdlog::info(
++      "FLR0026_MODEL_SELECTED ordinal={} asset={}", inspected_models - 1, asset_path
++    );
+     loadModel(iter);
+     ++queued_models;
+   }
+ 
+   spdlog::info(
+-    "FLR0026_MODEL_LOAD_PLAN total={} limit={} queued={}",
+-    models_.size(), model_limit, queued_models
++    "FLR0026_MODEL_LOAD_PLAN total={} limit={} match={} inspected={} queued={}",
++    models_.size(), model_limit, model_match, inspected_models, queued_models
+   );
+ 
+   SPDLOG_TRACE("--{}", __FUNCTION__);

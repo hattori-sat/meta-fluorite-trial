@@ -1,0 +1,41 @@
+From 359652d492b4ce0f2a8a34a0004e47d8cc309e61 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 09:55:40 +0000
+Subject: [PATCH] diag: test Vulkan acquire semaphore wait
+
+---
+ filament/backend/src/vulkan/VulkanSwapChain.cpp | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index 67e841f4e..dc3ef3eab 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -21,10 +21,11 @@
+ 
+ #include <utils/FixedCapacityVector.h>
+ #include <utils/Panic.h>
+ 
+ #include <cstdio>
++#include <cstdlib>
+ 
+ using namespace bluevk;
+ using namespace utils;
+ 
+ namespace filament::backend {
+@@ -172,11 +173,14 @@ void VulkanSwapChain::acquire(bool& resized) {
+     VkResult const result = mPlatform->acquire(swapChain, &imageSyncData);
+     mCurrentSwapIndex = imageSyncData.imageIndex;
+     mFinishedDrawing[mCurrentSwapIndex] = {};
+     FILAMENT_CHECK_POSTCONDITION(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+             << "Cannot acquire in swapchain. error=" << static_cast<int32_t>(result);
+-    if (imageSyncData.imageReadySemaphore != VK_NULL_HANDLE) {
++    const bool skipImageReadyWait = std::getenv("FLR0026_ACQUIRE_NO_WAIT") != nullptr;
++    std::fprintf(stderr, "FLR0026_VK_ACQUIRE_WAIT_SEMAPHORE enabled=%s\\n",
++            skipImageReadyWait ? "false" : "true");
++    if (imageSyncData.imageReadySemaphore != VK_NULL_HANDLE && !skipImageReadyWait) {
+         mCommands->injectDependency(imageSyncData.imageReadySemaphore,
+                 VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+     }
+     mAcquired = true;
+ }

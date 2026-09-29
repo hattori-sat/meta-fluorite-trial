@@ -1,0 +1,40 @@
+From 3f7c7c966e297a0ff0bc4472fd215f8d676e5148 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 11:50:05 +0000
+Subject: [PATCH] diag: add hardcoded native material color discriminator
+
+---
+ .../filament_view/core/scene/view_target.cc    | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index f27ff31..cb64ec0 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -311,14 +311,20 @@ void ViewTarget::setupNativeMinimalGeometry() {
+ 
+   filamat::MaterialBuilder::init();
+   filamat::MaterialBuilder materialBuilder;
+-  materialBuilder
+-    .name("fluorite_native_minimal_unlit")
+-    .material(
+-      "void material(inout MaterialInputs material) {"
++  const bool hardcodedNativeMaterialColor =
++    std::getenv("FLUORITE_NATIVE_HARDCODED_MATERIAL_COLOR") != nullptr;
++  const char* nativeMaterialSource = hardcodedNativeMaterialColor
++    ? "void material(inout MaterialInputs material) {"
+       "  prepareMaterial(material);"
+-      "  material.baseColor = vec4(materialParams.color, 1.0);"
++      "  material.baseColor.rgb = vec3(0.05, 0.45, 1.0);"
+       "}"
+-    )
++    : "void material(inout MaterialInputs material) {"
++      "  prepareMaterial(material);"
++      "  material.baseColor = vec4(materialParams.color, 1.0);"
++      "}";
++  materialBuilder
++    .name("fluorite_native_minimal_unlit")
++    .material(nativeMaterialSource)
+     .parameter("color", filament::backend::UniformType::FLOAT3)
+     .shading(filamat::MaterialBuilder::Shading::UNLIT)
+     .targetApi(filamat::MaterialBuilder::TargetApi::ALL)

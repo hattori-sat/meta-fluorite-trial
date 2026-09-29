@@ -1,0 +1,243 @@
+From f793a5156f916f3d3b66f4f44a6e532b681afef3 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 21:03:25 +0000
+Subject: [PATCH] diag: attach known-color Wayland shm probe to effective
+ surface
+
+---
+ .../filament_view/core/scene/view_target.cc   | 157 ++++++++++++++++++
+ .../filament_view/core/scene/view_target.h    |   8 +
+ 2 files changed, 165 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 121a605..caa0eaa 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -45,6 +45,16 @@
+ #include <utility>
+ #include <view/flutter_view.h>
+ #include <wayland/display.h>
++#include <wayland-client-protocol.h>
++
++#include <algorithm>
++#include <cerrno>
++#include <cstdlib>
++#include <cstring>
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <unistd.h>
+ 
+ using flutter::EncodableList;
+ using flutter::EncodableMap;
+@@ -58,6 +68,36 @@ class FlutterView;
+ 
+ namespace plugin_filament_view {
+ 
++namespace {
++
++struct ShmProbeRegistry {
++  wl_shm* shm{};
++};
++
++void onShmGlobal(
++  void* data,
++  wl_registry* registry,
++  const uint32_t name,
++  const char* interface,
++  const uint32_t version
++) {
++  auto* state = static_cast<ShmProbeRegistry*>(data);
++  if (std::strcmp(interface, "wl_shm") == 0 && state->shm == nullptr) {
++    state->shm = static_cast<wl_shm*>(
++      wl_registry_bind(registry, name, &wl_shm_interface, std::min(version, 1u))
++    );
++  }
++}
++
++void onShmGlobalRemove(void*, wl_registry*, const uint32_t) {}
++
++const wl_registry_listener shm_registry_listener = {
++  .global = onShmGlobal,
++  .global_remove = onShmGlobalRemove
++};
++
++}  // namespace
++
+ ////////////////////////////////////////////////////////////////////////////
+ ViewTarget::ViewTarget(
+   const size_t id,
+@@ -89,6 +129,23 @@ ViewTarget::~ViewTarget() {
+   _engine->destroy(fview_);
+   _engine->destroy(fswapChain_);
+ 
++  if (shm_probe_buffer_) {
++    wl_buffer_destroy(shm_probe_buffer_);
++    shm_probe_buffer_ = nullptr;
++  }
++  if (shm_probe_pool_) {
++    wl_shm_pool_destroy(shm_probe_pool_);
++    shm_probe_pool_ = nullptr;
++  }
++  if (shm_probe_shm_) {
++    wl_shm_destroy(shm_probe_shm_);
++    shm_probe_shm_ = nullptr;
++  }
++  if (shm_probe_data_) {
++    munmap(shm_probe_data_, shm_probe_size_);
++    shm_probe_data_ = nullptr;
++  }
++
+   if (subsurface_) {
+     wl_subsurface_destroy(subsurface_);
+     subsurface_ = nullptr;
+@@ -181,6 +238,7 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+   );
+ 
+   _engine = filamentSystem->getFilamentEngine();
++  setupShmProbe(width, height);
+   fswapChain_ = _engine->createSwapChain(&native_window_, filament::SwapChain::CONFIG_TRANSPARENT);
+   fview_ = _engine->createView();
+ 
+@@ -547,6 +605,104 @@ void ViewTarget::SendFrameViewCallback(
+   viewTargetSystem->SendDataToEventChannel(encodableMap);
+ }
+ 
++void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
++  if (std::getenv("FLR0026_SHM_PROBE") == nullptr || display_ == nullptr ||
++      surface_ == nullptr || width == 0 || height == 0) {
++    return;
++  }
++
++  auto* registry = wl_display_get_registry(display_);
++  if (registry == nullptr) {
++    return;
++  }
++  ShmProbeRegistry registry_state;
++  wl_registry_add_listener(registry, &shm_registry_listener, &registry_state);
++  if (wl_display_roundtrip(display_) < 0 || registry_state.shm == nullptr) {
++    spdlog::error("FLR0026_WAYLAND_SHM_PROBE registry_failed");
++    wl_registry_destroy(registry);
++    return;
++  }
++  wl_registry_destroy(registry);
++
++  const size_t stride = static_cast<size_t>(width) * 4u;
++  const size_t size = stride * static_cast<size_t>(height);
++  const char* const name = "/flr0026-shm-probe";
++  const int fd = shm_open(name, O_CREAT | O_RDWR, 0600);
++  if (fd < 0) {
++    spdlog::error("FLR0026_WAYLAND_SHM_PROBE shm_open_errno={}", errno);
++    wl_shm_destroy(registry_state.shm);
++    return;
++  }
++  shm_unlink(name);
++  if (ftruncate(fd, static_cast<off_t>(size)) != 0) {
++    spdlog::error("FLR0026_WAYLAND_SHM_PROBE ftruncate_errno={}", errno);
++    close(fd);
++    wl_shm_destroy(registry_state.shm);
++    return;
++  }
++
++  void* data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++  if (data == MAP_FAILED) {
++    spdlog::error("FLR0026_WAYLAND_SHM_PROBE mmap_errno={}", errno);
++    close(fd);
++    wl_shm_destroy(registry_state.shm);
++    return;
++  }
++  auto* pixels = static_cast<uint32_t*>(data);
++  for (size_t i = 0; i < static_cast<size_t>(width) * height; ++i) {
++    pixels[i] = 0x00FF00FFu;
++  }
++
++  auto* pool = wl_shm_create_pool(
++    registry_state.shm, fd, static_cast<int32_t>(size)
++  );
++  close(fd);
++  if (pool == nullptr) {
++    spdlog::error("FLR0026_WAYLAND_SHM_PROBE pool_failed");
++    munmap(data, size);
++    wl_shm_destroy(registry_state.shm);
++    return;
++  }
++  auto* buffer = wl_shm_pool_create_buffer(
++    pool,
++    0,
++    static_cast<int32_t>(width),
++    static_cast<int32_t>(height),
++    static_cast<int32_t>(stride),
++    WL_SHM_FORMAT_XRGB8888
++  );
++  if (buffer == nullptr) {
++    spdlog::error("FLR0026_WAYLAND_SHM_PROBE buffer_failed");
++    wl_shm_pool_destroy(pool);
++    munmap(data, size);
++    wl_shm_destroy(registry_state.shm);
++    return;
++  }
++
++  shm_probe_shm_ = registry_state.shm;
++  shm_probe_pool_ = pool;
++  shm_probe_buffer_ = buffer;
++  shm_probe_data_ = data;
++  shm_probe_size_ = size;
++  spdlog::info(
++    "FLR0026_WAYLAND_SHM_PROBE_READY width={} height={}", width, height
++  );
++}
++
++void ViewTarget::attachShmProbe() {
++  if (shm_probe_attached_ || shm_probe_buffer_ == nullptr || surface_ == nullptr) {
++    return;
++  }
++  wl_surface_attach(surface_, shm_probe_buffer_, 0, 0);
++  wl_surface_damage(surface_, 0, 0, native_window_.width, native_window_.height);
++  wl_surface_commit(surface_);
++  const int flush_result = wl_display_flush(display_);
++  shm_probe_attached_ = true;
++  spdlog::info(
++    "FLR0026_WAYLAND_SHM_PROBE_ATTACHED flush_result={}", flush_result
++  );
++}
++
+ /////////////////////////////////////////////////////////////////////////
+ const wl_callback_listener ViewTarget::frame_listener = {.done = OnFrame};
+ 
+@@ -764,6 +920,7 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+       wl_surface_commit(obj->surface_);
+       spdlog::info("FLR0026_WAYLAND_SURFACE_COMMITTED committed=true");
+     }
++    obj->attachShmProbe();
+ 
+     // Z-Order
+     // These do not need <seem> to need to be called every frame.
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index c2fb8dd..9d54652 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -142,6 +142,8 @@ class ViewTarget {
+     /*
+      *  Wayland
+      */
++    void setupShmProbe(uint32_t width, uint32_t height);
++    void attachShmProbe();
+     void setupWaylandSubsurface();
+ 
+     FlutterDesktopEngineState* state_;
+@@ -157,6 +159,12 @@ class ViewTarget {
+     wl_surface* parent_surface_{};
+     wl_callback* callback_;
+     wl_subsurface* subsurface_{};
++    wl_shm* shm_probe_shm_{};
++    wl_shm_pool* shm_probe_pool_{};
++    wl_buffer* shm_probe_buffer_{};
++    void* shm_probe_data_{};
++    size_t shm_probe_size_{};
++    bool shm_probe_attached_{};
+ 
+     struct _native_window {
+         struct wl_display* display;
+-- 
+2.34.1
+

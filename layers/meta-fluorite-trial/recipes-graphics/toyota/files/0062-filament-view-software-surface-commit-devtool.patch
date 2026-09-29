@@ -1,0 +1,24 @@
+From ed6906991ec88705e026b093a6508d165ea35ae1 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 17:37:21 +0000
+Subject: [PATCH] diag: commit software frame surface
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index f4d1189..464e6d2 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -691,6 +691,10 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+     *drawSoftwareFrame = [obj, drawSoftwareFrame](const uint32_t frameTime) {
+       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+       obj->DrawFrame(frameTime);
++      if (obj->surface_ != nullptr) {
++        wl_surface_commit(obj->surface_);
++        spdlog::info("FLR0026_WAYLAND_SOFTWARE_SURFACE_COMMITTED committed=true");
++      }
+       post(*ECSManager::GetInstance()->getStrand(), [drawSoftwareFrame, frameTime] {
+         (*drawSoftwareFrame)(frameTime + 100);
+       });

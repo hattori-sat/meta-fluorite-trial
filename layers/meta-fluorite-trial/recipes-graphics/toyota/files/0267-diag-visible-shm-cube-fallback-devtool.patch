@@ -1,0 +1,352 @@
+From 606018f75ce5e83d5c2225d87a018a61db2789b3 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 19 Sep 2026 18:12:28 +0000
+Subject: [PATCH] diag: add visible Wayland SHM cube fallback
+
+---
+ .../filament_view/core/scene/view_target.cc   | 277 ++++++++++++++++++
+ .../filament_view/core/scene/view_target.h    |   8 +
+ 2 files changed, 285 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 234bb42b5..88a6c3ba1 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -54,6 +54,13 @@
+ #include <utility>
+ #include <view/flutter_view.h>
+ #include <wayland/display.h>
++#include <wayland-client-protocol.h>
++
++#include <cerrno>
++#include <cstring>
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <unistd.h>
+ 
+ using flutter::EncodableList;
+ using flutter::EncodableMap;
+@@ -67,6 +74,133 @@ class FlutterView;
+ 
+ namespace plugin_filament_view {
+ 
++namespace {
++
++struct VisibleShmPoint {
++  float x;
++  float y;
++};
++
++float visibleShmEdge(
++  const VisibleShmPoint& a,
++  const VisibleShmPoint& b,
++  const VisibleShmPoint& p
++) {
++  return (p.x - a.x) * (b.y - a.y) - (p.y - a.y) * (b.x - a.x);
++}
++
++void fillVisibleShmTriangle(
++  uint32_t* pixels,
++  const uint32_t width,
++  const uint32_t height,
++  const VisibleShmPoint& a,
++  const VisibleShmPoint& b,
++  const VisibleShmPoint& c,
++  const uint32_t color
++) {
++  const float area = visibleShmEdge(a, b, c);
++  if (area == 0.0f) return;
++
++  const int32_t minX = std::max(
++    0,
++    static_cast<int32_t>(std::min({a.x, b.x, c.x}))
++  );
++  const int32_t maxX = std::min(
++    static_cast<int32_t>(width) - 1,
++    static_cast<int32_t>(std::max({a.x, b.x, c.x}))
++  );
++  const int32_t minY = std::max(
++    0,
++    static_cast<int32_t>(std::min({a.y, b.y, c.y}))
++  );
++  const int32_t maxY = std::min(
++    static_cast<int32_t>(height) - 1,
++    static_cast<int32_t>(std::max({a.y, b.y, c.y}))
++  );
++  const bool positive = area > 0.0f;
++
++  for (int32_t y = minY; y <= maxY; ++y) {
++    for (int32_t x = minX; x <= maxX; ++x) {
++      const VisibleShmPoint p{static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f};
++      const float w0 = visibleShmEdge(b, c, p);
++      const float w1 = visibleShmEdge(c, a, p);
++      const float w2 = visibleShmEdge(a, b, p);
++      if ((positive && w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f) ||
++          (!positive && w0 <= 0.0f && w1 <= 0.0f && w2 <= 0.0f)) {
++        pixels[static_cast<size_t>(y) * width + static_cast<size_t>(x)] = color;
++      }
++    }
++  }
++}
++
++void fillVisibleShmQuad(
++  uint32_t* pixels,
++  const uint32_t width,
++  const uint32_t height,
++  const VisibleShmPoint& a,
++  const VisibleShmPoint& b,
++  const VisibleShmPoint& c,
++  const VisibleShmPoint& d,
++  const uint32_t color
++) {
++  fillVisibleShmTriangle(pixels, width, height, a, b, c, color);
++  fillVisibleShmTriangle(pixels, width, height, a, c, d, color);
++}
++
++void drawVisibleShmCube(uint32_t* pixels, const uint32_t width, const uint32_t height) {
++  constexpr uint32_t background = 0xff101826u;
++  constexpr uint32_t topFace = 0xffd9e8ffu;
++  constexpr uint32_t leftFace = 0xff3f7ad6u;
++  constexpr uint32_t rightFace = 0xffd66a3fu;
++  for (size_t index = 0; index < static_cast<size_t>(width) * height; ++index) {
++    pixels[index] = background;
++  }
++
++  const float cx = static_cast<float>(width) * 0.5f;
++  const float cy = static_cast<float>(height) * 0.43f;
++  const float halfWidth = static_cast<float>(width) * 0.26f;
++  const float halfHeight = static_cast<float>(height) * 0.16f;
++  const float faceHeight = static_cast<float>(height) * 0.30f;
++  const VisibleShmPoint top{cx, cy - halfHeight};
++  const VisibleShmPoint right{cx + halfWidth, cy};
++  const VisibleShmPoint center{cx, cy + halfHeight};
++  const VisibleShmPoint left{cx - halfWidth, cy};
++  const VisibleShmPoint bottomLeft{left.x, left.y + faceHeight};
++  const VisibleShmPoint bottom{center.x, center.y + faceHeight};
++  const VisibleShmPoint bottomRight{right.x, right.y + faceHeight};
++  fillVisibleShmQuad(pixels, width, height, top, right, center, left, topFace);
++  fillVisibleShmQuad(pixels, width, height, left, center, bottom, bottomLeft, leftFace);
++  fillVisibleShmQuad(pixels, width, height, center, right, bottomRight, bottom, rightFace);
++}
++
++struct VisibleShmRegistry {
++  wl_shm* shm{};
++};
++
++void onVisibleShmGlobal(
++  void* data,
++  wl_registry* registry,
++  const uint32_t name,
++  const char* interface,
++  const uint32_t version
++) {
++  auto* state = static_cast<VisibleShmRegistry*>(data);
++  if (std::strcmp(interface, "wl_shm") == 0 && state->shm == nullptr) {
++    state->shm = static_cast<wl_shm*>(
++      wl_registry_bind(registry, name, &wl_shm_interface, std::min(version, 1u))
++    );
++  }
++}
++
++void onVisibleShmGlobalRemove(void*, wl_registry*, const uint32_t) {}
++
++const wl_registry_listener visible_shm_registry_listener = {
++  .global = onVisibleShmGlobal,
++  .global_remove = onVisibleShmGlobalRemove
++};
++
++}  // namespace
++
+ ////////////////////////////////////////////////////////////////////////////
+ ViewTarget::ViewTarget(
+   const size_t id,
+@@ -123,6 +257,32 @@ ViewTarget::~ViewTarget() {
+   _engine->destroy(fview_);
+   _engine->destroy(fswapChain_);
+ 
++  if (shm_buffer_) {
++    wl_buffer_destroy(shm_buffer_);
++    shm_buffer_ = nullptr;
++  }
++  if (shm_pool_) {
++    wl_shm_pool_destroy(shm_pool_);
++    shm_pool_ = nullptr;
++  }
++  if (shm_) {
++    wl_shm_destroy(shm_);
++    shm_ = nullptr;
++  }
++  if (shm_data_) {
++    munmap(shm_data_, shm_size_);
++    shm_data_ = nullptr;
++    shm_size_ = 0;
++  }
++  if (shm_subsurface_) {
++    wl_subsurface_destroy(shm_subsurface_);
++    shm_subsurface_ = nullptr;
++  }
++  if (shm_surface_) {
++    wl_surface_destroy(shm_surface_);
++    shm_surface_ = nullptr;
++  }
++
+   if (subsurface_) {
+     wl_subsurface_destroy(subsurface_);
+     subsurface_ = nullptr;
+@@ -243,6 +403,7 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+   );
+ 
+   _engine = filamentSystem->getFilamentEngine();
++  setupVisibleShmCube(width, height);
+   const bool opaqueSwapchain =
+     std::getenv("FLUORITE_NATIVE_OPAQUE_SWAPCHAIN") != nullptr;
+   const uint64_t swapchainConfig = opaqueSwapchain
+@@ -264,6 +425,122 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+   SPDLOG_TRACE("--{}", __FUNCTION__);
+ }
+ 
++void ViewTarget::setupVisibleShmCube(const uint32_t width, const uint32_t height) {
++  if (std::getenv("FLUORITE_NATIVE_VISIBLE_SHM_CUBE") == nullptr ||
++      display_ == nullptr || parent_surface_ == nullptr || width == 0 || height == 0) {
++    return;
++  }
++
++  auto* registry = wl_display_get_registry(display_);
++  if (registry == nullptr) {
++    spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE registry_failed");
++    return;
++  }
++  VisibleShmRegistry registryState;
++  if (wl_registry_add_listener(registry, &visible_shm_registry_listener, &registryState) != 0 ||
++      wl_display_roundtrip(display_) < 0 || registryState.shm == nullptr) {
++    spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE registry_failed");
++    wl_registry_destroy(registry);
++    return;
++  }
++  wl_registry_destroy(registry);
++
++  constexpr uint32_t cubeWidth = 360;
++  constexpr uint32_t cubeHeight = 280;
++  const uint32_t left = width > cubeWidth ? (width - cubeWidth) / 2u : 0u;
++  const uint32_t top = height > cubeHeight ? (height - cubeHeight) / 2u : 0u;
++  const size_t stride = static_cast<size_t>(cubeWidth) * 4u;
++  const size_t size = stride * static_cast<size_t>(cubeHeight);
++  const char* const name = "/fluorite-visible-shm-cube";
++  const int fd = shm_open(name, O_CREAT | O_RDWR, 0600);
++  if (fd < 0) {
++    spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE shm_open_errno={}", errno);
++    wl_shm_destroy(registryState.shm);
++    return;
++  }
++  shm_unlink(name);
++  if (ftruncate(fd, static_cast<off_t>(size)) != 0) {
++    spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE ftruncate_errno={}", errno);
++    close(fd);
++    wl_shm_destroy(registryState.shm);
++    return;
++  }
++
++  void* data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++  if (data == MAP_FAILED) {
++    spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE mmap_errno={}", errno);
++    close(fd);
++    wl_shm_destroy(registryState.shm);
++    return;
++  }
++  drawVisibleShmCube(static_cast<uint32_t*>(data), cubeWidth, cubeHeight);
++
++  auto* pool = wl_shm_create_pool(registryState.shm, fd, static_cast<int32_t>(size));
++  close(fd);
++  if (pool == nullptr) {
++    spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE pool_failed");
++    munmap(data, size);
++    wl_shm_destroy(registryState.shm);
++    return;
++  }
++  auto* buffer = wl_shm_pool_create_buffer(
++    pool,
++    0,
++    static_cast<int32_t>(cubeWidth),
++    static_cast<int32_t>(cubeHeight),
++    static_cast<int32_t>(stride),
++    WL_SHM_FORMAT_XRGB8888
++  );
++  if (buffer == nullptr) {
++    spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE buffer_failed");
++    wl_shm_pool_destroy(pool);
++    munmap(data, size);
++    wl_shm_destroy(registryState.shm);
++    return;
++  }
++
++  auto* const compositor = state_->view_controller->view->GetDisplay()->GetCompositor();
++  auto* const subcompositor = state_->view_controller->view->GetDisplay()->GetSubCompositor();
++  auto* shmSurface = wl_compositor_create_surface(compositor);
++  auto* shmSubsurface = shmSurface == nullptr
++    ? nullptr
++    : wl_subcompositor_get_subsurface(subcompositor, shmSurface, parent_surface_);
++  if (shmSubsurface == nullptr) {
++    spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE child_surface_failed");
++    if (shmSurface != nullptr) wl_surface_destroy(shmSurface);
++    wl_buffer_destroy(buffer);
++    wl_shm_pool_destroy(pool);
++    munmap(data, size);
++    wl_shm_destroy(registryState.shm);
++    return;
++  }
++  wl_subsurface_set_position(shmSubsurface, left_ + left_, top_ + top_);
++  if (surface_ != nullptr) wl_subsurface_place_above(shmSubsurface, surface_);
++  else wl_subsurface_place_above(shmSubsurface, parent_surface_);
++  wl_subsurface_set_desync(shmSubsurface);
++
++  shm_ = registryState.shm;
++  shm_pool_ = pool;
++  shm_buffer_ = buffer;
++  shm_surface_ = shmSurface;
++  shm_subsurface_ = shmSubsurface;
++  shm_data_ = data;
++  shm_size_ = size;
++  wl_surface_attach(shm_surface_, shm_buffer_, 0, 0);
++  wl_surface_damage(shm_surface_, 0, 0, cubeWidth, cubeHeight);
++  wl_surface_commit(shm_surface_);
++  const int flushResult = wl_display_flush(display_);
++  spdlog::info(
++    "FLUORITE_NATIVE_VISIBLE_SHM_CUBE_READY width={} height={} object=cube", cubeWidth, cubeHeight
++  );
++  spdlog::info(
++    "FLUORITE_NATIVE_VISIBLE_SHM_CUBE_ATTACHED left={} top={} flush_result={}",
++    left_ + left,
++    top_ + top,
++    flushResult
++  );
++}
++
+ ////////////////////////////////////////////////////////////////////////////
+ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+   SPDLOG_TRACE("++{}", __FUNCTION__);
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index 101ed1dc1..08a63f63f 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -152,6 +152,7 @@ class ViewTarget {
+      *  Wayland
+      */
+     void setupWaylandSubsurface();
++    void setupVisibleShmCube(uint32_t width, uint32_t height);
+ 
+     FlutterDesktopEngineState* state_;
+     filament::viewer::Settings settings_;
+@@ -166,6 +167,13 @@ class ViewTarget {
+     wl_surface* parent_surface_{};
+     wl_callback* callback_;
+     wl_subsurface* subsurface_{};
++    wl_surface* shm_surface_{};
++    wl_subsurface* shm_subsurface_{};
++    wl_shm* shm_{};
++    wl_shm_pool* shm_pool_{};
++    wl_buffer* shm_buffer_{};
++    void* shm_data_{};
++    size_t shm_size_{};
+ 
+     struct _native_window {
+         struct wl_display* display;

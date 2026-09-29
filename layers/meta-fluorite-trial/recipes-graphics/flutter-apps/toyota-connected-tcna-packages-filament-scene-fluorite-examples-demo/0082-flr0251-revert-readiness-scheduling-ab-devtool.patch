@@ -1,0 +1,39 @@
+From 14ac959fb35f9659cf4777107c3e8906c90f3409 Mon Sep 17 00:00:00 2001
+From: Fluorite integration role <integration-role@localhost>
+Date: Sun, 20 Sep 2026 22:59:36 +0000
+Subject: [PATCH] FLR-0251: revert readiness scheduling A/B
+
+---
+ packages/filament_scene/example/lib/main.dart | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index ae85128..d402e37 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -121,9 +121,13 @@ class _MyAppState extends State<MyApp> {
+ 
+     _filamentViewWidget = poGetFilamentScene();
+ 
+-    // Readiness must start after the native PlatformView has registered its
+-    // MethodChannels. Starting from initState races PlatformView creation and
+-    // can permanently leave the first readiness calls without a handler.
++    unawaited(
++      // FLR-0141 initial-payload gate: the v2 Native view consumes the
++      // selected scene from creationParams. Do not mount a StatefulSceneView
++      // here; its current camera-control callbacks use generated setCamera*
++      // channels that the Fluorite v2 Native plugin does not implement.
++      initializeReadiness(),
++    );
+   }
+ 
+   /// Update only the scene subtree; never rebuild the parent Stack here.
+@@ -318,8 +322,6 @@ class _MyAppState extends State<MyApp> {
+         _collisionEventChannel.setController(filamentViewApi);
+ 
+         print('poGetFilamentScene onCreated completed');
+-        print('FLR0249_READINESS_START_AFTER_PLATFORM_VIEW');
+-        unawaited(initializeReadiness());
+       },
+     );
+   }

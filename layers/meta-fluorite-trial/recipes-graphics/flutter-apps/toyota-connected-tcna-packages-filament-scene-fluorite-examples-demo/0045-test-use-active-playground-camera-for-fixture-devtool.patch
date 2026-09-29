@@ -1,0 +1,22 @@
+From be9aaa181030e93032702c3b10269ac2609c8eb8 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 04:26:33 +0000
+Subject: [PATCH] test: use active playground camera for fixture
+
+---
+ packages/filament_scene/example/lib/main.dart | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 6e86a77..2419900 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -303,7 +303,7 @@ class _MyAppState extends State<MyApp> {
+       models: null,
+       scene: poGetMinimal3dFixtureScene(),
+       shapes: poGetMinimal3dFixtureShapes(),
+-      cameras: poGetMinimal3dFixtureCameras(),
++      cameras: PlaygroundSceneView.getSceneCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 

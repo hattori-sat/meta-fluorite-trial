@@ -1,0 +1,67 @@
+From 9b2f144313f166c4dd8a88b5475e228dd280c906 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 21:11:27 +0000
+Subject: [PATCH] FLR-0304: trace production camera and culling boundary
+
+---
+ .../filament_view/core/scene/view_target.cc   | 27 +++++++++++++++++++
+ .../core/systems/derived/model_system.cc      |  8 ++++++
+ 2 files changed, 35 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 28a229b..92923c7 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1465,6 +1465,33 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     );
+   }
+ 
++  if (std::getenv("FLR0304_PRODUCTION_CAMERA_CULLING_TRACE") != nullptr) {
++    const auto projection = camera_->getProjectionMatrix();
++    const auto cullingProjection = camera_->getCullingProjectionMatrix();
++    const auto view = camera_->getViewMatrix();
++    const auto logMatrix = [](const char* name, const filament::math::mat4& matrix) {
++      spdlog::info(
++        "FLR0304_CAMERA_MATRIX name={} c0=({},{},{},{}) c1=({},{},{},{}) "
++        "c2=({},{},{},{}) c3=({},{},{},{})",
++        name,
++        matrix[0].x, matrix[0].y, matrix[0].z, matrix[0].w,
++        matrix[1].x, matrix[1].y, matrix[1].z, matrix[1].w,
++        matrix[2].x, matrix[2].y, matrix[2].z, matrix[2].w,
++        matrix[3].x, matrix[3].y, matrix[3].z, matrix[3].w
++      );
++    };
++    const auto position = camera_->getPosition();
++    spdlog::info(
++      "FLR0304_CAMERA_EFFECTIVE position=({},{},{}) target=UNKNOWN "
++      "projection_target=runtime camera_profile={}",
++      position.x, position.y, position.z,
++      productionCameraProfile != nullptr ? productionCameraProfile : "default"
++    );
++    logMatrix("projection", projection);
++    logMatrix("culling_projection", cullingProjection);
++    logMatrix("view", view);
++  }
++
+   const char* nativeModelScene = std::getenv("FLR0285_NATIVE_MODEL_SCENE");
+   if (nativeModelScene != nullptr && std::strcmp(nativeModelScene, "diagnostic") == 0 &&
+       native_diagnostic_scene_ != nullptr) {
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index ed2585e..02456d9 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -460,6 +460,14 @@ void ModelSystem::setupRenderable(
+     return;
+   }
+ 
++  if (std::getenv("FLR0304_PRODUCTION_DISABLE_CULLING") != nullptr) {
++    _rcm->setCulling(ri, false);
++    spdlog::info(
++      "FLR0304_PRODUCTION_CULLING_OVERRIDE entity={} enabled=false",
++      fEntity.getId()
++    );
++  }
++
+   if (std::getenv("FLR0280_MODEL_CONTENT_TRACE") != nullptr) {
+     const auto& box = _rcm->getAxisAlignedBoundingBox(ri);
+     const auto primitiveCount = _rcm->getPrimitiveCount(ri);

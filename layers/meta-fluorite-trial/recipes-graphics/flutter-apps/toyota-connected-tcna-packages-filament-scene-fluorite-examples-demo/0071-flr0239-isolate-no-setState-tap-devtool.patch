@@ -1,0 +1,23 @@
+From 9a38c2ac41e64eea2b936985dc630005d001fa48 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 13:46:39 +0000
+Subject: [PATCH] FLR-0239: isolate no-setState tap
+
+---
+ packages/filament_scene/example/lib/main.dart | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 744fb15..a55a258 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -252,8 +252,7 @@ class _MyAppState extends State<MyApp> {
+                   // FLR-0235: keep the tap boundary without Material hover
+                   // state painting over the native 3D surface.
+                   onTap: () {
+-                    print('FLR0238_SCENE_TAP_MARKER_ONLY id=3 name=Planetarium');
+-                    setState(() {});
++                    print('FLR0239_SCENE_TAP_NO_SETSTATE id=3 name=Planetarium');
+                   },
+                   child: Container(
+                     width: 99,

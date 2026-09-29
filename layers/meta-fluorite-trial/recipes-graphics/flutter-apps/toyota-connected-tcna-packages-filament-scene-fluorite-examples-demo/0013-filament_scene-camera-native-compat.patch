@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite PoC <fluorite@example.invalid>
+Date: Sat, 22 Aug 2026 17:25:00 +0900
+Subject: [PATCH] filament_scene: include legacy native camera initialization
+
+The Dart camera rig currently serializes orbit fields, while the native
+Camera constructor initializes its active camera from the legacy mode,
+targetPosition, upVector, and flightStartPosition fields. Include both
+representations so the existing camera rig remains usable on the QEMU
+native bridge.
+---
+ packages/filament_scene/lib/camera/camera.dart | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/packages/filament_scene/lib/camera/camera.dart b/packages/filament_scene/lib/camera/camera.dart
+--- a/packages/filament_scene/lib/camera/camera.dart
++++ b/packages/filament_scene/lib/camera/camera.dart
+@@ -252,12 +252,19 @@ class Camera extends TransformEntity with CameraComponent.Camera, CameraComponent.CameraRig {
+   // TODO(kerberjg): use `Jsonable` when done
+   @override
+   JsonObject toJson() {
++    final Vector3 nativeTarget = targetPoint ?? orbitOriginPoint ?? Vector3.zero();
++
+     return <String, dynamic>{
+       ...super.toJson(),
+       ...cameraToJson(),
+       ...rigToJson(),
+       // TODO(kerberjg): move to [CameraRig]
+       'orbitRotation': _rigRotation.toJson(),
++      // Keep the legacy native camera initializer in sync with the Dart rig.
++      'mode': 'INERTIA_AND_GESTURES',
++      'targetPosition': nativeTarget.toJson(),
++      'upVector': Vector3(0, 1, 0).toJson(),
++      'flightStartPosition': Vector3(orbitDistance, 0, 0).toJson(),
+     };
+   }
+ }

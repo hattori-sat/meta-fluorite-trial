@@ -1,0 +1,55 @@
+From 4b712e4727e2be68b8b03dec9d5a86c7c57e71f3 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 17:08:20 +0000
+Subject: [PATCH] diag: optionally skip frame event callback
+
+---
+ .../filament_view/core/scene/view_target.cc   | 27 +++++++++++++------
+ 1 file changed, 19 insertions(+), 8 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index f4d1189..fb928b6 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -36,6 +36,7 @@
+ #include <filament/utils/EntityManager.h>
+ 
+ #include <chrono>
++#include <cstdlib>
+ #include <thread>
+ 
+ #include <asio/post.hpp>
+@@ -659,15 +660,25 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   if (shouldLogFrame) {
+     spdlog::info("FLR0026_DRAWFRAME_BEFORE_EVENT seq={} started={}", frameSequence, frameStarted);
+   }
+-  FilamentViewPlugin::CallEvent(
+-    kPreRenderFrame,
+-    {//
+-     std::make_pair(kParam_DeltaTime, EncodableValue(deltaTime)),
+-     std::make_pair(kParam_FPS, EncodableValue(fps)),
+-     std::make_pair(kParam_cpuFrametime, EncodableValue(cpuFrametime)),
+-     std::make_pair(kParam_gpuFrametime, EncodableValue(gpuFrametime))
++  const bool skipFrameEvent = std::getenv("FLR0026_SKIP_FRAME_EVENT") != nullptr;
++  if (skipFrameEvent) {
++    if (shouldLogFrame) {
++      spdlog::info("FLR0026_FRAME_EVENT_SKIPPED seq={}", frameSequence);
+     }
+-  );
++  } else {
++    FilamentViewPlugin::CallEvent(
++      kPreRenderFrame,
++      {//
++       std::make_pair(kParam_DeltaTime, EncodableValue(deltaTime)),
++       std::make_pair(kParam_FPS, EncodableValue(fps)),
++       std::make_pair(kParam_cpuFrametime, EncodableValue(cpuFrametime)),
++       std::make_pair(kParam_gpuFrametime, EncodableValue(gpuFrametime))
++      }
++    );
++    if (shouldLogFrame) {
++      spdlog::info("FLR0026_FRAME_EVENT_RETURNED seq={}", frameSequence);
++    }
++  }
+ 
+   // const auto scriptDuration = std::chrono::steady_clock::now() - scriptStart;
+   // spdlog::debug(

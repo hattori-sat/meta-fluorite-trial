@@ -1,0 +1,1 @@
+if test -s /run/user/1001/flr0278-production-lights.pid; then pid=$(cat /run/user/1001/flr0278-production-lights.pid); kill -TERM "$pid" 2>/dev/null || true; fi; sleep 1; pgrep -a flutter-auto || true

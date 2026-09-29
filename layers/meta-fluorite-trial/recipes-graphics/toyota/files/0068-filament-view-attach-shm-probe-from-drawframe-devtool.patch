@@ -1,0 +1,24 @@
+From 2dc4927464b1f3a456073973350365330ee00818 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 22:32:02 +0000
+Subject: [PATCH] diag: attach known-color probe from DrawFrame
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 973df48..489c61a 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -814,6 +814,7 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // );
+ 
+   m_LastTime = time;
++  attachShmProbe();
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////
+-- 
+2.34.1
+

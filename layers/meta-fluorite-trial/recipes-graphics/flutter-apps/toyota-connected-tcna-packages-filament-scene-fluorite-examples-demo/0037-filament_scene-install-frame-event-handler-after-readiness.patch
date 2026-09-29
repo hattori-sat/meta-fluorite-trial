@@ -1,0 +1,23 @@
+From 5c1f7a9e2d4b6c8a0f1e3d5b7a9c2e4f6b8d0a1c Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 14:30:00 +0900
+Subject: [PATCH] filament_scene: install frame event handler after readiness
+
+The native renderer can emit preRenderFrame while the Flutter app is still
+checking native readiness. Register the event-bus handler only when event
+listening starts after readiness succeeds, avoiding initialization-time
+message-channel contention.
+
+---
+ packages/filament_scene/example/lib/events/frame_event_channel.dart | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/events/frame_event_channel.dart b/packages/filament_scene/example/lib/events/frame_event_channel.dart
+--- a/packages/filament_scene/example/lib/events/frame_event_channel.dart
++++ b/packages/filament_scene/example/lib/events/frame_event_channel.dart
+@@ -23,1 +23,0 @@
+-    _eventBus.setMethodCallHandler(_handleNativeCall);
+@@ -81,0 +82,1 @@
++      _eventBus.setMethodCallHandler(_handleNativeCall);
+-- 
+2.39.2

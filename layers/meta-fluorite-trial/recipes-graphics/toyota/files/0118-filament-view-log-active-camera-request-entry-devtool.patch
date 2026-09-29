@@ -1,0 +1,22 @@
+From 1f56a45380f3daa6ab499b61b74094a967f0dd0a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 02:09:40 +0000
+Subject: [PATCH] diag: log active camera request entry
+
+---
+ .../filament_view/core/systems/derived/view_target_system.cc    | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/view_target_system.cc b/plugins/filament_view/core/systems/derived/view_target_system.cc
+index ab3d881..dab59a8 100644
+--- a/plugins/filament_view/core/systems/derived/view_target_system.cc
++++ b/plugins/filament_view/core/systems/derived/view_target_system.cc
+@@ -265,6 +265,8 @@ void ViewTargetSystem::update(double /*deltaTime*/) {
+ }
+ 
+ void ViewTargetSystem::setViewCamera(size_t viewId, EntityGUID cameraId) {
++  spdlog::info("FLR0026_ACTIVE_CAMERA_REQUEST view={} camera={}", viewId, cameraId);
++
+   // Get all the cameras
+   const auto& cameras = ecs->getComponentsOfType<Camera>();
+   for (const auto& camera : cameras) {

@@ -1,0 +1,65 @@
+From 4944f3f5d20ef65cc10883d144f07ea40585e77f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 01:32:44 +0000
+Subject: [PATCH] FLR-0272: restore root camera activation contract
+
+---
+ .../example/lib/scenes/planetarium_scene.dart   |  3 ++-
+ .../filament_scene/lib/scene/scene_widget.dart  | 17 ++++++++++-------
+ 2 files changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+index 91d2124..4b9ee72 100644
+--- a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+@@ -247,7 +247,8 @@ class PlanetariumSceneView extends StatefulSceneView {
+ class _PlanetariumSceneViewState extends StatefulSceneViewState {
+   @override
+   void onCreate() {
+-    print('FLR0241_PLANETARIUM_LIFECYCLE_INERT onCreate');
++    PlanetariumSceneView.camera.setActive();
++    print('FLR0272_PLANETARIUM_SET_ACTIVE');
+   }
+ 
+   @override
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+index b19c7d9..16824c8 100644
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -196,17 +196,19 @@ class ModelViewerState extends State<SceneView> {
+ 
+     //final model = widget.models?.toJson();
+     final JsonObject? scene = widget.scene?.toJson();
+-    if (scene != null && widget.cameras != null && widget.cameras!.isNotEmpty) {
+-      // The current native v2 deserializer creates the ViewTarget camera
+-      // from scene.camera. Do not send the legacy root cameras list.
+-      scene['camera'] = widget.cameras!.first.toJson();
+-    }
+     print(
+       'FLR0272_CAMERA_PAYLOAD cameras=${widget.cameras?.length ?? 0} '
++      'root_cameras=${widget.cameras != null} '
+       'scene=${scene != null} scene_camera=${scene?['camera'] != null}',
+     );
+     _creationParams["models"] = widget.models?.map((final param) => param.toJson()).toList();
+     _creationParams["scene"] = scene;
++    // The current native deserializer creates camera ECS entities from the
++    // root-level cameras list. Camera.setActive() selects one after the
++    // platform view has created those entities.
++    _creationParams["cameras"] = widget.cameras
++        ?.map((final param) => param.toJson())
++        .toList();
+     // use concatenated toFlatJson
+     _creationParams["shapes"] = widget.shapes
+         ?.map((final param) => param.toFlatJson().map(normalizeShape).toList())
+@@ -230,8 +232,9 @@ class ModelViewerState extends State<SceneView> {
+       // TODO(kerberjg): just keep a list of entities in a single map
+       widget.models?.forEach((final model) => model.initialize(widget.filament));
+       widget.shapes?.forEach((final shape) => shape.initialize(widget.filament));
+-      // scene.camera is already owned by the native ViewTarget. The generated
+-      // camera mutation channels are not implemented by this native API.
++      // Root cameras are native ECS entities. Bind the Dart camera objects so
++      // their setActive() calls can select a native camera for view 0.
++      widget.cameras?.forEach((final camera) => camera.initialize(widget.filament));
+ 
+       // Call the onCreated callback with the controller
+       print('FLR0256_ON_CREATED_DISPATCH_BEGIN id=$id');

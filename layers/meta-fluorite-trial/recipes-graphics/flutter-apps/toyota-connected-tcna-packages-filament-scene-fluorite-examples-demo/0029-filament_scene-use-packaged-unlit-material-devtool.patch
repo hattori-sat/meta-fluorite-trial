@@ -1,0 +1,21 @@
+From 6ed7bb75dfb1782e9fd9a86ef437a0b4051f1342 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 22:48:07 +0000
+Subject: [PATCH] fix: use packaged unlit material asset
+
+
+diff --git a/packages/filament_scene/example/lib/material_helpers.dart b/packages/filament_scene/example/lib/material_helpers.dart
+index b3635c7..d28e9f8 100644
+--- a/packages/filament_scene/example/lib/material_helpers.dart
++++ b/packages/filament_scene/example/lib/material_helpers.dart
+@@ -5,7 +5,9 @@ import 'dart:math';
+ import 'utils.dart';
+ 
+ const String litMat = "assets/materials/lit.filamat";
+-const String unlitMat = "assets/materials/unlit.filamat";
++// The packaged demo asset is named unlitUV.filamat; keep the non-UV helper
++// pointed at the available unlit material so the fixture can start.
++const String unlitMat = "assets/materials/unlitUV.filamat";
+ const String unlitUVMat = "assets/materials/unlitUV.filamat";
+ const String texturedMat = "assets/materials/textured_pbr.filamat";
+ 

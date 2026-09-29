@@ -1,0 +1,25 @@
+From 450511d4ae5035728bddb7a888fbfae86c144e3e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 10:23:55 +0000
+Subject: [PATCH] diag: bind Dart unlit base map
+
+---
+ .../example/lib/shape_and_object_creators.dart               | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 536abb4..ddb1999 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -45,7 +45,10 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+       name: 'flr0023_fixture_cube',
+       // A/B: keep geometry, camera, and ViewTarget fixed while removing the
+       // lit-material path from this diagnostic fixture.
+-      material: poGetUnlitMaterial(Colors.blue),
++      material: poGetUnlitTexturedMaterial(
++        "assets/materials/texture/floor_basecolor.png",
++        color: Colors.blue,
++      ),
+       // A/B: match the visible native fixture's culling contract.
+       cullingEnabled: false,
+     ),

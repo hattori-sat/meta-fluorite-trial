@@ -1,0 +1,115 @@
+From 94d8ea6a041eca5b733fbdd62cb813fe6483b5b2 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 17:50:49 +0000
+Subject: [PATCH] diag: poll native readback fence without blocking
+
+---
+ .../filament_view/core/scene/view_target.cc   | 34 +++++++++++++++++++
+ .../filament_view/core/scene/view_target.h    |  4 +++
+ 2 files changed, 38 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 8ab65c5..38ad991 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -27,6 +27,7 @@
+ #include <filament_view_plugin.h>
+ 
+ #include <filament/Renderer.h>
++#include <filament/Fence.h>
+ #include <filament/RenderTarget.h>
+ #include <filament/SwapChain.h>
+ #include <filament/Texture.h>
+@@ -134,6 +135,10 @@ ViewTarget::~ViewTarget() {
+     _engine->destroy(native_readback_view_);
+     native_readback_view_ = nullptr;
+   }
++  if (native_readback_fence_) {
++    _engine->destroy(native_readback_fence_);
++    native_readback_fence_ = nullptr;
++  }
+   if (native_readback_target_) {
+     _engine->destroy(native_readback_target_);
+     native_readback_target_ = nullptr;
+@@ -846,6 +851,25 @@ void ViewTarget::OnNativeReadback(void* buffer, const size_t size, void* user) {
+   delete[] static_cast<uint8_t*>(buffer);
+ }
+ 
++void ViewTarget::pollNativeReadbackFence() {
++  if (native_readback_fence_ == nullptr) {
++    return;
++  }
++
++  const auto status = native_readback_fence_->wait(filament::Fence::Mode::FLUSH, 0);
++  if (status == filament::Fence::FenceStatus::TIMEOUT_EXPIRED) {
++    if (!native_readback_fence_timeout_logged_) {
++      spdlog::info("FLR0026_NATIVE_READBACK_FENCE_STATUS status={}", static_cast<int>(status));
++      native_readback_fence_timeout_logged_ = true;
++    }
++    return;
++  }
++
++  spdlog::info("FLR0026_NATIVE_READBACK_FENCE_STATUS status={}", static_cast<int>(status));
++  _engine->destroy(native_readback_fence_);
++  native_readback_fence_ = nullptr;
++}
++
+ /////////////////////////////////////////////////////////////////////////
+ const wl_callback_listener ViewTarget::frame_listener = {.done = OnFrame};
+ 
+@@ -899,6 +923,8 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   const auto filamentSystem = ecs->getSystem<FilamentSystem>("DrawFrame");
+   const auto renderer = filamentSystem->getFilamentRenderer();
+ 
++  pollNativeReadbackFence();
++
+   if (std::getenv("FLR0026_NATIVE_CLEAR_PROBE") != nullptr) {
+     filament::Renderer::ClearOptions clearOptions{};
+     clearOptions.clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+@@ -988,6 +1014,14 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     }
+     // spdlog::debug("=== END FRAME ===");
+     renderer->endFrame();
++    if (native_readback_probe_enabled_ && native_readback_probe_queued_ &&
++        native_readback_fence_ == nullptr) {
++      native_readback_fence_ = _engine->createFence();
++      spdlog::info(
++        "FLR0026_NATIVE_READBACK_FENCE_CREATED fence={}",
++        native_readback_fence_ != nullptr
++      );
++    }
+     if (shouldLogFrame) {
+       spdlog::info("FLR0026_FRAME_END seq={}", frameSequence);
+     }
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index a28bf11..a912857 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -31,6 +31,7 @@
+ #include <viewer/Settings.h>
+ 
+ namespace filament {
++class Fence;
+ class RenderTarget;
+ class Texture;
+ }  // namespace filament
+@@ -150,6 +151,7 @@ class ViewTarget {
+      */
+     void setupShmProbe(uint32_t width, uint32_t height);
+     void attachShmProbe();
++    void pollNativeReadbackFence();
+     void setupWaylandSubsurface();
+     static void OnNativeReadback(void* buffer, size_t size, void* user);
+ 
+@@ -177,6 +179,8 @@ class ViewTarget {
+     std::atomic<bool> shm_probe_content_ready_{false};
+     bool native_readback_probe_enabled_{};
+     bool native_readback_probe_queued_{};
++    ::filament::Fence* native_readback_fence_{};
++    bool native_readback_fence_timeout_logged_{};
+ 
+     struct _native_window {
+         struct wl_display* display;
+-- 
+2.34.1
+

@@ -1,0 +1,64 @@
+From 4ce54f88a9587f5aa6b267a548c0d4d293baf9d4 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 06:00:09 +0000
+Subject: [PATCH] FLR-0227: isolate MenuAnchor hover layer
+
+---
+ packages/filament_scene/example/lib/main.dart | 41 +++----------------
+ 1 file changed, 5 insertions(+), 36 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 100c707..e410a69 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -240,45 +240,14 @@ class _MyAppState extends State<MyApp> {
+               left: 0,
+               child: FrameProfilingOverlay(data: frameProfilingDataNotifier),
+             ),
+-            // A button at the top-right to switch scenes
++            // FLR-0227 A/B: keep the button geometry but remove MenuAnchor's
++            // popup layer to isolate the hover/composition boundary.
+             Positioned(
+               top: 24,
+               right: 24,
+-              // Show menu with list of scenes with MenuAnchor and a FilledButton in builder
+-              child: MenuAnchor(
+-                builder: (BuildContext context, MenuController controller, Widget? child) =>
+-                    FilledButton(
+-                      onPressed: () {
+-                        if (controller.isOpen) {
+-                          controller.close();
+-                        } else {
+-                          controller.open();
+-                        }
+-                      },
+-                      child: const Text('Scenes'),
+-                    ),
+-                menuChildren: [
+-                  MenuItemButton(
+-                    child: const Text('Playground'),
+-                    onPressed: () => setState(() => _setScene(0)),
+-                  ),
+-                  MenuItemButton(
+-                    child: const Text('Radar'),
+-                    onPressed: () => setState(() => _setScene(1)),
+-                  ),
+-                  MenuItemButton(
+-                    child: const Text('Settings'),
+-                    onPressed: () => setState(() => _setScene(2)),
+-                  ),
+-                  MenuItemButton(
+-                    child: const Text('Planetarium'),
+-                    onPressed: () => setState(() => _setScene(3)),
+-                  ),
+-                  MenuItemButton(
+-                    child: const Text('Trainset'),
+-                    onPressed: () => setState(() => _setScene(4)),
+-                  ),
+-                ],
++              child: FilledButton(
++                onPressed: () {},
++                child: const Text('Scenes'),
+               ),
+             ),
+           ],

@@ -1,0 +1,57 @@
+From 6c635c57d2667ade671643132cb2da4f9d5178b0 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 11:23:22 +0000
+Subject: [PATCH] probe: log beginFrame failure surface state
+
+---
+ .../filament_view/core/scene/view_target.cc   | 29 +++++++++++++++++--
+ 1 file changed, 27 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 4e193ab..dc0077b 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1434,9 +1434,13 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+ 
+   // Render the scene, unless the renderer wants to skip the frame.
+   const auto gpuDrawStart = std::chrono::steady_clock::now();
++  const bool traceBeginFrameFailure =
++    std::getenv("FLR0285_BEGIN_FRAME_PROBE") != nullptr;
++  const bool frameStarted = renderer->beginFrame(
++    fswapChain_, std::chrono::steady_clock::now().time_since_epoch().count()
++  );
+   // spdlog::debug("=== BEGIN FRAME ===");
+-  if (renderer->beginFrame(
+-        fswapChain_, std::chrono::steady_clock::now().time_since_epoch().count())) {
++  if (frameStarted) {
+     if (traceFrameBoundary) {
+       spdlog::info("FLUORITE_VIEWTARGET_BEGIN_FRAME_TRUE");
+     }
+@@ -1564,6 +1568,27 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     if (traceFrameBoundary) {
+       spdlog::info("FLUORITE_VIEWTARGET_BEGIN_FRAME_FALSE");
+     }
++    if (traceBeginFrameFailure) {
++      static uint32_t beginFrameFailureSamples = 0;
++      if (beginFrameFailureSamples++ < 8) {
++        const int waylandError = display_ == nullptr ? -1 : wl_display_get_error(display_);
++        spdlog::warn(
++          "FLR0285_BEGIN_FRAME_PROBE sample={} renderer={} frame_started=false "
++          "swapchain={} native_display={} native_surface={} parent_surface={} "
++          "subsurface={} wayland_error={} native_size={}x{}",
++          beginFrameFailureSamples,
++          renderer != nullptr,
++          fswapChain_ != nullptr,
++          native_window_.display != nullptr,
++          native_window_.surface != nullptr,
++          parent_surface_ != nullptr,
++          subsurface_ != nullptr,
++          waylandError,
++          native_window_.width,
++          native_window_.height
++        );
++      }
++    }
+     // beginFrame failed, the renderer couldn't render this frame
+     // spdlog::error("[{}] BEGINFRAME FAILED!", __FUNCTION__);
+   }

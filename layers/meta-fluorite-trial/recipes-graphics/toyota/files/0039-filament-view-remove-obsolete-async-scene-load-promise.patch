@@ -1,0 +1,26 @@
+From 1b2c3d4e5f60718293a4b5c6d7e8f90123456789 Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 15:30:00 +0900
+Subject: [PATCH] filament_view: remove obsolete async scene-load promise
+
+The scene deserializer now runs asynchronously. Remove the stack promise
+that was only needed by the old synchronous wait and capture the lambda by
+value so it cannot access a returned function's lifetime.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc b/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+@@ -109,2 +109,0 @@ void DeserializeDataAndSetupMessageChannels(
+-  std::promise<void> initPromise;
+-  const std::future<void> initFuture = initPromise.get_future();
+@@ -115,1 +113,1 @@ void DeserializeDataAndSetupMessageChannels(
+-    post(strand, [=, &initPromise]() mutable {
++    post(strand, [=]() mutable {
+@@ -123,1 +121,0 @@ void DeserializeDataAndSetupMessageChannels(
+-      initPromise.set_value();
+-- 
+2.39.2

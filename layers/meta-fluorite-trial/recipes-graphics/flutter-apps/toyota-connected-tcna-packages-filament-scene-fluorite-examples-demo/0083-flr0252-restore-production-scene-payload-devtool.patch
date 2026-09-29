@@ -1,0 +1,27 @@
+From c5cf3cdc2fcba4a83110deb4910dc03ad767e05a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 23:40:24 +0000
+Subject: [PATCH] FLR-0252: restore production scene payload
+
+---
+ packages/filament_scene/example/lib/main.dart | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index d402e37..a9e16e6 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -309,10 +309,10 @@ class _MyAppState extends State<MyApp> {
+       // shape-only Planetarium payload. This deliberately avoids GLB model
+       // loading so shape/camera serialization is separated from the known
+       // production-asset/llvmpipe failure.
+-      models: <Model>[],
++      models: poGetModelList(),
+       scene: poGetScene(),
+-      shapes: PlanetariumSceneView.getSceneShapes(),
+-      cameras: PlanetariumSceneView.getSceneCameras(),
++      shapes: poGetScenesShapes(),
++      cameras: poGetScenesCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 

@@ -1,0 +1,115 @@
+From ee1a0d1fa0f3c28b3e678a922a2e1a42345a1af5 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 8 Sep 2026 16:39:19 +0000
+Subject: [PATCH] diag: probe Flutter parent alpha before present
+
+---
+ .../backend/wayland_vulkan/wayland_vulkan.cc  | 75 +++++++++++++++----
+ 1 file changed, 60 insertions(+), 15 deletions(-)
+
+diff --git a/shell/backend/wayland_vulkan/wayland_vulkan.cc b/shell/backend/wayland_vulkan/wayland_vulkan.cc
+index c971f8d2..de5f5840 100644
+--- a/shell/backend/wayland_vulkan/wayland_vulkan.cc
++++ b/shell/backend/wayland_vulkan/wayland_vulkan.cc
+@@ -516,6 +516,17 @@ bool WaylandVulkanBackend::InitializeSwapChain() {
+   CHECK_VK_RESULT(d.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+       physical_device_, surface_, &surface_capabilities));
+ 
++  const bool parentAlphaClearRequested =
++      std::getenv("FLR0026_PARENT_ALPHA_CLEAR") != nullptr;
++  const bool parentAlphaClearEnabled =
++      parentAlphaClearRequested &&
++      (surface_capabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) != 0;
++  if (parentAlphaClearRequested && !parentAlphaClearEnabled) {
++    spdlog::error(
++        "FLR0026_PARENT_ALPHA_CLEAR unavailable transfer_dst_supported={}",
++        (surface_capabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) != 0);
++  }
++
+   if (surface_capabilities.currentExtent.width != UINT32_MAX) {
+     // If the surface reports a specific extent, we must use it.
+     clientSize = surface_capabilities.currentExtent;
+@@ -583,6 +594,14 @@ bool WaylandVulkanBackend::InitializeSwapChain() {
+   info.imageExtent = clientSize;
+   info.imageArrayLayers = 1;
+   info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
++  if (parentAlphaClearEnabled) {
++    info.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
++    spdlog::info(
++        "FLR0026_PARENT_ALPHA_CLEAR enabled=true operation=transparent_full_surface "
++        "format={} extent={}x{}",
++        static_cast<uint32_t>(surface_format_.format), clientSize.width,
++        clientSize.height);
++  }
+   info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+   info.preTransform = surface_capabilities.currentTransform;
+   info.compositeAlpha = (surface_capabilities.supportedCompositeAlpha &
+@@ -634,27 +653,53 @@ bool WaylandVulkanBackend::InitializeSwapChain() {
+     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+     CHECK_VK_RESULT(d.vkBeginCommandBuffer(buffer, &begin_info));
+ 
+-    // Filament Engine hands back the image after writing to it
+-    VkImageMemoryBarrier barrier{};
+-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+-    barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+-    barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+-    barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+-    barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+-    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+-    barrier.image = image;
+-    barrier.subresourceRange = {
++    // Filament Engine hands back the image after writing to it. The alpha
++    // probe deliberately clears the complete Flutter parent image to RGBA
++    // zero, preserving no HUD pixels; this is a diagnostic A/B only.
++    VkImageMemoryBarrier toPresent{};
++    toPresent.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
++    toPresent.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++    toPresent.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++    toPresent.image = image;
++    toPresent.subresourceRange = {
+         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+         .baseMipLevel = 0,
+         .levelCount = 1,
+         .baseArrayLayer = 0,
+         .layerCount = 1,
+     };
+-    d.vkCmdPipelineBarrier(buffer,
+-                           VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+-                           VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr,
+-                           0, nullptr, 1, &barrier);
++
++    if (parentAlphaClearEnabled) {
++      toPresent.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
++      toPresent.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
++      toPresent.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
++      toPresent.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++      d.vkCmdPipelineBarrier(
++          buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
++          VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1,
++          &toPresent);
++
++      const VkClearColorValue transparent = {{0.0f, 0.0f, 0.0f, 0.0f}};
++      d.vkCmdClearColorImage(buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
++                             &transparent, 1, &toPresent.subresourceRange);
++
++      toPresent.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
++      toPresent.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
++      toPresent.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++      toPresent.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
++      d.vkCmdPipelineBarrier(buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
++                             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0,
++                             nullptr, 0, nullptr, 1, &toPresent);
++    } else {
++      toPresent.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
++      toPresent.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
++      toPresent.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
++      toPresent.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
++      d.vkCmdPipelineBarrier(
++          buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
++          VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1,
++          &toPresent);
++    }
+ 
+     CHECK_VK_RESULT(d.vkEndCommandBuffer(buffer));
+   }

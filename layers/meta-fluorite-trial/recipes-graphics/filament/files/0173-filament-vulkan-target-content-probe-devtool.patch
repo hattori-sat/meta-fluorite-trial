@@ -1,0 +1,76 @@
+From 42509d76592dde7c6873d357d35bac4a7d0d4457 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 10 Sep 2026 06:13:11 +0000
+Subject: [PATCH] diag: probe production target pixels
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 56 ++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 0ee3a4c36..5fb257e62 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -1789,6 +1789,62 @@ void VulkanDriver::endRenderPass(int) {
+     // pipeline barrier between framebuffer writes and shader reads.
+     rt->emitBarriersEndRenderPass(*mCurrentRenderPass.commandBuffer);
+ 
++    // This is a one-shot diagnostic only. It reads the production-sized, floating-point color
++    // target before the later swapchain composition pass, so a non-zero result proves that
++    // shaded output reached the target even if the displayed frame is black.
++    if (std::getenv("FLR0026_TARGET_PROBE") != nullptr) {
++        static bool probeIssued = false;
++        VkExtent2D const extent = rt->getExtent();
++        if (!probeIssued && !rt->isSwapChain() && extent.width == 1280 && extent.height == 800) {
++            auto const& color = rt->getColor0();
++            if (color.getFormat() == VK_FORMAT_R16G16B16A16_SFLOAT) {
++                probeIssued = true;
++                constexpr size_t COMPONENTS = 4;
++                constexpr size_t PIXELS = 1280 * 800;
++                constexpr size_t BUFFER_BYTES = PIXELS * COMPONENTS * sizeof(uint16_t);
++                auto* const buffer = new uint16_t[PIXELS * COMPONENTS]{};
++                PixelBufferDescriptor pbd(buffer, BUFFER_BYTES,
++                        PixelDataFormat::RGBA, PixelDataType::HALF,
++                        [](void* data, size_t, void*) {
++                            delete[] static_cast<uint16_t*>(data);
++                        });
++                VkImage const probeImage = color.getImage();
++                FVK_LOGI << "FLR0026_TARGET_PROBE_BEGIN image=" << probeImage
++                         << " extent=" << extent.width << "x" << extent.height
++                         << " format=" << static_cast<int>(color.getFormat());
++                endCommandRecording();
++                mReadPixels.run(
++                        rt, 0, 0, extent.width, extent.height,
++                        mPlatform->getGraphicsQueueFamilyIndex(), std::move(pbd),
++                        [context = &mContext](uint32_t types, VkFlags reqs) {
++                            return context->selectMemoryType(types, reqs);
++                        },
++                        [probeImage, extent](PixelBufferDescriptor&& result) {
++                            auto const* const pixels =
++                                    static_cast<uint16_t const*>(result.buffer);
++                            size_t nonzeroPixels = 0;
++                            uint64_t wordSum = 0;
++                            if (pixels) {
++                                for (size_t pixel = 0; pixel < PIXELS; ++pixel) {
++                                    bool nonzero = false;
++                                    for (size_t component = 0; component < COMPONENTS; ++component) {
++                                        uint16_t const word = pixels[pixel * COMPONENTS + component];
++                                        nonzero |= word != 0;
++                                        wordSum += word;
++                                    }
++                                    nonzeroPixels += nonzero ? 1 : 0;
++                                }
++                            }
++                            FVK_LOGI << "FLR0026_TARGET_PROBE_RESULT image=" << probeImage
++                                     << " extent=" << extent.width << "x" << extent.height
++                                     << " nonzero_pixels=" << nonzeroPixels
++                                     << " total_pixels=" << PIXELS
++                                     << " half_word_sum=" << wordSum;
++                        });
++            }
++        }
++    }
++
+     mCurrentRenderPass.renderTarget = {};
+     mCurrentRenderPass.renderPass = VK_NULL_HANDLE;
+ 

@@ -1,0 +1,32 @@
+FLR-0049 current QMP alpha runtime summary
+Date: 2026-09-08
+
+Artifacts
+- feature tip: ffab6585d80e8adb304558b3e546a1e8ff8787c8
+- rootfs: agl-ivi-image-flutter-qemux86-64.rootfs-20260908055043.ext4
+- rootfs sha256: 496bbc58f6c9a334976b8315b5d483ca90b8724eea61a9585ab7f196176811ea
+- qemuboot sha256: a80d65033f88e9b57a1980cffddd60115d1c46eb923d4e6660b681b88ace327d
+- devtool patch sha256: 59b35281bfd31c2fbb572ef35826cc894911df50905e4d1bd53d5e93df6cc17c
+
+QEMU
+- one Mini PC QEMU instance
+- QMP-only: -usb -device usb-tablet -device usb-kbd -device virtio-vga -display none
+- framebuffer: 1280x800
+- teardown: QMP quit, host-qmp-quit
+- post-check: qemu-system-x86_64=absent, runqemu=absent, flutter-auto=absent, qmp socket=absent
+
+Runtime
+- app user: agl-driver
+- model: assets/models/sequoia_ngp.glb, limit=2
+- scene: entities=25 renderables=14
+- composite alpha: transparent=true supported=0x3 selected=0x2
+- Vulkan present: result=0
+- crash markers: no SIGSEGV/Oops/page fault/Out of memory in matching runtime or serial logs
+
+QMP video
+- qmp-alpha-runtime.mp4 sha256: 35537195f38d4cfa80e54dbb3c00dd9685cffdaa273f046459a1d9925de6e209
+- duration/fps/frames: 39 seconds / 1 fps / 39 frames
+- representative raw PPM sha256: 99d0b78f90b8e49ece4afd18624799729b6c757de88eff146c2bb9d3e0e88690
+- candidate region: [200,100,400,250]
+- changed pixels against white: 40257/100000
+- conclusion: production 3D is visible and stable; Flutter 2D HUD/CPU/FPS is not visible in the same frame, so combined composition remains UNKNOWN.

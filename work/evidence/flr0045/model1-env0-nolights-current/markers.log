@@ -1,0 +1,19 @@
+FLR-0045 decisive runtime evidence (QEMU-only screenshot)
+rootfs=agl-ivi-image-flutter-qemux86-64.rootfs-20260907130705.ext4
+conditions=FLR0026_NATIVE_MODEL_LIMIT=1 FLR0026_NATIVE_SKIP_ENVIRONMENT=1 FLR0027_NATIVE_SKIP_LIGHTS=1
+conditions_note=FLR0026_FORCE_RENDER_ON_SKIPPED_FRAME and FLR0026_SYNC_TRACE were not set
+model_selected=FLR0026_MODEL_SELECTED ordinal=0 asset=assets/models/sequoia_ngp.glb
+model_load_plan=FLR0026_MODEL_LOAD_PLAN total=60 limit=1 match= inspected=2 queued=1
+shape_ready_sample=FLR0026_SHAPE_READY guid=188 entity=5 renderable=true
+camera_applied=FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+frame_begin=FLR0026_FRAME_BEGIN seq=1 started=true
+present=FLR0026_VK_QUEUE_PRESENT result=0
+runtime_note=Light not found was emitted for entities 164,166,168,170 because production lights were intentionally skipped
+runtime_note=FLR0026_MODEL_STAGE_TRACE was not enabled; model-stage completion markers were not collected in this run
+qmp_dimensions=1280x800
+qmp_region=200,100,400,250
+qmp_changed_pixels=22893
+qmp_changed_ratio=0.22893
+qmp_bounding_box=200,100,400,241
+qmp_ppm_sha256=aa0f262851c44fa18bf5ca8e777a6ecb98666e390c3100e8192e699b4276cc8a
+qmp_teardown=QMP query-status running; quit response event=SHUTDOWN reason=host-qmp-quit; post-check qemu/runqemu/flutter-auto empty

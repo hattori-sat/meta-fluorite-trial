@@ -1,0 +1,1 @@
+pid=$(cat /run/user/1001/flr0252-prod-readiness.pid); gdb -q -batch -nx -nh -p "$pid" -ex 'set pagination off' -ex 'set confirm off' -ex 'info threads' -ex 'thread apply all bt 12' -ex 'info sharedlibrary' -ex 'detach' -ex 'quit'

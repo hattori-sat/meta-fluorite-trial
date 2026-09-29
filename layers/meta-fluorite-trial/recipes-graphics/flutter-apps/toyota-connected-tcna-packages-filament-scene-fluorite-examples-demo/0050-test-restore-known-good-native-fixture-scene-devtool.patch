@@ -1,0 +1,55 @@
+From e7be17ce8fa8c4606949746f1c1cef2fc75ae587 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 11:38:48 +0000
+Subject: [PATCH] test: restore known-good native fixture scene wiring
+
+---
+ packages/filament_scene/example/lib/main.dart | 10 ++--------
+ 1 file changed, 2 insertions(+), 8 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 8350dae..dc82ae1 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -287,36 +287,30 @@ class _MyAppState extends State<MyApp> {
+   ////////////////////////////////////////////////////////////////////////
+   Scene poGetScene() {
+     return Scene(
+       skybox: ColorSkybox(color: Colors.white),
+       //skybox: HdrSkybox.asset("assets/envs/courtyard.hdr"),
+-      indirectLight: poGetDefaultIndirectLight(),
++      indirectLight: HdrIndirectLight.asset("assets/envs/courtyard.hdr"),
+       //indirectLight: poGetDefaultIndirectLight(),
+       lights: poGetSceneLightsList(),
+     );
+   }
+ 
+   ////////////////////////////////////////////////////////////////////////
+   SceneView poGetFilamentScene() {
+-    final fixtureCameras = poGetMinimal3dFixtureCameras();
+     return SceneView(
+       filament: filamentViewApi,
+       // Reproduce the known-good minimal fixture input path.
+       models: <Model>[],
+       scene: poGetMinimal3dFixtureScene(),
+       shapes: poGetMinimal3dFixtureShapes(),
+-      cameras: fixtureCameras,
++      cameras: poGetMinimal3dFixtureCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 
+         poController = controller;
+ 
+-        // The fixture camera starts detached so production cameras do not
+-        // claim view 0 before activation. Select it explicitly for this
+-        // isolated proof path after SceneView binds the camera engine.
+-        fixtureCameras.single.setActive();
+-
+         _frameEventChannel.setController(filamentViewApi);
+         _collisionEventChannel.setController(filamentViewApi);
+ 
+         print('poGetFilamentScene onCreated completed');
+       },
+-- 
+2.34.1
+

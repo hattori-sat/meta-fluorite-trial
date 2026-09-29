@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sat, 22 Aug 2026 00:25:00 +0900
+Subject: [PATCH] filament_view: export CPU and Filament GPU frame timings
+
+The Flutter overlay already consumes cpuFt and gpuFt, but ViewTarget only
+sent elapsed-frame and FPS values. Export the measured native render interval
+and Filament FrameInfo GPU interval so the overlay no longer reports a
+misleading zero CPU time. GPU remains zero when the backend does not expose a
+timer query (such as QEMU llvmpipe).
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -347,1 +347,4 @@
+-  static bool bonce = true;
++  static bool bonce = true;
++  static float lastCpuFrameTimeMs = 0.0f;
++  static float lastGpuFrameTimeMs = 0.0f;
++  const auto renderStart = std::chrono::steady_clock::now();
+@@ -400,1 +403,3 @@
+-       std::make_pair(kParam_FPS, EncodableValue(fps))}
++       std::make_pair(kParam_FPS, EncodableValue(fps)),
++       std::make_pair("cpuFt", EncodableValue(lastCpuFrameTimeMs)),
++       std::make_pair("gpuFt", EncodableValue(lastGpuFrameTimeMs))}
+@@ -413,1 +418,7 @@
+-    filamentSystem->getFilamentRenderer()->endFrame();
++    filamentSystem->getFilamentRenderer()->endFrame();
++    const auto renderEnd = std::chrono::steady_clock::now();
++    lastCpuFrameTimeMs = std::chrono::duration<float, std::milli>(renderEnd - renderStart).count();
++    const auto frameInfo = filamentSystem->getFilamentRenderer()->getFrameInfoHistory(1);
++    if (!frameInfo.empty()) {
++      lastGpuFrameTimeMs = static_cast<float>(frameInfo[0].frameTime) / 1000000.0f;
++    }
+--
+2.34.1

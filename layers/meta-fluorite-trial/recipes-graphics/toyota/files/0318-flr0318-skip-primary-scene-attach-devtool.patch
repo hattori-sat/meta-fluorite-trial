@@ -1,0 +1,28 @@
+From 93ff371232eb47a5fc6422ffc13b7e8b4ccc5917 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 04:00:35 +0000
+Subject: [PATCH] FLR-0318: gate primary scene attachment
+
+---
+ .../filament_view/core/systems/derived/model_system.cc    | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 617261e..3867f94 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -726,6 +726,14 @@ void ModelSystem::updateAsyncAssetLoading() {
+ 
+         switch (model->getInstancingMode()) {
+           case ModelInstancingMode::primary:
++            if (std::getenv("FLUORITE_SKIP_PRIMARY_SCENE_ATTACH") != nullptr) {
++              spdlog::info(
++                "FLR0318_PRIMARY_SCENE_ATTACH skipped model={} path={}",
++                modelGuid,
++                model->getAssetPath()
++              );
++              break;
++            }
+             spdlog::trace("Model is primary, adding its asset instance to the scene");
+             addModelToScene(modelGuid);
+             break;

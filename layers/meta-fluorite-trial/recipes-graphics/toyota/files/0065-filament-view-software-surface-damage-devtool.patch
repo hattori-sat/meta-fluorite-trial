@@ -1,0 +1,28 @@
+From b568d8dd8897fb33cebf5ebb3f03d5cc291558e6 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 19:08:51 +0000
+Subject: [PATCH] diag: damage software frame surface
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 87c6e02..20fb7f9 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -692,6 +692,14 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+       obj->DrawFrame(frameTime);
+       if (obj->surface_ != nullptr) {
++        wl_surface_damage_buffer(
++          obj->surface_,
++          0,
++          0,
++          static_cast<int32_t>(obj->native_window_.width),
++          static_cast<int32_t>(obj->native_window_.height)
++        );
++        spdlog::info("FLR0026_WAYLAND_SOFTWARE_SURFACE_DAMAGED damaged=true");
+         if (obj->subsurface_ != nullptr && obj->parent_surface_ != nullptr) {
+           wl_subsurface_place_above(obj->subsurface_, obj->parent_surface_);
+           spdlog::info("FLR0026_WAYLAND_SUBSURFACE_PLACED_ABOVE placed=true");

@@ -1,0 +1,32 @@
+From 5de74d6890cac9abd0504b0f72a0ee9b2cf32ec9 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 19 Sep 2026 14:07:46 +0000
+Subject: [PATCH] diag: gate Wayland child stacking direction
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 1b5f2ade6..234bb42b5 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -217,7 +217,17 @@ void ViewTarget::setupWaylandSubsurface() {
+     return;
+   }
+ 
+-  wl_subsurface_place_above(subsurface_, parent_surface_);
++  const bool placeBelow =
++    std::getenv("FLUORITE_NATIVE_WAYLAND_PLACE_BELOW") != nullptr;
++  if (placeBelow) {
++    wl_subsurface_place_below(subsurface_, parent_surface_);
++  } else {
++    wl_subsurface_place_above(subsurface_, parent_surface_);
++  }
++  spdlog::info(
++    "FLUORITE_NATIVE_WAYLAND_STACKING below={}",
++    placeBelow
++  );
+   wl_subsurface_set_position(subsurface_, left_, top_);
+   wl_subsurface_set_desync(subsurface_);
+ }

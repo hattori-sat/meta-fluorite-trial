@@ -1,0 +1,49 @@
+From e2d24446dbec29bc42b9f6f0597749dda76fd3b7 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 01:24:44 +0000
+Subject: [PATCH] diag: optionally attach default indirect light to scene
+
+---
+ .../systems/derived/indirect_light_system.cc  | 22 ++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/indirect_light_system.cc b/plugins/filament_view/core/systems/derived/indirect_light_system.cc
+index 37aa29a..96873ff 100644
+--- a/plugins/filament_view/core/systems/derived/indirect_light_system.cc
++++ b/plugins/filament_view/core/systems/derived/indirect_light_system.cc
+@@ -22,6 +22,7 @@
+ #include <core/systems/ecs.h>
+ #include <core/utils/hdr_loader.h>
+ #include <filament/Texture.h>
++#include <cstdlib>
+ #include <filesystem>
+ #include <memory>
+ #include <plugins/common/common.h>
+@@ -84,7 +85,26 @@ std::future<Resource<std::string_view>> IndirectLightSystem::setIndirectLight(
+     const auto filamentSystem = ecs_ptr->getSystem<FilamentSystem>("setIndirectLight");
+     const auto engine = filamentSystem->getFilamentEngine();
+ 
+-    builder.build(*engine);
++    const auto builtIndirectLight = builder.build(*engine);
++    if (std::getenv("FLR0026_NATIVE_ATTACH_DEFAULT_INDIRECT_LIGHT") != nullptr) {
++      const auto scene = filamentSystem->getFilamentScene();
++      if (builtIndirectLight != nullptr && scene != nullptr) {
++        const auto previousIndirectLight = scene->getIndirectLight();
++        if (previousIndirectLight != nullptr) {
++          engine->destroy(previousIndirectLight);
++        }
++        scene->setIndirectLight(builtIndirectLight);
++        spdlog::info(
++          "FLR0026_NATIVE_ATTACH_DEFAULT_INDIRECT_LIGHT enabled=true scene=true"
++        );
++      } else {
++        spdlog::error(
++          "FLR0026_NATIVE_ATTACH_DEFAULT_INDIRECT_LIGHT failed built={} scene={}",
++          builtIndirectLight != nullptr,
++          scene != nullptr
++        );
++      }
++    }
+ 
+     promise->set_value(Resource<std::string_view>::Success("changed Light successfully"));
+   });

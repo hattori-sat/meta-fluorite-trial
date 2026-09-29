@@ -1,0 +1,141 @@
+# FLR-0362 — align the FIFO gate with the shell read descriptor
+
+- Status: Waiting
+- Waiting reason: `flr0362-0001` stopped at the runner's independent guest-helper staging defect before Flutter launch; FLR-0363 will repair that handoff before this FIFO/attach gate is resumed.
+- Priority: High
+- Owner: QEMU guest FIFO/attach gate and runtime evidence roles
+- Created: 2026-09-29
+- Updated: 2026-09-29
+- Predecessor: [FLR-0360 same-point diagnosis](FLR-0360-diagnose-gdb-attach-precondition.md)
+- Plan: [implementation plan](../../docs/superpowers/plans/2026-09-29-flr0362-align-fifo-shell-read-fd.md)
+- Working log: [FLR-0362 log](../logs/2026-09-29-flr0362.md)
+- Historical controls: [FLR-0286 fixture + HUD](FLR-0286-reproduce-known-good-combined-sequoia-hud.md), [FLR-0287 production Sequoia](FLR-0287-compare-production-sequoia-light-material.md), [FLR-0357 retrospective](FLR-0357-refresh-3d-visibility-retrospective.md)
+
+## Objective
+
+Make the existing pre-GO runtime gate agree with the shell's measured blocked `read(0)` without weakening run ownership: the exact recorded FIFO must be the object named by the gate and both fd 0 and fd 3, and process identity must remain stable before GDB, after attach, and immediately before GO.
+
+## Why this is the next unit
+
+FLR-0360's one exact-bundle Mini run used the existing `exec 3<>...; IFS= read -r token <&3` wrapper. At the same-point attach marker, `syscall_fd3=FAIL` was the only failed original predicate; `syscall_nr=0`, `syscall_fd=0x0`, `fd0_same_gate=PASS`, and `fd3_same_gate=PASS`. The host's official FIFO observer already accepted `read_fd=0` after verifying the target FIFO's type and device/inode. This is a real disagreement between the shell's wait descriptor and later attach/release checks, not evidence of a missing fd 3 or renderer failure.
+
+Historical records are evidence with scope, not authority:
+
+- FLR-0356's host framing stopped before GDB/GO; it does not diagnose this descriptor gate.
+- FLR-0358 used a stale helper and did not exercise its intended serial correction.
+- FLR-0359 passed exact helper provenance and FIFO observation, then stopped at a generic attach check.
+- FLR-0360 named `syscall_fd3` as the only current failure; its QMP black still/video are pre-GO and cannot classify rendering.
+- FLR-0286 proves same-frame HUD plus a self-made lit Filament fixture; FLR-0287 separately reached production Sequoia draw/present with a zero-chroma native ROI. They remain distinct controls.
+
+## Problem stratification — 4W1H (Why excluded)
+
+| Dimension | Current evidence | Next discriminator |
+| --- | --- | --- |
+| What | Actual blocked syscall is `read(0)`; attach and release expect `read(3)` | All gates accept only read-0 on the recorded exact FIFO, or fail closed |
+| Where | `FLR-0350-attach-pre-submit.cmd` precondition and post-GDB poll; `FLR-0350-release-go.cmd` | Same recorded device/inode checks at each decision boundary |
+| When | Mini run `flr0360-0001`, after FIFO observer PASS and before GDB/GO | One fresh `flr0362-0001` after exact bundle/image/preflight passes |
+| Who | Shell wrapper owns the wait; attach command owns GDB admission; release command owns GO; runner owns ordering and teardown | Preserve each owner; no host-side bypass |
+| How | `<&3` redirection leaves both descriptors on one FIFO while the shell builtin blocks in `read(0)` | Record FIFO identity; revalidate fd0/fd3, PID/start/UID, tracer and wait state at attach/GO |
+
+## Evidence and interpretation
+
+- Exact FLR-0360 attach marker and QMP picture/video are recorded in [FLR-0360](FLR-0360-diagnose-gdb-attach-precondition.md) and its [evidence index](../evidence/FLR-0360-qmp-pre-go-2026-09-29.md).
+- The prior black QMP frame occurred before GO. FLR-0362 must capture its own QMP-only still/eight-frame video and label it by GO state.
+- Overall 2D+3D success remains open. Passing this gate only proves the diagnostic can advance to the next runtime boundary.
+
+## Options considered
+
+1. **Chosen — align the gate with observed `read(0)`:** record the observer-validated FIFO device/inode and require that identity for the named FIFO, fd 0, and fd 3 at pre-GDB, post-attach, and pre-GO boundaries. This retains shell behavior and adds no runtime dependency.
+2. **Deferred — change the wait primitive to force `read(3)`:** the shell builtin's redirection is already observed to use fd 0; guaranteeing fd 3 would need a different primitive and more runtime integration. Reconsider only if a documented product/harness contract requires a literal fd-3 syscall.
+
+## Hypotheses
+
+1. **Confirmed:** shell builtin `read` with `<&3` blocks through fd 0; same-point evidence showed the two descriptors still refer to the same gate.
+2. **Expected next result:** with recorded type/device/inode and stable process identity, GDB attach and GO will pass. Falsifier: a named process/FIFO transition check fails after the policy change.
+3. **Open:** after GO, production Sequoia and HUD may be visible, partially visible, or black. Only post-GO QMP/runtime evidence can distinguish that renderer boundary.
+
+## Scope
+
+### In scope
+
+- Record the exact FIFO identity in the existing observer/host-validation boundary.
+- Update attach, post-attach polling, GO, preflight, and cleanup checks with test-first coverage.
+- Exact bundle delivery to the existing Mini receiver and one fresh pinned-image QEMU run.
+- QMP screenshot/video, compact evidence derivatives, first-divergence logging, and safe teardown.
+
+### Out of scope
+
+- Product Flutter/Filament/Yocto recipe or image changes; lighting, camera, material, texture, and Wayland composition fixes.
+- Relaxing process/FIFO identity, tracer, or marker requirements; accepting `read(0)` by descriptor number alone.
+- Building/rebuilding the image, Devtool, new receiver/TMPDIR/cache, global process kill, or copying VM images to Mac.
+- Reusing `flr0360-0001` or any other consumed run ID.
+
+## Success criteria
+
+1. Regression tests demonstrate that current fd-3-only assumptions reject the measured exact-FIFO `read(0)` and that mismatched identity fails closed.
+2. A root-owned, mode-0700 `/run` directory binds the fresh run ID; the observer creates an exclusive record with run ID, PID/start/UID, and exact FIFO device/inode. The host validator rejects stale, partial, substituted, or mismatched records.
+3. GDB validates PID/start/UID, ptrace-stopped state, and fd0/fd3 identity before attach authorization; it stays stopped and waits for a valid GO record instead of resuming on timeout. Invalid/expired post-write state terminates the exact inferior before GDB exits.
+4. Release-GO checks the stopped target, opens the writer once, validates the opened descriptor, rechecks target identity while still stopped, then writes through that same descriptor and publishes an exclusive GO record. GDB continues only after validating that record. Pre-write failure yields zero GO bytes; a post-write record failure terminates the exact target before token consumption, with runner-side kill-before-GDB-interrupt fallback.
+5. Cleanup removes only proven run-owned objects. Partial or substituted state is named FAIL and retained; cleanup cannot say PASS while run records remain.
+6. Guest commands remain POSIX-shell-valid one-liners at most 4096 bytes; behavioral regression tests, focused tests, and runner `--check` pass.
+7. Exactly one fresh Mini run uses the exact committed bundle and pinned image. It reaches a named post-GO boundary or stops at a named fail-closed predicate; no retry or bypass.
+8. QMP-only still/eight-frame video, GO classification, relevant runtime markers, hashes, and cleanup evidence are retained. If post-GO pixels remain black, create a separate renderer ticket; do not extend this gate ticket.
+
+## Plan / Do / Check / Act
+
+### Plan
+
+- See the linked implementation plan; execute inline in this session because the user explicitly asked to continue without pausing for a plan-choice prompt.
+- Test first, preserve the gate boundaries, then commit locally and use the established bundle/one-shot Mini workflow.
+
+### Do
+
+- Ticket opened from FLR-0360's exact finding; that sentence describes the initial state only.
+- Updated the observer validator to bind fresh run ID and persisted FIFO/process identity; added committed-source guest helpers behind bounded serial adapters, run identity initialization, stale-helper collision preflight, and target-safe cleanup/abort checks.
+- Mac verification: 46/46 tests and runner `--check` passed after making the FIFO-swap fixture deterministic. Mini's first exact-commit `--check` found the old fixture failure. The test-only correction is local commit `5fc8ff833ca2ced34e1c87daa93e0501d92964f0`; the first follow-up handoff invocation was rejected locally because its supplied tip did not resolve, before bundle creation or transfer. Mini remains at `e9df11d1031b2554ccc28d45bbed883e563a0957`. No QEMU/GO run occurred; `flr0362-0001` remains unused.
+- Final local gates: privacy PASS, file-size PASS (1864 tracked/untracked files checked), checkpoint PASS (`active=1`), and `git diff --check` PASS. `make check-markdown` remains FAIL on nine pre-existing missing evidence targets in FLR-0338/0339/0340; FLR-0362 links pass and those unrelated historical references stay out of scope.
+
+### Check
+
+| Gate | Expected | Result |
+| --- | --- | --- |
+| Persisted identity / transition regressions | Wrong ID, partial/substituted record, process change, or FIFO swap fails with zero GO bytes | Mac suite 46/46 PASS after deterministic fixture correction. First Mini `--check` found the old fixture flaw. The next one-shot runner invocation will rerun canonical/static/46-test gates before QEMU preflight; pending |
+| GDB stopped-attach authorization | Exact process/FIFO identity checked before authorization; target remains stopped until GO record validates | Static contract PASS; Mini attach/GO remains NOT RUN |
+| Guest command syntax/size and runner contract | POSIX syntax, <=4096 bytes, GO ordered after all checks | `--check` PASS (12 serial commands); helper install still awaits exact committed bundle |
+| Local repository gates | No privacy leak, size limit, invalid checkpoint, or whitespace errors | Privacy PASS; size PASS; checkpoint PASS; diff check PASS. Markdown gate reports 9 pre-existing missing FLR-0338/0339/0340 evidence links, not FLR-0362 |
+| Exact bundle / pinned Mini runtime | Receiver, effective TOPDIR/TMPDIR, image hashes, unique run ID all pass | First bundle/receiver/TOPDIR/TMPDIR PASS; first Mini `--check` found the fixture failure. Follow-up bundle was not created/transferred because the local handoff command rejected its unresolved tip; receiver remains at the first commit |
+| Attach/GO and QMP | Stable read-0 identity reaches GO or first new predicate stops; still/video labeled | NOT RUN |
+| Cleanup | Identity marker and run FIFO removed; app/QEMU/QMP residuals zero | NOT RUN |
+
+### Act
+
+- On the clean follow-up exact bundle, invoke the runtime runner once with `flr0362-0001`. Its normal path runs canonical/static/46-test and helper-provenance gates, then target/image/port preflight, and only then starts QEMU. Do not run a separate duplicate `--check`; if any prelaunch gate fails, preserve it and stop without retrying the ID. No recipe/image build is in scope. Capture QMP still/eight-frame evidence and classify it by GO state.
+
+## Runtime attempt addendum — `flr0362-0001` stopped before Flutter
+
+### Facts
+
+- The exact committed bundle tip `37ce70ece15907c642cfbd2c10688fd4d7e13965` reached the fixed Mini receiver; bundle SHA-256 was `5a9dfd3fbccc437bb55331dce6d7007485dba81ee235487ccb1ca93413e543f6`. Effective `TOPDIR` and `TMPDIR` checks passed.
+- The normal runner executed its embedded static suite (46/46 passed), verified helper provenance and pinned image inputs, started QEMU, reached `guest-ready=PASS` on SSH-port probe attempt 12, and captured the pre-launch QMP frame.
+- Guest helper staging then failed at the first `FLR-0350-gate-common.sh` chunk. The runner's install command file was created, but the serial bridge reported `command-file-not-readable`; the guest helper was not installed.
+- Read-only Mini artifact checks confirmed `launch.serial.log`, `release-go.serial.log`, `runtime-state.serial.log`, and `post-run.ppm` are absent. Only `pre-launch.ppm` exists; its SHA-256 is `2617e8773e7bf65962467a54d212e36715ea674fbe3b7d05dc322c0dec209dc6`. The QMP socket is absent after teardown.
+- QMP quit was accepted and cleanup reported `residual_targets=0 residual_qmp=0`. No `agl-driver` app wrapper, `/usr/bin/flutter-auto`, GDB attach, GO token, app startup log, scene/frame marker, or post-launch screen was produced.
+- The source computes `install_file=$run_dir/install-guest-script-$chunk_index.cmd`, but the `guest_run` call passes `"$install-guest-script-$chunk_index.cmd"`. Under Bash expansion this expands `$install` (the command body) instead of using the prepared filename.
+
+### Inferences
+
+- This is a confirmed host-runner argument-expansion defect at the guest-command staging boundary. It explains the earliest actionable divergence and is unrelated to Flutter rendering.
+- The black pre-launch QMP frame is expected before guest app launch. This run neither proves a black Flutter screen nor establishes a 3D regression; 2D and 3D are UNKNOWN for this attempt.
+- The historical execution contract remains explicit: start exactly one `flutter-auto` as `agl-driver`, inspect the launch/runtime log, and judge the post-launch QMP frame. FLR-0116 showed the app alive with HUD while the 3D ROI was black; FLR-0235 and FLR-0286 are separate positive controls for HUD plus self-made native geometry/lighting, not production Sequoia success.
+
+### Hypotheses
+
+1. **Confirmed:** the command-file path argument is malformed because the runner interpolates the shell command body instead of `$install_file`. Prediction: the failure disappears when the exact generated filename is passed; a regression test must fail on the old call site.
+2. **Not tested here:** after helper staging succeeds, the FIFO observer, GDB attach, GO, Flutter startup, and rendering may pass or stop at a later predicate. Each remains UNKNOWN until reached.
+
+### Plan / Do / Check / Act
+
+- **Plan:** keep FLR-0362 Waiting; fix the independently ticketed staging boundary first, then resume this gate with a fresh run ID without relaxing FIFO/PID identity checks.
+- **Do:** preserved the consumed run and its failure evidence; did not retry `flr0362-0001` or change the image/product source.
+- **Check:** guest-ready and pre-launch capture PASS; helper staging FAIL; app launch/GO/render NOT REACHED; QMP teardown and residual checks PASS.
+- **Act:** FLR-0363 owns the red-capable staging regression, the one-line path correction, and one post-launch Mini attempt. If that attempt reaches GO, its full-frame and 3D ROI are classified before deciding whether to resume the attach-gate work.

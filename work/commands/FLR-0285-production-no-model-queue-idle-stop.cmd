@@ -1,0 +1,1 @@
+if test -s /run/user/1001/flr0285-production-no-model-queue-idle.pid; then pid=$(cat /run/user/1001/flr0285-production-no-model-queue-idle.pid); kill -TERM "$pid" 2>/dev/null || true; fi; sleep 1; pgrep -a flutter-auto || true

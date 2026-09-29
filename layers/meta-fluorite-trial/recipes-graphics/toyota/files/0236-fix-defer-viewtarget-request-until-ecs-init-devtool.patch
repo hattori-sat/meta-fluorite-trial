@@ -1,0 +1,102 @@
+From df40bd7a757333d9550f7b211a993b83c5850a2d Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 01:55:17 +0000
+Subject: [PATCH] fix: defer ViewTarget request until ECS init
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 67 +++++++++++++------
+ 1 file changed, 47 insertions(+), 20 deletions(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index f0753b9..145d5f4 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -81,7 +81,11 @@ void RunOnceCheckAndInitializeECSystems() {
+     // Internal debate whether we auto subscribe to systems on entity creation
+     // or not.
+ 
+-    ecs->initialize();
++    ecs->vInitSystems();
++    // Start only after handlers have been registered. The old C API-side
++    // state check could observe NotInitialized while this strand task was
++    // still pending and leave the ECS loop stopped forever.
++    ecs->StartMainLoop();
+ 
+   });
+ 
+@@ -89,9 +93,39 @@ void RunOnceCheckAndInitializeECSystems() {
+ 
+ //////////////////////////////////////////////////////////////////////////////////////////
+ void KickOffRenderingLoops() {
+-  ECSMessage viewTargetStartRendering;
+-  viewTargetStartRendering.addData(ECSMessageType::ViewTargetStartRenderingLoops, true);
+-  ECSManager::GetInstance()->RouteMessage(viewTargetStartRendering);
++  const auto ecs = ECSManager::GetInstance();
++  post(*ecs->GetStrand(), [ecs]() mutable {
++    ECSMessage viewTargetStartRendering;
++    viewTargetStartRendering.addData(ECSMessageType::ViewTargetStartRenderingLoops, true);
++    ecs->vRouteMessage(viewTargetStartRendering);
++    spdlog::info("FLUORITE_VIEWTARGET_RENDERING_LOOPS_ROUTED");
++  });
++}
++
++//////////////////////////////////////////////////////////////////////////////////////////
++void RouteViewTargetCreationRequest(
++  ECSManager* const ecs,
++  const FlutterDesktopEngineRef engine,
++  const int32_t top,
++  const int32_t left,
++  const uint32_t width,
++  const uint32_t height
++) {
++  // RunOnceCheckAndInitializeECSystems() posts system creation before this
++  // function is called. Posting the request to the same strand guarantees
++  // that vRouteMessage() sees a registered ViewTargetSystem.
++  post(*ecs->GetStrand(), [=]() mutable {
++    ECSMessage viewTargetCreationRequest;
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequest, engine);
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequestTop, top);
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequestLeft, left);
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequestWidth, width);
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequestHeight, height);
++    ecs->vRouteMessage(viewTargetCreationRequest);
++    spdlog::info(
++      "FLUORITE_VIEWTARGET_CREATE_REQUEST_ROUTED width={} height={}", width, height
++    );
++  });
+ }
+ 
+ //////////////////////////////////////////////////////////////////////////////////////////
+@@ -254,23 +288,16 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+   // Safeguarded inside
+   RunOnceCheckAndInitializeECSystems();
+ 
+-  // Every time this method is called, we should create a new view target
+-  ECSMessage viewTargetCreationRequest;
+-  viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequest, engine);
+-  viewTargetCreationRequest.addData(
+-    ECSMessageType::ViewTargetCreateRequestTop, static_cast<int>(top)
+-  );
+-  viewTargetCreationRequest.addData(
+-    ECSMessageType::ViewTargetCreateRequestLeft, static_cast<int>(left)
++  // Every time this method is called, we should create a new view target.
++  // Route it after the initialization post above, on the same strand.
++  RouteViewTargetCreationRequest(
++    ecs,
++    engine,
++    static_cast<int32_t>(top),
++    static_cast<int32_t>(left),
++    static_cast<uint32_t>(width),
++    static_cast<uint32_t>(height)
+   );
+-  viewTargetCreationRequest.addData(
+-    ECSMessageType::ViewTargetCreateRequestWidth, static_cast<uint32_t>(width)
+-  );
+-  viewTargetCreationRequest.addData(
+-    ECSMessageType::ViewTargetCreateRequestHeight, static_cast<uint32_t>(height)
+-  );
+-
+-  ecs->RouteMessage(viewTargetCreationRequest);
+ 
+   if (!m_bHasSetupRegistrar) {
+     m_bHasSetupRegistrar = true;

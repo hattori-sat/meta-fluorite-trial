@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sun, 23 Aug 2026 08:00:00 +0900
+Subject: [PATCH] filament_scene: restore root camera ECS registration
+
+The native scene deserializer consumes the root-level `cameras` payload and
+does not consume `scene.camera`. The v2 adapter sent only the latter and also
+skipped Dart camera initialization, leaving the Filament View with its default
+camera while frame timing continued. Restore the supported camera path so the
+active Dart camera is created as an ECS entity and applied to the ViewTarget.
+---
+ packages/filament_scene/lib/scene/scene_widget.dart | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -196,13 +196,9 @@
+ 
+     //final model = widget.models?.toJson();
+     final JsonObject? scene = widget.scene?.toJson();
+-    if (scene != null && widget.cameras != null && widget.cameras!.isNotEmpty) {
+-      // flutter-auto v2 creates cameras from scene.camera, not root cameras.
+-      // Keep the first active camera GUID aligned with Dart post-create setup.
+-      scene['camera'] = widget.cameras!.first.toJson();
+-    }
+     _creationParams["models"] = widget.models?.map((final param) => param.toJson()).toList();
+     _creationParams["scene"] = scene;
++    _creationParams["cameras"] = widget.cameras?.map((final param) => param.toJson()).toList();
+     // use concatenated toFlatJson
+     _creationParams["shapes"] = widget.shapes
+         ?.map((final param) => param.toFlatJson().map(normalizeShape).toList())
+         .flattenedToList;
+@@ -224,8 +220,7 @@
+       // TODO(kerberjg): just keep a list of entities in a single map
+       widget.models?.forEach((final model) => model.initialize(widget.filament));
+       widget.shapes?.forEach((final shape) => shape.initialize(widget.filament));
+-      // v2 scene.camera is a native ViewTarget camera, not an ECS entity.
+-      // Initializing it here would fail the native entity existence check.
++      widget.cameras?.forEach((final camera) => camera.initialize(widget.filament));
+ 
+       // Call the onCreated callback with the controller
+       widget.onCreated?.call(controller);

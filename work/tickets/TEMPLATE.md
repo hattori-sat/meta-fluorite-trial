@@ -5,6 +5,7 @@
 - Owner:
 - Created:
 - Updated:
+- Work unit: 独立して判定できる1つの作業単位
 - Links: context / logs / decisions / evidence
 
 ## Problem
@@ -69,6 +70,14 @@
 
 ## Success criteria
 
+## Visual evidence
+
+- QMP-only screenshotまたは承認済み実機capture:
+- 画像で見える内容 / 見えない内容:
+- Run ID / image identity / captured at:
+- Pixel count / bounding box / SHA-256 / evidence ID:
+- Artifact attachment or role-based link:
+
 ## Hypotheses
 
 1. Hypothesis A
@@ -95,6 +104,7 @@
 ### Act
 
 - Standardize / revise plan / create follow-up ticket / rollback:
+- 完了判定後はこのticketへの新しい開発を止め、次の独立作業は新しいMarkdown ticketへ切る。
 
 ## Decision log
 

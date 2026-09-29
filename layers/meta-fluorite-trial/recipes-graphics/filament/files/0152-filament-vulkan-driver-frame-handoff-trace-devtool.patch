@@ -1,0 +1,111 @@
+From edd873ea7dde99872e358ead08623caf4120a09a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 04:39:11 +0000
+Subject: [PATCH] diag: trace Vulkan driver frame handoff
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 24 +++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 8d76800b9..3b524b7fa 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -417,10 +417,13 @@ void VulkanDriver::collectGarbage() {
+ #endif
+ }
+ void VulkanDriver::beginFrame(int64_t monotonic_clock_ns,
+         int64_t refreshIntervalNs, uint32_t frameId) {
+     FVK_PROFILE_MARKER(PROFILE_NAME_BEGINFRAME);
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_DRIVER_BEGIN_FRAME frame_id=%u\n", frameId);
++    }
+ 
+     // Check if any command have finished and reset all its used resources. The resources
+     // wont be destroyed but their reference count will decreased if the command is already
+     // completed.
+     //
+@@ -428,10 +431,13 @@ void VulkanDriver::beginFrame(int64_t monotonic_clock_ns,
+     mCommands.gc();
+ 
+     if (mAppState.hasExternalSamplers()) {
+         mExternalImageManager.onBeginFrame();
+     }
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_DRIVER_BEGIN_FRAME_DONE frame_id=%u\n", frameId);
++    }
+ }
+ 
+ void VulkanDriver::setFrameScheduledCallback(Handle<HwSwapChain> sch, CallbackHandler* handler,
+         FrameScheduledCallback&& callback, uint64_t flags) {
+     auto swapChain = resource_ptr<VulkanSwapChain>::cast(&mResourceManager, sch);
+@@ -449,10 +455,13 @@ void VulkanDriver::endFrame(uint32_t frameId) {
+     FVK_PROFILE_MARKER(PROFILE_NAME_ENDFRAME);
+     FVK_LOGI << "FLR0026_VK_END_FRAME_BEGIN";
+     endCommandRecording();
+     FVK_LOGI << "FLR0026_VK_END_FRAME_COMMANDS_RECORDED";
+     collectGarbage();
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_END_FRAME_DONE\n");
++    }
+ }
+ 
+ void VulkanDriver::updateDescriptorSetBuffer(
+         backend::DescriptorSetHandle dsh,
+         backend::descriptor_binding_t binding,
+@@ -1752,38 +1761,51 @@ void VulkanDriver::nextSubpass(int) {
+     }
+ }
+ 
+ void VulkanDriver::makeCurrent(Handle<HwSwapChain> drawSch, Handle<HwSwapChain> readSch) {
+     FVK_SYSTRACE_SCOPE();
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_MAKE_CURRENT_BEGIN\n");
++    }
+ 
+     ASSERT_PRECONDITION_NON_FATAL(drawSch == readSch,
+             "Vulkan driver does not support distinct draw/read swap chains.");
+ 
+     resource_ptr<VulkanSwapChain> swapChain =
+             resource_ptr<VulkanSwapChain>::cast(&mResourceManager, drawSch);
+     mCurrentSwapChain = swapChain;
+ 
+     bool resized = false;
+     swapChain->acquire(resized);
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_MAKE_CURRENT_ACQUIRED resized=%s\n",
++                resized ? "true" : "false");
++    }
+ 
+     if (resized) {
+         mFramebufferCache.resetFramebuffers();
+     }
+ 
+     if (UTILS_LIKELY(mDefaultRenderTarget)) {
+         mDefaultRenderTarget->bindToSwapChain(swapChain);
+     }
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_MAKE_CURRENT_DONE\n");
++    }
+ }
+ 
+ void VulkanDriver::commit(Handle<HwSwapChain> sch) {
+     FVK_SYSTRACE_SCOPE();
+-    std::fprintf(stderr, "FLR0026_VK_COMMIT\n");
++    std::fprintf(stderr, "FLR0026_VK_COMMIT_BEGIN\n");
+ 
+     auto swapChain = resource_ptr<VulkanSwapChain>::cast(&mResourceManager, sch);
+ 
+     // Present the backbuffer after the most recent command buffer submission has finished.
+     swapChain->present(*this);
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_COMMIT_DONE\n");
++    }
+ }
+ 
+ void VulkanDriver::setPushConstant(backend::ShaderStage stage, uint8_t index,
+         backend::PushConstantVariant value) {
+     assert_invariant(mPipelineState.program && "Expect a program when writing to push constants");
+-- 
+2.34.1
+

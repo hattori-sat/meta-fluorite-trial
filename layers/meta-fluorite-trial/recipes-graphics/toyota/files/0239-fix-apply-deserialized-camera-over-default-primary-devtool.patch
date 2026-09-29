@@ -1,0 +1,42 @@
+From 7ff7887c5c6b3e58d412e32cfd960f6772e786a8 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 03:27:50 +0000
+Subject: [PATCH] fix: apply deserialized camera over default primary
+
+---
+ .../core/systems/derived/view_target_system.cc         | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/view_target_system.cc b/plugins/filament_view/core/systems/derived/view_target_system.cc
+index 40ecd21..f3ff20e 100644
+--- a/plugins/filament_view/core/systems/derived/view_target_system.cc
++++ b/plugins/filament_view/core/systems/derived/view_target_system.cc
+@@ -125,11 +125,17 @@ void ViewTargetSystem::vOnInitSystem() {
+       spdlog::debug("SetCameraFromDeserializedLoad");
+       const auto deserializedCamera =
+         msg.getData<Camera*>(ECSMessageType::SetCameraFromDeserializedLoad);
++      if (deserializedCamera == nullptr) {
++        spdlog::error("FLUORITE_DESERIALIZED_CAMERA_RECEIVE_FAILED reason=null");
++        return;
++      }
+       m_poCamera = deserializedCamera->clone();
+       delete deserializedCamera;
++      spdlog::info("FLUORITE_DESERIALIZED_CAMERA_RECEIVED");
+       spdlog::debug("SetCameraFromDeserializedLoad Complete");
+ 
+       vSetCameraFromSerializedData();
++      spdlog::info("FLUORITE_DESERIALIZED_CAMERA_APPLIED");
+     }
+   );
+ 
+@@ -250,10 +256,6 @@ void ViewTargetSystem::vChangeViewQualitySettings(
+ ////////////////////////////////////////////////////////////////////////////////////
+ void ViewTargetSystem::vSetCameraFromSerializedData() const {
+   for (const auto& viewTarget : m_lstViewTargets) {
+-    // we might get request to add new view targets as they come online
+-    // make sure we're not resetting older ones.
+-    if (viewTarget->getCameraManager()->poGetPrimaryCamera() != nullptr) continue;
+-
+     std::unique_ptr<Camera> clonedCamera = m_poCamera->clone();
+ 
+     viewTarget->vSetupCameraManagerWithDeserializedCamera(std::move(clonedCamera));

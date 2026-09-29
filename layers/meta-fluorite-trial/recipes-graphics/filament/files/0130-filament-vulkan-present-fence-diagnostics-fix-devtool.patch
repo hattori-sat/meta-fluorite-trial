@@ -1,0 +1,25 @@
+From 69d07977cdb79f0ae3aa33002965bf6fda9febe8 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 12:19:45 +0000
+Subject: [PATCH] fix: qualify bluevk fence query
+
+---
+ filament/backend/src/vulkan/VulkanCommands.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanCommands.h b/filament/backend/src/vulkan/VulkanCommands.h
+index 37279db61..be64aad93 100644
+--- a/filament/backend/src/vulkan/VulkanCommands.h
++++ b/filament/backend/src/vulkan/VulkanCommands.h
+@@ -240,7 +240,7 @@ public:
+         if (mLastFence == VK_NULL_HANDLE) {
+             return VK_NOT_READY;
+         }
+-        return vkGetFenceStatus(mDevice, mLastFence);
++        return bluevk::vkGetFenceStatus(mDevice, mLastFence);
+     }
+ 
+     std::shared_ptr<VulkanCmdFence> getMostRecentFenceStatus() {
+-- 
+2.34.1
+

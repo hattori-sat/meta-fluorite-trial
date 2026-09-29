@@ -1,0 +1,37 @@
+From 4808e4f30cb16c375594cd74cc5a404c4f32e997 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 00:32:41 +0000
+Subject: [PATCH] diag: isolate explicit light contribution on current API
+
+---
+ .../filament_view/core/systems/derived/light_system.cc | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 6575c12..8f74863 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -17,6 +17,7 @@
+ #include "light_system.h"
+ 
+ #include <asio/post.hpp>
++#include <cstdlib>
+ #include <core/components/derived/light.h>
+ #include <core/entity/base/entityobject.h>
+ #include <core/include/color.h>
+@@ -91,7 +92,14 @@ void LightSystem::BuildLight(Light& light) {
+   builder.intensity(light.getIntensity());
+   builder.position(light.getPosition());
+   builder.direction(light.getDirection());
+-  builder.castLight(light.getCastLight());
++  const bool disableDirectContribution =
++      std::getenv("FLUORITE_NATIVE_LIGHT_DISABLE_CONTRIBUTION") != nullptr;
++  builder.castLight(light.getCastLight() && !disableDirectContribution);
++  if (disableDirectContribution) {
++    spdlog::info(
++        "FLUORITE_NATIVE_LIGHT_DISABLE_CONTRIBUTION enabled=true entity={}",
++        light.m_poFilamentEntityLight.getId());
++  }
+   builder.castShadows(light.getCastShadows());
+   builder.falloff(light.getFalloffRadius());
+ 

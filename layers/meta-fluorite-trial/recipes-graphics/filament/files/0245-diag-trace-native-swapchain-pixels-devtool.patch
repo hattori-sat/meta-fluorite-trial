@@ -1,0 +1,99 @@
+From a50bdcb733b26fdd2a9b220033ccf9ab68504cb7 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 19:59:24 +0000
+Subject: [PATCH] diag: trace native swapchain pixels
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 79 ++++++++++++++++++++
+ 1 file changed, 79 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 7f611c3b5..e7e533a8c 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -1789,6 +1789,85 @@ void VulkanDriver::endRenderPass(int) {
+     // pipeline barrier between framebuffer writes and shader reads.
+     rt->emitBarriersEndRenderPass(*mCurrentRenderPass.commandBuffer);
+ 
++    // One-shot diagnostic for the native swapchain path. The existing target
++    // probe intentionally observes only non-swapchain floating-point targets;
++    // this probe uses the actual qemux86-64 swapchain format and reads the
++    // same bounded region that the QMP evidence analyzer inspects.
++    if (std::getenv("FLUORITE_VK_SWAPCHAIN_PIXEL_TRACE") != nullptr) {
++        static bool swapchainProbeIssued = false;
++        constexpr uint32_t probeX = 300;
++        constexpr uint32_t probeY = 250;
++        constexpr uint32_t probeWidth = 620;
++        constexpr uint32_t probeHeight = 400;
++        constexpr size_t componentCount = 4;
++        constexpr size_t pixelCount = static_cast<size_t>(probeWidth) * probeHeight;
++        VkExtent2D const extent = rt->getExtent();
++        auto const& color = rt->getColor0();
++        bool const supportedFormat =
++                color.getFormat() == VK_FORMAT_B8G8R8A8_UNORM ||
++                color.getFormat() == VK_FORMAT_B8G8R8A8_SRGB;
++        if (!swapchainProbeIssued && rt->isSwapChain() && supportedFormat &&
++                probeX + probeWidth <= extent.width && probeY + probeHeight <= extent.height) {
++            swapchainProbeIssued = true;
++            constexpr size_t bufferBytes = pixelCount * componentCount * sizeof(uint8_t);
++            auto* const buffer = new uint8_t[pixelCount * componentCount]{};
++            PixelBufferDescriptor pbd(
++                    buffer,
++                    bufferBytes,
++                    PixelDataFormat::RGBA,
++                    PixelDataType::UBYTE,
++                    [](void* data, size_t, void*) {
++                        delete[] static_cast<uint8_t*>(data);
++                    });
++            VkImage const probeImage = color.getImage();
++            FVK_LOGI << "FLUORITE_VK_SWAPCHAIN_PIXEL_PROBE_BEGIN image=" << probeImage
++                     << " extent=" << extent.width << "x" << extent.height
++                     << " format=" << static_cast<int>(color.getFormat())
++                     << " layout=" << static_cast<int>(color.getLayout())
++                     << " region=" << probeX << "," << probeY << " "
++                     << probeWidth << "x" << probeHeight;
++            endCommandRecording();
++            mReadPixels.run(
++                    rt,
++                    probeX,
++                    probeY,
++                    probeWidth,
++                    probeHeight,
++                    mPlatform->getGraphicsQueueFamilyIndex(),
++                    std::move(pbd),
++                    [context = &mContext](uint32_t types, VkFlags reqs) {
++                        return context->selectMemoryType(types, reqs);
++                    },
++                    [probeImage, pixelCount, componentCount](PixelBufferDescriptor&& result) {
++                        auto const* const pixels = static_cast<uint8_t const*>(result.buffer);
++                        size_t nonzeroPixels = 0;
++                        size_t chromaticPixels = 0;
++                        uint64_t byteSum = 0;
++                        uint8_t maxByte = 0;
++                        if (pixels) {
++                            for (size_t pixel = 0; pixel < pixelCount; ++pixel) {
++                                uint8_t const red = pixels[pixel * componentCount + 0];
++                                uint8_t const green = pixels[pixel * componentCount + 1];
++                                uint8_t const blue = pixels[pixel * componentCount + 2];
++                                uint8_t const alpha = pixels[pixel * componentCount + 3];
++                                nonzeroPixels += (red || green || blue || alpha) ? 1 : 0;
++                                uint8_t const maximum = std::max({red, green, blue});
++                                uint8_t const minimum = std::min({red, green, blue});
++                                chromaticPixels += maximum - minimum >= 24 ? 1 : 0;
++                                maxByte = std::max(maxByte, maximum);
++                                byteSum += red + green + blue + alpha;
++                            }
++                        }
++                        FVK_LOGI << "FLUORITE_VK_SWAPCHAIN_PIXEL_PROBE_RESULT image="
++                                 << probeImage << " nonzero_pixels=" << nonzeroPixels
++                                 << " chromatic_pixels=" << chromaticPixels
++                                 << " total_pixels=" << pixelCount
++                                 << " byte_sum=" << byteSum
++                                 << " max_rgb_byte=" << static_cast<unsigned>(maxByte);
++                    });
++        }
++    }
++
+     // This is a one-shot diagnostic only. It reads the production-sized, floating-point color
+     // target before the later swapchain composition pass, so a non-zero result proves that
+     // shaded output reached the target even if the displayed frame is black.

@@ -1,0 +1,1 @@
+pid=$(cat /tmp/flr0200-app.pid 2>/dev/null || true); printf '%s\n' APP_PID=$pid; [ -n "$pid" ] || exit 12; kill "$pid" 2>/dev/null || true; sleep 3; printf '%s\n' REMAINING; ps -o pid,ppid,user,stat,comm,args -p "$pid" 2>/dev/null || true

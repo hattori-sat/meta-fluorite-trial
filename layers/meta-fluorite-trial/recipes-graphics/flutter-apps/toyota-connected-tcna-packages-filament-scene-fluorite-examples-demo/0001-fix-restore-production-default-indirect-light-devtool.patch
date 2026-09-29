@@ -1,0 +1,24 @@
+From 0f696a7e71901a03ec9ce1c8843b9ec869007bff Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 10 Sep 2026 23:30:47 +0000
+Subject: [PATCH] fix: restore production default indirect light
+
+---
+ packages/filament_scene/example/lib/main.dart | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 1dc9ee2..03450cd 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -289,8 +289,8 @@ class _MyAppState extends State<MyApp> {
+     return Scene(
+       skybox: ColorSkybox(color: Colors.white),
+       //skybox: HdrSkybox.asset("assets/envs/courtyard.hdr"),
+-      indirectLight: HdrIndirectLight.asset("assets/envs/courtyard.hdr"),
+-      //indirectLight: poGetDefaultIndirectLight(),
++      //indirectLight: HdrIndirectLight.asset("assets/envs/courtyard.hdr"),
++      indirectLight: poGetDefaultIndirectLight(),
+       lights: poGetSceneLightsList(),
+     );
+   }

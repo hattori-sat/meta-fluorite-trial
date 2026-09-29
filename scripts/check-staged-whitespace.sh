@@ -14,7 +14,7 @@ fi
 git diff --check
 git diff --cached --check -- . \
     ':(glob,exclude)conf/*/*.template' \
-    ':(glob,exclude)layers/meta-local/**' \
+    ':(glob,exclude)layers/meta-fluorite-trial/**' \
     ':(exclude)manifests/agl-trout-fixed.xml' \
     ':(glob,exclude)manifests/local-changes/**'
 

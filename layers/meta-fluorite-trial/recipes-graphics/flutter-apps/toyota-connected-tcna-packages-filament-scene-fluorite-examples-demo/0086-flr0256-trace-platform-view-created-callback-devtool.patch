@@ -1,0 +1,58 @@
+From 12cb66604ca74a9deb6dafc799209c1fa41a4fb3 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 21 Sep 2026 02:03:39 +0000
+Subject: [PATCH] FLR-0256: trace PlatformView callback
+
+---
+ packages/filament_scene/example/lib/main.dart       | 3 +++
+ packages/filament_scene/lib/scene/scene_widget.dart | 4 ++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 7d6a815..8216d2c 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -280,6 +280,7 @@ class _MyAppState extends State<MyApp> {
+       shapes: poGetScenesShapes(),
+       cameras: poGetScenesCameras(),
+       onCreated: (SceneController controller) async {
++        print('FLR0256_PO_ON_CREATED_BEGIN');
+         print('poGetFilamentScene onCreated');
+ 
+         poController = controller;
+@@ -288,7 +289,9 @@ class _MyAppState extends State<MyApp> {
+         _collisionEventChannel.setController(filamentViewApi);
+ 
+         print('poGetFilamentScene onCreated completed');
++        print('FLR0256_PO_ON_CREATED_END');
+         print('FLR0249_READINESS_START_AFTER_PLATFORM_VIEW');
++        print('FLR0256_READINESS_START_CALL');
+         _nativeReadiness.addCallback(startListeningForEvents);
+         _nativeReadiness.startPolling();
+       },
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+index dadaecc..7ef2c04 100644
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -216,9 +216,11 @@ class ModelViewerState extends State<SceneView> {
+   }
+ 
+   void _onPlatformViewCreated(final int id) {
++    print('FLR0256_PLATFORM_VIEW_CREATED id=$id');
+     final SceneController controller = SceneController(id: id);
+ 
+     _controller.complete(controller);
++    print('FLR0256_CONTROLLER_COMPLETED id=$id');
+     if (widget.onCreated != null) {
+       // Set the engine on all entities
+       // TODO(kerberjg): just keep a list of entities in a single map
+@@ -230,7 +232,9 @@ class ModelViewerState extends State<SceneView> {
+       // handlers and would fail after the platform view is created.
+ 
+       // Call the onCreated callback with the controller
++      print('FLR0256_ON_CREATED_DISPATCH_BEGIN id=$id');
+       widget.onCreated?.call(controller);
++      print('FLR0256_ON_CREATED_DISPATCH_RETURNED id=$id');
+     }
+   }
+ 

@@ -1,0 +1,22 @@
+From ed3ad8a7344abc2081e50cd03a0767bfa8e9d588 Mon Sep 17 00:00:00 2001
+From: Fluorite integration role <integration-role@localhost>
+Date: Mon, 7 Sep 2026 11:18:05 +0000
+Subject: [PATCH] fix: allow native light trace engine access
+
+---
+ plugins/filament_view/core/systems/derived/light_system.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 17edfd6..48e3b9c 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -66,7 +66,7 @@ void LightSystem::BuildLightAndAddToScene(Light& light) {
+     const auto filamentSystem = ecs->getSystem<FilamentSystem>(
+       "lightManager::BuildLightAndAddToSceneTrace"
+     );
+-    const auto* const engine = filamentSystem->getFilamentEngine();
++    auto* const engine = filamentSystem->getFilamentEngine();
+     const auto& lightManager = engine->getLightManager();
+     const auto nativeEntity = light.m_poFilamentEntityLight;
+     const auto nativeInstance = lightManager.getInstance(nativeEntity);

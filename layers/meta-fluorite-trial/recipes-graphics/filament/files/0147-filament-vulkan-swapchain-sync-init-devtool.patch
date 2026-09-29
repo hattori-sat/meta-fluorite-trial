@@ -1,0 +1,32 @@
+From 76e71738ad7defbc73e36703b719a69b1059fd94 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 02:36:53 +0000
+Subject: [PATCH] fix: initialize Vulkan surface swapchain sync state
+
+---
+ .../src/vulkan/platform/VulkanPlatformSwapChainImpl.h        | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.h b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.h
+index 88472c7c9..56d4308a4 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.h
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.h
+@@ -121,12 +121,13 @@ private:
+     VkSwapchainKHR mSwapchain = VK_NULL_HANDLE;
+     VkExtent2D const mFallbackExtent;
+     VkSemaphore mImageReady[IMAGE_READY_SEMAPHORE_COUNT];
+-    uint32_t mCurrentImageReadyIndex;
++    // Start the semaphore ring so the first acquire uses slot zero.
++    uint32_t mCurrentImageReadyIndex = IMAGE_READY_SEMAPHORE_COUNT - 1;
+ 
+     bool mUsesRGB = false;
+     bool mHasStencil = false;
+     bool mIsProtected = false;
+-    bool mSuboptimal;
++    bool mSuboptimal = false;
+ };
+ 
+ struct VulkanPlatformHeadlessSwapChain : public VulkanPlatformSwapChainImpl {
+-- 
+2.34.1
+

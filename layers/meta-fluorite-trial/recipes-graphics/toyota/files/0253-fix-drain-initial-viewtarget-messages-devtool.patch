@@ -1,0 +1,36 @@
+From 9b4f1f717a13be074aa98e3cccd2a32271eab123 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 09:44:30 +0000
+Subject: [PATCH] fix: drain initial ViewTarget messages
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index c2bed59..eac8a26 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -286,6 +286,22 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+   // Ok to be called infinite times.
+   KickOffRenderingLoops();
+ 
++  // ECS update is entered by ViewTarget::DrawFrame. Drain the bootstrap
++  // messages after registration so the ViewTarget creation and rendering-loop
++  // requests can schedule the first frame before normal frame updates begin.
++  const auto viewTargetSystem = ecs->getSystem<ViewTargetSystem>(__FUNCTION__);
++  if (pthread_self() == ecs->getFilamentAPIThreadID()) {
++    viewTargetSystem->ProcessMessages();
++  } else {
++    std::promise<void> startupPromise;
++    auto startupFuture = startupPromise.get_future();
++    post(*ecs->getStrand(), [&viewTargetSystem, &startupPromise] {
++      viewTargetSystem->ProcessMessages();
++      startupPromise.set_value();
++    });
++    startupFuture.wait();
++  }
++
+   spdlog::debug("Initialization completed");
+ }
+ 

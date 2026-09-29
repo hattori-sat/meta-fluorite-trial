@@ -1,0 +1,1 @@
+pid=$(cat /run/user/1001/flr0260-production-route.pid 2>/dev/null || true); if [ -n "$pid" ]; then kill -TERM "$pid" 2>/dev/null || true; for i in 1 2 3 4 5 6 7 8 9 10; do kill -0 "$pid" 2>/dev/null || break; sleep 1; done; fi; printf 'FLR0260_PRODUCTION_ROUTE_STOP pid=%s alive=%s\n' "$pid" "$(kill -0 "$pid" 2>/dev/null && echo yes || echo no)"

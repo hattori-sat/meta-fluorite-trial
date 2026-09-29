@@ -1,0 +1,80 @@
+From 1d80a45d3c18beaca0898e2f7336279d0f454d08 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@localhost>
+Date: Fri, 25 Sep 2026 22:45:26 +0900
+Subject: [PATCH] FLR-0332: trace native surface frame trigger
+
+---
+ plugins/nav_render_view/nav_render_surface.cc | 25 +++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/plugins/nav_render_view/nav_render_surface.cc b/plugins/nav_render_view/nav_render_surface.cc
+index a4d7f66..70f0f7d 100644
+--- a/plugins/nav_render_view/nav_render_surface.cc
++++ b/plugins/nav_render_view/nav_render_surface.cc
+@@ -4,6 +4,7 @@
+ #include <flutter/standard_message_codec.h>
+ #include <plugins/common/common.h>
+ 
++#include <cstdlib>
+ #include <utility>
+ 
+ #include "libnav_render.h"
+@@ -147,6 +148,12 @@ NavRenderSurface::NavRenderSurface(int32_t id,
+ 
+   wl_subsurface_set_desync(subsurface_);
+ 
++  if (std::getenv("FLR0332_NAV_SURFACE_TRACE") != nullptr) {
++    spdlog::info(
++        "FLR0332_NAV_SURFACE_CREATED id={} callback_present={} subsurface_ready={}",
++        id_, callback_ != nullptr, subsurface_ != nullptr);
++  }
++
+   addListener(platformViewsContext_, id, &platform_view_listener_, this);
+   SPDLOG_TRACE("--NavRenderSurface::NavRenderSurface");
+ }
+@@ -161,6 +168,11 @@ void NavRenderSurface::on_frame(void* data,
+                                 const uint32_t /* time */) {
+   const auto obj = static_cast<NavRenderSurface*>(data);
+ 
++  if (std::getenv("FLR0332_NAV_SURFACE_TRACE") != nullptr) {
++    spdlog::info("FLR0332_NAV_SURFACE_ON_FRAME_BEGIN id={} callback_present={}",
++                 obj->id_, callback != nullptr);
++  }
++
+   obj->callback_ = nullptr;
+ 
+   if (callback) {
+@@ -169,6 +181,11 @@ void NavRenderSurface::on_frame(void* data,
+ 
+   obj->DrawFrame();
+ 
++  if (std::getenv("FLR0332_NAV_SURFACE_TRACE") != nullptr) {
++    spdlog::info("FLR0332_NAV_SURFACE_DRAW_RETURN id={} subsurface_ready={}",
++                 obj->id_, obj->subsurface_ != nullptr);
++  }
++
+   if (obj->subsurface_ == nullptr)
+     return;
+ 
+@@ -183,6 +200,10 @@ void NavRenderSurface::on_frame(void* data,
+   wl_subsurface_set_position(obj->subsurface_, obj->left_, obj->top_);
+ 
+   wl_surface_commit(obj->surface_);
++
++  if (std::getenv("FLR0332_NAV_SURFACE_TRACE") != nullptr) {
++    spdlog::info("FLR0332_NAV_SURFACE_COMMIT_SENT id={}", obj->id_);
++  }
+ }
+ 
+ const wl_callback_listener NavRenderSurface::frame_listener = {.done =
+@@ -235,6 +256,10 @@ void NavRenderSurface::DrawFrame() {
+ 
+ void NavRenderSurface::SetOffset(int32_t left, int32_t top) {
+   SPDLOG_DEBUG("[NavRenderSurface] SetOffset: left: {}, top: {}", left, top);
++  if (std::getenv("FLR0332_NAV_SURFACE_TRACE") != nullptr) {
++    spdlog::info("FLR0332_NAV_SURFACE_SET_OFFSET id={} left={} top={} callback_present={}",
++                 id_, left, top, callback_ != nullptr);
++  }
+   wl_subsurface_set_position(subsurface_, left, top);
+   if (!callback_) {
+     on_frame(this, callback_, 0);

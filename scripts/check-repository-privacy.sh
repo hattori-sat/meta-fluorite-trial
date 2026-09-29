@@ -7,12 +7,12 @@ failed=0
 patterns=(
     '(?<![0-9])(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?![0-9])'
     '(?<![A-Fa-f0-9:])(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}(?![A-Fa-f0-9:])'
-    '(?<![A-Za-z0-9:.\[])(?=[A-Fa-f0-9:.]*[A-Fa-f0-9])(?=[A-Fa-f0-9:.]*:)[A-Fa-f0-9:.]*::[A-Fa-f0-9:.]*(?![A-Za-z0-9:.\]])'
+    '(?<![A-Za-z0-9_:\[])(?=[A-Fa-f0-9:.]*[A-Fa-f0-9])(?=[A-Fa-f0-9:.]*:)[A-Fa-f0-9:.]*::[A-Fa-f0-9:.]*(?![A-Za-z0-9_:.\]])'
     '(?<![A-Za-z0-9_])\[(?=[A-Fa-f0-9:]*:[A-Fa-f0-9:]*:)[A-Fa-f0-9:]{3,}\](?![A-Za-z0-9_])'
-    '(?<![A-Za-z0-9_/@$.-])(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+(?:internal|local|lan|corp|private|localdomain)(?![A-Za-z0-9_.-])'
+    '(?<![A-Za-z0-9_/@$.-])(?!(?:index)\.local(?![A-Za-z0-9_.-]))(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+(?:internal|local|lan|corp|private|localdomain)(?![A-Za-z0-9_.-])'
     '/(?:Users|home)/[A-Za-z0-9._-]+/'
-    '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
-    '(?<![A-Za-z0-9._/-])(?:ssh://)?[A-Za-z0-9._-]+@(?:[A-Za-z0-9._-]+|\[[^]]+\])'
+    '(?<![A-Za-z0-9._%+-])(?!(?:wl_[A-Za-z0-9_]+)@[0-9]+(?:\.[A-Za-z0-9_]+)?(?![A-Za-z0-9.-]))(?!(?:fluorite|fluorite-trial|fluorite-devtool)@example\.invalid(?![A-Za-z0-9.-]))(?!(?:codex-devtool)@localhost(?![A-Za-z0-9.-]))[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+    '(?<![A-Za-z0-9._/-])(?!(?:wl_[A-Za-z0-9_]+)@[0-9]+(?:\.[A-Za-z0-9_]+)?(?![A-Za-z0-9.-]))(?!(?:fluorite|fluorite-trial|fluorite-devtool)@example\.invalid(?![A-Za-z0-9.-]))(?!(?:codex-devtool|fluorite-devtool|integration-role)@localhost(?![A-Za-z0-9.-]))(?!(?:root)@(?:qemux86-64|\.)(?![A-Za-z0-9.-]))(?:ssh://)?[A-Za-z0-9._-]+@(?:[A-Za-z0-9._-]+|\[[^]]+\])'
     'https://github\.com/[A-Za-z0-9_.-]+/meta-fluorite-trial(?:\.git)?'
     '-----BEGIN (?:[A-Z0-9 ]+ )?PRIVATE KEY-----'
     '(?<![A-Za-z0-9])AKIA[0-9A-Z]{16}(?![A-Za-z0-9])'
@@ -31,6 +31,12 @@ candidate_files() {
 
 for pattern in "${patterns[@]}"; do
     while IFS= read -r -d '' file; do
+        # `git ls-files` includes worktree paths that are deleted but not yet
+        # staged. They are valid candidates during a rename/migration; there
+        # is no file content to scan until the replacement is present.
+        if test ! -f "$file"; then
+            continue
+        fi
         case "${file##*/}" in
             Makefile) ;;
             *)
@@ -51,6 +57,23 @@ done
 if test "$failed" -ne 0; then
     echo "privacy check: FAIL (matched values intentionally omitted)"
     exit 1
+fi
+
+if git -C "$ROOT" rev-parse --verify HEAD >/dev/null 2>&1; then
+    role_email="integration-role"'@'"localhost"
+    role_identity="Fluorite integration role|${role_email}|Fluorite integration role|${role_email}"
+    metadata_range="${PRIVACY_GIT_RANGE:-HEAD^..HEAD}"
+    if ! git -C "$ROOT" rev-parse --verify "${metadata_range%%..*}" >/dev/null 2>&1; then
+        metadata_range="HEAD"
+    fi
+    while IFS= read -r commit; do
+        identity="$(git -C "$ROOT" show -s --format='%an|%ae|%cn|%ce' "$commit")"
+        if test "$identity" != "$role_identity"; then
+            echo "privacy check: blocked Git metadata detected"
+            echo "privacy check: FAIL (matched values intentionally omitted)"
+            exit 1
+        fi
+    done < <(git -C "$ROOT" rev-list "$metadata_range")
 fi
 
 echo "privacy check: PASS"

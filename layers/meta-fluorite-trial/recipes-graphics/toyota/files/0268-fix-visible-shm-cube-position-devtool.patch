@@ -1,0 +1,22 @@
+From 2c9d32cf6f66ebf88527d75e9c12789ab694a449 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 19 Sep 2026 18:54:52 +0000
+Subject: [PATCH] fix: use computed visible SHM cube position
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 88a6c3ba1..51fae9939 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -514,7 +514,7 @@ void ViewTarget::setupVisibleShmCube(const uint32_t width, const uint32_t height
+     wl_shm_destroy(registryState.shm);
+     return;
+   }
+-  wl_subsurface_set_position(shmSubsurface, left_ + left_, top_ + top_);
++  wl_subsurface_set_position(shmSubsurface, left_ + left, top_ + top);
+   if (surface_ != nullptr) wl_subsurface_place_above(shmSubsurface, surface_);
+   else wl_subsurface_place_above(shmSubsurface, parent_surface_);
+   wl_subsurface_set_desync(shmSubsurface);

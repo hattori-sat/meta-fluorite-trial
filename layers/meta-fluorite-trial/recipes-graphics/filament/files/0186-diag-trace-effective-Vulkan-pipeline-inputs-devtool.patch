@@ -1,0 +1,64 @@
+From 27f57649c921d1ccc6dc5d009c30fc72b43a592a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 18:24:40 +0000
+Subject: [PATCH] diag: trace effective Vulkan pipeline inputs
+
+---
+ .../src/vulkan/VulkanPipelineCache.cpp        | 30 +++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanPipelineCache.cpp b/filament/backend/src/vulkan/VulkanPipelineCache.cpp
+index e9cb7ad71..fb222ba1d 100644
+--- a/filament/backend/src/vulkan/VulkanPipelineCache.cpp
++++ b/filament/backend/src/vulkan/VulkanPipelineCache.cpp
+@@ -19,6 +19,7 @@
+ #include <utils/Log.h>
+ #include <utils/Panic.h>
+ 
++#include <chrono>
+ #include <cstdio>
+ #include <cstdlib>
+ 
+@@ -236,6 +237,28 @@ VulkanPipelineCache::PipelineCacheEntry* VulkanPipelineCache::createPipeline() n
+     PipelineCacheEntry cacheEntry = {
+         .lastUsed = mCurrentTime,
+     };
++    const bool tracePipelineInput =
++            std::getenv("FLUORITE_VK_PIPELINE_INPUT_TRACE") != nullptr;
++    if (tracePipelineInput) {
++        std::fprintf(stderr,
++                "FLUORITE_VK_PIPELINE_INPUT shader0=%p shader1=%p render_pass=%p layout=%p "
++                "subpass=%u topology=%u attrs=%u buffers=%u color_targets=%u samples=%u "
++                "blend=%u depth_write=%u depth_compare=%u\n",
++                static_cast<void*>(mPipelineRequirements.shaders[0]),
++                static_cast<void*>(mPipelineRequirements.shaders[1]),
++                static_cast<void*>(mPipelineRequirements.renderPass),
++                static_cast<void*>(mPipelineRequirements.layout),
++                static_cast<unsigned>(mPipelineRequirements.subpassIndex),
++                static_cast<unsigned>(mPipelineRequirements.topology),
++                static_cast<unsigned>(numVertexAttribs),
++                static_cast<unsigned>(numVertexBuffers),
++                static_cast<unsigned>(raster.colorTargetCount),
++                static_cast<unsigned>(raster.rasterizationSamples),
++                static_cast<unsigned>(raster.blendEnable),
++                static_cast<unsigned>(raster.depthWriteEnable),
++                static_cast<unsigned>(raster.depthCompareOp));
++    }
++    const auto pipelineCreateStart = std::chrono::steady_clock::now();
+     const bool tracePipeline = std::getenv("FLR0026_PIPELINE_TRACE") != nullptr;
+     if (tracePipeline) {
+         std::fprintf(stderr, "FLR0026_GRAPHICS_PIPELINE_CREATE_BEGIN\n");
+@@ -246,6 +269,13 @@ VulkanPipelineCache::PipelineCacheEntry* VulkanPipelineCache::createPipeline() n
+         std::fprintf(stderr, "FLR0026_GRAPHICS_PIPELINE_CREATE_DONE result=%d\n",
+                 static_cast<int32_t>(error));
+     }
++    if (tracePipelineInput) {
++        const auto elapsedUs = std::chrono::duration_cast<std::chrono::microseconds>(
++                std::chrono::steady_clock::now() - pipelineCreateStart).count();
++        std::fprintf(stderr,
++                "FLUORITE_VK_PIPELINE_CREATE_RESULT result=%d elapsed_us=%llu\n",
++                static_cast<int32_t>(error), static_cast<unsigned long long>(elapsedUs));
++    }
+     assert_invariant(error == VK_SUCCESS);
+     if (error != VK_SUCCESS) {
+         FVK_LOGE << "vkCreateGraphicsPipelines error " << error;

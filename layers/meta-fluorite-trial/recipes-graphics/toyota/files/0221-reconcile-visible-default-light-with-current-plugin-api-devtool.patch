@@ -1,0 +1,23 @@
+From 391592902c6f0915e42445ae67420a3eca714a5a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 16:55:01 +0000
+Subject: [PATCH] fix: restore visible default light on current plugin API
+
+---
+ plugins/filament_view/core/systems/derived/light_system.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 64555d2..c68e4b4 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -43,7 +43,8 @@ void LightSystem::vCreateDefaultLight() {
+   const auto oLightComp = std::make_shared<Light>();
+   ecs->addComponent(m_poDefaultLight->getGuid(), oLightComp);
+ 
+-  oLightComp->setIntensity(200);
++  oLightComp->setColorTemperature(6500.0f);
++  oLightComp->setIntensity(100000.0f);
+   oLightComp->setDirection({0, -1, 0});
+   oLightComp->setPosition({0, 5, 0});
+   oLightComp->setCastLight(true);

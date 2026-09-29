@@ -1,0 +1,103 @@
+From a58af08543efc916a2d2e2bfcbc6fe7a625f1f01 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Mon, 7 Sep 2026 22:46:06 +0000
+Subject: [PATCH] diag: delay GLB readback and trace resources
+
+---
+ .../filament_view/core/scene/view_target.cc   | 53 +++++++++++++++++--
+ 1 file changed, 50 insertions(+), 3 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index addaaaf..08a2668 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -30,6 +30,7 @@
+ #include <filament/Fence.h>
+ #include <filament/IndexBuffer.h>
+ #include <filament/Material.h>
++#include <filament/MaterialInstance.h>
+ #include <filament/RenderTarget.h>
+ #include <filament/RenderableManager.h>
+ #include <filament/Scene.h>
+@@ -1258,7 +1259,8 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+           : filament::math::mat4f{};
+         spdlog::info(
+           "FLR0026_RENDERABLE_SAMPLE seq={} entity={} world_pos=({:.3f},{:.3f},{:.3f}) "
+-          "bounds_min=({:.3f},{:.3f},{:.3f}) bounds_max=({:.3f},{:.3f},{:.3f}) layer={}",
++          "bounds_min=({:.3f},{:.3f},{:.3f}) bounds_max=({:.3f},{:.3f},{:.3f}) "
++          "layer={} primitives={}",
+           frameSequence,
+           entity.getId(),
+           world[3].x,
+@@ -1270,8 +1272,24 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+           bounds.getMax().x,
+           bounds.getMax().y,
+           bounds.getMax().z,
+-          renderableManager.getLayerMask(renderable)
++          renderableManager.getLayerMask(renderable),
++          renderableManager.getPrimitiveCount(renderable)
+         );
++        for (size_t primitiveIndex = 0;
++             primitiveIndex < renderableManager.getPrimitiveCount(renderable);
++             ++primitiveIndex) {
++          const auto* const materialInstance =
++            renderableManager.getMaterialInstanceAt(renderable, primitiveIndex);
++          spdlog::info(
++            "FLR0026_RENDERABLE_RESOURCE_SAMPLE seq={} entity={} primitive={} "
++            "material_valid={} material_name={}",
++            frameSequence,
++            entity.getId(),
++            primitiveIndex,
++            materialInstance != nullptr,
++            materialInstance != nullptr ? materialInstance->getName() : "(null)"
++          );
++        }
+         ++sampleCount;
+       });
+     }
+@@ -1364,8 +1382,24 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     } else {
+       renderer->render(fview_);
+     }
++    const char* const readbackDelayEnv =
++      std::getenv("FLR0026_NATIVE_READBACK_DELAY_FRAMES");
++    char* readbackDelayEnd = nullptr;
++    const unsigned long readbackDelayFrames = readbackDelayEnv != nullptr
++      ? std::strtoul(readbackDelayEnv, &readbackDelayEnd, 10)
++      : 0ul;
++    const auto& readbackCamera = fview_->getCamera();
++    const auto* const readbackScene = filamentSystem->getFilamentScene();
++    const bool readbackCameraReady = readbackCamera.getNear() > 0.0 &&
++      readbackCamera.getCullingFar() > readbackCamera.getNear();
++    const bool readbackSceneReady = readbackScene != nullptr &&
++      readbackScene->getRenderableCount() > 1;
++    const bool readbackDelayReady = readbackDelayEnv == nullptr ||
++      (readbackDelayEnd != readbackDelayEnv &&
++       frameSequence >= readbackDelayFrames &&
++       readbackCameraReady && readbackSceneReady);
+     if (native_readback_probe_enabled_ && native_readback_view_ && native_readback_target_ &&
+-        !native_readback_probe_queued_) {
++        !native_readback_probe_queued_ && readbackDelayReady) {
+       renderer->render(native_readback_view_);
+       spdlog::info("FLR0026_NATIVE_READBACK_VIEW_RENDERED");
+       native_readback_probe_queued_ = true;
+@@ -1400,6 +1434,19 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+         readbackWidth,
+         readbackHeight
+       );
++    } else if (native_readback_probe_enabled_ && !native_readback_probe_queued_ &&
++               readbackDelayEnv != nullptr && shouldLogFrame) {
++      spdlog::info(
++        "FLR0026_NATIVE_READBACK_GATE_WAIT seq={} delay_frames={} camera_ready={} "
++        "scene_ready={} near={:.3f} far={:.3f} renderables={}",
++        frameSequence,
++        readbackDelayFrames,
++        readbackCameraReady,
++        readbackSceneReady,
++        readbackCamera.getNear(),
++        readbackCamera.getCullingFar(),
++        readbackScene != nullptr ? readbackScene->getRenderableCount() : 0u
++      );
+     }
+     // spdlog::debug("=== END FRAME ===");
+     if (surface_ != nullptr &&

@@ -1,0 +1,66 @@
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index b44a30f..edf5271 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -276,10 +276,12 @@ class _MyAppState extends State<MyApp> {
+   SceneView poGetFilamentScene() {
+     return SceneView(
+       filament: filamentViewApi,
+-      models: poGetModelList(),
+-      scene: poGetScene(),
+-      shapes: poGetScenesShapes(),
+-      cameras: poGetScenesCameras(),
++      // FLR-0023 diagnostic fixture: prove the Flutter Engine -> native
++      // Filament path with exactly one deterministic shape.
++      models: <Model>[],
++      scene: poGetMinimal3dFixtureScene(),
++      shapes: poGetMinimal3dFixtureShapes(),
++      cameras: poGetScenesCameras().take(1).toList(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 445a4b3..bcada5b 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -9,6 +9,7 @@ import 'package:fluorite_examples_demo/scenes/radar_scene.dart';
+ import 'package:fluorite_examples_demo/scenes/settings_scene.dart';
+ import 'package:filament_scene/filament_scene.dart';
+ import 'package:fluorite_examples_demo/scenes/trainset_scene.dart';
++import 'package:fluorite_examples_demo/material_helpers.dart';
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+ // TODO(kerberjg): remove! Shapes will become components on scene entities, and this will go to init
+@@ -26,6 +27,32 @@ List<Shape> poGetScenesShapes() {
+   return itemsToReturn;
+ }
+ 
++// FLR-0023 diagnostic fixture: one deterministic renderable with no model,
++// HDR environment, animation, or scene-specific asset dependency.
++List<Shape> poGetMinimal3dFixtureShapes() {
++  return <Shape>[
++    Cube(
++      id: generateGuid(),
++      position: Vector3(0, 0, 0),
++      scale: Vector3.all(1),
++      rotation: Quaternion.identity(),
++      name: 'flr0023_fixture_cube',
++      material: poGetLitMaterial(
++        Colors.blue,
++        roughness: 0.6,
++        metallic: 0.0,
++      ),
++    ),
++  ];
++}
++
++Scene poGetMinimal3dFixtureScene() {
++  return Scene(
++    indirectLight: poGetDefaultIndirectLight(),
++    lights: <Light>[poGetDefaultPointLight(Colors.white, 6)],
++  );
++}
++
+ ////////////////////////////////////////////////////////////////////////////////
+ // TODO(kerberjg): refactor as an Entity
+ class MovingDemoLight {

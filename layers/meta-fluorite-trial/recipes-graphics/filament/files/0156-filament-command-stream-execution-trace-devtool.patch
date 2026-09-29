@@ -1,0 +1,96 @@
+From 842270f7d9801cce12e3c370ce63b46582ca16a3 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 06:27:24 +0000
+Subject: [PATCH] diag: trace command stream execution
+
+---
+ .../include/private/backend/CommandStream.h   | 29 +++++++++++++++----
+ 1 file changed, 24 insertions(+), 5 deletions(-)
+
+diff --git a/filament/backend/include/private/backend/CommandStream.h b/filament/backend/include/private/backend/CommandStream.h
+index 5322f7ab6..1e6b85639 100644
+--- a/filament/backend/include/private/backend/CommandStream.h
++++ b/filament/backend/include/private/backend/CommandStream.h
+@@ -37,6 +37,9 @@
+ #include <utils/ThreadUtils.h>
+ 
+ #include <cstddef>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
+ #include <functional>
+ #include <tuple>
+ #include <type_traits>
+@@ -61,7 +64,8 @@ class CommandBase {
+ protected:
+     using Execute = Dispatcher::Execute;
+ 
+-    constexpr explicit CommandBase(Execute execute) noexcept : mExecute(execute) {}
++    constexpr explicit CommandBase(Execute execute, const char* name = nullptr) noexcept
++            : mExecute(execute), mName(name) {}
+ 
+ public:
+     // alignment of all Commands in the CommandStream
+@@ -75,8 +79,21 @@ public:
+         // tail-call optimization in the function called by mExecute, however that comes at
+         // a cost here (writing and reading the stack at each iteration), in the end it's
+         // probably better to pay the cost at just one location.
++        const char* const name = mName;
++        const bool trace = name && std::getenv("FLR0026_COMMAND_EXECUTION_TRACE") != nullptr &&
++                (std::strcmp(name, "commit") == 0 ||
++                 std::strcmp(name, "createFenceR") == 0 ||
++                 std::strcmp(name, "endFrame") == 0);
++        if (trace) {
++            std::fprintf(stderr, "FLR0026_COMMAND_EXECUTE_BEGIN name=%s command=%p\n",
++                    name, static_cast<void*>(this));
++        }
+         intptr_t next;
+         mExecute(driver, this, &next);
++        if (trace) {
++            std::fprintf(stderr, "FLR0026_COMMAND_EXECUTE_DONE name=%s command=%p\n",
++                    name, static_cast<void*>(this));
++        }
+         return reinterpret_cast<CommandBase*>(reinterpret_cast<intptr_t>(this) + next);
+     }
+ 
+@@ -84,6 +101,7 @@ public:
+ 
+ private:
+     Execute mExecute;
++    const char* mName;
+ };
+ 
+ // ------------------------------------------------------------------------------------------------
+@@ -150,8 +168,8 @@ struct CommandType<void (Driver::*)(ARGS...)> {
+         inline Command(Command&& rhs) noexcept = default;
+ 
+         template<typename... A>
+-        inline explicit constexpr Command(Execute execute, A&& ... args)
+-                : CommandBase(execute), mArgs(std::forward<A>(args)...) {
++        inline explicit constexpr Command(Execute execute, const char* name, A&& ... args)
++                : CommandBase(execute, name), mArgs(std::forward<A>(args)...) {
+         }
+ 
+         // placement new declared as "throw" to avoid the compiler's null-check
+@@ -225,7 +243,7 @@ public:
+         DEBUG_COMMAND_BEGIN(methodName, false, params);                                         \
+         using Cmd = COMMAND_TYPE(methodName);                                                   \
+         void* const p = allocateCommand(CommandBase::align(sizeof(Cmd)));                       \
+-        new(p) Cmd(mDispatcher.methodName##_, APPLY(std::move, params));                        \
++        new(p) Cmd(mDispatcher.methodName##_, #methodName, APPLY(std::move, params));            \
+         DEBUG_COMMAND_END(methodName, false);                                                   \
+     }
+ 
+@@ -244,7 +262,8 @@ public:
+         RetType result = mDriver.methodName##S();                                               \
+         using Cmd = COMMAND_TYPE(methodName##R);                                                \
+         void* const p = allocateCommand(CommandBase::align(sizeof(Cmd)));                       \
+-        new(p) Cmd(mDispatcher.methodName##_, RetType(result), APPLY(std::move, params));       \
++        new(p) Cmd(mDispatcher.methodName##_, #methodName "R", RetType(result),                \
++                APPLY(std::move, params));                                                       \
+         DEBUG_COMMAND_END(methodName, false);                                                   \
+         return result;                                                                          \
+     }
+-- 
+2.34.1
+

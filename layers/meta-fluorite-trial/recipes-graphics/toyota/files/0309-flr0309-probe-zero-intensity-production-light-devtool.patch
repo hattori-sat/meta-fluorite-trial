@@ -1,0 +1,39 @@
+From 81060181b637280612c675152fa872fd83b04abe Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 00:13:11 +0000
+Subject: [PATCH] FLR-0309: probe zero-intensity production light
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 271dc66..6634bc0 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1028,9 +1028,11 @@ void ViewTarget::setupProductionProbeLight() {
+   }
+ 
+   production_probe_light_entity_ = engine->getEntityManager().create();
++  const auto probeLightIntensity =
++    std::getenv("FLR0309_PRODUCTION_SCENE_LIGHT_ZERO_INTENSITY") != nullptr ? 0.0f : 110000.0f;
+   filament::LightManager::Builder(filament::LightManager::Type::SUN)
+     .color({1.0f, 0.9f, 0.8f})
+-    .intensity(110000.0f)
++    .intensity(probeLightIntensity)
+     .direction({0.7f, -1.0f, -0.8f})
+     .sunAngularRadius(1.9f)
+     .castShadows(false)
+@@ -1038,8 +1040,10 @@ void ViewTarget::setupProductionProbeLight() {
+   scene->addEntity(production_probe_light_entity_);
+   spdlog::info(
+     "FLR0305_PRODUCTION_SCENE_LIGHT_SETUP_DONE entity={} scene=default type=SUN "
+-    "intensity=110000 direction=(0.7,-1,-0.8)",
+-    production_probe_light_entity_.getId()
++    "intensity={} mode={} direction=(0.7,-1,-0.8)",
++    production_probe_light_entity_.getId(),
++    probeLightIntensity,
++    probeLightIntensity == 0.0f ? "zero-intensity" : "normal"
+   );
+ }
+ 

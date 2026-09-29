@@ -1,0 +1,72 @@
+From 680ed20f16ed682c44891a313d405e93fffbbad5 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 23 Sep 2026 16:42:28 +0000
+Subject: [PATCH] diag: reintroduce production scene stage isolation controls
+
+---
+ .../serialization/scene_text_deserializer.cc  | 52 ++++++++++++++++---
+ 1 file changed, 44 insertions(+), 8 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 3983e4f..bba57d1 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -210,14 +210,50 @@ void SceneTextDeserializer::RunPostSetupLoad() {
+ 
+   spdlog::trace("setUpLoadingModels");
+   setUpLoadingModels();
+-  spdlog::trace("setUpSkybox");
+-  setUpSkybox();
+-  spdlog::trace("setUpLights");
+-  setUpLights();
+-  spdlog::trace("setUpIndirectLight");
+-  setUpIndirectLight();
+-  spdlog::trace("setUpShapes");
+-  setUpShapes();
++  const bool skip_environment = std::getenv("FLR0026_NATIVE_SKIP_ENVIRONMENT") != nullptr;
++  const bool skip_skybox = std::getenv("FLR0026_NATIVE_SKIP_SKYBOX") != nullptr;
++  const bool skip_indirect_light =
++    std::getenv("FLR0026_NATIVE_SKIP_INDIRECT_LIGHT") != nullptr;
++  const bool skip_lights = std::getenv("FLR0027_NATIVE_SKIP_LIGHTS") != nullptr;
++  const bool skip_shapes = std::getenv("FLR0027_NATIVE_SKIP_SHAPES") != nullptr;
++
++  if (skip_environment || skip_skybox) {
++    spdlog::info(
++      "FLR0026_NATIVE_SKIP_SKYBOX enabled=true environment={} explicit={}",
++      skip_environment, skip_skybox
++    );
++  } else {
++    spdlog::trace("setUpSkybox");
++    setUpSkybox();
++  }
++
++  if (skip_lights) {
++    spdlog::info(
++      "FLR0027_NATIVE_SKIP_LIGHTS enabled=true lights={}", lights_.size()
++    );
++  } else {
++    spdlog::trace("setUpLights");
++    setUpLights();
++  }
++
++  if (skip_environment || skip_indirect_light) {
++    spdlog::info(
++      "FLR0026_NATIVE_SKIP_INDIRECT_LIGHT enabled=true environment={} explicit={}",
++      skip_environment, skip_indirect_light
++    );
++  } else {
++    spdlog::trace("setUpIndirectLight");
++    setUpIndirectLight();
++  }
++
++  if (skip_shapes) {
++    spdlog::info(
++      "FLR0027_NATIVE_SKIP_SHAPES enabled=true shapes={}", shapes_.size()
++    );
++  } else {
++    spdlog::trace("setUpShapes");
++    setUpShapes();
++  }
+   spdlog::trace("setUpEntities");
+   setUpEntities();
+ 

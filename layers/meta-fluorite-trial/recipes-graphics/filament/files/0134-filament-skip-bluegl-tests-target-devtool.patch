@@ -1,0 +1,49 @@
+From 7ffef1792347d40b5f1b60ec0fc754c7cf55cb95 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 15:05:41 +0000
+Subject: [PATCH] fix: skip BlueGL tests for target builds
+
+---
+ libs/bluegl/CMakeLists.txt | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/libs/bluegl/CMakeLists.txt b/libs/bluegl/CMakeLists.txt
+index b43a204b9..cf2022328 100644
+--- a/libs/bluegl/CMakeLists.txt
++++ b/libs/bluegl/CMakeLists.txt
+@@ -74,17 +74,20 @@ endif()
+ 
+ install(TARGETS ${TARGET} ARCHIVE DESTINATION lib/${DIST_DIR})
+ 
+-# Build the tests...
+-add_executable(test_${TARGET}
+-    tests/OpenGLSupport.cpp
+-    tests/OpenGLSupport.hpp
+-    tests/test_bluegl.cpp)
++# Build the tests only on the host; the target build does not need X11 test
++# headers or a test runner in the runtime image.
++if (IS_HOST_PLATFORM)
++    add_executable(test_${TARGET}
++        tests/OpenGLSupport.cpp
++        tests/OpenGLSupport.hpp
++        tests/test_bluegl.cpp)
+ 
+-if (LINUX)
+-    target_link_libraries(test_${TARGET} PUBLIC dl)
+-endif()
++    if (LINUX)
++        target_link_libraries(test_${TARGET} PUBLIC dl)
++    endif()
+ 
+-# and we're linking against the libraries below, importing their public headers
+-target_link_libraries(test_${TARGET} LINK_PUBLIC ${TARGET})
+-target_link_libraries(test_${TARGET} LINK_PUBLIC gtest)
+-set_target_properties(test_${TARGET} PROPERTIES FOLDER Tests)
++    # and we're linking against the libraries below, importing their public headers
++    target_link_libraries(test_${TARGET} LINK_PUBLIC ${TARGET})
++    target_link_libraries(test_${TARGET} LINK_PUBLIC gtest)
++    set_target_properties(test_${TARGET} PROPERTIES FOLDER Tests)
++endif()
+-- 
+2.34.1
+

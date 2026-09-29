@@ -1,0 +1,31 @@
+From 531a51345c892ee9f10e743708606dc5bee3058a Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 13:05:32 +0000
+Subject: [PATCH] fix: enable offscreen readback blit source
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index bbf6e9a..0dd3963 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -280,11 +280,13 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+     native_readback_texture_ = filament::Texture::Builder()
+       .width(readbackWidth)
+       .height(readbackHeight)
+       .levels(1)
+       .format(filament::Texture::InternalFormat::RGBA8)
+-      .usage(filament::Texture::Usage::COLOR_ATTACHMENT)
++      .usage(
++        filament::Texture::Usage::COLOR_ATTACHMENT | filament::Texture::Usage::BLIT_SRC
++      )
+       .build(*_engine);
+     if (native_readback_texture_ != nullptr) {
+       native_readback_target_ = filament::RenderTarget::Builder()
+         .texture(filament::RenderTarget::AttachmentPoint::COLOR, native_readback_texture_)
+         .build(*_engine);
+-- 
+2.34.1
+

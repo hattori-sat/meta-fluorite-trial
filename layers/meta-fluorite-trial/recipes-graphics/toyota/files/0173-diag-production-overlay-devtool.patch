@@ -1,0 +1,34 @@
+From 51afd0edadeb68dd4fa011f667fdf45b86a04e30 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 14:11:57 +0000
+Subject: [PATCH] diag: overlay native fixture in production scene
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index fdbf863..457f573 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -519,10 +519,20 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+     fview_->setScene(native_diagnostic_scene_);
+     fview_->setBlendMode(filament::View::BlendMode::OPAQUE);
+     spdlog::info("FLR0026_NATIVE_MINIMAL_GEOMETRY_ENABLED scene=true");
+   }
+ 
++  if (std::getenv("FLR0026_NATIVE_MINIMAL_GEOMETRY_IN_PRODUCTION") != nullptr) {
++    setupNativeMinimalGeometry();
++    if (native_diagnostic_entity_) {
++      filamentSystem->getFilamentScene()->addEntity(native_diagnostic_entity_);
++      fview_->setScene(filamentSystem->getFilamentScene());
++      fview_->setBlendMode(filament::View::BlendMode::OPAQUE);
++      spdlog::info("FLR0026_NATIVE_MINIMAL_GEOMETRY_IN_PRODUCTION enabled=true");
++    }
++  }
++
+   SPDLOG_TRACE("--{}", __FUNCTION__);
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////
+ void ViewTarget::setupNativeMinimalGeometry() {
+-- 
+2.34.1
+

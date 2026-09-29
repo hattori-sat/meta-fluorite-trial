@@ -1,0 +1,47 @@
+From 6e5b9d5b3c7b179a76fe5a13fad3af21f676d213 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Tue, 25 Aug 2026 06:07:09 +0900
+Subject: [PATCH] diag: isolate fixture camera from production scenes
+
+---
+ packages/filament_scene/example/lib/main.dart       |  2 +-
+ .../example/lib/shape_and_object_creators.dart      | 13 +++++++++++++
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index edf5271..4a04f8e 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -281,7 +281,7 @@ class _MyAppState extends State<MyApp> {
+       models: <Model>[],
+       scene: poGetMinimal3dFixtureScene(),
+       shapes: poGetMinimal3dFixtureShapes(),
+-      cameras: poGetScenesCameras().take(1).toList(),
++      cameras: poGetMinimal3dFixtureCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index bcada5b..9660b89 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -46,6 +46,19 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+   ];
+ }
+
++// Keep the fixture independent from every production scene's camera graph.
++List<Camera> poGetMinimal3dFixtureCameras() {
++  return <Camera>[
++    Camera(
++      id: generateGuid(),
++      name: 'flr0023_fixture_camera',
++      orbitOriginPoint: Vector3.zero(),
++      orbitDistance: 5,
++      targetPoint: Vector3.zero(),
++    ),
++  ];
++}
++
+ Scene poGetMinimal3dFixtureScene() {
+   return Scene(
+     indirectLight: poGetDefaultIndirectLight(),

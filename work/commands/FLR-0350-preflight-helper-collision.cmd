@@ -1,0 +1,1 @@
+bad=0; for f in /run/user/1001/FLR-0350-*.sh /run/user/1001/FLR-0350-*.sh.gz /run/user/1001/FLR-0350-*.sh.tmp; do if [ -e "$f" ] || [ -L "$f" ]; then echo "FLR0350_HELPER_COLLISION=$f"; bad=1; fi; done; if [ "$bad" -eq 0 ]; then echo FLR0350_HELPER_PREFLIGHT=PASS; else echo FLR0350_HELPER_PREFLIGHT=FAIL; fi

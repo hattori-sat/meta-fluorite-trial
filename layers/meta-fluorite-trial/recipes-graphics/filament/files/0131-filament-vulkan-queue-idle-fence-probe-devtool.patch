@@ -1,0 +1,30 @@
+From 51a7371e59daa94cdbb2231a091b2bd395c39362 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 12:49:28 +0000
+Subject: [PATCH] diag: couple queue idle to fence probe
+
+---
+ .../src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp     | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index ace3185d2..9baf24e19 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -350,8 +350,12 @@ VkResult VulkanPlatformSurfaceSwapChain::present(uint32_t index, VkSemaphore fin
+     };
+     std::fprintf(stderr, "FLR0026_VK_PRESENT_WAIT_SEMAPHORE enabled=%s\\n",
+             skipFinishedSemaphore ? "false" : "true");
+-    const bool waitForQueueIdle = std::getenv("FLR0026_PRESENT_QUEUE_IDLE") != nullptr;
++    const bool waitForQueueIdle =
++            std::getenv("FLR0026_PRESENT_QUEUE_IDLE") != nullptr ||
++            std::getenv("FLR0026_PRESENT_FENCE_DIAGNOSTIC") != nullptr;
+     if (waitForQueueIdle) {
++        std::fprintf(stderr, "FLR0026_VK_QUEUE_WAIT_IDLE_BEGIN queue=%p\\n",
++                static_cast<void*>(mQueue));
+         const VkResult idleResult = vkQueueWaitIdle(mQueue);
+         std::fprintf(stderr, "FLR0026_VK_QUEUE_WAIT_IDLE result=%d\\n",
+                 static_cast<int32_t>(idleResult));
+-- 
+2.34.1
+

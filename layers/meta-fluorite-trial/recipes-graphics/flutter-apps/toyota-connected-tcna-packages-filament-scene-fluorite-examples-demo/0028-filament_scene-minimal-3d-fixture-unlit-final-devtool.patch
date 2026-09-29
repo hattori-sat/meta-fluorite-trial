@@ -1,0 +1,29 @@
+From 3131ea12a8ac557d1457a0b3d683f3ac52a8b52e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 22:32:20 +0000
+Subject: [PATCH] test: make native fixture material unlit
+
+---
+ .../example/lib/shape_and_object_creators.dart            | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index e537f64..ec2a76f 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -37,12 +37,10 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+       scale: Vector3.all(1),
+       rotation: Quaternion.identity(),
+       name: 'flr0023_fixture_cube',
+-      // Keep the packaged lit material but emit blue light from the fixture.
+-      // This isolates fragment visibility from indirect-light intensity.
+-      material: poGetLitMaterial(
++      // Use the packaged unlit material so the fixture color is independent of
++      // light and indirect-light setup.
++      material: poGetUnlitMaterial(
+         Colors.blue,
+-        emissiveColor: Colors.blue,
+-        emissiveIntensity: 1.0,
+       ),
+     ),
+   ];

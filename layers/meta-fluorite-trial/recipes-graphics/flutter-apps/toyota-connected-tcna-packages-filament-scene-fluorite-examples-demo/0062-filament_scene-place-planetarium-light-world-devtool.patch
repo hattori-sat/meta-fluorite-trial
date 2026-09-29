@@ -1,0 +1,52 @@
+From 9ae43aa8d7f6970d577ddac51f30abc6a006da67 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 14:23:17 +0000
+Subject: [PATCH] fix: place Planetarium diagnostic light in scene world
+
+---
+ .../example/lib/shape_and_object_creators.dart | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index ddb1999..8bc392b 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -113,7 +113,15 @@ final EntityGUID centerPointLightGUID = generateGuid();
+ List<Light> poGetSceneLightsList() {
+   List<Light> itemsToReturn = [];
+ 
+-  itemsToReturn.add(poGetDefaultPointLight(Colors.white, 6));
++  // FLR-0143: keep the first diagnostic light in the Planetarium world so
++  // its declared falloff can reach the shape-only scene.
++  itemsToReturn.add(
++    poGetDefaultPointLight(
++      Colors.white,
++      6,
++      position: PlanetariumSceneView.scenePosition + Vector3(0, 5, 1),
++    ),
++  );
+ 
+   double yDirection = -1;
+   double fallOffRadius = 10;
+@@ -409,7 +417,11 @@ DefaultIndirectLight poGetDefaultIndirectLight() {
+ // falloffradius
+ //
+ // TODO(kerberjg): refactor as `Light.default`
+-Light poGetDefaultPointLight(Color directLightColor, double intensity) {
++Light poGetDefaultPointLight(
++  Color directLightColor,
++  double intensity, {
++  Vector3? position,
++}) {
+   return Light(
+     id: centerPointLightGUID,
+     type: LightType.point,
+@@ -421,7 +433,7 @@ Light poGetDefaultPointLight(Color directLightColor, double intensity) {
+     spotLightConeInner: 1,
+     spotLightConeOuter: 10,
+     falloffRadius: 300.1, // what base is this in? meters?
+-    position: Vector3(0, 5, 1),
++    position: position ?? Vector3(0, 5, 1),
+     direction: Vector3(0, 1, 0),
+   );
+ }

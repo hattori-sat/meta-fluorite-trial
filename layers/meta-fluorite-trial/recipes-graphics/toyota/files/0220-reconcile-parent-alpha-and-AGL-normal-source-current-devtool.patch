@@ -1,0 +1,252 @@
+From 4d1f0c04da1eb18735eec8def1aec37c68c6c5ab Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 16:12:11 +0000
+Subject: [PATCH] fix: rebase parent alpha and AGL normal behavior on current
+ source
+
+---
+ .../backend/wayland_vulkan/wayland_vulkan.cc  | 77 +++++++++++++++----
+ shell/wayland/display.cc                      | 30 +++++++-
+ shell/wayland/display.h                       | 20 +++++
+ shell/wayland/window.cc                       | 27 +++++--
+ 4 files changed, 130 insertions(+), 24 deletions(-)
+
+diff --git a/shell/backend/wayland_vulkan/wayland_vulkan.cc b/shell/backend/wayland_vulkan/wayland_vulkan.cc
+index 217dd7d6..fb77b81a 100644
+--- a/shell/backend/wayland_vulkan/wayland_vulkan.cc
++++ b/shell/backend/wayland_vulkan/wayland_vulkan.cc
+@@ -509,6 +509,19 @@ bool WaylandVulkanBackend::InitializeSwapChain() {
+   CHECK_VK_RESULT(d.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+       physical_device_, surface_, &surface_capabilities));
+ 
++  const bool parentAlphaClearRequested =
++      std::getenv("FLR0026_PARENT_ALPHA_CLEAR") != nullptr;
++  const bool parentAlphaClearEnabled =
++      parentAlphaClearRequested &&
++      (surface_capabilities.supportedUsageFlags &
++       VK_IMAGE_USAGE_TRANSFER_DST_BIT) != 0;
++  if (parentAlphaClearRequested && !parentAlphaClearEnabled) {
++    spdlog::error(
++        "FLR0026_PARENT_ALPHA_CLEAR unavailable transfer_dst_supported={}",
++        (surface_capabilities.supportedUsageFlags &
++         VK_IMAGE_USAGE_TRANSFER_DST_BIT) != 0);
++  }
++
+   if (surface_capabilities.currentExtent.width != UINT32_MAX) {
+     // If the surface reports a specific extent, we must use it.
+     clientSize = surface_capabilities.currentExtent;
+@@ -576,6 +589,14 @@ bool WaylandVulkanBackend::InitializeSwapChain() {
+   info.imageExtent = clientSize;
+   info.imageArrayLayers = 1;
+   info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
++  if (parentAlphaClearEnabled) {
++    info.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
++    spdlog::info(
++        "FLR0026_PARENT_ALPHA_CLEAR enabled=true operation=transparent_full_surface "
++        "format={} extent={}x{}",
++        static_cast<uint32_t>(surface_format_.format), clientSize.width,
++        clientSize.height);
++  }
+   info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+   info.preTransform = surface_capabilities.currentTransform;
+   info.compositeAlpha = (surface_capabilities.supportedCompositeAlpha &
+@@ -627,27 +648,53 @@ bool WaylandVulkanBackend::InitializeSwapChain() {
+     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+     CHECK_VK_RESULT(d.vkBeginCommandBuffer(buffer, &begin_info));
+ 
+-    // Filament Engine hands back the image after writing to it
+-    VkImageMemoryBarrier barrier{};
+-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+-    barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+-    barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+-    barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+-    barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+-    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+-    barrier.image = image;
+-    barrier.subresourceRange = {
++    // Filament Engine hands back the image after writing to it. The alpha
++    // probe deliberately clears the complete Flutter parent image to RGBA
++    // zero, preserving no HUD pixels; this is a diagnostic A/B only.
++    VkImageMemoryBarrier toPresent{};
++    toPresent.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
++    toPresent.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++    toPresent.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
++    toPresent.image = image;
++    toPresent.subresourceRange = {
+         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+         .baseMipLevel = 0,
+         .levelCount = 1,
+         .baseArrayLayer = 0,
+         .layerCount = 1,
+     };
+-    d.vkCmdPipelineBarrier(buffer,
+-                           VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+-                           VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr,
+-                           0, nullptr, 1, &barrier);
++
++    if (parentAlphaClearEnabled) {
++      toPresent.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
++      toPresent.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
++      toPresent.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
++      toPresent.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++      d.vkCmdPipelineBarrier(
++          buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
++          VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1,
++          &toPresent);
++
++      const VkClearColorValue transparent = {{0.0f, 0.0f, 0.0f, 0.0f}};
++      d.vkCmdClearColorImage(buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
++                             &transparent, 1, &toPresent.subresourceRange);
++
++      toPresent.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
++      toPresent.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
++      toPresent.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
++      toPresent.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
++      d.vkCmdPipelineBarrier(buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
++                             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0,
++                             nullptr, 0, nullptr, 1, &toPresent);
++    } else {
++      toPresent.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
++      toPresent.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
++      toPresent.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
++      toPresent.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
++      d.vkCmdPipelineBarrier(
++          buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
++          VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1,
++          &toPresent);
++    }
+ 
+     CHECK_VK_RESULT(d.vkEndCommandBuffer(buffer));
+   }
+diff --git a/shell/wayland/display.cc b/shell/wayland/display.cc
+index 9683312f..468f6b0b 100644
+--- a/shell/wayland/display.cc
++++ b/shell/wayland/display.cc
+@@ -49,9 +49,7 @@ Display::Display(const bool enable_cursor,
+   wayland_event_mask_update(ignore_wayland_event, m_wayland_event_mask);
+ 
+   for (auto const& cfg : configs) {
+-    // check if we actually need to bind to agl-shell
+-    if (WaylandWindow::WINDOW_NORMAL !=
+-        WaylandWindow::get_window_type(cfg.view.window_type)) {
++    if (cfg.app_id == "fluorite") {
+       m_agl.bind_to_agl_shell = true;
+       break;
+     }
+@@ -841,6 +839,32 @@ void Display::AglShellDoReady() const {
+   }
+ }
+ 
++void Display::AglShellDoAppNormal(const std::string& app_id) const {
++  if (!m_agl.shell)
++    return;
++
++  SPDLOG_DEBUG("Registering NORMAL app_id {} with agl-shell", app_id);
++  agl_shell_set_app_normal(m_agl.shell, app_id.c_str());
++  wl_display_flush(m_display);
++}
++
++void Display::AglShellDoActivateApp(const std::string& app_id,
++                                    const uint32_t index) const {
++  if (!m_agl.shell)
++    return;
++
++  if (index >= m_all_outputs.size()) {
++    SPDLOG_ERROR("Cannot activate app_id {} on invalid output index {}", app_id,
++                 index);
++    return;
++  }
++
++  SPDLOG_DEBUG("Activating NORMAL app_id {} on output index {}", app_id, index);
++  agl_shell_activate_app(m_agl.shell, app_id.c_str(),
++                         m_all_outputs[index]->output);
++  wl_display_flush(m_display);
++}
++
+ void Display::AglShellDoSetupActivationArea(uint32_t x,
+                                             uint32_t y,
+                                             uint32_t width,
+diff --git a/shell/wayland/display.h b/shell/wayland/display.h
+index 8f3d0d5d..445a237a 100644
+--- a/shell/wayland/display.h
++++ b/shell/wayland/display.h
+@@ -188,6 +188,26 @@ class Display {
+    */
+   void AglShellDoReady() const;
+ 
++  /**
++   * @brief AglShell: Register an application as a normal app window.
++   * @param[in] app_id the AGL/XDG app id for the window
++   * @return void
++   * @relation
++   * wayland, agl-shell
++   */
++  void AglShellDoAppNormal(const std::string& app_id) const;
++
++  /**
++   * @brief AglShell: Activate an application on the selected output.
++   * @param[in] app_id the AGL/XDG app id for the window
++   * @param[in] index the logical output index
++   * @return void
++   * @relation
++   * wayland, agl-shell
++   */
++  void AglShellDoActivateApp(const std::string& app_id,
++                             uint32_t index) const;
++
+   /**
+    * @brief AglShell: Set up an activation area where to display the client's
+    * window
+diff --git a/shell/wayland/window.cc b/shell/wayland/window.cc
+index dc1b0ae3..4ad65e19 100644
+--- a/shell/wayland/window.cc
++++ b/shell/wayland/window.cc
+@@ -96,26 +96,41 @@ WaylandWindow::WaylandWindow(const size_t index,
+ #if ENABLE_AGL_SHELL_CLIENT
+   switch (m_type) {
+     case WINDOW_NORMAL:
++      if (m_app_id == "fluorite") {
++        if (m_activation_area.x || m_activation_area.y ||
++            m_activation_area.width || m_activation_area.height) {
++          m_display->AglShellDoSetupActivationArea(
++              m_activation_area.x, m_activation_area.y,
++              m_activation_area.width, m_activation_area.height,
++              m_output_index);
++        }
++        m_display->AglShellDoAppNormal(m_app_id);
++        m_display->AglShellDoActivateApp(m_app_id, m_output_index);
++      }
+       break;
+     case WINDOW_BG:
+-      m_display->AglShellDoBackground(m_base_surface, 0);
++      m_display->AglShellDoBackground(m_base_surface, m_output_index);
+       if (m_activation_area.x || m_activation_area.y ||
+           m_activation_area.width || m_activation_area.height)
+         m_display->AglShellDoSetupActivationArea(
+             m_activation_area.x, m_activation_area.y, m_activation_area.width,
+-            m_activation_area.height, 0);
++            m_activation_area.height, m_output_index);
+       break;
+     case WINDOW_PANEL_TOP:
+-      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_TOP, 0);
++      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_TOP,
++                                 m_output_index);
+       break;
+     case WINDOW_PANEL_BOTTOM:
+-      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_BOTTOM, 0);
++      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_BOTTOM,
++                                 m_output_index);
+       break;
+     case WINDOW_PANEL_LEFT:
+-      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_LEFT, 0);
++      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_LEFT,
++                                 m_output_index);
+       break;
+     case WINDOW_PANEL_RIGHT:
+-      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_RIGHT, 0);
++      m_display->AglShellDoPanel(m_base_surface, AGL_SHELL_EDGE_RIGHT,
++                                 m_output_index);
+       break;
+     default:
+       spdlog::critical("Invalid surface role type supplied");

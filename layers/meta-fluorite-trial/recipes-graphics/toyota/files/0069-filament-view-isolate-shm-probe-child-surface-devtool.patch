@@ -1,0 +1,135 @@
+From 93961ca577516aed4fc5bbd00b815946564052de Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 23:20:49 +0000
+Subject: [PATCH] diag: isolate known-color probe child surface
+
+---
+ .../filament_view/core/scene/view_target.cc   | 58 +++++++++++++++----
+ .../filament_view/core/scene/view_target.h    |  2 +
+ 2 files changed, 50 insertions(+), 10 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 489c61a..b92d2ca 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -143,6 +143,15 @@ ViewTarget::~ViewTarget() {
+     shm_probe_data_ = nullptr;
+   }
+ 
++  if (shm_probe_subsurface_) {
++    wl_subsurface_destroy(shm_probe_subsurface_);
++    shm_probe_subsurface_ = nullptr;
++  }
++  if (shm_probe_surface_) {
++    wl_surface_destroy(shm_probe_surface_);
++    shm_probe_surface_ = nullptr;
++  }
++
+   if (subsurface_) {
+     wl_subsurface_destroy(subsurface_);
+     subsurface_ = nullptr;
+@@ -606,8 +615,10 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+   }
+   wl_registry_destroy(registry);
+ 
+-  const size_t stride = static_cast<size_t>(width) * 4u;
+-  const size_t size = stride * static_cast<size_t>(height);
++  constexpr uint32_t probe_width = 240;
++  constexpr uint32_t probe_height = 160;
++  const size_t stride = static_cast<size_t>(probe_width) * 4u;
++  const size_t size = stride * static_cast<size_t>(probe_height);
+   const char* const name = "/flr0026-shm-probe";
+   const int fd = shm_open(name, O_CREAT | O_RDWR, 0600);
+   if (fd < 0) {
+@@ -631,7 +642,7 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+     return;
+   }
+   auto* pixels = static_cast<uint32_t*>(data);
+-  for (size_t i = 0; i < static_cast<size_t>(width) * height; ++i) {
++  for (size_t i = 0; i < static_cast<size_t>(probe_width) * probe_height; ++i) {
+     pixels[i] = 0x00FF00FFu;
+   }
+ 
+@@ -648,8 +659,8 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+   auto* buffer = wl_shm_pool_create_buffer(
+     pool,
+     0,
+-    static_cast<int32_t>(width),
+-    static_cast<int32_t>(height),
++    static_cast<int32_t>(probe_width),
++    static_cast<int32_t>(probe_height),
+     static_cast<int32_t>(stride),
+     WL_SHM_FORMAT_XRGB8888
+   );
+@@ -661,23 +672,50 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+     return;
+   }
+ 
++  auto* probe_surface = wl_compositor_create_surface(
++    state_->view_controller->view->GetDisplay()->GetCompositor()
++  );
++  auto* probe_subsurface = probe_surface == nullptr ? nullptr : wl_subcompositor_get_subsurface(
++    state_->view_controller->view->GetDisplay()->GetSubCompositor(),
++    probe_surface,
++    parent_surface_
++  );
++  if (probe_subsurface == nullptr) {
++    spdlog::error("FLR0026_WAYLAND_SHM_PROBE child_surface_failed");
++    if (probe_surface != nullptr) {
++      wl_surface_destroy(probe_surface);
++    }
++    wl_buffer_destroy(buffer);
++    wl_shm_pool_destroy(pool);
++    munmap(data, size);
++    wl_shm_destroy(registry_state.shm);
++    return;
++  }
++  wl_subsurface_set_position(probe_subsurface, 240, 120);
++  wl_subsurface_place_above(probe_subsurface, parent_surface_);
++  wl_subsurface_set_desync(probe_subsurface);
++
+   shm_probe_shm_ = registry_state.shm;
+   shm_probe_pool_ = pool;
+   shm_probe_buffer_ = buffer;
++  shm_probe_surface_ = probe_surface;
++  shm_probe_subsurface_ = probe_subsurface;
+   shm_probe_data_ = data;
+   shm_probe_size_ = size;
+   spdlog::info(
+-    "FLR0026_WAYLAND_SHM_PROBE_READY width={} height={}", width, height
++    "FLR0026_WAYLAND_SHM_PROBE_READY width={} height={} child=true",
++    probe_width,
++    probe_height
+   );
+ }
+ 
+ void ViewTarget::attachShmProbe() {
+-  if (shm_probe_attached_ || shm_probe_buffer_ == nullptr || surface_ == nullptr) {
++  if (shm_probe_attached_ || shm_probe_buffer_ == nullptr || shm_probe_surface_ == nullptr) {
+     return;
+   }
+-  wl_surface_attach(surface_, shm_probe_buffer_, 0, 0);
+-  wl_surface_damage(surface_, 0, 0, native_window_.width, native_window_.height);
+-  wl_surface_commit(surface_);
++  wl_surface_attach(shm_probe_surface_, shm_probe_buffer_, 0, 0);
++  wl_surface_damage(shm_probe_surface_, 0, 0, 240, 160);
++  wl_surface_commit(shm_probe_surface_);
+   const int flush_result = wl_display_flush(display_);
+   shm_probe_attached_ = true;
+   spdlog::info(
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index 9d54652..45f6696 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -162,6 +162,8 @@ class ViewTarget {
+     wl_shm* shm_probe_shm_{};
+     wl_shm_pool* shm_probe_pool_{};
+     wl_buffer* shm_probe_buffer_{};
++    wl_surface* shm_probe_surface_{};
++    wl_subsurface* shm_probe_subsurface_{};
+     void* shm_probe_data_{};
+     size_t shm_probe_size_{};
+     bool shm_probe_attached_{};
+-- 
+2.34.1
+

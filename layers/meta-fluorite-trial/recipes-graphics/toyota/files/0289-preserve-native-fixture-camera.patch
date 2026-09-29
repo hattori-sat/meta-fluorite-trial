@@ -1,0 +1,28 @@
+From 10409d8f76588d6131088ea4be568c3f226ec4cd Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 08:44:56 +0000
+Subject: [PATCH] FLR-0285: preserve native fixture camera
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index d6dad6b..39beefd 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1087,6 +1087,14 @@ void ViewTarget::updateCameraSettings(
+ ) {
+   // spdlog::debug("Updating camera({}) for view({})", cameraData.getOwner()->getGuid(), id);
+ 
++  const bool pureFixtureCamera =
++    std::getenv("FLUORITE_NATIVE_PURE_FIXTURE") != nullptr &&
++    std::getenv("FLUORITE_NATIVE_FIXTURE_LOCAL_CAMERA") != nullptr &&
++    std::getenv("FLUORITE_NATIVE_MINIMAL_GEOMETRY") != nullptr;
++  if (pureFixtureCamera) {
++    return;
++  }
++
+   // Update transform
+   const filament::math::float3* fulcrum = nullptr;
+   const filament::math::quatf* fulcrumRotation = nullptr;

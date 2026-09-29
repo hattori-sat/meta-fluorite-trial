@@ -1,0 +1,64 @@
+From 16ea53606331225c55f743133feace5e615e588d Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@localhost>
+Date: Thu, 24 Sep 2026 18:27:33 +0000
+Subject: [PATCH] FLR-0289: allow opt-in translucent diagnostic scene
+
+---
+ .../filament_view/core/scene/view_target.cc   | 24 +++++++++++++++++--
+ 1 file changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index acf5175..28a229b 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -796,6 +796,8 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+   fview_->setViewport({0, 0, width, height});
+ 
+   const bool forceOpaque = std::getenv("FLUORITE_NATIVE_FORCE_OPAQUE") != nullptr;
++  const bool diagnosticTranslucent =
++    std::getenv("FLUORITE_NATIVE_DIAGNOSTIC_TRANSLUCENT") != nullptr;
+   fview_->setBlendMode(
+     forceOpaque ? filament::View::BlendMode::OPAQUE : filament::View::BlendMode::TRANSLUCENT);
+   if (forceOpaque) {
+@@ -809,7 +811,15 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+     setupNativeMinimalGeometry();
+     if (native_diagnostic_scene_) {
+       fview_->setScene(native_diagnostic_scene_);
+-      fview_->setBlendMode(filament::View::BlendMode::OPAQUE);
++      fview_->setBlendMode(
++        diagnosticTranslucent
++          ? filament::View::BlendMode::TRANSLUCENT
++          : filament::View::BlendMode::OPAQUE
++      );
++      spdlog::info(
++        "FLUORITE_NATIVE_DIAGNOSTIC_BLEND mode={}",
++        diagnosticTranslucent ? "translucent" : "opaque"
++      );
+       spdlog::info("FLUORITE_NATIVE_MINIMAL_GEOMETRY_ENABLED scene=true");
+     }
+   }
+@@ -1466,13 +1476,23 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     native_diagnostic_scene_->setSkybox(defaultScene->getSkybox());
+     native_diagnostic_scene_->setIndirectLight(defaultScene->getIndirectLight());
+     fview_->setScene(native_diagnostic_scene_);
+-    fview_->setBlendMode(filament::View::BlendMode::OPAQUE);
++    const bool diagnosticTranslucent =
++      std::getenv("FLUORITE_NATIVE_DIAGNOSTIC_TRANSLUCENT") != nullptr;
++    fview_->setBlendMode(
++      diagnosticTranslucent
++        ? filament::View::BlendMode::TRANSLUCENT
++        : filament::View::BlendMode::OPAQUE
++    );
+     if (traceFrameBoundary) {
+       spdlog::info(
+         "FLR0285_NATIVE_MODEL_SCENE_ACTIVE scene=diagnostic skybox={} indirect_light={}",
+         native_diagnostic_scene_->getSkybox() != nullptr,
+         native_diagnostic_scene_->getIndirectLight() != nullptr
+       );
++      spdlog::info(
++        "FLUORITE_NATIVE_DIAGNOSTIC_BLEND mode={}",
++        diagnosticTranslucent ? "translucent" : "opaque"
++      );
+     }
+   }
+ 

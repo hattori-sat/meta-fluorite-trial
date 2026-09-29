@@ -1,0 +1,24 @@
+From d65f3e7fcde0c5700e83361a34f70f52313f4ff9 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 01:22:36 +0000
+Subject: [PATCH] diag: add proven cube to production shape path
+
+---
+ .../filament_scene/example/lib/shape_and_object_creators.dart | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 0ce8f74..a5f5c9c 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -22,6 +22,10 @@ List<Shape> poGetScenesShapes() {
+   itemsToReturn.addAll(PlanetariumSceneView.getSceneShapes());
+   itemsToReturn.addAll(TrainsetSceneView.getSceneShapes());
+ 
++  // Keep the proven self-made cube in the production camera path for
++  // separating renderer visibility from GLB asset loading.
++  itemsToReturn.addAll(poGetMinimal3dFixtureShapes());
++
+   // NOTE: add other scenes if needed
+ 
+   return itemsToReturn;

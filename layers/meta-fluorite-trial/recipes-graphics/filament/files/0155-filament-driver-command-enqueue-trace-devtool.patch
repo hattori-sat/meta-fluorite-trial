@@ -1,0 +1,65 @@
+From ab57b42c3ee802c0d09a44c0a58848387f61ce03 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 05:55:57 +0000
+Subject: [PATCH] diag: trace driver command enqueue
+
+---
+ filament/src/FrameSkipper.cpp     | 7 +++++++
+ filament/src/details/Renderer.cpp | 8 ++++++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/filament/src/FrameSkipper.cpp b/filament/src/FrameSkipper.cpp
+index 188001299..8f6447920 100644
+--- a/filament/src/FrameSkipper.cpp
++++ b/filament/src/FrameSkipper.cpp
+@@ -81,7 +81,14 @@ void FrameSkipper::submitFrame(DriverApi& driver) noexcept {
+     // add a new fence to the end
+     assert_invariant(!fences[last]);
+ 
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_FRAME_FENCE_CREATE_REQUEST\n");
++    }
+     fences[last] = driver.createFence();
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_FRAME_FENCE_CREATE_RETURNED valid=%s\n",
++                fences[last] ? "true" : "false");
++    }
+ }
+ 
+ } // namespace filament
+diff --git a/filament/src/details/Renderer.cpp b/filament/src/details/Renderer.cpp
+index e6a6c916b..806689cee 100644
+--- a/filament/src/details/Renderer.cpp
++++ b/filament/src/details/Renderer.cpp
+@@ -66,6 +66,8 @@
+ #include <algorithm>
+ #include <cmath>
+ #include <chrono>
++#include <cstdio>
++#include <cstdlib>
+ #include <limits>
+ #include <memory>
+ #include <utility>
+@@ -437,6 +439,9 @@ void FRenderer::endFrame() {
+             << "SwapChain must remain valid until endFrame is called.";
+ 
+     if (mSwapChain) {
++        if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++            std::fprintf(stderr, "FLR0026_RENDERER_COMMIT_ENQUEUE\n");
++        }
+         mSwapChain->commit(driver);
+         mSwapChain = nullptr;
+     }
+@@ -444,6 +449,9 @@ void FRenderer::endFrame() {
+     mFrameInfoManager.endFrame(driver);
+     mFrameSkipper.submitFrame(driver);
+ 
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_RENDERER_ENDFRAME_ENQUEUE\n");
++    }
+     driver.endFrame(mFrameId);
+ 
+     // gives the backend a chance to execute periodic tasks
+-- 
+2.34.1
+

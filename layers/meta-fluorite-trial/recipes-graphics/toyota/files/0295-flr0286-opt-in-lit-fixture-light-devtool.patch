@@ -1,0 +1,98 @@
+From ab69cd312fe5a743517ac625dccc7f312154ac25 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 17:11:09 +0000
+Subject: [PATCH] FLR-0286: add opt-in lit fixture light
+
+---
+ .../filament_view/core/scene/view_target.cc   | 31 +++++++++++++++++--
+ .../filament_view/core/scene/view_target.h    |  1 +
+ 2 files changed, 29 insertions(+), 3 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 7e9cf11..acf5175 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -27,6 +27,7 @@
+ #include <core/utils/vectorutils.h>
+ #include <filament_view_plugin.h>
+ #include <filament/IndexBuffer.h>
++#include <filament/LightManager.h>
+ #include <filament/Material.h>
+ #include <algorithm>
+ #include <backend/PixelBufferDescriptor.h>
+@@ -235,6 +236,10 @@ ViewTarget::~ViewTarget() {
+     _engine->destroy(native_diagnostic_entity_);
+     native_diagnostic_entity_.clear();
+   }
++  if (native_diagnostic_light_entity_) {
++    _engine->destroy(native_diagnostic_light_entity_);
++    native_diagnostic_light_entity_.clear();
++  }
+   if (native_diagnostic_material_instance_) {
+     _engine->destroy(native_diagnostic_material_instance_);
+     native_diagnostic_material_instance_ = nullptr;
+@@ -894,11 +899,13 @@ void ViewTarget::setupNativeMinimalGeometry() {
+ 
+   filamat::MaterialBuilder::init();
+   filamat::MaterialBuilder materialBuilder;
++  const bool fixtureLight = std::getenv("FLUORITE_NATIVE_FIXTURE_LIGHT") != nullptr;
+   const bool hardcodedNativeMaterialColor =
+     std::getenv("FLUORITE_NATIVE_HARDCODED_MATERIAL_COLOR") != nullptr;
+   spdlog::info(
+-    "FLUORITE_NATIVE_MATERIAL_BRANCH hardcoded={} source={}",
++    "FLUORITE_NATIVE_MATERIAL_BRANCH hardcoded={} shading={} source={}",
+     hardcodedNativeMaterialColor,
++    fixtureLight ? "lit" : "unlit",
+     hardcodedNativeMaterialColor ? "constant" : "parameter"
+   );
+   const char* nativeMaterialSource = hardcodedNativeMaterialColor
+@@ -911,10 +918,14 @@ void ViewTarget::setupNativeMinimalGeometry() {
+       "  material.baseColor = vec4(materialParams.color, 1.0);"
+       "}";
+   materialBuilder
+-    .name("fluorite_native_minimal_unlit")
++    .name(fixtureLight ? "fluorite_native_minimal_lit" : "fluorite_native_minimal_unlit")
+     .material(nativeMaterialSource)
+     .parameter("color", filament::backend::UniformType::FLOAT3)
+-    .shading(filamat::MaterialBuilder::Shading::UNLIT)
++    .shading(
++      fixtureLight
++        ? filamat::MaterialBuilder::Shading::LIT
++        : filamat::MaterialBuilder::Shading::UNLIT
++    )
+     .targetApi(filamat::MaterialBuilder::TargetApi::ALL)
+     .platform(filamat::MaterialBuilder::Platform::ALL);
+   const auto package = materialBuilder.build(engine->getJobSystem());
+@@ -947,6 +958,20 @@ void ViewTarget::setupNativeMinimalGeometry() {
+     .castShadows(false)
+     .build(*engine, native_diagnostic_entity_);
+   native_diagnostic_scene_->addEntity(native_diagnostic_entity_);
++  if (fixtureLight) {
++    native_diagnostic_light_entity_ = engine->getEntityManager().create();
++    filament::LightManager::Builder(filament::LightManager::Type::SUN)
++      .color({1.0f, 0.9f, 0.8f})
++      .intensity(110000.0f)
++      .direction({0.7f, -1.0f, -0.8f})
++      .sunAngularRadius(1.9f)
++      .castShadows(false)
++      .build(*engine, native_diagnostic_light_entity_);
++    native_diagnostic_scene_->addEntity(native_diagnostic_light_entity_);
++    spdlog::info(
++      "FLUORITE_NATIVE_FIXTURE_LIGHT_SETUP_DONE enabled=true type=SUN intensity=110000"
++    );
++  }
+   const auto& renderableManager = engine->getRenderableManager();
+   const auto renderableInstance = renderableManager.getInstance(native_diagnostic_entity_);
+   const bool hasRenderable = renderableManager.hasComponent(native_diagnostic_entity_);
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index ef302df..a9d3e6b 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -201,6 +201,7 @@ class ViewTarget {
+     ::filament::Material* native_diagnostic_material_{};
+     ::filament::MaterialInstance* native_diagnostic_material_instance_{};
+     utils::Entity native_diagnostic_entity_;
++    utils::Entity native_diagnostic_light_entity_;
+ 
+     // todo to be moved?
+     ::filament::gltfio::Animator* fanimator_;

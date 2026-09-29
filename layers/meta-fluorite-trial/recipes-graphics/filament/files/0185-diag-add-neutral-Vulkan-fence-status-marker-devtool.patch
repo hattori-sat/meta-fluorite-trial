@@ -1,0 +1,28 @@
+From 37813b04cddec4e06727d65ffd2f776da2e7fac0 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 16:34:33 +0000
+Subject: [PATCH] diag: add neutral Vulkan fence status marker
+
+---
+ filament/backend/src/vulkan/VulkanSwapChain.cpp | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index f2bf29ba2d..de651c05ba 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -149,10 +149,12 @@ void VulkanSwapChain::present(DriverBase& driver) {
+         std::fprintf(stderr, "FLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=%s\\n",
+                 finishedDrawing ? "true" : "false");
+         mFinishedDrawing[mCurrentSwapIndex] = finishedDrawing;
+-        if (std::getenv("FLR0026_PRESENT_FENCE_DIAGNOSTIC") != nullptr) {
++        const bool fluoriteFenceDiagnostic =
++                std::getenv("FLUORITE_VK_FENCE_DIAGNOSTIC") != nullptr;
++        if (fluoriteFenceDiagnostic) {
+             const VkResult fenceStatus = mCommands->getMostRecentFenceStatusFromDriver();
+             std::fprintf(stderr,
+-                    "FLR0026_VK_PRESENT_FENCE_STATUS result=%d fence=%p\n",
++                    "FLUORITE_VK_FENCE_STATUS result=%d fence=%p\n",
+                     static_cast<int32_t>(fenceStatus),
+                     static_cast<void*>(mCommands->getMostRecentFence()));
+         }

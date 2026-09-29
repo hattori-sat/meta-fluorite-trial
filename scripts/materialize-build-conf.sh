@@ -7,6 +7,7 @@ Usage:
   scripts/materialize-build-conf.sh \
     --target raspberrypi4-64|qemux86-64 \
     --agl-root /absolute/agl/root \
+    --project-root /absolute/meta-fluorite-trial \
     --output-dir /absolute/build/directory [--write --source-identity-verified]
 
 Validates a sanitized baseline configuration. Without --write it is a dry run.
@@ -19,6 +20,7 @@ EOF
 
 target=
 agl_root=
+project_root=
 output_dir=
 write=0
 source_identity_verified=0
@@ -38,6 +40,11 @@ while test "$#" -gt 0; do
         --output-dir)
             test "$#" -ge 2 || { usage >&2; exit 2; }
             output_dir=$2
+            shift 2
+            ;;
+        --project-root)
+            test "$#" -ge 2 || { usage >&2; exit 2; }
+            project_root=$2
             shift 2
             ;;
         --write)
@@ -74,6 +81,14 @@ case "$output_dir" in
     *) echo "build-conf: --output-dir must be an absolute path" >&2; exit 2 ;;
 esac
 
+if test -z "$project_root"; then
+    project_root=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+fi
+case "$project_root" in
+    /*) ;;
+    *) echo "build-conf: --project-root must be an absolute path" >&2; exit 2 ;;
+esac
+
 script_dir=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
 template_dir="$repository_root/conf/$target"
@@ -88,7 +103,7 @@ done
 for required_path in \
     "$agl_root/meta-agl" \
     "$agl_root/external/poky" \
-    "$agl_root/meta-local/conf/layer.conf" \
+    "$project_root/layers/meta-fluorite-trial/conf/layer.conf" \
     "$agl_root/meta-vulkan/conf/layer.conf"; do
     if ! test -e "$required_path"; then
         echo "build-conf: required AGL source/layer MISSING" >&2
@@ -125,12 +140,12 @@ cleanup_temporary_conf() {
 }
 trap cleanup_temporary_conf EXIT HUP INT TERM
 
-AGL_ROOT_VALUE=$agl_root AGL_BUILD_DIR_VALUE=$output_dir perl -pe \
-    's/\@AGL_ROOT\@/$ENV{AGL_ROOT_VALUE}/g; s/\@AGL_BUILD_DIR\@/$ENV{AGL_BUILD_DIR_VALUE}/g' \
+AGL_ROOT_VALUE=$agl_root AGL_BUILD_DIR_VALUE=$output_dir PROJECT_ROOT_VALUE=$project_root perl -pe \
+    's/\@AGL_ROOT\@/$ENV{AGL_ROOT_VALUE}/g; s/\@AGL_BUILD_DIR\@/$ENV{AGL_BUILD_DIR_VALUE}/g; s/\@PROJECT_ROOT\@/$ENV{PROJECT_ROOT_VALUE}/g' \
     "$template_dir/local.conf.template" >"$temporary_conf/local.conf"
 
-AGL_ROOT_VALUE=$agl_root AGL_BUILD_DIR_VALUE=$output_dir perl -pe \
-    's/\@AGL_ROOT\@/$ENV{AGL_ROOT_VALUE}/g; s/\@AGL_BUILD_DIR\@/$ENV{AGL_BUILD_DIR_VALUE}/g' \
+AGL_ROOT_VALUE=$agl_root AGL_BUILD_DIR_VALUE=$output_dir PROJECT_ROOT_VALUE=$project_root perl -pe \
+    's/\@AGL_ROOT\@/$ENV{AGL_ROOT_VALUE}/g; s/\@AGL_BUILD_DIR\@/$ENV{AGL_BUILD_DIR_VALUE}/g; s/\@PROJECT_ROOT\@/$ENV{PROJECT_ROOT_VALUE}/g' \
     "$template_dir/bblayers.conf.template" >"$temporary_conf/bblayers.conf"
 
 mv -- "$temporary_conf" "$output_dir/conf"

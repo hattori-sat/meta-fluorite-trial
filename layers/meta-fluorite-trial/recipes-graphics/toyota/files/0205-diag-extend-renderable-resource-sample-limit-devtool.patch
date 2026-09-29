@@ -1,0 +1,41 @@
+From 32ddefcb7efbc1d830a0dd318d1b757f7bcad33f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 10 Sep 2026 19:56:11 +0900
+Subject: [PATCH] diag: extend renderable resource sample limit
+
+---
+ .../filament_view/core/scene/view_target.cc    | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 6c072bf..a27cbe1 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1310,10 +1310,26 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     );
+     auto& renderableManager = _engine->getRenderableManager();
+     auto& transformManager = _engine->getTransformManager();
++    size_t sampleLimit = 6;
++    const char* const sampleLimitEnv =
++      std::getenv("FLR0026_CAMERA_GEOMETRY_SAMPLE_LIMIT");
++    if (sampleLimitEnv != nullptr && *sampleLimitEnv != '\0') {
++      char* sampleLimitEnd = nullptr;
++      errno = 0;
++      const unsigned long parsedSampleLimit = std::strtoul(sampleLimitEnv, &sampleLimitEnd, 10);
++      if (errno == 0 && sampleLimitEnd != sampleLimitEnv && *sampleLimitEnd == '\0') {
++        sampleLimit = std::min<size_t>(parsedSampleLimit, 128);
++      }
++    }
++    spdlog::info(
++      "FLR0026_CAMERA_GEOMETRY_SAMPLE_LIMIT seq={} limit={}",
++      frameSequence,
++      sampleLimit
++    );
+     size_t sampleCount = 0;
+     if (scene != nullptr) {
+       scene->forEach([&](utils::Entity entity) {
+-        if (sampleCount >= 6 || !renderableManager.hasComponent(entity)) {
++        if (sampleCount >= sampleLimit || !renderableManager.hasComponent(entity)) {
+           return;
+         }
+         const auto renderable = renderableManager.getInstance(entity);

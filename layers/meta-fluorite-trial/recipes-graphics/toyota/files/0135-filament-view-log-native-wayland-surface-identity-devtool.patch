@@ -1,0 +1,35 @@
+From bd7f14531c611b43b0454ac7a0bad9c18d071975 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 3 Sep 2026 15:47:57 +0000
+Subject: [PATCH] diag: log native Wayland surface identity
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index dac8650..bc2ddee 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -340,12 +340,16 @@ void ViewTarget::setupWaylandSubsurface() {
+   wl_subsurface_set_position(subsurface_, left_, top_);
+   wl_subsurface_set_desync(subsurface_);
+   spdlog::info(
+-    "FLR0026_WAYLAND_SURFACE_CREATED surface={} subsurface={} parent={} position=({}, {})",
++    "FLR0026_WAYLAND_SURFACE_CREATED surface={} subsurface={} parent={} position=({}, {}) "
++    "surface_ptr={} parent_ptr={} display_ptr={}",
+     surface_ != nullptr,
+     subsurface_ != nullptr,
+     parent_surface_ != nullptr,
+     left_,
+-    top_
++    top_,
++    static_cast<void*>(surface_),
++    static_cast<void*>(parent_surface_),
++    static_cast<void*>(display_)
+   );
+ }
+ 
+-- 
+2.34.1
+

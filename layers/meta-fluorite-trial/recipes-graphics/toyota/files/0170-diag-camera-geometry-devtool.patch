@@ -1,0 +1,91 @@
+From f6bc852f35d5d46d8586c5071c1573a0a7ad06cc Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 13:36:40 +0000
+Subject: [PATCH] diag: trace camera geometry and renderable bounds
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 2e06703..17a4b3c 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -33,10 +33,11 @@
+ #include <filament/RenderTarget.h>
+ #include <filament/RenderableManager.h>
+ #include <filament/Scene.h>
+ #include <filament/SwapChain.h>
+ #include <filament/Texture.h>
++#include <filament/TransformManager.h>
+ #include <filament/View.h>
+ #include <filament/Viewport.h>
+ #include <filament/backend/PixelBufferDescriptor.h>
+ #include <filament/math/TMatHelpers.h>
+ #include <filament/math/mat4.h>
+@@ -1198,10 +1199,65 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+       viewport.width,
+       viewport.height
+     );
+   }
+ 
++  if (std::getenv("FLR0026_CAMERA_GEOMETRY_TRACE") != nullptr && shouldLogFrame) {
++    const auto& camera = fview_->getCamera();
++    const auto cameraPosition = camera.getPosition();
++    const auto cameraForward = camera.getForwardVector();
++    spdlog::info(
++      "FLR0026_CAMERA_GEOMETRY seq={} position=({:.3f},{:.3f},{:.3f}) "
++      "forward=({:.3f},{:.3f},{:.3f}) fov_vertical={:.3f} near={:.3f} far={:.3f}",
++      frameSequence,
++      cameraPosition.x,
++      cameraPosition.y,
++      cameraPosition.z,
++      cameraForward.x,
++      cameraForward.y,
++      cameraForward.z,
++      camera.getFieldOfViewInDegrees(filament::Camera::Fov::VERTICAL),
++      camera.getNear(),
++      camera.getCullingFar()
++    );
++
++    const auto* const scene = filamentSystem->getFilamentScene();
++    auto& renderableManager = _engine->getRenderableManager();
++    auto& transformManager = _engine->getTransformManager();
++    size_t sampleCount = 0;
++    if (scene != nullptr) {
++      scene->forEach([&](utils::Entity entity) {
++        if (sampleCount >= 6 || !renderableManager.hasComponent(entity)) {
++          return;
++        }
++        const auto renderable = renderableManager.getInstance(entity);
++        const auto& bounds = renderableManager.getAxisAlignedBoundingBox(renderable);
++        const auto transform = transformManager.getInstance(entity);
++        const auto world = transform.isValid()
++          ? transformManager.getWorldTransform(transform)
++          : filament::math::mat4f{};
++        spdlog::info(
++          "FLR0026_RENDERABLE_SAMPLE seq={} entity={} world_pos=({:.3f},{:.3f},{:.3f}) "
++          "bounds_min=({:.3f},{:.3f},{:.3f}) bounds_max=({:.3f},{:.3f},{:.3f}) layer={}",
++          frameSequence,
++          entity.getId(),
++          world[3].x,
++          world[3].y,
++          world[3].z,
++          bounds.min.x,
++          bounds.min.y,
++          bounds.min.z,
++          bounds.max.x,
++          bounds.max.y,
++          bounds.max.z,
++          renderableManager.getLayerMask(renderable)
++        );
++        ++sampleCount;
++      });
++    }
++  }
++
+   pollNativeReadbackFence();
+ 
+   if (std::getenv("FLR0026_WAYLAND_ROUNDTRIP") != nullptr && display_ != nullptr) {
+     const int roundtripResult = wl_display_roundtrip(display_);
+     if (shouldLogFrame) {
+-- 
+2.34.1
+

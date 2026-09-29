@@ -1,0 +1,177 @@
+From a0b5d328e8fc15616fb69195086fe1df8a925f88 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 04:15:54 +0000
+Subject: [PATCH] diag: trace Vulkan swapchain boundaries
+
+---
+ .../backend/src/vulkan/VulkanCommands.cpp     | 23 ++++++++++++++-
+ .../backend/src/vulkan/VulkanSwapChain.cpp    | 28 +++++++++++++++++++
+ 2 files changed, 50 insertions(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanCommands.cpp b/filament/backend/src/vulkan/VulkanCommands.cpp
+index 42ea2d7ee..0814d9ab9 100644
+--- a/filament/backend/src/vulkan/VulkanCommands.cpp
++++ b/filament/backend/src/vulkan/VulkanCommands.cpp
+@@ -204,10 +204,12 @@ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+     std::fprintf(stderr, "FLR0026_VK_COMMAND_END_BEGIN buffer=%p\\n", static_cast<void*>(mBuffer));
+     vkEndCommandBuffer(mBuffer);
+     std::fprintf(stderr, "FLR0026_VK_COMMAND_END_DONE buffer=%p\\n", static_cast<void*>(mBuffer));
+ 
+     VkSemaphore submissionSemaphore = mSubmission->getVkSemaphore();
++    static uint64_t flr0026SubmitSequence = 0;
++    const uint64_t submitSequence = ++flr0026SubmitSequence;
+     VkSubmitInfo submitInfo{
+         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+         .waitSemaphoreCount = mWaitSemaphores.size(),
+         .pWaitSemaphores = mWaitSemaphores.data(),
+         .pWaitDstStageMask = mWaitSemaphoreStages.data(),
+@@ -239,11 +241,12 @@ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+              << " fence=" << mFence;
+ #endif
+ 
+     if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
+         std::fprintf(stderr,
+-                "FLR0026_VK_SUBMIT_SYNC wait_count=%u wait0=%p wait1=%p signal=%p\n",
++                "FLR0026_VK_SUBMIT_SYNC seq=%llu wait_count=%u wait0=%p wait1=%p signal=%p\n",
++                static_cast<unsigned long long>(submitSequence),
+                 static_cast<unsigned int>(mWaitSemaphores.size()),
+                 mWaitSemaphores.size() > 0 ? static_cast<void*>(mWaitSemaphores[0]) : nullptr,
+                 mWaitSemaphores.size() > 1 ? static_cast<void*>(mWaitSemaphores[1]) : nullptr,
+                 static_cast<void*>(submissionSemaphore));
+     }
+@@ -467,10 +470,16 @@ bool VulkanCommands::flush() {
+     fvkmemory::resource_ptr<VulkanSemaphore> dependency;
+     bool hasFlushed = false;
+ 
+     VkFence flushedFence = VK_NULL_HANDLE;
+     std::shared_ptr<VulkanCmdFence> flushedFenceStatus;
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr,
++                "FLR0026_VK_FLUSH_BEGIN injected=%p has_last_submit=%s\n",
++                static_cast<void*>(mInjectedDependency),
++                mLastSubmit ? "true" : "false");
++    }
+ 
+     // Note that we've ordered it so that the non-protected commands are followed by the protected
+     // commands.  This assumes that the protected commands will be that one doing the rendering into
+     // the protected memory (i.e. protected render target).
+     for (auto pool: {mPool.get(), mProtectedPool.get()}) {
+@@ -491,21 +500,33 @@ bool VulkanCommands::flush() {
+                     VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT);
+             mLastSubmit = {};
+         }
+         flushedFence = pool->getRecording().getVkFence();
+         flushedFenceStatus = pool->getRecording().getFenceStatus();
++        if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++            std::fprintf(stderr, "FLR0026_VK_FLUSH_POOL_BEGIN pool=%p\n",
++                    static_cast<void*>(pool));
++        }
+         dependency = pool->flush();
++        if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++            std::fprintf(stderr, "FLR0026_VK_FLUSH_POOL_DONE pool=%p dependency=%s\n",
++                    static_cast<void*>(pool), dependency ? "true" : "false");
++        }
+         hasFlushed = true;
+     }
+ 
+     if (hasFlushed) {
+         mInjectedDependency = VK_NULL_HANDLE;
+         mLastSubmit = dependency;
+         mLastFence = flushedFence;
+         mLastFenceStatus = flushedFenceStatus;
+     }
+ 
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_FLUSH_DONE has_flushed=%s\n",
++                hasFlushed ? "true" : "false");
++    }
+     return true;
+ }
+ 
+ void VulkanCommands::wait() {
+     // It's possible to call flush and wait at "terminate", in which case, we'll just return.
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index dd046d928..81f34026a 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -106,10 +106,14 @@ void VulkanSwapChain::update() {
+     mExtent = bundle.extent;
+     mLayerCount = bundle.layerCount;
+ }
+ 
+ void VulkanSwapChain::present(DriverBase& driver) {
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_PRESENT_BOUNDARY_BEGIN index=%u\n",
++                mCurrentSwapIndex);
++    }
+     std::fprintf(stderr, "FLR0026_VK_SWAPCHAIN_PRESENT headless=%s\n", mHeadless ? "true" : "false");
+     const bool skipPresentLayout = std::getenv("FLR0026_SKIP_PRESENT_LAYOUT") != nullptr;
+     if (!mHeadless && mTransitionSwapChainImageLayoutForPresent && !skipPresentLayout) {
+         VulkanCommandBuffer& commands = mCommands->get();
+         VkImageSubresourceRange const subresources{
+@@ -143,15 +147,22 @@ void VulkanSwapChain::present(DriverBase& driver) {
+                     static_cast<int32_t>(fenceStatus),
+                     static_cast<void*>(mCommands->getMostRecentFence()));
+         }
+         VkResult const result =
+                 mPlatform->present(swapChain, mCurrentSwapIndex, finishedDrawing->getVkSemaphore());
++        if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++            std::fprintf(stderr, "FLR0026_VK_PRESENT_BOUNDARY_RETURN result=%d\n",
++                    static_cast<int32_t>(result));
++        }
+         FILAMENT_CHECK_POSTCONDITION(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR ||
+                 result == VK_ERROR_OUT_OF_DATE_KHR)
+                 << "Cannot present in swapchain. error=" << static_cast<int32_t>(result);
+     }
+ 
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_PRESENT_BOUNDARY_DONE\n");
++    }
+     // We presented the last acquired buffer.
+     mAcquired = false;
+     mIsFirstRenderPass = true;
+ 
+     if (frameScheduled.callback) {
+@@ -177,22 +188,39 @@ void VulkanSwapChain::acquire(bool& resized) {
+         }
+         mPlatform->recreate(swapChain);
+         update();
+     }
+ 
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_ACQUIRE_BOUNDARY_BEGIN resized=%s\n",
++                resized ? "true" : "false");
++    }
+     VulkanPlatform::ImageSyncData imageSyncData;
+     VkResult const result = mPlatform->acquire(swapChain, &imageSyncData);
+     mCurrentSwapIndex = imageSyncData.imageIndex;
+     mFinishedDrawing[mCurrentSwapIndex] = {};
+     FILAMENT_CHECK_POSTCONDITION(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+             << "Cannot acquire in swapchain. error=" << static_cast<int32_t>(result);
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr,
++                "FLR0026_VK_ACQUIRE_BOUNDARY_DONE result=%d index=%u semaphore=%p\n",
++                static_cast<int32_t>(result), mCurrentSwapIndex,
++                static_cast<void*>(imageSyncData.imageReadySemaphore));
++    }
+     const bool skipImageReadyWait = std::getenv("FLR0026_ACQUIRE_NO_WAIT") != nullptr;
+     std::fprintf(stderr, "FLR0026_VK_ACQUIRE_WAIT_SEMAPHORE enabled=%s\\n",
+             skipImageReadyWait ? "false" : "true");
+     if (imageSyncData.imageReadySemaphore != VK_NULL_HANDLE && !skipImageReadyWait) {
+         mCommands->injectDependency(imageSyncData.imageReadySemaphore,
+                 VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
++        if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++            std::fprintf(stderr, "FLR0026_VK_ACQUIRE_BOUNDARY_INJECTED semaphore=%p\n",
++                    static_cast<void*>(imageSyncData.imageReadySemaphore));
++        }
++    }
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_VK_ACQUIRE_BOUNDARY_DONE2\n");
+     }
+     mAcquired = true;
+ }
+ 
+ }// namespace filament::backend
+-- 
+2.34.1
+

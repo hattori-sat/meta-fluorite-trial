@@ -1,0 +1,26 @@
+From fa193db963a47bd16f816368eeda970b9f912d36 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 04:38:35 +0000
+Subject: [PATCH] test: match known good fixture camera
+
+---
+ .../filament_scene/example/lib/scenes/playground_scene.dart | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/scenes/playground_scene.dart b/packages/filament_scene/example/lib/scenes/playground_scene.dart
+index 368ee4a..10e57c7 100644
+--- a/packages/filament_scene/example/lib/scenes/playground_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/playground_scene.dart
+@@ -43,8 +43,10 @@ class PlaygroundSceneView extends StatefulSceneView {
+   static final Camera _sceneCamera = Camera(
+     id: objectGuids['playground_camera']!,
+     orbitOriginPoint: focusPoint,
+-    orbitAngles: initialCameraRotation,
+-    orbitDistance: 9.5,
++    orbitAngles: Vector2(1.5707963267948966, 0),
++    orbitDistance: 5,
++    dollyOffset: Vector3(5, 0, 0),
++    targetPoint: focusPoint,
+     name: 'playgroundCamera',
+   );
+ 

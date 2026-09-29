@@ -23,7 +23,7 @@ including a caller-supplied `command`, fail closed instead of being ignored.
 | `flutter_runtime` | Flutter Engine/embedder, IVI launcher, threads and surfaces | `catalog_embedder_surfaces`, `search_embedder_contract`, `read_runtime_source` |
 | `filament` | Dart/native bridge, Filament engine, materials and render assets | `catalog_render_assets`, `search_render_bridge`, `read_render_source` |
 | `graphics` | Wayland, Vulkan, Mesa, DRM, GPU and presentation path | `catalog_graphics_configuration`, `search_graphics_path`, `read_graphics_evidence` |
-| `target_validation` | existing boot, service, graphics, input and screen evidence | `list_validation_bundles`, `summarize_boot_evidence`, `summarize_graphics_evidence`, `read_target_evidence` |
+| `target_validation` | existing boot, service, QEMU app-launch, graphics, render, input and screen evidence | `list_validation_bundles`, `summarize_boot_evidence`, `summarize_qemu_boot`, `summarize_graphics_evidence`, `summarize_app_launch`, `summarize_render_case`, `read_target_evidence` |
 | `command_runner` | fixed runbook planning, execution ownership and bounded logs | `list_runbooks`, `describe_runbook`, `plan_runbook`, `execute_runbook`, `start_runbook`, `get_run_status`, `read_run_log`, `cancel_run` |
 
 The first seven servers are read-only. They do not run SSH, BitBake or target
@@ -169,7 +169,7 @@ the MCP host must approve the destructive-annotated tool.
 
 Without configuration every context exposes the role alias `repository`, resolved
 from the installed package location. This makes the repository's `manifests/`,
-`conf/` and `layers/meta-local/` available without embedding a user, host or IP.
+`conf/` and `layers/meta-fluorite-trial/` available without embedding a user, host or IP.
 
 Additional source/build roots are local machine data. Copy
 `mcp/config.example.json` outside Git, replace role paths and point the process to
@@ -241,6 +241,12 @@ Use `start_runbook` for long-running work, then `get_run_status`, `read_run_log`
 process-local and disappear when the server restarts. This initial runtime has no
 resume or distributed process ownership; that remains explicitly UNKNOWN until a
 persistent supervisor is selected.
+
+SSH does not disable MCP. The fixed remote wrapper runs only the configured `agl`,
+`yocto`, and `command_runner` servers on the build role. It validates the remote
+repository revision and rejects arbitrary SSH arguments; the next monitor ticket
+adds durable, redacted completion records so a new chat can resume without replaying
+the full build transcript.
 
 Real metadata-write operations are async-only; synchronous execution is limited
 to short read-only runbooks so MCP host timeouts cannot orphan a long call. A

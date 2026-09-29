@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 20 Jul 2026 22:00:00 +0900
+Subject: [PATCH] filament_scene: omit unsupported root cameras payload
+
+The native scene deserializer does not consume the root-level cameras list.
+Omit this unused payload so camera serialization cannot abort scene startup.
+---
+ packages/filament_scene/lib/scene/scene_widget.dart | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -178,1 +178,0 @@
+-    _creationParams["cameras"] = widget.cameras?.map((final param) => param.toJson()).toList();
+
+-- 
+2.34.1

@@ -1,0 +1,33 @@
+From 7b79b99833b6f18a8dd4ec9e1aab80a5a0dbb22d Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 03:55:43 +0000
+Subject: [PATCH] fix: send orbit point as camera target
+
+---
+ packages/filament_scene/lib/camera/camera.dart | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/lib/camera/camera.dart b/packages/filament_scene/lib/camera/camera.dart
+index 236d82f..2c13aee 100644
+--- a/packages/filament_scene/lib/camera/camera.dart
++++ b/packages/filament_scene/lib/camera/camera.dart
+@@ -77,6 +77,8 @@ class Camera extends TransformEntity with CameraComponent.Camera, CameraComponen
+ 
+     // Set the initial orbit position
+     _updateRigPosition();
++    // The v2 native view needs the orbit point as an explicit look-at target.
++    _updateTarget();
+   }
+ 
+   /// Sets the camera as active for the given view
+@@ -223,8 +225,9 @@ class Camera extends TransformEntity with CameraComponent.Camera, CameraComponen
+   }
+ 
+   void _updateTarget() {
++    final Vector3? nativeTarget = targetPoint ?? orbitOriginPoint;
+     engine?.queueFrameTask(
+-      engine?.setCameraTarget(id, targetEntity ?? kNullGuid, targetPoint?.storage64),
++      engine?.setCameraTarget(id, targetEntity ?? kNullGuid, nativeTarget?.storage64),
+     );
+   }
+ 

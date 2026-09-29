@@ -1,0 +1,59 @@
+From 71c8fd6b6a0ee8c21df99f5e6a2eff3c1e230eca Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 23:48:41 +0000
+Subject: [PATCH] fix: snapshot indirect light inputs before async build
+
+---
+ .../systems/derived/indirect_light_system.cc  | 34 +++++++++++++------
+ 1 file changed, 23 insertions(+), 11 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/indirect_light_system.cc b/plugins/filament_view/core/systems/derived/indirect_light_system.cc
+index 3170768..a1840ad 100644
+--- a/plugins/filament_view/core/systems/derived/indirect_light_system.cc
++++ b/plugins/filament_view/core/systems/derived/indirect_light_system.cc
+@@ -54,22 +54,34 @@ std::future<Resource<std::string_view>> IndirectLightSystem::setIndirectLight(
+     return future;
+   }
+ 
++  const auto intensity = indirectLight->getIntensity();
++  const auto radiance = indirectLight->radiance_;
++  const auto irradiance = indirectLight->irradiance_;
++  const auto rotation = indirectLight->rotation_;
++  const auto ecs_ptr = ecs;
+   const asio::io_context::strand& strand_(*ecs->getStrand());
+ 
+-  post(strand_, [&, promise, indirectLight] {
++  post(strand_, [
++    ecs_ptr,
++    promise,
++    intensity,
++    radiance,
++    irradiance,
++    rotation
++  ] {
+     auto builder = filament::IndirectLight::Builder();
+-    builder.intensity(indirectLight->getIntensity());
+-    builder.radiance(
+-      static_cast<uint8_t>(indirectLight->radiance_.size()), indirectLight->radiance_.data()
+-    );
+-    builder.irradiance(
+-      static_cast<uint8_t>(indirectLight->irradiance_.size()), indirectLight->irradiance_.data()
+-    );
+-    if (indirectLight->rotation_.has_value()) {
+-      builder.rotation(indirectLight->rotation_.value());
++    builder.intensity(intensity);
++    if (!radiance.empty()) {
++      builder.radiance(static_cast<uint8_t>(radiance.size()), radiance.data());
++    }
++    if (!irradiance.empty()) {
++      builder.irradiance(static_cast<uint8_t>(irradiance.size()), irradiance.data());
++    }
++    if (rotation.has_value()) {
++      builder.rotation(rotation.value());
+     }
+ 
+-    const auto filamentSystem = ecs->getSystem<FilamentSystem>("setIndirectLight");
++    const auto filamentSystem = ecs_ptr->getSystem<FilamentSystem>("setIndirectLight");
+     const auto engine = filamentSystem->getFilamentEngine();
+ 
+     builder.build(*engine);

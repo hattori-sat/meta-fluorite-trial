@@ -1,0 +1,24 @@
+From 9e690ddc56d1ab950bbbf8d9a361fb0e5fc59c55 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 23:24:21 +0000
+Subject: [PATCH] fix: enable transparent effective swapchain
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 8dbdd5a..b805ca3 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -173,7 +173,9 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+   );
+ 
+   _engine = filamentSystem->getFilamentEngine();
+-  fswapChain_ = _engine->createSwapChain(&native_window_);
++  fswapChain_ = _engine->createSwapChain(
++    &native_window_, filament::SwapChain::CONFIG_TRANSPARENT
++  );
+   fview_ = _engine->createView();
+ 
+   setupView(width, height);

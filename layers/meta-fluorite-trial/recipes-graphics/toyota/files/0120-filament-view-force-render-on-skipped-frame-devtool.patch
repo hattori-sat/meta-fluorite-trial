@@ -1,0 +1,31 @@
+From 74f3be7d78097518f564ce42d01c2b3fae783ade Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 3 Sep 2026 05:08:05 +0000
+Subject: [PATCH] diag: render when Filament skips a frame
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index d517925..18083c5 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1095,7 +1095,13 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   if (shouldLogFrame) {
+     spdlog::info("FLR0026_FRAME_BEGIN seq={} started={}", frameSequence, frameStarted);
+   }
+-  if (frameStarted) {
++  const bool forceRenderOnSkippedFrame =
++    std::getenv("FLR0026_FORCE_RENDER_ON_SKIPPED_FRAME") != nullptr;
++  const bool renderFrame = frameStarted || forceRenderOnSkippedFrame;
++  if (renderFrame) {
++    if (!frameStarted && forceRenderOnSkippedFrame) {
++      spdlog::info("FLR0026_FRAME_FORCED_AFTER_SKIP seq={}", frameSequence);
++    }
+     // Frame is being rendered
+     // TODO(kerberjg): send kPreRenderFrame event, async with wait
+     // spdlog::debug("=== RENDER FRAME ===");
+-- 
+2.34.1
+

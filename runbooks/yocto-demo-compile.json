@@ -1,0 +1,17 @@
+{
+  "schema": "fluorite.runbook/v1",
+  "id": "yocto-demo-compile",
+  "title": "Bounded Fluorite demo compile",
+  "description": "Incrementally compile only the fixed Fluorite demo recipe with separate wall-clock and task-output inactivity bounds.",
+  "risk": "build",
+  "parameters": {},
+  "steps": [{
+    "id": "fluorite-demo-compile",
+    "argv": ["bitbake", "toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo", "-c", "compile"],
+    "root": "yocto_build",
+    "environment_profile": "yocto",
+    "activity_root": "yocto_compile_logs",
+    "timeout_seconds": 14400,
+    "inactivity_timeout_seconds": 1800
+  }]
+}

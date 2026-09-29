@@ -1,0 +1,23 @@
+From 25510190f491841f5c180695dfa54b985683e7dc Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 10 Sep 2026 07:35:20 +0000
+Subject: [PATCH] diag: serialize target probe queue
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index dc5d51064..44d756d0d 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -1813,6 +1813,9 @@ void VulkanDriver::endRenderPass(int) {
+                          << " extent=" << extent.width << "x" << extent.height
+                          << " format=" << static_cast<int>(color.getFormat());
+                 endCommandRecording();
++                FVK_LOGI << "FLR0026_TARGET_PROBE_QUEUE_IDLE_BEGIN";
++                VkResult const queueIdleStatus = vkQueueWaitIdle(mPlatform->getGraphicsQueue());
++                FVK_LOGI << "FLR0026_TARGET_PROBE_QUEUE_IDLE_RESULT result=" << queueIdleStatus;
+                 mReadPixels.run(
+                         rt, 0, 0, extent.width, extent.height,
+                         mPlatform->getGraphicsQueueFamilyIndex(), std::move(pbd),

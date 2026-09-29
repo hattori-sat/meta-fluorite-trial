@@ -1,0 +1,32 @@
+From 417adbf2089f212b26e42183f1f4331c7b6be364 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 19 Sep 2026 12:51:53 +0000
+Subject: [PATCH] diag: gate native swapchain opacity
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index fa9241fe6..804bcf788 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -233,9 +233,15 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+   );
+ 
+   _engine = filamentSystem->getFilamentEngine();
+-  fswapChain_ = _engine->createSwapChain(
+-    &native_window_, filament::SwapChain::CONFIG_TRANSPARENT
+-  );
++  const bool opaqueSwapchain =
++    std::getenv("FLUORITE_NATIVE_OPAQUE_SWAPCHAIN") != nullptr;
++  const uint64_t swapchainConfig = opaqueSwapchain
++    ? 0u
++    : filament::SwapChain::CONFIG_TRANSPARENT;
++  fswapChain_ = _engine->createSwapChain(&native_window_, swapchainConfig);
++  if (opaqueSwapchain) {
++    spdlog::info("FLUORITE_NATIVE_OPAQUE_SWAPCHAIN enabled=true");
++  }
+   fview_ = _engine->createView();
+ 
+   setupView(width, height);

@@ -1,0 +1,56 @@
+From 57308d9cd8a10cbe0e1d73d204a41726cd4fef2d Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role <fluorite@example.invalid>
+Date: Tue, 8 Sep 2026 13:32:46 +0000
+Subject: [PATCH] diag: allow XDG fluorite launch without AGL bind
+
+---
+ shell/wayland/display.cc | 6 +++++-
+ shell/wayland/window.cc  | 4 +++-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/shell/wayland/display.cc b/shell/wayland/display.cc
+index 64524959..3cb7b057 100644
+--- a/shell/wayland/display.cc
++++ b/shell/wayland/display.cc
+@@ -21,6 +21,7 @@
+ #include <xkbcommon/xkbcommon.h>
+ #include <algorithm>
+ #include <cerrno>
++#include <cstdlib>
+ #include <cstring>
+ #include <utility>
+ 
+@@ -49,7 +50,10 @@ Display::Display(const bool enable_cursor,
+   wayland_event_mask_update(ignore_wayland_event, m_wayland_event_mask);
+ 
+   for (auto const& cfg : configs) {
+-    if (cfg.app_id == "fluorite" ||
++    const bool disable_fluorite_agl_bind =
++        cfg.app_id == "fluorite" &&
++        std::getenv("FLR0026_DISABLE_FLUORITE_AGL_BIND") != nullptr;
++    if ((!disable_fluorite_agl_bind && cfg.app_id == "fluorite") ||
+         WaylandWindow::WINDOW_NORMAL !=
+             WaylandWindow::get_window_type(cfg.view.window_type)) {
+       m_agl.bind_to_agl_shell = true;
+diff --git a/shell/wayland/window.cc b/shell/wayland/window.cc
+index 76970102..907a6b0a 100644
+--- a/shell/wayland/window.cc
++++ b/shell/wayland/window.cc
+@@ -14,6 +14,7 @@
+ 
+ #include "window.h"
+ 
++#include <cstdlib>
+ #include <utility>
+ 
+ #include "display.h"
+@@ -127,7 +128,8 @@ WaylandWindow::WaylandWindow(const size_t index,
+ 
+ #if ENABLE_AGL_SHELL_CLIENT
+   const bool defer_fluorite_normal_registration =
+-      m_type == WINDOW_NORMAL && m_app_id == "fluorite";
++      m_type == WINDOW_NORMAL && m_app_id == "fluorite" &&
++      std::getenv("FLR0026_DISABLE_FLUORITE_AGL_BIND") == nullptr;
+ 
+   switch (m_type) {
+     case WINDOW_NORMAL:

@@ -1,0 +1,88 @@
+From c6df6a7e43a504ba244b1ef3bc4f6ad4d99db8f6 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 18:21:26 +0000
+Subject: [PATCH] fix: include Filament logger for readPixels trace
+
+---
+ filament/src/Renderer.cpp         | 4 ++--
+ filament/src/RendererUtils.cpp    | 5 +++--
+ filament/src/details/Renderer.cpp | 4 ++--
+ 3 files changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/filament/src/Renderer.cpp b/filament/src/Renderer.cpp
+index 1aa440b4f..8289837e4 100644
+--- a/filament/src/Renderer.cpp
++++ b/filament/src/Renderer.cpp
+@@ -23,7 +23,7 @@
+ #include "details/View.h"
+ 
+ #include <utils/FixedCapacityVector.h>
+-#include <utils/debug.h>
++#include <utils/Logger.h>
+ 
+ #include <utility>
+ 
+@@ -72,7 +72,7 @@ void Renderer::readPixels(uint32_t const xoffset, uint32_t const yoffset, uint32
+ void Renderer::readPixels(RenderTarget* renderTarget,
+         uint32_t const xoffset, uint32_t const yoffset, uint32_t const width, uint32_t const height,
+         PixelBufferDescriptor&& buffer) {
+-    DLOG(INFO) << "FLR0026_RENDERER_READPIXELS_PUBLIC";
++    LOG(INFO) << "FLR0026_RENDERER_READPIXELS_PUBLIC";
+     downcast(this)->readPixels(downcast(renderTarget),
+             xoffset, yoffset, width, height, std::move(buffer));
+ }
+diff --git a/filament/src/RendererUtils.cpp b/filament/src/RendererUtils.cpp
+index 38a89054b..b7fa0d4f5 100644
+--- a/filament/src/RendererUtils.cpp
++++ b/filament/src/RendererUtils.cpp
+@@ -39,6 +39,7 @@
+ #include <backend/PixelBufferDescriptor.h>
+ 
+ #include <utils/BitmaskEnum.h>
++#include <utils/Logger.h>
+ #include <utils/compiler.h>
+ #include <utils/debug.h>
+ #include <utils/Panic.h>
+@@ -356,7 +357,7 @@ UTILS_NOINLINE
+ void RendererUtils::readPixels(DriverApi& driver, Handle<HwRenderTarget> renderTargetHandle,
+         uint32_t const xoffset, uint32_t const yoffset, uint32_t const width, uint32_t const height,
+         PixelBufferDescriptor&& buffer) {
+-    DLOG(INFO) << "FLR0026_RENDERER_UTILS_READPIXELS";
++    LOG(INFO) << "FLR0026_RENDERER_UTILS_READPIXELS";
+     FILAMENT_CHECK_PRECONDITION(buffer.type != PixelDataType::COMPRESSED)
+             << "buffer.format cannot be COMPRESSED";
+ 
+@@ -380,7 +381,7 @@ void RendererUtils::readPixels(DriverApi& driver, Handle<HwRenderTarget> renderT
+             << " bytes";
+ 
+     driver.readPixels(renderTargetHandle, xoffset, yoffset, width, height, std::move(buffer));
+-    DLOG(INFO) << "FLR0026_RENDERER_UTILS_READPIXELS_RECORDED";
++    LOG(INFO) << "FLR0026_RENDERER_UTILS_READPIXELS_RECORDED";
+ }
+ 
+ } // namespace filament
+diff --git a/filament/src/details/Renderer.cpp b/filament/src/details/Renderer.cpp
+index 2c880e139..e6a6c916b 100644
+--- a/filament/src/details/Renderer.cpp
++++ b/filament/src/details/Renderer.cpp
+@@ -489,7 +489,7 @@ void FRenderer::readPixels(FRenderTarget const* renderTarget,
+         uint32_t const width, uint32_t const height,
+         PixelBufferDescriptor&& buffer) {
+ 
+-    DLOG(INFO) << "FLR0026_FRENDERER_READPIXELS";
++    LOG(INFO) << "FLR0026_FRENDERER_READPIXELS";
+ 
+     // TODO: change the following to an assert when client call sites have addressed the issue.
+     if (!renderTarget->supportsReadPixels()) {
+@@ -500,7 +500,7 @@ void FRenderer::readPixels(FRenderTarget const* renderTarget,
+ 
+     RendererUtils::readPixels(mEngine.getDriverApi(), renderTarget->getHwHandle(),
+             xoffset, yoffset, width, height, std::move(buffer));
+-    DLOG(INFO) << "FLR0026_FRENDERER_READPIXELS_RECORDED";
++    LOG(INFO) << "FLR0026_FRENDERER_READPIXELS_RECORDED";
+ }
+ 
+ void FRenderer::copyFrame(FSwapChain* dstSwapChain, filament::Viewport const& dstViewport,
+-- 
+2.34.1
+

@@ -1,0 +1,66 @@
+From 1b7dd5065842bda167699ec4c4ffdbd7e171d7bf Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 8 Sep 2026 05:25:21 +0000
+Subject: [PATCH] fix: honor transparent Vulkan swapchain alpha
+
+---
+ .../platform/VulkanPlatformSwapChainImpl.cpp  | 26 +++++++++++++++----
+ .../platform/VulkanPlatformSwapChainImpl.h    |  1 +
+ 2 files changed, 22 insertions(+), 5 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index 9371a7831..1387210e1 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -140,7 +140,8 @@ VulkanPlatformSurfaceSwapChain::VulkanPlatformSurfaceSwapChain(VulkanContext con
+       mFallbackExtent(fallbackExtent),
+       mUsesRGB((flags & backend::SWAP_CHAIN_CONFIG_SRGB_COLORSPACE) != 0),
+       mHasStencil((flags & backend::SWAP_CHAIN_HAS_STENCIL_BUFFER) != 0),
+-      mIsProtected((flags & backend::SWAP_CHAIN_CONFIG_PROTECTED_CONTENT) != 0) {
++      mIsProtected((flags & backend::SWAP_CHAIN_CONFIG_PROTECTED_CONTENT) != 0),
++      mIsTransparent((flags & backend::SWAP_CHAIN_CONFIG_TRANSPARENT) != 0) {
+     assert_invariant(surface);
+     create();
+ }
+@@ -232,10 +233,25 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
+         mSwapChainBundle.extent = caps.currentExtent;
+     }
+ 
+-    VkCompositeAlphaFlagBitsKHR const compositeAlpha
+-            = (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+-                      ? VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
+-                      : VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
++    VkCompositeAlphaFlagBitsKHR compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
++    if (mIsTransparent) {
++        if (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR) {
++            compositeAlpha = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
++        } else if (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR) {
++            compositeAlpha = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
++        } else if (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR) {
++            compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
++        }
++    } else if (!(caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) &&
++            (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)) {
++        compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
++    }
++    std::fprintf(
++            stderr,
++            "FLR0026_VK_COMPOSITE_ALPHA transparent=%s supported=0x%x selected=0x%x\n",
++            mIsTransparent ? "true" : "false",
++            static_cast<uint32_t>(caps.supportedCompositeAlpha),
++            static_cast<uint32_t>(compositeAlpha));
+ 
+     VkSwapchainCreateInfoKHR const createInfo{
+             .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.h b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.h
+index 56d4308a4..20d2b51d1 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.h
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.h
+@@ -127,6 +127,7 @@ private:
+     bool mUsesRGB = false;
+     bool mHasStencil = false;
+     bool mIsProtected = false;
++    bool mIsTransparent = false;
+     bool mSuboptimal = false;
+ };
+ 

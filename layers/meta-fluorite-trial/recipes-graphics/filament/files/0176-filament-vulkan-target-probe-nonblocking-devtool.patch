@@ -1,0 +1,50 @@
+From c6767205434a36d6d6954a5728ac7083a55419ed Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 10 Sep 2026 09:24:14 +0000
+Subject: [PATCH] diag: bound target readback observation
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp     | 4 +---
+ filament/backend/src/vulkan/VulkanReadPixels.cpp | 9 +++++++--
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 44d756d0d..7f611c3b5 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -1813,9 +1813,7 @@ void VulkanDriver::endRenderPass(int) {
+                          << " extent=" << extent.width << "x" << extent.height
+                          << " format=" << static_cast<int>(color.getFormat());
+                 endCommandRecording();
+-                FVK_LOGI << "FLR0026_TARGET_PROBE_QUEUE_IDLE_BEGIN";
+-                VkResult const queueIdleStatus = vkQueueWaitIdle(mPlatform->getGraphicsQueue());
+-                FVK_LOGI << "FLR0026_TARGET_PROBE_QUEUE_IDLE_RESULT result=" << queueIdleStatus;
++                FVK_LOGI << "FLR0026_TARGET_PROBE_QUEUE_IDLE_SKIPPED reason=nonblocking";
+                 mReadPixels.run(
+                         rt, 0, 0, extent.width, extent.height,
+                         mPlatform->getGraphicsQueueFamilyIndex(), std::move(pbd),
+diff --git a/filament/backend/src/vulkan/VulkanReadPixels.cpp b/filament/backend/src/vulkan/VulkanReadPixels.cpp
+index fa76c9a49..324aa54d0 100644
+--- a/filament/backend/src/vulkan/VulkanReadPixels.cpp
++++ b/filament/backend/src/vulkan/VulkanReadPixels.cpp
+@@ -332,13 +332,18 @@ void VulkanReadPixels::run(fvkmemory::resource_ptr<VulkanRenderTarget> srcTarget
+         delete pUserBuffer;
+         FVK_LOGI << "FLR0026_VK_READBACK_CLEANUP_END";
+     };
++    uint64_t const fenceTimeout = std::getenv("FLR0026_TARGET_PROBE") != nullptr
++            ? 500000000ULL : UINT64_MAX;
+     auto waitFenceFunc = [device, width, height, swizzle, stagingBuffer, stagingMemory,
+                                  cmdpool, cmdbuffer, pUserBuffer, bpp, componentType,
+-                                 componentCount, hostCachedStaging,
++                                 componentCount, hostCachedStaging, fenceTimeout,
+                                  fence = readCompleteFence]() mutable {
+         FVK_LOGI << "FLR0026_VK_READBACK_FENCE_WAIT_BEGIN";
+-        VkResult status = vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
++        VkResult status = vkWaitForFences(device, 1, &fence, VK_TRUE, fenceTimeout);
+         FVK_LOGI << "FLR0026_VK_READBACK_FENCE_WAIT result=" << status;
++        if (status == VK_TIMEOUT) {
++            FVK_LOGW << "FLR0026_VK_READBACK_FENCE_TIMEOUT";
++        }
+         if (status != VK_SUCCESS) {
+             FVK_LOGE << "Failed to wait for readPixels fence";
+             vkDestroyBuffer(device, stagingBuffer, VKALLOC);

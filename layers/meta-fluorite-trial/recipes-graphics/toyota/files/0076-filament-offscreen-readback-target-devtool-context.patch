@@ -1,0 +1,310 @@
+From 163767e4b8dacbb64e0702d7cc79a6d63fbb5076 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 12:43:40 +0000
+Subject: [PATCH] diag: render offscreen target into shm probe
+
+---
+ .../filament_view/core/scene/view_target.cc   | 160 ++++++++++++------
+ .../filament_view/core/scene/view_target.h    |  12 ++
+ 2 files changed, 123 insertions(+), 49 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 2934d00..bbf6e9a 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -25,11 +25,13 @@
+ #include <core/utils/vectorutils.h>
+ 
+ #include <filament_view_plugin.h>
+ 
+ #include <filament/Renderer.h>
++#include <filament/RenderTarget.h>
+ #include <filament/SwapChain.h>
++#include <filament/Texture.h>
+ #include <filament/View.h>
+ #include <filament/Viewport.h>
+ #include <filament/backend/PixelBufferDescriptor.h>
+ #include <filament/math/TMatHelpers.h>
+ #include <filament/math/mat4.h>
+@@ -126,10 +128,19 @@ ViewTarget::~ViewTarget() {
+   if (callback_) {
+     wl_callback_destroy(callback_);
+     callback_ = nullptr;
+   }
+ 
++  if (native_readback_target_) {
++    _engine->destroy(native_readback_target_);
++    native_readback_target_ = nullptr;
++  }
++  if (native_readback_texture_) {
++    _engine->destroy(native_readback_texture_);
++    native_readback_texture_ = nullptr;
++  }
++
+   _engine->destroy(fview_);
+   _engine->destroy(fswapChain_);
+ 
+   if (shm_probe_buffer_) {
+     wl_buffer_destroy(shm_probe_buffer_);
+@@ -259,10 +270,40 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+     spdlog::info("FLR0026_NATIVE_CLEAR_PROBE_SWAPCHAIN opaque=true");
+   }
+   fview_ = _engine->createView();
+ 
+   setupView(width, height);
++  native_readback_probe_enabled_ =
++    std::getenv("FLR0026_NATIVE_READBACK_PROBE") != nullptr;
++  if (native_readback_probe_enabled_) {
++    constexpr uint32_t readbackWidth = 240;
++    constexpr uint32_t readbackHeight = 160;
++    native_readback_texture_ = filament::Texture::Builder()
++      .width(readbackWidth)
++      .height(readbackHeight)
++      .levels(1)
++      .format(filament::Texture::InternalFormat::RGBA8)
++      .usage(filament::Texture::Usage::COLOR_ATTACHMENT)
++      .build(*_engine);
++    if (native_readback_texture_ != nullptr) {
++      native_readback_target_ = filament::RenderTarget::Builder()
++        .texture(filament::RenderTarget::AttachmentPoint::COLOR, native_readback_texture_)
++        .build(*_engine);
++    }
++    if (native_readback_target_ != nullptr) {
++      fview_->setBlendMode(filament::View::BlendMode::OPAQUE);
++      fview_->setRenderTarget(native_readback_target_);
++      fview_->setViewport({0, 0, readbackWidth, readbackHeight});
++      spdlog::info(
++        "FLR0026_NATIVE_READBACK_TARGET_READY width={} height={}",
++        readbackWidth,
++        readbackHeight
++      );
++    } else {
++      spdlog::error("FLR0026_NATIVE_READBACK_TARGET_FAILED");
++    }
++  }
+   static bool softwareFrameLoopStarted = false;
+   if (!softwareFrameLoopStarted) {
+     softwareFrameLoopStarted = true;
+     OnFrame(this, nullptr, 0);
+   }
+@@ -738,20 +779,61 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+ 
+ void ViewTarget::attachShmProbe() {
+   if (shm_probe_attached_ || shm_probe_buffer_ == nullptr || shm_probe_surface_ == nullptr) {
+     return;
+   }
++  if (native_readback_probe_enabled_ &&
++      !shm_probe_content_ready_.load(std::memory_order_acquire)) {
++    return;
++  }
+   wl_surface_attach(shm_probe_surface_, shm_probe_buffer_, 0, 0);
+   wl_surface_damage(shm_probe_surface_, 0, 0, 240, 160);
+   wl_surface_commit(shm_probe_surface_);
+   const int flush_result = wl_display_flush(display_);
+   shm_probe_attached_ = true;
+   spdlog::info(
+     "FLR0026_WAYLAND_SHM_PROBE_ATTACHED flush_result={}", flush_result
+   );
+ }
+ 
++void ViewTarget::OnNativeReadback(void* buffer, const size_t size, void* user) {
++  auto* const obj = static_cast<ViewTarget*>(user);
++  const auto* const bytes = static_cast<const uint8_t*>(buffer);
++  size_t nonBlackPixels = 0;
++  uint8_t maxChannel = 0;
++  for (size_t offset = 0; offset + 3 < size; offset += 4) {
++    const uint8_t red = bytes[offset];
++    const uint8_t green = bytes[offset + 1];
++    const uint8_t blue = bytes[offset + 2];
++    if (red != 0 || green != 0 || blue != 0) {
++      ++nonBlackPixels;
++    }
++    maxChannel = std::max(maxChannel, std::max(green, std::max(red, blue)));
++  }
++
++  if (obj->shm_probe_data_ != nullptr && size >= (240u * 160u * 4u)) {
++    auto* const destination = static_cast<uint32_t*>(obj->shm_probe_data_);
++    for (size_t index = 0; index < (240u * 160u); ++index) {
++      const size_t offset = index * 4u;
++      destination[index] = 0xFF000000u |
++        (static_cast<uint32_t>(bytes[offset + 2]) << 16u) |
++        (static_cast<uint32_t>(bytes[offset + 1]) << 8u) |
++        static_cast<uint32_t>(bytes[offset]);
++    }
++    obj->shm_probe_content_ready_.store(true, std::memory_order_release);
++  }
++
++  spdlog::info(
++    "FLR0026_NATIVE_READBACK_RESULT bytes={} nonblack={} max_channel={} shm_copy={}",
++    size,
++    nonBlackPixels,
++    static_cast<unsigned int>(maxChannel),
++    obj->shm_probe_data_ != nullptr
++  );
++  delete[] static_cast<uint8_t*>(buffer);
++}
++
+ /////////////////////////////////////////////////////////////////////////
+ const wl_callback_listener ViewTarget::frame_listener = {.done = OnFrame};
+ 
+ /**
+  * Renders the model and updates the Filament camera.
+@@ -826,62 +908,42 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // drawing a frame.
+ 
+   // ECS Update
+   const auto cpuUpdateStart = std::chrono::steady_clock::now();
+   ecs->update(deltaTime);
+-    if (std::getenv("FLR0026_NATIVE_READBACK_PROBE") != nullptr) {
+-      static bool readbackProbeQueued = false;
+-      if (!readbackProbeQueued) {
+-        readbackProbeQueued = true;
+-        const uint32_t readbackWidth = native_window_.width;
+-        const uint32_t readbackHeight = native_window_.height;
+-        const size_t readbackSize = static_cast<size_t>(readbackWidth) *
+-          static_cast<size_t>(readbackHeight) * 4u;
+-        auto* pixels = new uint8_t[readbackSize]();
+-        renderer->readPixels(
++    if (native_readback_probe_enabled_ && native_readback_target_ &&
++        !native_readback_probe_queued_) {
++      native_readback_probe_queued_ = true;
++      constexpr uint32_t readbackWidth = 240;
++      constexpr uint32_t readbackHeight = 160;
++      const size_t readbackSize = static_cast<size_t>(readbackWidth) *
++        static_cast<size_t>(readbackHeight) * 4u;
++      auto* pixels = new uint8_t[readbackSize]();
++      renderer->readPixels(
++        native_readback_target_,
++        0,
++        0,
++        readbackWidth,
++        readbackHeight,
++        filament::backend::PixelBufferDescriptor(
++          pixels,
++          readbackSize,
++          filament::backend::PixelBufferDescriptor::PixelDataFormat::RGBA,
++          filament::backend::PixelBufferDescriptor::PixelDataType::UBYTE,
++          1,
+           0,
+           0,
+           readbackWidth,
+-          readbackHeight,
+-          filament::backend::PixelBufferDescriptor(
+-            pixels,
+-            readbackSize,
+-            filament::backend::PixelBufferDescriptor::PixelDataFormat::RGBA,
+-            filament::backend::PixelBufferDescriptor::PixelDataType::UBYTE,
+-            1,
+-            0,
+-            0,
+-            readbackWidth,
+-            [](void* buffer, size_t size, void*) {
+-              const auto* bytes = static_cast<const uint8_t*>(buffer);
+-              size_t nonBlackPixels = 0;
+-              uint8_t maxChannel = 0;
+-              for (size_t offset = 0; offset + 3 < size; offset += 4) {
+-                const uint8_t red = bytes[offset];
+-                const uint8_t green = bytes[offset + 1];
+-                const uint8_t blue = bytes[offset + 2];
+-                if (red != 0 || green != 0 || blue != 0) {
+-                  ++nonBlackPixels;
+-                }
+-                maxChannel = std::max(maxChannel, std::max(red, std::max(green, blue)));
+-              }
+-              spdlog::info(
+-                "FLR0026_NATIVE_READBACK_RESULT bytes={} nonblack={} max_channel={}",
+-                size,
+-                nonBlackPixels,
+-                static_cast<unsigned int>(maxChannel)
+-              );
+-              delete[] static_cast<uint8_t*>(buffer);
+-            }
+-          )
+-        );
+-        spdlog::info(
+-          "FLR0026_NATIVE_READBACK_QUEUED width={} height={}",
+-          readbackWidth,
+-          readbackHeight
+-        );
+-      }
++          &ViewTarget::OnNativeReadback,
++          this
++        )
++      );
++      spdlog::info(
++        "FLR0026_NATIVE_READBACK_QUEUED width={} height={}",
++        readbackWidth,
++        readbackHeight
++      );
+     }
+   double cpuFrametime = std::chrono::duration<double, std::milli>(
+                           std::chrono::steady_clock::now() - cpuUpdateStart
+   )
+                           .count();
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index 45f6696..ac650d2 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -21,16 +21,22 @@
+ #include <core/components/derived/transform.h>
+ #include <core/scene/camera/touch_pair.h>
+ #include <core/scene/geometry/ray.h>
+ 
+ #include <cstdint>
++#include <atomic>
+ #include <event_channel.h>
+ #include <filament/Engine.h>
+ #include <flutter_desktop_plugin_registrar.h>
+ #include <gltfio/AssetLoader.h>
+ #include <viewer/Settings.h>
+ 
++namespace filament {
++class RenderTarget;
++class Texture;
++}  // namespace filament
++
+ namespace plugin_filament_view {
+ 
+ class Camera;
+ 
+ /// TODO: add missing docs on everything here
+@@ -143,10 +149,11 @@ class ViewTarget {
+      *  Wayland
+      */
+     void setupShmProbe(uint32_t width, uint32_t height);
+     void attachShmProbe();
+     void setupWaylandSubsurface();
++    static void OnNativeReadback(void* buffer, size_t size, void* user);
+ 
+     FlutterDesktopEngineState* state_;
+     filament::viewer::Settings settings_;
+     filament::gltfio::FilamentAsset* asset_{};
+     int32_t left_;
+@@ -165,19 +172,24 @@ class ViewTarget {
+     wl_surface* shm_probe_surface_{};
+     wl_subsurface* shm_probe_subsurface_{};
+     void* shm_probe_data_{};
+     size_t shm_probe_size_{};
+     bool shm_probe_attached_{};
++    std::atomic<bool> shm_probe_content_ready_{false};
++    bool native_readback_probe_enabled_{};
++    bool native_readback_probe_queued_{};
+ 
+     struct _native_window {
+         struct wl_display* display;
+         struct wl_surface* surface;
+         uint32_t width;
+         uint32_t height;
+     } native_window_{};
+ 
+     ::filament::SwapChain* fswapChain_{};
++    ::filament::Texture* native_readback_texture_{};
++    ::filament::RenderTarget* native_readback_target_{};
+     std::mutex frameLock_;
+     ::filament::View* fview_{};
+ 
+     // todo to be moved?
+     ::filament::gltfio::Animator* fanimator_;
+-- 
+2.34.1
+

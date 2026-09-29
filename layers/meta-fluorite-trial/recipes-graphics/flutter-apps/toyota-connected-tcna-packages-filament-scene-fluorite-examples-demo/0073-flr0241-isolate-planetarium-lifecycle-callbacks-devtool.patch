@@ -1,0 +1,68 @@
+From 7eda35d03d607ac44d1d60c2c12fb149a3f0b26b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 15:12:25 +0000
+Subject: [PATCH] FLR-0241: isolate Planetarium lifecycle callbacks
+
+---
+ .../example/lib/scenes/planetarium_scene.dart | 41 +------------------
+ 1 file changed, 2 insertions(+), 39 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+index 5318d17..91d2124 100644
+--- a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+@@ -247,21 +247,7 @@ class PlanetariumSceneView extends StatefulSceneView {
+ class _PlanetariumSceneViewState extends StatefulSceneViewState {
+   @override
+   void onCreate() {
+-    PlanetariumSceneView.camera.setActive();
+-
+-    widget.filament.queueFrameTask(widget.filament.setFogOptions(false));
+-
+-    // deactivate rendering for system and orbits
+-    widget.filament.queueFrameTask(
+-      widget.filament.turnOffVisualForEntity(PlanetariumSceneView.objectGuids['system']!),
+-    );
+-    for (final String name in PlanetariumSceneView.objectGuids.keys) {
+-      if (name.endsWith('_orbit')) {
+-        widget.filament.queueFrameTask(
+-          widget.filament.turnOffVisualForEntity(PlanetariumSceneView.objectGuids[name]!),
+-        );
+-      }
+-    }
++    print('FLR0241_PLANETARIUM_LIFECYCLE_INERT onCreate');
+   }
+ 
+   @override
+@@ -273,30 +259,7 @@ class _PlanetariumSceneViewState extends StatefulSceneViewState {
+ 
+   @override
+   void onUpdateFrame(FilamentViewApi engine, double dt) {
+-    _timer += dt;
+-    final DateTime now = DateTime.now();
+-    if (now.difference(_lastCommandAt) < const Duration(milliseconds: 500)) {
+-      return;
+-    }
+-    _lastCommandAt = now;
+-
+-    // rotate planets
+-    for (int update = 0; update < 1; update++) {
+-      final String name = PlanetariumSceneView.planets[_nextPlanetIndex];
+-      _nextPlanetIndex = (_nextPlanetIndex + 1) % PlanetariumSceneView.planets.length;
+-      final double speed = 1 / PlanetariumSceneView.planetSpeeds[name]! * 0.25;
+-
+-      // rotate around the sun
+-      final double angle = _timer * speed * 2 * 3.14;
+-      Quaternion rot = Quaternion.euler(angle, 0, 0);
+-
+-      widget.filament.queueFrameTask(
+-        widget.filament.setEntityTransformRotation(
+-          PlanetariumSceneView.objectGuids["${name}_orbit"]!,
+-          rot.storage64,
+-        ),
+-      );
+-    }
++    return;
+   }
+ 
+   @override

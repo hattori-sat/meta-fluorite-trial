@@ -1,0 +1,35 @@
+From 74b6c2067a010d3b0feaf0c876e22737d47dbc23 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 13:56:45 +0000
+Subject: [PATCH] diag: trace active view scene and layers
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index ba70c63..fdbf863 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1219,10 +1219,21 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+       camera.getNear(),
+       camera.getCullingFar()
+     );
+ 
+     const auto* const scene = filamentSystem->getFilamentScene();
++    const auto* const viewScene = fview_->getScene();
++    spdlog::info(
++      "FLR0026_VIEW_STATE seq={} view_scene={} system_scene={} same_scene={} visible_layers={} "
++      "blend_opaque={}",
++      frameSequence,
++      viewScene != nullptr,
++      scene != nullptr,
++      viewScene == scene,
++      fview_->getVisibleLayers(),
++      fview_->getBlendMode() == filament::View::BlendMode::OPAQUE
++    );
+     auto& renderableManager = _engine->getRenderableManager();
+     auto& transformManager = _engine->getTransformManager();
+     size_t sampleCount = 0;
+     if (scene != nullptr) {
+       scene->forEach([&](utils::Entity entity) {
+-- 
+2.34.1
+

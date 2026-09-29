@@ -1,0 +1,33 @@
+From a32ed640938b8f84022af20c22ead4a14bd8624f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 13:55:52 +0000
+Subject: [PATCH] diag: trace Vulkan queue present return
+
+---
+ .../vulkan/platform/VulkanPlatformSwapChainImpl.cpp    | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index 1387210e1..d1e8fcf58 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -382,9 +382,19 @@ VkResult VulkanPlatformSurfaceSwapChain::present(uint32_t index, VkSemaphore fin
+         std::fprintf(stderr, "FLR0026_VK_QUEUE_WAIT_IDLE result=%d\\n",
+                 static_cast<int32_t>(idleResult));
+     }
++    const bool fluoritePresentTrace = std::getenv("FLUORITE_PRESENT_TRACE") != nullptr;
++    if (fluoritePresentTrace) {
++        std::fprintf(stderr,
++                "FLUORITE_VK_QUEUE_PRESENT_ENTER index=%u wait=%s\n",
++                currentIndex, skipFinishedSemaphore ? "false" : "true");
++    }
+     std::fprintf(stderr, "FLR0026_VK_QUEUE_PRESENT_BEGIN queue=%p swapchain=%p index=%u\\n",
+             static_cast<void*>(mQueue), static_cast<void*>(mSwapchain), currentIndex);
+     VkResult result = vkQueuePresentKHR(mQueue, &presentInfo);
++    if (fluoritePresentTrace) {
++        std::fprintf(stderr, "FLUORITE_VK_QUEUE_PRESENT_RETURN result=%d\n",
++                static_cast<int32_t>(result));
++    }
+     std::fprintf(
+             stderr,
+             "FLR0026_VK_QUEUE_PRESENT result=%d surface=%llx swapchain=%llx index=%u\n",

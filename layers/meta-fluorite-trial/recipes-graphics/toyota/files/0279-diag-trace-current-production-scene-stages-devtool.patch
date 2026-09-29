@@ -1,0 +1,203 @@
+From f5bfd484ba45b5900158b70fd4c5d0f5d5fcb9ce Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 23 Sep 2026 17:15:08 +0000
+Subject: [PATCH] diag: trace current production scene stages
+
+---
+ .../filament_view/core/scene/view_target.cc   | 14 +++
+ .../core/systems/derived/model_system.cc      | 86 ++++++++++++++++++-
+ 2 files changed, 99 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index d099acb..7eee7ae 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1121,6 +1121,7 @@ const wl_callback_listener ViewTarget::frame_listener = {.done = OnFrame};
+  */
+ void ViewTarget::DrawFrame(const uint32_t time) {
+   const bool traceFrameBoundary = std::getenv("FLUORITE_VIEWTARGET_FRAME_TRACE") != nullptr;
++  const bool traceSceneStage = std::getenv("FLR0026_SCENE_STAGE_TRACE") != nullptr;
+   if (traceFrameBoundary) {
+     const auto filamentSystem = ECSManager::GetInstance()->getSystem<FilamentSystem>("DrawFrame");
+     const auto viewport = fview_->getViewport();
+@@ -1226,6 +1227,16 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     // Frame is being rendered
+     // TODO(kerberjg): send kPreRenderFrame event, async with wait
+     // spdlog::debug("=== RENDER FRAME ===");
++    if (traceSceneStage) {
++      const auto activeScene = fview_->getScene();
++      spdlog::info(
++        "FLR0026_SCENE_STAGE_DRAW_SUBMIT scene_default={} scene_native={} swapchain={} view={}",
++        activeScene == filamentSystem->getFilamentScene(),
++        activeScene == native_diagnostic_scene_,
++        fswapChain_ != nullptr,
++        fview_ != nullptr
++      );
++    }
+     renderer->render(fview_);
+     if (traceFrameBoundary) {
+       spdlog::info("FLUORITE_VIEWTARGET_RENDER_RETURN");
+@@ -1311,6 +1322,9 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     }
+     // spdlog::debug("=== END FRAME ===");
+     renderer->endFrame();
++    if (traceSceneStage) {
++      spdlog::info("FLR0026_SCENE_STAGE_DRAW_END");
++    }
+     const bool forceWaylandCommit =
+       std::getenv("FLUORITE_NATIVE_WAYLAND_COMMIT") != nullptr;
+     if (forceWaylandCommit && surface_ != nullptr && display_ != nullptr) {
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index c811215..e3eb06e 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -108,6 +108,8 @@ void ModelSystem::createModelInstance(Model* model) {
+ void ModelSystem::addModelToScene(EntityGUID modelGuid) {
+   assertInitialized();
+ 
++  const bool traceSceneStage = std::getenv("FLR0026_SCENE_STAGE_TRACE") != nullptr;
++
+   // Get model
+   std::shared_ptr<Model> model = _models[modelGuid];
+   runtime_assert(
+@@ -129,6 +131,21 @@ void ModelSystem::addModelToScene(EntityGUID modelGuid) {
+   const bool isInScene = model->isInScene();
+   const ModelInstancingMode instancingMode = model->getInstancingMode();
+ 
++  if (traceSceneStage) {
++    spdlog::info(
++      "FLR0026_SCENE_STAGE_ADD_BEGIN model={} name={} path={} mode={} asset_loaded={} "
++      "asset_present={} instance_present={} in_scene={}",
++      modelGuid,
++      model->name,
++      model->getAssetPath(),
++      modelInstancingModeToString(instancingMode),
++      _assets[model->getAssetPath()].state == AssetLoadingState::loaded,
++      model->getAsset() != nullptr,
++      model->getAssetInstance() != nullptr,
++      isInScene
++    );
++  }
++
+   if (isInScene) {
+     spdlog::warn(
+       "[{}] model '{}'({}) is already in scene (asset {}), skipping add", __FUNCTION__,  //
+@@ -177,6 +194,17 @@ void ModelSystem::addModelToScene(EntityGUID modelGuid) {
+     modelEntityCount = asset->getRenderableEntityCount();
+   }
+ 
++  if (traceSceneStage) {
++    spdlog::info(
++      "FLR0026_SCENE_STAGE_ENTITY_SET model={} entity_count={} asset_present={} "
++      "instance_present={}",
++      modelGuid,
++      modelEntityCount,
++      asset != nullptr,
++      assetInstance != nullptr
++    );
++  }
++
+   /*
+    *  Renderable setup
+    */
+@@ -209,6 +237,15 @@ void ModelSystem::addModelToScene(EntityGUID modelGuid) {
+     );
+   }
+ 
++  if (traceSceneStage) {
++    spdlog::info(
++      "FLR0026_SCENE_STAGE_SCENE_ADD_DONE model={} root_entity={} renderable_entities={}",
++      modelGuid,
++      instanceEntity.getId(),
++      modelEntityCount
++    );
++  }
++
+   // Set up transform parenting (needs to be done after renderable setup)
+   spdlog::trace("  Setting up transform parenting for model({})", modelGuid);
+   for (auto& [childEntity, childGuid] : model->_childrenEntities) {
+@@ -272,6 +309,15 @@ void ModelSystem::addModelToScene(EntityGUID modelGuid) {
+   }
+ 
+   model->m_isInScene = true;
++
++  if (traceSceneStage) {
++    spdlog::info(
++      "FLR0026_SCENE_STAGE_ADD_COMPLETE model={} in_scene={} child_entities={}",
++      modelGuid,
++      model->isInScene(),
++      model->_childrenEntities.size()
++    );
++  }
+ }
+ 
+ void ModelSystem::setupRenderable(
+@@ -423,6 +469,17 @@ void ModelSystem::updateAsyncAssetLoading() {
+ 
+   // for each AssetDescriptor...
+   for (auto& [assetPath, assetData] : _assets) {
++    const bool traceSceneStage = std::getenv("FLR0026_SCENE_STAGE_TRACE") != nullptr;
++    if (traceSceneStage) {
++      spdlog::info(
++        "FLR0026_SCENE_STAGE_ASSET_READY asset_path={} state={} queued_models={} asset_present={}",
++        assetPath,
++        static_cast<int>(assetData.state),
++        assetData.loadingInstances.size(),
++        assetData.asset != nullptr
++      );
++    }
++
+     // if the asset is loaded, mark it as loaded
+     if (assetData.state == AssetLoadingState::loading) {
+       assetData.state = AssetLoadingState::loaded;
+@@ -469,6 +526,18 @@ void ModelSystem::updateAsyncAssetLoading() {
+         // Add model to scene
+         spdlog::debug("Loaded, adding model to scene: '{}'({})", model->getAssetPath(), modelGuid);
+ 
++        if (traceSceneStage) {
++          spdlog::info(
++            "FLR0026_SCENE_STAGE_DISPATCH model={} path={} mode={} asset_present={} "
++            "instance_present={}",
++            modelGuid,
++            model->getAssetPath(),
++            modelInstancingModeToString(model->getInstancingMode()),
++            model->getAsset() != nullptr,
++            model->getAssetInstance() != nullptr
++          );
++        }
++
+         switch (model->getInstancingMode()) {
+           case ModelInstancingMode::primary:
+             spdlog::trace("Model is primary, updating transform but not adding to scene");
+@@ -576,8 +645,10 @@ void ModelSystem::queueModelLoad(std::shared_ptr<Model> model) {
+ void ModelSystem::loadModelFromFile(EntityGUID modelGuid, const std::string& baseAssetPath) {
+   spdlog::trace("++ loadModelFromFile");
+ 
++  const bool traceSceneStage = std::getenv("FLR0026_SCENE_STAGE_TRACE") != nullptr;
++
+   const auto& strand = *ecs->getStrand();
+-  post(strand, [&, modelGuid, baseAssetPath]() mutable {
++  post(strand, [&, modelGuid, baseAssetPath, traceSceneStage]() mutable {
+     spdlog::trace("++ loadModelFromFile (lambda), model guid: {}", modelGuid);
+     // Get model
+     std::shared_ptr<Model> model = _models[modelGuid];
+@@ -614,6 +685,19 @@ void ModelSystem::loadModelFromFile(EntityGUID modelGuid, const std::string& bas
+ 
+         model->setAssetInstance(assetInstance);
+ 
++        if (traceSceneStage) {
++          spdlog::info(
++            "FLR0026_SCENE_STAGE_ASSET_LOADED model={} path={} bytes={} renderable_entities={} "
++            "asset_present={} instance_present={}",
++            modelGuid,
++            assetPath,
++            buffer.size(),
++            asset->getRenderableEntityCount(),
++            model->getAsset() != nullptr,
++            model->getAssetInstance() != nullptr
++          );
++        }
++
+         spdlog::debug("Loaded glb model successfully from {}", assetPath);
+       } else {
+         spdlog::error("Couldn't load glb model from {}", assetPath);
