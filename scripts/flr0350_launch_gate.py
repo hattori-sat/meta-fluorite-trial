@@ -16,6 +16,13 @@ LAUNCH_FIELDS = frozenset({"pid", "start", "uid", "comm"})
 REQUIRED_FIELDS = frozenset(
     {
         "version",
+        "run_id",
+        "identity_record",
+        "identity_pid",
+        "identity_start",
+        "identity_uid",
+        "identity_dev",
+        "identity_ino",
         "pid",
         "start",
         "start_after",
@@ -81,6 +88,29 @@ def is_fresh_run_id(value: str) -> bool:
     return bool(RUN_ID_PATTERN.fullmatch(value)) and value not in CONSUMED_RUN_IDS
 
 
+def render_identity_init_command(run_id: str) -> str:
+    """Create a root-owned run directory and exclusive run-ID marker on guest."""
+    if not is_fresh_run_id(run_id):
+        raise GateObservationError("invalid-or-consumed-run-id")
+    quoted_run_id = "'" + run_id + "'"
+    return (
+        '(umask 077; d=/run/flr0350; '
+        'if [ -e "$d" ] || [ -L "$d" ]; then '
+        'echo FLR0350_RUN_ID_INIT=FAIL reason=collision; '
+        'elif mkdir -m 700 "$d" '
+        '&& [ "$(stat -c \'%u:%a\' "$d" 2>/dev/null)" = 0:700 ] '
+        '&& (set -C; printf \'%s\\n\' '
+        + quoted_run_id
+        + ' > "$d/run.id") && [ -f "$d/run.id" ] '
+        '&& [ ! -L "$d/run.id" ] '
+        '&& [ "$(stat -c \'%u:%a\' "$d/run.id" 2>/dev/null)" = 0:600 ] '
+        '&& [ "$(cat "$d/run.id" 2>/dev/null)" = '
+        + quoted_run_id
+        + ' ]; then echo FLR0350_RUN_ID_INIT=PASS; '
+        'else echo FLR0350_RUN_ID_INIT=FAIL reason=init; fi)'
+    )
+
+
 def _unsigned(value: str, field: str) -> int:
     if re.fullmatch(r"0x[0-9a-fA-F]+", value):
         return int(value[2:], 16)
@@ -89,13 +119,21 @@ def _unsigned(value: str, field: str) -> int:
     raise GateObservationError("invalid-number-" + field)
 
 
-def validate_gate_output(output: str) -> dict[str, str]:
+def validate_gate_output(
+    output: str, expected_run_id: str | None = None
+) -> dict[str, str]:
     """Parse and validate the exact observation consumed by the host runner."""
     launch = _parse_marker(output, LAUNCH_MARKER, LAUNCH_FIELDS)
     fields = _parse_marker(output, GATE_MARKER, REQUIRED_FIELDS)
 
-    if fields["version"] != "1":
+    if fields["version"] != "2":
         raise GateObservationError("unsupported-version")
+    if not is_fresh_run_id(fields["run_id"]):
+        raise GateObservationError("invalid-or-consumed-run-id")
+    if expected_run_id is not None and fields["run_id"] != expected_run_id:
+        raise GateObservationError("run-id-mismatch")
+    if fields["identity_record"] != "PASS":
+        raise GateObservationError("identity-record-not-passed")
     pid = _unsigned(fields["pid"], "pid")
     start = _unsigned(fields["start"], "start")
     start_after = _unsigned(fields["start_after"], "start_after")
@@ -111,6 +149,11 @@ def validate_gate_output(output: str) -> dict[str, str]:
     gate_device = _unsigned(fields["gate_dev"], "gate_dev")
     gate_inode = _unsigned(fields["gate_ino"], "gate_ino")
     gate_uid = _unsigned(fields["gate_uid"], "gate_uid")
+    identity_pid = _unsigned(fields["identity_pid"], "identity_pid")
+    identity_start = _unsigned(fields["identity_start"], "identity_start")
+    identity_uid = _unsigned(fields["identity_uid"], "identity_uid")
+    identity_device = _unsigned(fields["identity_dev"], "identity_dev")
+    identity_inode = _unsigned(fields["identity_ino"], "identity_ino")
 
     if (
         pid == 0
@@ -123,6 +166,10 @@ def validate_gate_output(output: str) -> dict[str, str]:
         or fields["comm"] != launch["comm"]
     ):
         raise GateObservationError("process-identity-unstable")
+    if (identity_pid, identity_start, identity_uid) != (pid, start, uid):
+        raise GateObservationError("persisted-process-identity-mismatch")
+    if (identity_device, identity_inode) != (gate_device, gate_inode):
+        raise GateObservationError("persisted-fifo-identity-mismatch")
     if uid != 1001 or fields["comm"] != "sh" or fields["state"] != "S":
         raise GateObservationError("wrapper-identity-mismatch")
     if tracer != 0:
@@ -163,7 +210,7 @@ def extract_proc_stat_starttime(stat_line: str) -> str:
 
 def _usage() -> int:
     print(
-        "usage: flr0350_launch_gate.py --validate <launch-log> <gate-log> "
+        "usage: flr0350_launch_gate.py --validate <run-id> <launch-log> <gate-log> "
         "| --check-run-id <id>",
         file=sys.stderr,
     )
@@ -178,12 +225,22 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
         print("FLR0350_RUN_ID=PASS")
         return 0
-    if len(args) == 3 and args[0] == "--validate":
+    if len(args) == 2 and args[0] == "--render-identity-init":
         try:
+            print(render_identity_init_command(args[1]))
+        except GateObservationError as exc:
+            print("FLR0350_RUN_ID_INIT=REJECTED reason=" + str(exc))
+            return 2
+        return 0
+    if len(args) == 4 and args[0] == "--validate":
+        try:
+            expected_run_id = args[1]
+            if not is_fresh_run_id(expected_run_id):
+                raise GateObservationError("invalid-or-consumed-run-id")
             output = "\n".join(
-                Path(path).read_text(encoding="utf-8") for path in args[1:]
+                Path(path).read_text(encoding="utf-8") for path in args[2:]
             )
-            fields = validate_gate_output(output)
+            fields = validate_gate_output(output, expected_run_id=expected_run_id)
         except (OSError, UnicodeError):
             print("FLR0350_FIFO_READ_GATE=FAIL reason=observation-unavailable")
             return 2
@@ -192,6 +249,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 1
         print(
             "FLR0350_FIFO_READ_GATE=PASS"
+            + " run_id="
+            + fields["run_id"]
             + " pid="
             + fields["pid"]
             + " start="

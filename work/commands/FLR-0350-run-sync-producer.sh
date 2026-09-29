@@ -20,6 +20,14 @@ runtime_command_files=(
     FLR-0350-interrupt-gdb.cmd
     FLR-0350-capture-runtime-state.cmd
     FLR-0350-stop-recorded-app.cmd
+    FLR-0350-preflight-helper-collision.cmd
+)
+runtime_guest_scripts=(
+    FLR-0350-gate-common.sh
+    FLR-0350-attach-pre-submit.sh
+    FLR-0350-release-go.sh
+    FLR-0350-stop-recorded-app.sh
+    FLR-0350-interrupt-gdb.sh
 )
 
 static_check() {
@@ -31,6 +39,7 @@ import base64
 import gzip
 import re
 import shlex
+import subprocess
 import sys
 from pathlib import Path
 
@@ -85,6 +94,8 @@ if not (
     raise SystemExit("failure cleanup may capture while GDB stop is unconfirmed")
 if "FLR0350_POST_RUN_CAPTURE=SKIPPED reason=gdb-stop-not-confirmed" not in cleanup_body:
     raise SystemExit("failure cleanup must report skipped capture when GDB remains active")
+if "FLR0350_UNRECORDED_TARGET_ABORT=FAIL" not in cleanup_body:
+    raise SystemExit("failure cleanup must not interrupt GDB after an unproven target abort")
 
 inventory = re.search(r"(?ms)^runtime_command_files=\(\n(.*?)^\)", runner_text)
 if not inventory:
@@ -108,7 +119,18 @@ for name in command_names:
         raise SystemExit("serial-command-source-unreadable: " + name) from exc
     if len(data.splitlines()) != 1 or len(data.rstrip(b"\n")) > 4096:
         raise SystemExit("serial-command shape/size failed: " + name)
-    import subprocess
+    subprocess.run(["sh", "-n", str(path)], check=True)
+
+script_inventory = re.search(r"(?ms)^runtime_guest_scripts=\(\n(.*?)^\)", runner_text)
+if not script_inventory:
+    raise SystemExit("guest helper-script inventory missing")
+script_names = re.findall(r"(?m)^\s*(FLR-0350-[\w.-]+\.sh)\s*$", script_inventory.group(1))
+if not script_names or len(script_names) != len(set(script_names)):
+    raise SystemExit("guest helper-script inventory is empty or duplicated")
+for name in script_names:
+    path = commands / name
+    if not path.is_file():
+        raise SystemExit("guest helper-script missing: " + name)
     subprocess.run(["sh", "-n", str(path)], check=True)
 
 gdb_path = commands / "FLR-0350-sync-producer.gdb"
@@ -151,6 +173,19 @@ if any(len(chunk) > 2000 or (index < len(chunks) - 1 and len(chunk) % 4)
 if any(len("printf %s '" + chunk + "' | base64 -d >> /run/user/1001/flr0350-sync-producer.gdb.gz") > 4096
        for chunk in chunks):
     raise SystemExit("GDB script transfer command exceeds serial limit")
+init_command = subprocess.run(
+    [sys.executable, str(root / "scripts/flr0350_launch_gate.py"),
+     "--render-identity-init", "flr0362-0001"],
+    check=True, capture_output=True, text=True,
+).stdout.rstrip("\n")
+if "\n" in init_command or len(init_command.encode()) > 4096:
+    raise SystemExit("run-identity initialization command exceeds serial limit")
+preflight = runner_runtime.index("guest_run preflight FLR-0350-preflight.cmd")
+helper_preflight = runner_runtime.index("guest_run helper-preflight FLR-0350-preflight-helper-collision.cmd")
+identity_init = runner_runtime.index("guest_run init-run-identity init-run-identity.cmd")
+launch = runner_runtime.index("guest_run launch FLR-0350-launch-paused-production.cmd")
+if not preflight < helper_preflight < identity_init < launch:
+    raise SystemExit("root identity init must follow guest preflight and precede launch")
 print("FLR0350_STATIC_CHECK=PASS commands=%d gdb_python_blocks=%d transfer_chunks=%d" %
       (len(command_names), len(blocks), len(chunks)))
 print("FLR0350_PROFILE_MATCH=PASS environment=exact cli=exact target=qemux86-64")
@@ -232,6 +267,27 @@ printf '%s\n' "$preflight_output" | tee "$parent/qemu-preflight.log"
 for file in "${runtime_command_files[@]}"; do
     cp -- "$repo_root/work/commands/$file" "$parent/$file"
 done
+for file in "${runtime_guest_scripts[@]}"; do
+    source_file=$repo_root/work/commands/$file
+    committed_sha=$(git -C "$repo_root" show "HEAD:work/commands/$file" |
+        sha256sum | awk '{print $1}')
+    source_sha=$(sha256sum "$source_file" | awk '{print $1}')
+    [ "$source_sha" = "$committed_sha" ] || {
+        echo "FLR0350_GUEST_SCRIPT=FAIL reason=source-not-at-HEAD file=$file"
+        exit 1
+    }
+    cp -- "$source_file" "$parent/$file"
+    cmp -s "$source_file" "$parent/$file" || {
+        echo "FLR0350_GUEST_SCRIPT=FAIL reason=staged-source-mismatch file=$file"
+        exit 1
+    }
+    staged_sha=$(sha256sum "$parent/$file" | awk '{print $1}')
+    [ "$staged_sha" = "$committed_sha" ] || {
+        echo "FLR0350_GUEST_SCRIPT=FAIL reason=staged-not-committed-bytes file=$file"
+        exit 1
+    }
+    echo "FLR0350_GUEST_SCRIPT=PASS file=$file sha256=$staged_sha"
+done
 cp -- "$harness_source" "$parent/qemu-runtime-harness.sh"
 harness=$parent/qemu-runtime-harness.sh
 if ! cmp -s "$harness_source" "$harness"; then
@@ -290,7 +346,7 @@ cleanup() {
                 cleanup_failed=1
                 gdb_stopped=0
             fi
-            if grep -Eq 'FLR0350_GDB_INTERRUPT=FAIL|FLR0350_GDB_REMAINDER=running' \
+            if grep -Eq 'FLR0350_UNRECORDED_TARGET_ABORT=FAIL|FLR0350_GDB_INTERRUPT=FAIL|FLR0350_GDB_REMAINDER=running' \
                 "$run_dir/cleanup-gdb.serial.log" 2>/dev/null; then
                 cleanup_failed=1
                 gdb_stopped=0
@@ -357,6 +413,17 @@ guest_ready=1
 cat "$run_dir/pre-launch-capture.log"
 guest_run preflight FLR-0350-preflight.cmd
 grep -F 'FLR0350_PREFLIGHT=PASS' "$run_dir/preflight.serial.log"
+guest_run helper-preflight FLR-0350-preflight-helper-collision.cmd
+grep -F 'FLR0350_HELPER_PREFLIGHT=PASS' "$run_dir/helper-preflight.serial.log"
+
+python3 scripts/flr0350_launch_gate.py --render-identity-init "$run_id" \
+    >"$run_dir/init-run-identity.cmd"
+[ "$(wc -c <"$run_dir/init-run-identity.cmd" | tr -d ' ')" -le 4097 ] || {
+    echo FLR0350_RUN_ID_INIT=FAIL reason=command-too-large
+    exit 1
+}
+guest_run init-run-identity init-run-identity.cmd
+grep -F 'FLR0350_RUN_ID_INIT=PASS' "$run_dir/init-run-identity.serial.log"
 
 gdb_script=$run_dir/FLR-0350-sync-producer.gdb
 gdb_sha=$(sha256sum "$gdb_script" | awk '{print $1}')
@@ -379,21 +446,57 @@ while [ "$offset" -lt "${#packed}" ]; do
     offset=$((offset + chunk_size))
     chunk_index=$((chunk_index + 1))
 done
-finalize="gzip -dc /run/user/1001/flr0350-sync-producer.gdb.gz > /run/user/1001/flr0350-sync-producer.gdb.tmp && chmod 600 /run/user/1001/flr0350-sync-producer.gdb.tmp && test \"\$(sha256sum /run/user/1001/flr0350-sync-producer.gdb.tmp | cut -d' ' -f1)\" = '$gdb_sha' && mv /run/user/1001/flr0350-sync-producer.gdb.tmp /run/user/1001/flr0350-sync-producer.gdb && unlink /run/user/1001/flr0350-sync-producer.gdb.gz && echo FLR0350_GDB_SCRIPT_INSTALL=PASS"
+finalize="test ! -e /run/user/1001/flr0350-sync-producer.gdb && test ! -L /run/user/1001/flr0350-sync-producer.gdb && test ! -e /run/user/1001/flr0350-sync-producer.gdb.tmp && test ! -L /run/user/1001/flr0350-sync-producer.gdb.tmp && gzip -dc /run/user/1001/flr0350-sync-producer.gdb.gz > /run/user/1001/flr0350-sync-producer.gdb.tmp && chmod 600 /run/user/1001/flr0350-sync-producer.gdb.tmp && test \"\$(sha256sum /run/user/1001/flr0350-sync-producer.gdb.tmp | cut -d' ' -f1)\" = '$gdb_sha' && mv /run/user/1001/flr0350-sync-producer.gdb.tmp /run/user/1001/flr0350-sync-producer.gdb && unlink /run/user/1001/flr0350-sync-producer.gdb.gz && echo FLR0350_GDB_SCRIPT_INSTALL=PASS"
 [ "$(printf '%s' "$finalize" | wc -c | tr -d ' ')" -le 4096 ] || { echo FLR0350_GDB_TRANSFER=FAIL finalize-too-large; exit 1; }
 printf '%s\n' "$finalize" >"$run_dir/install-gdb-finalize.cmd"
 guest_run install-gdb-finalize install-gdb-finalize.cmd
 grep -F 'FLR0350_GDB_SCRIPT_INSTALL=PASS' "$run_dir/install-gdb-finalize.serial.log"
+
+for guest_script in "${runtime_guest_scripts[@]}"; do
+    script_sha=$(sha256sum "$parent/$guest_script" | awk '{print $1}')
+    packed=$(gzip -n -c "$parent/$guest_script" | base64 | tr -d '\n')
+    offset=0
+    chunk_index=1
+    guest_path=/run/user/1001/$guest_script
+    while [ "$offset" -lt "${#packed}" ]; do
+        chunk=${packed:$offset:$chunk_size}
+        compressed_path=$guest_path.gz
+        if [ "$chunk_index" -eq 1 ]; then
+            install="test ! -e '$compressed_path' && test ! -L '$compressed_path' && printf %s '$chunk' | base64 -d > '$compressed_path' && echo FLR0350_GUEST_SCRIPT_CHUNK_$chunk_index=PASS"
+        else
+            install="test -f '$compressed_path' && printf %s '$chunk' | base64 -d >> '$compressed_path' && echo FLR0350_GUEST_SCRIPT_CHUNK_$chunk_index=PASS"
+        fi
+        [ "$(printf '%s' "$install" | wc -c | tr -d ' ')" -le 4096 ] || {
+            echo "FLR0350_GUEST_SCRIPT=FAIL reason=chunk-too-large file=$guest_script"
+            exit 1
+        }
+        install_file=$run_dir/install-guest-script-$chunk_index.cmd
+        printf '%s\n' "$install" >"$install_file"
+        guest_run "install-guest-script-$guest_script-$chunk_index" "$install-guest-script-$chunk_index.cmd"
+        grep -F 'FLR0350_GUEST_SCRIPT_CHUNK_' "$run_dir/install-guest-script-$guest_script-$chunk_index.serial.log"
+        offset=$((offset + chunk_size))
+        chunk_index=$((chunk_index + 1))
+    done
+    finalize="test ! -e '$guest_path' && test ! -L '$guest_path' && test ! -e '$guest_path.tmp' && test ! -L '$guest_path.tmp' && gzip -dc '$compressed_path' > '$guest_path.tmp' && chmod 600 '$guest_path.tmp' && test \"\$(sha256sum '$guest_path.tmp' | cut -d' ' -f1)\" = '$script_sha' && mv '$guest_path.tmp' '$guest_path' && unlink '$compressed_path' && echo FLR0350_GUEST_SCRIPT_INSTALL=PASS"
+    [ "$(printf '%s' "$finalize" | wc -c | tr -d ' ')" -le 4096 ] || {
+        echo "FLR0350_GUEST_SCRIPT=FAIL reason=finalize-too-large file=$guest_script"
+        exit 1
+    }
+    printf '%s\n' "$finalize" >"$run_dir/install-guest-script-finalize.cmd"
+    guest_run "install-guest-script-finalize-$guest_script" install-guest-script-finalize.cmd
+    grep -F 'FLR0350_GUEST_SCRIPT_INSTALL=PASS' "$run_dir/install-guest-script-finalize-$guest_script.serial.log"
+done
 
 guest_run launch FLR-0350-launch-paused-production.cmd
 grep -F 'FLR0350_LAUNCH=PASS' "$run_dir/launch.serial.log"
 grep -F 'FLR0350_LAUNCH_WRAPPER=READY' "$run_dir/launch.serial.log"
 guest_run observe-gate FLR-0350-observe-fifo-read-gate.cmd
 python3 scripts/flr0350_launch_gate.py --validate \
-    "$run_dir/launch.serial.log" "$run_dir/observe-gate.serial.log"
+    "$run_id" "$run_dir/launch.serial.log" "$run_dir/observe-gate.serial.log"
 guest_run attach-gdb FLR-0350-attach-pre-submit.cmd
 grep -F 'FLR0350_GDB_ATTACH=PASS' "$run_dir/attach-gdb.serial.log"
 guest_run release-go FLR-0350-release-go.cmd
+grep -F 'FLR0350_GO_RECORD=PASS' "$run_dir/release-go.serial.log"
 grep -F 'FLR0350_EXEC=PASS' "$run_dir/release-go.serial.log"
 guest_run symbol-gate FLR-0350-wait-symbol-gate.cmd
 if grep -Fq 'FLR0350_SYMBOL_GATE_POLL=PASS' "$run_dir/symbol-gate.serial.log"; then
@@ -438,7 +541,7 @@ fi
 guest_run stop-gdb FLR-0350-interrupt-gdb.cmd
 grep -E 'FLR0350_GDB_(INTERRUPT|REMAINDER|TERM_FALLBACK)|FLR0350_SYNC_WRITE|FLR0350_MATCHED_WAIT|FLR0350_COVERAGE_GAP|Hardware watchpoint|Old value|New value|Program received signal|error:|Error|Cannot|ptrace|failed|Failed|^#([0-9]+) ' \
     "$run_dir/stop-gdb.serial.log" | tail -n 120 || true
-if grep -Eq 'FLR0350_GDB_INTERRUPT=FAIL|FLR0350_GDB_REMAINDER=running' "$run_dir/stop-gdb.serial.log"; then
+if grep -Eq 'FLR0350_UNRECORDED_TARGET_ABORT=FAIL|FLR0350_GDB_INTERRUPT=FAIL|FLR0350_GDB_REMAINDER=running' "$run_dir/stop-gdb.serial.log"; then
     echo FLR0350_GDB_TEARDOWN=FAIL
     exit 1
 fi

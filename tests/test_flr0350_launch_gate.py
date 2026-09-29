@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,7 +30,14 @@ from scripts.flr0350_launch_gate import (  # noqa: E402
 
 def observation(**overrides: str) -> dict[str, str]:
     fields = {
-        "version": "1",
+        "version": "2",
+        "run_id": "flr0362-0001",
+        "identity_record": "PASS",
+        "identity_pid": "708",
+        "identity_start": "10001",
+        "identity_uid": "1001",
+        "identity_dev": "17",
+        "identity_ino": "88",
         "pid": "708",
         "start": "10001",
         "start_after": "10001",
@@ -70,8 +77,31 @@ class LaunchGatePredicateTests(unittest.TestCase):
     def test_same_fifo_passes_for_fd_zero_and_fd_three(self) -> None:
         for actual_fd in ("0x0", "0x3"):
             with self.subTest(actual_fd=actual_fd):
-                accepted = validate_gate_output(render(observation(arg1=actual_fd)))
+                accepted = validate_gate_output(
+                    render(observation(arg1=actual_fd)), expected_run_id="flr0362-0001"
+                )
                 self.assertEqual(accepted["arg1"], actual_fd)
+
+    def test_run_id_and_persisted_identity_must_match_expected_observation(self) -> None:
+        with self.assertRaises(GateObservationError):
+            validate_gate_output(
+                render(observation()), expected_run_id="flr0362-0002"
+            )
+        for changes in (
+            {"identity_record": "FAIL"},
+            {"identity_pid": "709"},
+            {"identity_start": "10002"},
+            {"identity_uid": "0"},
+            {"identity_dev": "18"},
+            {"identity_ino": "89"},
+            {"run_id": "flr0359-0001"},
+        ):
+            with self.subTest(changes=changes), self.assertRaises(
+                GateObservationError
+            ):
+                validate_gate_output(
+                    render(observation(**changes)), expected_run_id="flr0362-0001"
+                )
 
     def test_correct_fd_three_cannot_hide_wrong_actual_read_target(self) -> None:
         # The syscall says read(fd=0); an unrelated fd=3 symlink cannot make
@@ -139,7 +169,7 @@ class LaunchGatePredicateTests(unittest.TestCase):
 
     def test_process_and_syscall_identity_must_match(self) -> None:
         for changes in (
-            {"version": "2"},
+            {"version": "1"},
             {"pid": "0"},
             {"start": "-1"},
             {"start_after": "10002"},
@@ -170,6 +200,242 @@ class LaunchGatePredicateTests(unittest.TestCase):
 
 
 class ProcStatAndRunnerContractTests(unittest.TestCase):
+    def _release_gate_fixture(
+        self, root: Path, *, fault: str | None = None
+    ) -> tuple[dict[str, str], Path, Path, int, tuple[str, str, str, str]]:
+        user_dir = root / "user"
+        root_dir = root / "root-owned"
+        proc_root = root / "proc"
+        fake_bin = root / "bin"
+        for directory in (user_dir, root_dir, proc_root, fake_bin):
+            directory.mkdir(mode=0o700)
+        target_pid = "730001"
+        gdb_pid = str(os.getpid())
+        target_start = "1234567"
+        gdb_start = "7654321"
+        run_id = "flr0362-0001"
+        gate = user_dir / "flr0350-go.fifo"
+        decoy = user_dir / "other.fifo"
+        os.mkfifo(gate, 0o600)
+        os.mkfifo(decoy, 0o600)
+        os.chmod(gate, 0o600)
+        os.chmod(decoy, 0o600)
+        gate_stat = os.stat(gate)
+
+        def proc_stat(pid: str, state: str, start: str) -> str:
+            return f"{pid} (fixture) " + " ".join(
+                [state, *("0" for _ in range(18)), start]
+            ) + "\n"
+
+        target = proc_root / target_pid
+        gdb = proc_root / gdb_pid
+        for entry in (target, gdb):
+            (entry / "fd").mkdir(parents=True)
+        (target / "stat").write_text(proc_stat(target_pid, "t", target_start))
+        (target / "comm").write_text("sh\n")
+        (target / "status").write_text(
+            f"Uid:\t1001\t1001\t1001\t1001\nTracerPid:\t{gdb_pid}\n"
+        )
+        (target / "fd" / "0").symlink_to(gate)
+        (target / "fd" / "3").symlink_to(gate)
+        (gdb / "stat").write_text(proc_stat(gdb_pid, "S", gdb_start))
+        (gdb / "comm").write_text("gdb\n")
+        (gdb / "status").write_text("Uid:\t0\t0\t0\t0\nTracerPid:\t0\n")
+
+        (root_dir / "run.id").write_text(run_id + "\n")
+        (root_dir / "fifo.identity").write_text(
+            f"1 {run_id} {target_pid} {target_start} 1001 "
+            f"{gate_stat.st_dev} {gate_stat.st_ino}\n"
+        )
+        (root_dir / "attach.auth").write_text(
+            f"1 {run_id} {target_pid} {target_start} 1001 "
+            f"{gate_stat.st_dev} {gate_stat.st_ino} {gdb_pid} {gdb_start}\n"
+        )
+        for record in root_dir.iterdir():
+            record.chmod(0o600)
+
+        (user_dir / "flr0350-flutter.pid").write_text(target_pid + "\n")
+        (user_dir / "flr0350-wrapper.start").write_text(target_start + "\n")
+        (user_dir / "flr0350-gdb.pid").write_text(gdb_pid + "\n")
+        (user_dir / "flr0350-gdb.start").write_text(gdb_start + "\n")
+        (user_dir / "flr0350-gdb-armed").write_text(
+            f"FLR0350_GDB_ARMED=PASS target_pid={target_pid} gdb_pid={gdb_pid}\n"
+        )
+
+        fake_stat = fake_bin / "stat"
+        fake_stat.write_text(
+            "#!/bin/sh\n"
+            "fmt=; target=; want_fmt=0\n"
+            "for arg do\n"
+            "  if [ \"$want_fmt\" = 1 ]; then fmt=$arg; want_fmt=0; continue; fi\n"
+            "  case $arg in -L) ;; -c) want_fmt=1 ;; *) target=$arg ;; esac\n"
+            "done\n"
+            "result=$(python3 -c 'import os,sys; s=os.stat(sys.argv[2]); f=sys.argv[1]; m=oct(s.st_mode & 0o777)[2:]; "
+            "print((\"0:%s\" % m) if f == \"%u:%a\" else (\"%s:%s\" % (s.st_dev,s.st_ino)))' \"$fmt\" \"$target\")\n"
+            "printf '%s\\n' \"$result\"\n"
+            "if [ \"${FLR0350_TEST_MUTATE_POST_OPEN:-0}\" = 1 ] && [ \"$fmt\" = '%d:%i' ] && "
+            "[ \"$target\" = \"$FLR0350_WRITER_FD_PATH\" ]; then\n"
+            "  n=$(cat \"$FLR0350_TEST_STAT_COUNT\" 2>/dev/null || echo 0); n=$((n + 1)); printf '%s\\n' \"$n\" >\"$FLR0350_TEST_STAT_COUNT\"\n"
+            "  if [ \"$n\" -eq 2 ]; then cp \"$FLR0350_TEST_MUTATED_STAT\" \"$FLR0350_PROC_ROOT/$FLR0350_TEST_TARGET_PID/stat\"; fi\n"
+            "fi\n"
+        )
+        fake_stat.chmod(0o755)
+        fake_id = fake_bin / "id"
+        fake_id.write_text("#!/bin/sh\nprintf '%s\\n' 1001\n")
+        fake_id.chmod(0o755)
+
+        common = ROOT / "work/commands/FLR-0350-gate-common.sh"
+        release_text = (ROOT / "work/commands/FLR-0350-release-go.sh").read_text()
+        source_line = ". /run/user/1001/FLR-0350-gate-common.sh || exit 80"
+        release_text = release_text.replace(
+            source_line, f'. "{common}" || exit 80', 1
+        )
+        if fault == "postwrite-record":
+            needle = 'if ! flr0350_write_once "$FLR0350_ROOT_DIR/go.record" "$go_record"; then'
+            release_text = release_text.replace(
+                needle,
+                'flr0350_write_once "$FLR0350_ROOT_DIR/go.record" "1 corrupt" || true\n    ' + needle,
+                1,
+            )
+        release = root / "release-go.sh"
+        release.write_text(release_text)
+
+        if fault == "state":
+            (target / "stat").write_text(proc_stat(target_pid, "S", target_start))
+        elif fault in ("postopen-state", "postopen-start"):
+            changed_state = "S" if fault == "postopen-state" else "t"
+            changed_start = target_start if fault == "postopen-state" else target_start + "1"
+            (root / "mutated-stat").write_text(
+                proc_stat(target_pid, changed_state, changed_start)
+            )
+        elif fault == "fd0":
+            (target / "fd" / "0").unlink()
+            (target / "fd" / "0").symlink_to(decoy)
+        elif fault == "fifo-swap":
+            gate.unlink()
+            os.mkfifo(gate, 0o600)
+            os.chmod(gate, 0o600)
+        elif fault == "missing-auth":
+            (root_dir / "attach.auth").unlink()
+
+        read_fd = os.open(gate, os.O_RDWR | os.O_NONBLOCK)
+        env = os.environ.copy()
+        env.update(
+            FLR0350_USER_DIR=str(user_dir),
+            FLR0350_ROOT_DIR=str(root_dir),
+            FLR0350_PROC_ROOT=str(proc_root),
+            FLR0350_WRITER_FD_PATH=str(gate if fault != "writer-fd" else decoy),
+            PATH=f"{fake_bin}:{env['PATH']}",
+        )
+        if fault in ("postopen-state", "postopen-start"):
+            env.update(
+                FLR0350_TEST_MUTATE_POST_OPEN="1",
+                FLR0350_TEST_STAT_COUNT=str(root / "stat-count"),
+                FLR0350_TEST_MUTATED_STAT=str(root / "mutated-stat"),
+                FLR0350_TEST_TARGET_PID=target_pid,
+            )
+        args = (target_pid, target_start, gdb_pid, gdb_start)
+        return env, release, gate, read_fd, args
+
+    def _run_inner_go(
+        self, env: dict[str, str], release: Path, args: tuple[str, str, str, str]
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["/bin/sh", str(release), "--write-go", *args],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    def _read_fifo_now(self, descriptor: int) -> bytes:
+        try:
+            return os.read(descriptor, 64)
+        except BlockingIOError:
+            return b""
+
+    def test_release_helper_writes_exact_go_for_run_bound_stopped_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            env, release, _, read_fd, args = self._release_gate_fixture(Path(temp))
+            try:
+                result = self._run_inner_go(env, release, args)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn("FLR0350_GO_WRITE=PASS", result.stdout)
+                self.assertIn("FLR0350_GO_RECORD=PASS", result.stdout)
+                self.assertEqual(self._read_fifo_now(read_fd), b"FLR0350_GO\n")
+            finally:
+                os.close(read_fd)
+
+    def test_release_helper_prewrite_identity_faults_send_zero_bytes(self) -> None:
+        for fault in (
+            "state", "fd0", "writer-fd", "fifo-swap", "missing-auth",
+            "postopen-state", "postopen-start",
+        ):
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as temp:
+                env, release, _, read_fd, args = self._release_gate_fixture(
+                    Path(temp), fault=fault
+                )
+                try:
+                    result = self._run_inner_go(env, release, args)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertEqual(self._read_fifo_now(read_fd), b"")
+                    self.assertNotIn("FLR0350_GO_WRITE=PASS", result.stdout)
+                finally:
+                    os.close(read_fd)
+
+    def test_release_helper_postwrite_record_failure_is_explicit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            env, release, _, read_fd, args = self._release_gate_fixture(
+                Path(temp), fault="postwrite-record"
+            )
+            try:
+                result = self._run_inner_go(env, release, args)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("FLR0350_GO_WRITE=PASS", result.stdout)
+                self.assertIn(
+                    "FLR0350_GO_RECORD=FAIL reason=publication-after-write",
+                    result.stdout,
+                )
+                self.assertEqual(self._read_fifo_now(read_fd), b"FLR0350_GO\n")
+            finally:
+                os.close(read_fd)
+
+    def test_outer_release_rechecks_fifo_swapped_after_its_precheck(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            env, release, gate, old_read_fd, _ = self._release_gate_fixture(Path(temp))
+            fake_timeout = Path(env["PATH"].split(":", 1)[0]) / "timeout"
+            fake_timeout.write_text(
+                "#!/bin/sh\n"
+                "shift\n"
+                "if [ \"$1\" = /bin/sh ] && [ \"$3\" = --write-go ]; then\n"
+                "  unlink \"$FLR0350_USER_DIR/flr0350-go.fifo\"\n"
+                "  mkfifo \"$FLR0350_USER_DIR/flr0350-go.fifo\"\n"
+                "  chmod 600 \"$FLR0350_USER_DIR/flr0350-go.fifo\"\n"
+                "fi\n"
+                "exec \"$@\"\n"
+            )
+            fake_timeout.chmod(0o755)
+            try:
+                result = subprocess.run(
+                    ["/bin/sh", str(release)],
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn("FLR0350_GO=FAIL reason=writer-command", result.stdout)
+                os.close(old_read_fd)
+                old_read_fd = -1
+                replacement_fd = os.open(gate, os.O_RDWR | os.O_NONBLOCK)
+                try:
+                    self.assertEqual(self._read_fifo_now(replacement_fd), b"")
+                finally:
+                    os.close(replacement_fd)
+            finally:
+                if old_read_fd >= 0:
+                    os.close(old_read_fd)
+
     def test_proc_stat_starttime_handles_spaces_and_parentheses_in_comm(self) -> None:
         fields_after_comm = ["S"] + [str(index) for index in range(1, 20)]
         fields_after_comm[19] = "424242"
@@ -199,19 +465,30 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
 
     def test_attach_preflight_reports_each_existing_predicate(self) -> None:
         attach = (
-            ROOT / "work/commands/FLR-0350-attach-pre-submit.cmd"
+            ROOT / "work/commands/FLR-0350-attach-pre-submit.sh"
         ).read_text()
         fields = (
             "pid_present",
-            "expected_start_present",
+            "recorded_start_present",
             "start_match",
             "comm_match",
             "uid_match",
-            "fd3_path_match",
+            "running_state",
+            "tracer_clear",
             "syscall_read",
-            "syscall_fd3",
+            "syscall_fd0",
+            "gate_fifo",
+            "gate_owner_mode",
+            "root_identity_loaded",
+            "root_identity_process",
+            "root_identity_fifo",
+            "fd0_same_gate",
+            "fd3_same_gate",
+            "fd3_path_match",
             "script_readable",
             "armed_clear",
+            "auth_clear",
+            "go_clear",
             "gdb_pid_clear",
             "gdb_start_clear",
             "log_clear",
@@ -221,13 +498,14 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
             "guest attach command lacks the bounded preflight marker",
         )
         self.assertTrue(
-            'v="$v $n=PASS"' in attach and 'v="$v $n=FAIL"' in attach,
+            'values="$values $name=PASS"' in attach and
+            'values="$values $name=FAIL"' in attach,
             "preflight marker does not serialize individual PASS/FAIL values",
         )
         for field in fields:
             with self.subTest(field=field):
                 self.assertTrue(
-                    f"c {field} " in attach,
+                    f"check {field} " in attach,
                     f"preflight marker omits predicate {field}",
                 )
         for field in (
@@ -244,18 +522,16 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
 
     def test_attach_failure_stays_before_gdb_and_release_go(self) -> None:
         attach = (
-            ROOT / "work/commands/FLR-0350-attach-pre-submit.cmd"
+            ROOT / "work/commands/FLR-0350-attach-pre-submit.sh"
         ).read_text()
         runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
-        failure = attach.index('if [ -n "$b" ]; then')
+        failure = attach.index('if [ -n "$failed" ]; then')
         failure_marker = attach.index(
-            'echo "FLR0350_GDB_ATTACH=FAIL precondition failed=$b"', failure
+            'echo "FLR0350_GDB_ATTACH=FAIL precondition failed=$failed"', failure
         )
-        alternate = attach.index("; else /bin/sh -c", failure)
-        gdb = attach.index("exec /usr/bin/gdb", alternate)
+        gdb = attach.index("exec /usr/bin/gdb", failure)
         self.assertLess(failure, failure_marker)
-        self.assertLess(failure_marker, alternate)
-        self.assertLess(alternate, gdb)
+        self.assertLess(failure_marker, gdb)
 
         attach_call = runner.index(
             "guest_run attach-gdb FLR-0350-attach-pre-submit.cmd"
@@ -272,17 +548,20 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
     def test_attach_preflight_evaluates_failures_and_keeps_fd0_diagnostic_only(
         self,
     ) -> None:
-        attach = (
-            ROOT / "work/commands/FLR-0350-attach-pre-submit.cmd"
-        ).read_text()
-        preflight = attach.split(" else /bin/sh -c", 1)[0]
+        attach = (ROOT / "work/commands/FLR-0350-attach-pre-submit.sh").read_text()
+        common = (ROOT / "work/commands/FLR-0350-gate-common.sh").read_text()
+        preflight = "pidfile=" + attach.split("pidfile=", 1)[1].split(
+            '\nif [ -n "$failed" ]; then', 1
+        )[0]
 
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             run_dir = root / "run"
             proc_root = root / "proc"
+            root_dir = root / "root-owned"
             fake_bin = root / "bin"
             run_dir.mkdir()
+            root_dir.mkdir(mode=0o700)
             fake_bin.mkdir()
             pid = "4242"
             proc = proc_root / pid
@@ -292,6 +571,14 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
             decoy = run_dir / "other.fifo"
             os.mkfifo(gate)
             os.mkfifo(decoy)
+            os.chmod(gate, 0o600)
+            (root_dir / "run.id").write_text("flr0362-0001\n")
+            gate_stat = os.stat(gate)
+            (root_dir / "fifo.identity").write_text(
+                f"1 flr0362-0001 {pid} 424242 1001 {gate_stat.st_dev} {gate_stat.st_ino}\n"
+            )
+            for record in root_dir.iterdir():
+                record.chmod(0o600)
             (run_dir / "flr0350-flutter.pid").write_text(f"{pid}\n")
             (run_dir / "flr0350-wrapper.start").write_text("424242\n")
             (run_dir / "flr0350-sync-producer.gdb").write_text("# test script\n")
@@ -301,9 +588,11 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
                 + "\n"
             )
             (proc / "comm").write_text("sh\n")
-            (proc / "status").write_text("Uid:\t1001\t1001\t1001\t1001\n")
+            (proc / "status").write_text(
+                "Uid:\t1001\t1001\t1001\t1001\nTracerPid:\t0\n"
+            )
             syscall_file = proc / "syscall"
-            syscall_file.write_text("0 0x3 0 0\n")
+            syscall_file.write_text("0 0x0 0 0\n")
             (proc / "fd" / "0").symlink_to(gate)
             (proc / "fd" / "3").symlink_to(gate)
 
@@ -313,15 +602,24 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
             fake_stat = fake_bin / "stat"
             fake_stat.write_text(
                 "#!/bin/sh\n"
-                "for p do last=$p; done\n"
-                "exec python3 -c 'import os,sys; s=os.stat(sys.argv[1]); "
-                "print(\"%s:%s\" % (s.st_dev, s.st_ino))' \"$last\"\n"
+                "fmt=; target=; want_fmt=0\n"
+                "for arg do\n"
+                "  if [ \"$want_fmt\" = 1 ]; then fmt=$arg; want_fmt=0; continue; fi\n"
+                "  case $arg in -L) ;; -c) want_fmt=1 ;; *) target=$arg ;; esac\n"
+                "done\n"
+                "exec python3 -c 'import os,sys; s=os.stat(sys.argv[2]); f=sys.argv[1]; mode=oct(s.st_mode & 0o777)[2:]; "
+                "print((\"0:%s\" % mode) if f == \"%u:%a\" else "
+                "(\"%s:%s:1001:600\" % (s.st_dev,s.st_ino)) if f == \"%d:%i:%u:%a\" else "
+                "(\"%s:%s\" % (s.st_dev,s.st_ino)))' \"$fmt\" \"$target\"\n"
             )
             fake_stat.chmod(0o755)
 
-            command = preflight.replace("/run/user/1001", str(run_dir)).replace(
-                "/proc/$pid", "$PROC_ROOT/$pid"
-            ) + " else echo TEST_GDB_BRANCH; fi"
+            command = (
+                f"FLR0350_USER_DIR={run_dir} FLR0350_ROOT_DIR={root_dir} "
+                f"FLR0350_PROC_ROOT={proc_root}; {common}\n{preflight} "
+                "\nif [ -n \"$failed\" ]; then echo TEST_GDB_FAIL; "
+                "else echo TEST_GDB_BRANCH; fi"
+            )
             env = os.environ.copy()
             env.update(
                 PATH=f"{fake_bin}:{env['PATH']}",
@@ -339,21 +637,27 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
 
             passed = run_preflight()
             self.assertEqual(passed.returncode, 0, passed.stderr)
+            self.assertIn("syscall_read=PASS", passed.stdout)
+            self.assertIn("syscall_fd0=PASS", passed.stdout)
             self.assertIn("fd0_same_gate=PASS", passed.stdout)
             self.assertIn("fd3_same_gate=PASS", passed.stdout)
-            self.assertIn("syscall_nr=0 syscall_fd=0x3", passed.stdout)
+            self.assertIn("syscall_nr=0 syscall_fd=0x0", passed.stdout)
             self.assertIn("TEST_GDB_BRANCH", passed.stdout)
             for field in (
                 "pid_present",
-                "expected_start_present",
+                "recorded_start_present",
                 "start_match",
                 "comm_match",
                 "uid_match",
+                "syscall_fd0",
+                "root_identity_loaded",
+                "root_identity_process",
+                "root_identity_fifo",
                 "fd3_path_match",
-                "syscall_read",
-                "syscall_fd3",
                 "script_readable",
                 "armed_clear",
+                "auth_clear",
+                "go_clear",
                 "gdb_pid_clear",
                 "gdb_start_clear",
                 "log_clear",
@@ -361,26 +665,58 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
                 with self.subTest(predicate=field):
                     self.assertIn(f"{field}=PASS", passed.stdout)
 
-            syscall_file.write_text("0 0x0 0 0\n")
+            syscall_file.write_text("0 0x3 0 0\n")
             failed = run_preflight()
             self.assertEqual(failed.returncode, 0, failed.stderr)
             self.assertIn("syscall_read=PASS", failed.stdout)
-            self.assertIn("syscall_fd3=FAIL", failed.stdout)
+            self.assertIn("syscall_fd0=FAIL", failed.stdout)
             self.assertIn(
-                "FLR0350_GDB_ATTACH=FAIL precondition failed=syscall_fd3",
-                failed.stdout,
+                "TEST_GDB_FAIL", failed.stdout
             )
             self.assertNotIn("TEST_GDB_BRANCH", failed.stdout)
 
-            syscall_file.write_text("0 0x3 0 0\n")
+            syscall_file.write_text("0 0x0 0 0\n")
             (proc / "fd" / "0").unlink()
             (proc / "fd" / "0").symlink_to(decoy)
             diagnostic_only = run_preflight()
             self.assertEqual(diagnostic_only.returncode, 0, diagnostic_only.stderr)
             self.assertIn("fd0_same_gate=FAIL", diagnostic_only.stdout)
             self.assertIn("fd3_same_gate=PASS", diagnostic_only.stdout)
-            self.assertIn("TEST_GDB_BRANCH", diagnostic_only.stdout)
-            self.assertNotIn("FLR0350_GDB_ATTACH=FAIL", diagnostic_only.stdout)
+            self.assertIn("TEST_GDB_FAIL", diagnostic_only.stdout)
+            self.assertNotIn("TEST_GDB_BRANCH", diagnostic_only.stdout)
+
+    def test_postwrite_record_failure_terminates_inferior_before_gdb_error(self) -> None:
+        release = (ROOT / "work/commands/FLR-0350-release-go.sh").read_text()
+        gdb = (ROOT / "work/commands/FLR-0350-sync-producer.gdb").read_text()
+        runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        write = release.index("printf '%s\\n' FLR0350_GO >&3")
+        record = release.index('flr0350_write_once "$FLR0350_ROOT_DIR/go.record"')
+        self.assertLess(write, record)
+        self.assertIn("FLR0350_GO_RECORD=FAIL reason=publication-after-write", release)
+
+        wait = gdb.index("def wait_for_go_record():")
+        wait_end = gdb.index("def current_target_identity():", wait)
+        wait_body = gdb[wait:wait_end]
+        self.assertIn("terminate_stopped_inferior", wait_body)
+        self.assertIn("gdb.execute(\"kill\"", gdb)
+        self.assertIn("os.kill(TARGET_PID, 9)", gdb)
+        self.assertIn("FLR0350_TARGET_ABORT=PASS", gdb)
+        self.assertLess(
+            wait_body.index("terminate_stopped_inferior"),
+            wait_body.index("raise gdb.GdbError"),
+        )
+        self.assertIn("FLR0350_GO_RECORD=PASS", runner)
+        self.assertIn("FLR0350_EXEC=PASS", runner)
+
+    def test_cleanup_kills_unreleased_target_before_interrupting_gdb(self) -> None:
+        interrupt = (ROOT / "work/commands/FLR-0350-interrupt-gdb.sh").read_text()
+        runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        target_abort = interrupt.index('kill -KILL "$pid"')
+        gdb_interrupt = interrupt.index('kill -INT "$gpid"')
+        self.assertLess(target_abort, gdb_interrupt)
+        self.assertIn("FLR0350_UNRECORDED_TARGET_ABORT=PASS", interrupt)
+        self.assertIn("flr0350_go_record_matches", interrupt)
+        self.assertIn("FLR0350_UNRECORDED_TARGET_ABORT=FAIL", runner)
 
     def test_host_runner_validates_before_attach_and_go(self) -> None:
         runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
@@ -398,6 +734,127 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
         self.assertLess(validate, attach)
         self.assertLess(attach, release)
         self.assertNotIn("grep -F 'FLR0350_FIFO_READ_GATE=PASS'", runner)
+
+    def test_runner_initializes_identity_only_after_preflight_before_launch(self) -> None:
+        runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        preflight = runner.rindex("guest_run preflight FLR-0350-preflight.cmd")
+        helper_preflight = runner.rindex(
+            "guest_run helper-preflight FLR-0350-preflight-helper-collision.cmd"
+        )
+        self.assertTrue(
+            "guest_run init-run-identity" in runner,
+            "runner has no run-identity initialization stage",
+        )
+        initialize = runner.rindex("guest_run init-run-identity")
+        launch = runner.rindex(
+            "guest_run launch FLR-0350-launch-paused-production.cmd"
+        )
+        self.assertLess(preflight, helper_preflight)
+        self.assertLess(helper_preflight, initialize)
+        self.assertLess(initialize, launch)
+        self.assertIn("--render-identity-init", runner)
+
+    def test_helper_transfer_rejects_stale_payloads_and_never_overwrites(self) -> None:
+        preflight = (
+            ROOT / "work/commands/FLR-0350-preflight-helper-collision.cmd"
+        ).read_bytes()
+        self.assertEqual(len(preflight.splitlines()), 1)
+        self.assertLessEqual(len(preflight.rstrip(b"\n")), 4096)
+        text = preflight.decode()
+        self.assertIn("FLR-0350-*.sh", text)
+        self.assertIn("FLR-0350-*.sh.gz", text)
+        self.assertIn("FLR-0350-*.sh.tmp", text)
+        self.assertIn("FLR0350_HELPER_COLLISION=$f", text)
+        runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        self.assertIn("test ! -e '$guest_path' && test ! -L '$guest_path'", runner)
+        self.assertIn("test ! -e '$guest_path.tmp' && test ! -L '$guest_path.tmp'", runner)
+        self.assertIn("test ! -e /run/user/1001/flr0350-sync-producer.gdb.tmp", runner)
+
+    def test_long_guest_decisions_use_committed_helpers_behind_small_adapters(self) -> None:
+        runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        expected_helpers = (
+            "FLR-0350-gate-common.sh",
+            "FLR-0350-attach-pre-submit.sh",
+            "FLR-0350-release-go.sh",
+            "FLR-0350-stop-recorded-app.sh",
+            "FLR-0350-interrupt-gdb.sh",
+        )
+        for name in expected_helpers:
+            with self.subTest(helper=name):
+                self.assertTrue(name in runner, f"runner does not stage {name}")
+                adapter = (ROOT / "work/commands" / name).with_suffix(".cmd")
+                if name != "FLR-0350-gate-common.sh":
+                    data = adapter.read_bytes()
+                    self.assertEqual(len(data.splitlines()), 1)
+                    self.assertLessEqual(len(data.rstrip(b"\n")), 4096)
+        self.assertTrue(
+            'git -C "$repo_root" show "HEAD:work/commands/$file"' in runner,
+            "runner does not compare helper source to committed HEAD",
+        )
+
+    def test_identity_init_command_is_run_bound_collision_safe_and_bounded(self) -> None:
+        output = io.StringIO()
+        errors = io.StringIO()
+        with redirect_stdout(output), redirect_stderr(errors):
+            result = main(["--render-identity-init", "flr0362-0001"])
+        self.assertEqual(result, 0)
+        command = output.getvalue().strip()
+        self.assertEqual(len(command.splitlines()), 1)
+        self.assertLessEqual(len(command.encode()), 4096)
+        self.assertIn("/run/flr0350", command)
+        self.assertIn('[ -e "$d" ] || [ -L "$d" ]', command)
+        self.assertIn("set -C", command)
+        self.assertIn("flr0362-0001", command)
+        rejected = io.StringIO()
+        rejected_err = io.StringIO()
+        with redirect_stdout(rejected), redirect_stderr(rejected_err):
+            result = main(["--render-identity-init", "flr0350-0001"])
+        self.assertNotEqual(result, 0)
+
+    def test_identity_init_command_creates_once_and_rejects_dangling_symlink(self) -> None:
+        generated = io.StringIO()
+        with redirect_stdout(generated):
+            self.assertEqual(main(["--render-identity-init", "flr0362-0001"]), 0)
+        command = generated.getvalue().strip()
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            run_dir = root / "flr0350"
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            fake_stat = fake_bin / "stat"
+            fake_stat.write_text(
+                "#!/bin/sh\n"
+                "python3 -c 'import os,sys; s=os.stat(sys.argv[1]); "
+                "print(\"0:%o\" % (s.st_mode & 0o777))' \"$3\"\n",
+                encoding="utf-8",
+            )
+            fake_stat.chmod(0o755)
+            env = os.environ.copy()
+            env["PATH"] = f"{fake_bin}:{env['PATH']}"
+            local_command = command.replace("/run/flr0350", str(run_dir))
+            created = subprocess.run(
+                ["sh", "-c", local_command], env=env,
+                capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(created.returncode, 0)
+            self.assertIn("FLR0350_RUN_ID_INIT=PASS", created.stdout)
+            self.assertEqual((run_dir / "run.id").read_text(), "flr0362-0001\n")
+
+            collision = subprocess.run(
+                ["sh", "-c", local_command], env=env,
+                capture_output=True, text=True, check=False,
+            )
+            self.assertIn("FLR0350_RUN_ID_INIT=FAIL reason=collision", collision.stdout)
+            self.assertEqual((run_dir / "run.id").read_text(), "flr0362-0001\n")
+
+            (run_dir / "run.id").unlink()
+            run_dir.rmdir()
+            run_dir.symlink_to(root / "missing-target")
+            dangling = subprocess.run(
+                ["sh", "-c", local_command], env=env,
+                capture_output=True, text=True, check=False,
+            )
+            self.assertIn("FLR0350_RUN_ID_INIT=FAIL reason=collision", dangling.stdout)
 
     def test_all_fixed_guest_commands_are_staged_before_qemu_start(self) -> None:
         runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
@@ -446,15 +903,20 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
         self.assertNotIn('"/proc/$pid/fd/3"', observe)
 
     def test_guest_cleanup_never_uses_process_wide_kill(self) -> None:
-        stop = (ROOT / "work/commands/FLR-0350-stop-recorded-app.cmd").read_text()
+        stop = (ROOT / "work/commands/FLR-0350-stop-recorded-app.sh").read_text()
         self.assertNotIn("pkill", stop)
         self.assertNotIn("killall", stop)
-        guarded_signal = (
-            '[ "$start" = "$expected" ] && '
-            '[ "$uid" = "$(id -u agl-driver)" ]'
-        )
-        self.assertIn(guarded_signal, stop)
-        self.assertLess(stop.index(guarded_signal), stop.index('kill -TERM "$pid"'))
+        guarded_start = '[ "$start" = "$expected" ]'
+        guarded_uid = '[ "$uid" = "$(id -u agl-driver)" ]'
+        identity_gate = 'flr0350_identity_matches_process "$pid" "$expected" "$uid"'
+        self.assertIn(guarded_start, stop)
+        self.assertIn(guarded_uid, stop)
+        self.assertIn(identity_gate, stop)
+        self.assertLess(stop.index(guarded_start), stop.index('kill -TERM "$pid"'))
+        self.assertLess(stop.index(guarded_uid), stop.index('kill -TERM "$pid"'))
+        self.assertLess(stop.index(identity_gate), stop.index('kill -TERM "$pid"'))
+        self.assertIn('if [ "$state" = Z ] || [ "$state" = X ] || [ "$state" = x ]; then', stop)
+        self.assertIn("candidate_state=$(flr0350_proc_state \"$candidate\")", stop)
 
 
 class StarterRunIdPropagationTests(unittest.TestCase):
@@ -535,7 +997,9 @@ class StarterRunIdPropagationTests(unittest.TestCase):
             gate_path.write_text(gate + "\n", encoding="utf-8")
             output = io.StringIO()
             with redirect_stdout(output):
-                result = main(["--validate", str(launch_path), str(gate_path)])
+                result = main(
+                    ["--validate", "flr0362-0001", str(launch_path), str(gate_path)]
+                )
         self.assertEqual(result, 0)
         self.assertIn("FLR0350_FIFO_READ_GATE=PASS", output.getvalue())
 

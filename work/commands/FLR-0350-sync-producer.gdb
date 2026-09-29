@@ -9,8 +9,17 @@ set detach-on-fork on
 python
 import gdb
 import os
+import stat
+import time
 
 RUN_DIR = "/run/user/1001"
+ROOT_DIR = "/run/flr0350"
+GATE_PATH = RUN_DIR + "/flr0350-go.fifo"
+RUN_ID_FILE = ROOT_DIR + "/run.id"
+IDENTITY_FILE = ROOT_DIR + "/fifo.identity"
+ATTACH_AUTH_FILE = ROOT_DIR + "/attach.auth"
+GO_RECORD_FILE = ROOT_DIR + "/go.record"
+GO_WAIT_SECONDS = 30
 TARGET_PID_FILE = RUN_DIR + "/flr0350-flutter.pid"
 START_FILE = RUN_DIR + "/flr0350-wrapper.start"
 ARMED_FILE = RUN_DIR + "/flr0350-gdb-armed"
@@ -73,6 +82,175 @@ def write_once(path, contents):
         stream.write(contents + "\n")
         stream.flush()
         os.fsync(stream.fileno())
+
+def read_one_line(path):
+    with open(path, "r") as stream:
+        contents = stream.read()
+    if not contents.endswith("\n") or contents.count("\n") != 1:
+        raise RuntimeError("not-one-line")
+    return contents[:-1]
+
+def root_record(path, expected_fields):
+    root = os.lstat(ROOT_DIR)
+    if not stat.S_ISDIR(root.st_mode) or root.st_uid != 0 or stat.S_IMODE(root.st_mode) != 0o700:
+        raise RuntimeError("root-dir-owner-mode")
+    info = os.lstat(path)
+    if not stat.S_ISREG(info.st_mode) or info.st_uid != 0 or stat.S_IMODE(info.st_mode) != 0o600:
+        raise RuntimeError("root-record-owner-mode")
+    fields = read_one_line(path).split()
+    if len(fields) != expected_fields:
+        raise RuntimeError("root-record-field-count")
+    return fields
+
+def proc_snapshot(pid):
+    with open("/proc/%d/stat" % pid, "r") as stream:
+        raw = stream.read()
+    boundary = raw.rfind(") ")
+    if boundary < 0:
+        raise RuntimeError("proc-stat-malformed")
+    fields = raw[boundary + 2:].split()
+    if len(fields) < 20:
+        raise RuntimeError("proc-stat-short")
+    state = fields[0]
+    start = fields[19]
+    uid = None
+    tracer = None
+    with open("/proc/%d/status" % pid, "r") as stream:
+        for line in stream:
+            if line.startswith("Uid:"):
+                uid = int(line.split()[1])
+            elif line.startswith("TracerPid:"):
+                tracer = int(line.split()[1])
+    with open("/proc/%d/comm" % pid, "r") as stream:
+        comm = stream.read().strip()
+    if uid is None or tracer is None:
+        raise RuntimeError("proc-status-incomplete")
+    return state, start, uid, tracer, comm
+
+def stopped_gate_identity():
+    if gdb.selected_inferior().pid != TARGET_PID or os.getuid() != 0:
+        raise RuntimeError("inferior-or-gdb-identity")
+    run_id = read_one_line(RUN_ID_FILE)
+    if (len(run_id) != 12 or not run_id.startswith("flr") or
+            run_id[3:7].isdigit() is False or run_id[8:12].isdigit() is False or run_id[7] != "-"):
+        raise RuntimeError("run-id-format")
+    identity = root_record(IDENTITY_FILE, 7)
+    if identity[0] != "1" or identity[1] != run_id:
+        raise RuntimeError("run-identity-record")
+    pid = int(identity[2])
+    start_expected = identity[3]
+    uid_expected = int(identity[4])
+    dev_expected = int(identity[5])
+    ino_expected = int(identity[6])
+    if pid != TARGET_PID or start_expected != TARGET_START or uid_expected != 1001:
+        raise RuntimeError("recorded-target-identity")
+    state, start, uid, tracer, comm = proc_snapshot(pid)
+    if state not in ("t", "T") or start != start_expected or uid != uid_expected:
+        raise RuntimeError("target-not-stopped-or-changed")
+    if tracer != GDB_PID or comm != "sh":
+        raise RuntimeError("target-tracer-or-comm")
+    gate_lstat = os.lstat(GATE_PATH)
+    gate_stat = os.stat(GATE_PATH)
+    if stat.S_ISLNK(gate_lstat.st_mode) or not stat.S_ISFIFO(gate_stat.st_mode):
+        raise RuntimeError("named-gate-type")
+    expected_pair = (dev_expected, ino_expected)
+    gate_pair = (gate_stat.st_dev, gate_stat.st_ino)
+    if gate_pair != expected_pair:
+        raise RuntimeError("named-gate-identity")
+    for fd in (0, 3):
+        descriptor = os.stat("/proc/%d/fd/%d" % (pid, fd))
+        if (descriptor.st_dev, descriptor.st_ino) != expected_pair:
+            raise RuntimeError("target-fd-%d-identity" % fd)
+    gdb_state, gdb_start, gdb_uid, _, gdb_comm = proc_snapshot(GDB_PID)
+    if gdb_uid != 0 or gdb_comm != "gdb" or not gdb_start:
+        raise RuntimeError("gdb-process-identity")
+    return run_id, pid, start, uid, dev_expected, ino_expected, gdb_start
+
+def create_stopped_attach_authorization():
+    try:
+        run_id, pid, start, uid, dev, ino, gdb_start = stopped_gate_identity()
+        content = "1 %s %d %s %d %d %d %d %s" % (
+            run_id, pid, start, uid, dev, ino, GDB_PID, gdb_start)
+        write_once(ATTACH_AUTH_FILE, content)
+        emit("FLR0350_ATTACH_AUTH=PASS pid=%d start=%s gdb_pid=%d gdb_start=%s state=stopped fifo=%d:%d" % (
+            pid, start, GDB_PID, gdb_start, dev, ino))
+    except Exception as error:
+        emit("FLR0350_ATTACH_AUTH=FAIL reason=%s" % str(error).replace("\n", " ")[:120])
+        raise gdb.GdbError("FLR0350 stopped attach authorization failed")
+
+def target_lifecycle_state():
+    try:
+        with open("/proc/%d/stat" % TARGET_PID, "r") as stream:
+            raw = stream.read()
+        boundary = raw.rfind(") ")
+        if boundary < 0:
+            return "unknown"
+        fields = raw[boundary + 2:].split()
+        if len(fields) < 20:
+            return "unknown"
+        if fields[19] != TARGET_START:
+            return "reused"
+        return fields[0]
+    except OSError:
+        return "gone"
+
+def terminate_stopped_inferior(reason):
+    try:
+        if gdb.selected_inferior().pid != TARGET_PID:
+            raise RuntimeError("selected-inferior-mismatch")
+        try:
+            gdb.execute("kill", to_string=True)
+        except Exception:
+            try:
+                state, start, uid, tracer, _ = proc_snapshot(TARGET_PID)
+                if start != TARGET_START or uid != 1001 or tracer != GDB_PID:
+                    raise RuntimeError("fallback-target-identity-mismatch")
+                os.kill(TARGET_PID, 9)
+            except Exception:
+                emit("FLR0350_TARGET_ABORT=FAIL reason=%s" % reason)
+                while target_lifecycle_state() not in ("gone", "reused", "Z", "X", "x"):
+                    time.sleep(0.2)
+                emit("FLR0350_TARGET_ABORT=PASS reason=%s target_terminated=1" % reason)
+                return
+        deadline = time.time() + 2
+        while time.time() < deadline:
+            if target_lifecycle_state() in ("gone", "reused", "Z", "X", "x"):
+                emit("FLR0350_TARGET_ABORT=PASS reason=%s target_terminated=1" % reason)
+                return
+            time.sleep(0.05)
+        emit("FLR0350_TARGET_ABORT=FAIL reason=%s target_still_live=1" % reason)
+        while target_lifecycle_state() not in ("gone", "reused", "Z", "X", "x"):
+            time.sleep(0.2)
+        emit("FLR0350_TARGET_ABORT=PASS reason=%s target_terminated=1" % reason)
+    except Exception as error:
+        emit("FLR0350_TARGET_ABORT=FAIL reason=%s error=%s" % (
+            reason, type(error).__name__))
+        while target_lifecycle_state() not in ("gone", "reused", "Z", "X", "x"):
+            time.sleep(0.2)
+        emit("FLR0350_TARGET_ABORT=PASS reason=%s target_terminated=1" % reason)
+
+def wait_for_go_record():
+    deadline = time.time() + GO_WAIT_SECONDS
+    while time.time() < deadline:
+        try:
+            run_id, pid, start, uid, dev, ino, gdb_start = stopped_gate_identity()
+            if os.path.lexists(GO_RECORD_FILE):
+                record = root_record(GO_RECORD_FILE, 12)
+                expected = ["1", run_id, str(pid), start, str(uid), str(dev), str(ino),
+                            str(GDB_PID), gdb_start, str(dev), str(ino), "11"]
+                if record != expected:
+                    raise RuntimeError("go-record-mismatch")
+                emit("FLR0350_GO_RECORD=PASS pid=%d gdb_pid=%d fifo=%d:%d bytes=11 target_stopped=1" % (
+                    pid, GDB_PID, dev, ino))
+                return
+        except Exception as error:
+            emit("FLR0350_GO_WAIT=FAIL reason=%s" % str(error).replace("\n", " ")[:120])
+            terminate_stopped_inferior("go-identity-invalid")
+            raise gdb.GdbError("FLR0350 target identity changed before GO")
+        time.sleep(0.05)
+    emit("FLR0350_GO_WAIT=FAIL reason=record-timeout seconds=%d" % GO_WAIT_SECONDS)
+    terminate_stopped_inferior("go-record-timeout")
+    raise gdb.GdbError("FLR0350 GO record timeout; inferior terminated before detach")
 
 def current_target_identity():
     try:
@@ -443,6 +621,8 @@ end
 
 python
 create_preexec_marker()
+create_stopped_attach_authorization()
+wait_for_go_record()
 end
 
 continue
