@@ -34,14 +34,14 @@ Bash runner, Python `unittest`, existing Git-bundle handoff helper, Mini `runqem
 
 ### 1. Establish the red regression
 
-- [ ] Add a concise static regression for the `guest_run` stage call.
-- [ ] Run only that test and record the expected failure on the old call site. Avoid assertion output that dumps the full runner source.
+- [x] Add a concise static regression for the `guest_run` stage call.
+- [x] Run only that test and record the expected failure on the old call site. Avoid assertion output that dumps the full runner source.
 
 ### 2. Apply the one-line countermeasure
 
-- [ ] Change the path argument to `"$install_file"`; do not alter the payload, profile, command ordering, or other gates.
-- [ ] Confirm the focused regression passes, then run the runner's full local `--check` once (it includes the complete static suite).
-- [ ] Run shell syntax, privacy, file-size, Markdown-link, runtime-checkpoint, and diff checks. Record the existing nine unrelated FLR-0338/0339/0340 link failures without expanding scope.
+- [x] Change the path argument to `"$install_file"`; do not alter the payload, profile, command ordering, or other gates.
+- [x] Confirm the focused regression passes, then run the runner's full local `--check` once (it includes the complete static suite).
+- [x] Run shell syntax, privacy, file-size, Markdown-link, runtime-checkpoint, and diff checks. Record the existing nine unrelated FLR-0338/0339/0340 link failures without expanding scope.
 
 ### 3. Exact Mini runtime and evidence
 

@@ -1053,6 +1053,20 @@ class RuntimeHelperProvenanceTests(unittest.TestCase):
         self.assertFalse("harness=$prior_run_dir/qemu-runtime-harness.sh" in self.runner.splitlines(),
                          "runner still selects the prior-run helper")
 
+    def test_guest_script_stage_passes_the_prepared_install_file(self) -> None:
+        expected = (
+            'guest_run "install-guest-script-$guest_script-$chunk_index" '
+            '"$install_file"'
+        )
+        broken = (
+            'guest_run "install-guest-script-$guest_script-$chunk_index" '
+            '"$install-guest-script-$chunk_index.cmd"'
+        )
+        self.assertTrue(expected in self.runner,
+                        "guest helper staging must pass the prepared install_file")
+        self.assertFalse(broken in self.runner,
+                         "guest helper staging must not expand a command body as a path")
+
     def test_starter_validates_and_uses_the_same_run_scoped_helper(self) -> None:
         source = 'harness_source=$repo_root/scripts/qemu-runtime-harness.sh'
         staged = 'harness=$new_run_parent/qemu-runtime-harness.sh'

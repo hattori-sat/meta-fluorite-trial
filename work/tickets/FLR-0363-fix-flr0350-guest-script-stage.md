@@ -113,7 +113,7 @@ Use the already computed `install_file` path, backed by a test that fails on the
 | Criterion | Expected | Actual | Evidence | Result |
 | --- | --- | --- | --- | --- |
 | Current-run launch evidence | App/GO/runtime logs present | All absent in `flr0362-0001` | FLR-0362 addendum | NOT REACHED |
-| Regression and path correction | Red before, green after | Authoritative ticket-branch run pending | This ticket's working log | PENDING |
+| Regression and path correction | Red before, green after | Feature-branch test red before fix; focused test green after one-line correction; full runner check 47/47 PASS | This ticket's working log | PASS (local only) |
 | Mini app + QMP render observation | Same-PID app, bounded logs, post-launch still/video | Pending one fresh run | This ticket's working log/evidence | PENDING |
 
 ### Act
@@ -130,3 +130,28 @@ Use the already computed `install_file` path, backed by a test that fails on the
 - Status: NOT CHECKED
 - Checked by:
 - Findings:
+
+## Implementation checkpoint — local red/green complete
+
+### Facts
+
+- Branch path: `dev-flr-0362-runtime-gate` was created from `main` and merged FLR-0362; merge tip `49b6b96ef0d3009c6d1a107e058f54d9e08f1ad9`. FLR-0362 evidence closeout commit is `fd1113e`; this ticket's feature branch is `feature-flr-0363-fix-flr0350-guest-script-stage` from that dev tip. No push occurred.
+- The focused regression failed before the fix with the concise expected message that guest-helper staging must pass the prepared `install_file`.
+- The runner now passes `"$install_file"`; no payload, environment profile, FIFO policy, GDB gate, or product code changed.
+- Focused regression passed 1/1. The normal Mac runner `--check` passed its static contract and all 47 tests; it reported 12 serial commands, 7 GDB Python blocks, 5 transfer chunks, fresh-ID/reuse gate PASS, and `qemu=NOT_STARTED`.
+
+### Inference
+
+- The exact malformed argument is caught before runtime and fixed locally. Mini remains the integration test for actual helper transfer, app launch, startup/runtime log, and post-launch QMP.
+
+### UNKNOWN
+
+- Whether `flr0363-0001` reaches guest helper PASS, FIFO observation, attach, GO, and same-PID `agl-driver` Flutter exec.
+- Whether the post-launch frame contains HUD, native 3D, both, or neither under the diagnostic profile.
+
+### Plan / Do / Check / Act
+
+- **Plan:** complete privacy/size/Markdown/checkpoint/diff gates, make a ticket-scoped local commit, exact-bundle transfer, then one standard Mini runtime invocation.
+- **Do:** test-first call-site regression; corrected only the wrong filename variable.
+- **Check:** red before fix; focused test green; full runner check 47/47 green. No QEMU ran locally.
+- **Act:** do not run a separate Mini `--check`; the regular runner will run its static suite once and proceed to preflight/QEMU. Stop on the first named predicate; preserve app logs and post-launch QMP if reached.

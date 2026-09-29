@@ -472,7 +472,7 @@ for guest_script in "${runtime_guest_scripts[@]}"; do
         }
         install_file=$run_dir/install-guest-script-$chunk_index.cmd
         printf '%s\n' "$install" >"$install_file"
-        guest_run "install-guest-script-$guest_script-$chunk_index" "$install-guest-script-$chunk_index.cmd"
+        guest_run "install-guest-script-$guest_script-$chunk_index" "$install_file"
         grep -F 'FLR0350_GUEST_SCRIPT_CHUNK_' "$run_dir/install-guest-script-$guest_script-$chunk_index.serial.log"
         offset=$((offset + chunk_size))
         chunk_index=$((chunk_index + 1))
