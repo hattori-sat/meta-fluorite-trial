@@ -8,6 +8,19 @@ evidence_root=/mnt/yocto/evidence
 prior_run_dir=$evidence_root/flr0335-0001/qemu
 harness=$prior_run_dir/qemu-runtime-harness.sh
 capture=$prior_run_dir/qemu-pixel-capture.py
+runtime_command_files=(
+    FLR-0350-preflight.cmd
+    FLR-0350-launch-paused-production.cmd
+    FLR-0350-observe-fifo-read-gate.cmd
+    FLR-0350-attach-pre-submit.cmd
+    FLR-0350-release-go.cmd
+    FLR-0350-wait-symbol-gate.cmd
+    FLR-0350-wait-matched-wait.cmd
+    FLR-0350-watch-window.cmd
+    FLR-0350-interrupt-gdb.cmd
+    FLR-0350-capture-runtime-state.cmd
+    FLR-0350-stop-recorded-app.cmd
+)
 
 static_check() {
     bash -n "$0"
@@ -47,23 +60,26 @@ if not (
 if "FLR0350_POST_RUN_CAPTURE=SKIPPED reason=gdb-stop-not-confirmed" not in cleanup_body:
     raise SystemExit("failure cleanup must report skipped capture when GDB remains active")
 
-command_names = (
-    "FLR-0350-preflight.cmd",
-    "FLR-0350-launch-paused-production.cmd",
-    "FLR-0350-observe-fifo-read-gate.cmd",
-    "FLR-0350-release-go.cmd",
-    "FLR-0350-attach-pre-submit.cmd",
-    "FLR-0350-wait-symbol-gate.cmd",
-    "FLR-0350-wait-matched-wait.cmd",
-    "FLR-0350-watch-window.cmd",
-    "FLR-0350-interrupt-gdb.cmd",
-    "FLR-0350-capture-runtime-state.cmd",
-    "FLR-0350-stop-recorded-app.cmd",
-)
+inventory = re.search(r"(?ms)^runtime_command_files=\(\n(.*?)^\)", runner_text)
+if not inventory:
+    raise SystemExit("static guest-command inventory missing")
+command_names = re.findall(r"(?m)^\s*(FLR-0350-[\w.-]+\.cmd)\s*$", inventory.group(1))
+if not command_names or len(command_names) != len(set(command_names)):
+    raise SystemExit("static guest-command inventory is empty or duplicated")
+static_calls = set(re.findall(
+    r"(?m)^\s*guest_run\s+\S+\s+(FLR-0350-[\w.-]+\.cmd)\s*$",
+    runner_text,
+))
+missing_calls = static_calls - set(command_names)
+if missing_calls:
+    raise SystemExit("static guest commands missing from inventory: " + ",".join(sorted(missing_calls)))
 commands = root / "work/commands"
 for name in command_names:
     path = commands / name
-    data = path.read_bytes()
+    try:
+        data = path.read_bytes()
+    except OSError as exc:
+        raise SystemExit("serial-command-source-unreadable: " + name) from exc
     if len(data.splitlines()) != 1 or len(data.rstrip(b"\n")) > 4096:
         raise SystemExit("serial-command shape/size failed: " + name)
     import subprocess
@@ -115,7 +131,7 @@ print("FLR0350_PROFILE_MATCH=PASS environment=exact cli=exact target=qemux86-64"
 print("FLR0350_RUN_ID_HANDOFF=PASS preflight-before-evidence start-same-id")
 PY
     python3 "$repo_root/tests/test_flr0350_launch_gate.py"
-    python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id flr0355-0001
+    python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id flr0356-0001
     if python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id flr0350-0001; then
         echo FLR0350_RUN_ID_REUSE_GATE=FAIL
         return 1
@@ -138,6 +154,12 @@ python3 "$repo_root/scripts/flr0350_launch_gate.py" --check-run-id "$run_id" || 
 
 bash scripts/assert-canonical-repository.sh
 static_check
+for file in "${runtime_command_files[@]}"; do
+    [ -r "$repo_root/work/commands/$file" ] || {
+        echo "FLR0350_COMMAND_STAGE=FAIL reason=source-not-readable file=$file" >&2
+        exit 1
+    }
+done
 parent=$evidence_root/$run_id
 run_dir=$parent/qemu
 qmp=$run_dir/qmp-0350.sock
@@ -163,6 +185,10 @@ fi
 mkdir -- "$parent"
 exec > >(tee -a "$parent/FLR-0350-runner.log") 2>&1
 printf '%s\n' "$preflight_output" | tee "$parent/qemu-preflight.log"
+for file in "${runtime_command_files[@]}"; do
+    cp -- "$repo_root/work/commands/$file" "$parent/$file"
+done
+echo "FLR0350_COMMAND_STAGE=PASS location=evidence-parent count=${#runtime_command_files[@]}"
 
 guest_run() {
     local label=$1
@@ -262,14 +288,10 @@ FLR0350_RUN_ID="$run_id" bash "$start_script" start >"$parent/qemu-start.log" 2>
     tail -n 60 "$parent/qemu-start.log"
     exit 1
 }
-for file in FLR-0350-preflight.cmd FLR-0350-launch-paused-production.cmd \
-    FLR-0350-release-go.cmd FLR-0350-attach-pre-submit.cmd \
-    FLR-0350-wait-symbol-gate.cmd FLR-0350-wait-matched-wait.cmd \
-    FLR-0350-watch-window.cmd FLR-0350-interrupt-gdb.cmd \
-    FLR-0350-capture-runtime-state.cmd FLR-0350-stop-recorded-app.cmd \
-    FLR-0350-sync-producer.gdb; do
-    cp -- "$repo_root/work/commands/$file" "$run_dir/$file"
+for file in "${runtime_command_files[@]}"; do
+    cp -- "$parent/$file" "$run_dir/$file"
 done
+cp -- "$repo_root/work/commands/FLR-0350-sync-producer.gdb" "$run_dir/FLR-0350-sync-producer.gdb"
 "$harness" guest-ready --ssh-port 10931 --timeout-seconds 180 >"$run_dir/guest-ready.log" 2>&1
 cat "$run_dir/guest-ready.log"
 guest_ready=1

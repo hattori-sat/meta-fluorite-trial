@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import io
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -212,6 +213,36 @@ class ProcStatAndRunnerContractTests(unittest.TestCase):
         self.assertLess(validate, attach)
         self.assertLess(attach, release)
         self.assertNotIn("grep -F 'FLR0350_FIFO_READ_GATE=PASS'", runner)
+
+    def test_all_fixed_guest_commands_are_staged_before_qemu_start(self) -> None:
+        runner = (ROOT / "work/commands/FLR-0350-run-sync-producer.sh").read_text()
+        fixed_calls = set(re.findall(
+            r"(?m)^\s*guest_run\s+\S+\s+(FLR-0350-[\w.-]+\.cmd)\s*$",
+            runner,
+        ))
+        inventory = re.search(
+            r"(?ms)^runtime_command_files=\(\n(.*?)^\)", runner
+        )
+        self.assertIsNotNone(inventory, "runner has no static command inventory")
+        staged = set(re.findall(
+            r"(?m)^\s*(FLR-0350-[\w.-]+\.cmd)\s*$", inventory.group(1)
+        ))
+        self.assertTrue(fixed_calls, "no fixed guest_run commands were found")
+        self.assertEqual(fixed_calls - staged, set())
+        self.assertIn("FLR-0350-observe-fifo-read-gate.cmd", staged)
+        stage_loop = runner.rfind(
+            'for file in "${runtime_command_files[@]}"; do',
+            0,
+            runner.rindex('FLR0350_RUN_ID="$run_id" bash "$start_script" start'),
+        )
+        self.assertNotEqual(stage_loop, -1)
+        copy_parent = runner.index(
+            'cp -- "$repo_root/work/commands/$file" "$parent/$file"'
+        )
+        start = runner.rindex(
+            'FLR0350_RUN_ID="$run_id" bash "$start_script" start'
+        )
+        self.assertLess(copy_parent, start)
 
     def test_launch_saves_wrapper_identity_before_gate_observation(self) -> None:
         launch = (

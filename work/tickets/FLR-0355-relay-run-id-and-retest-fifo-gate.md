@@ -1,6 +1,6 @@
 # FLR-0355 — relay a fresh run ID and retest the FIFO gate on QEMU
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High; blocks the next producer-correlation runtime attempt
 - Owner: Mac runtime-harness / Mini QEMU / QMP evidence roles
 - Created: 2026-09-29
