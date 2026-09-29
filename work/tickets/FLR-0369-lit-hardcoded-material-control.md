@@ -4,6 +4,7 @@
 - Priority: High
 - Owner: Mini QEMU / direct guest SSH / manual Flutter / QMP evidence roles
 - Created: 2026-09-30
+- Branch: `feature-flr-0369-lit-hardcoded-material-control` (local continuation of the verified FLR-0368 runtime baseline; no push)
 - Predecessor: [FLR-0368 current-image UNLIT control](FLR-0368-manual-unlit-fixture-control.md)
 - LIT negative baseline: [FLR-0367 manual LIT replay](FLR-0367-replay-manual-known-good-fixture-on-current-image.md)
 - Working log: [FLR-0369 working log](../logs/2026-09-30-flr0369.md)
