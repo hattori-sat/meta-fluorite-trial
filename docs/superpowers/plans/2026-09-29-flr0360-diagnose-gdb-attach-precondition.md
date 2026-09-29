@@ -36,7 +36,7 @@
 - [x] Add `test_attach_failure_stays_before_gdb_and_release_go` asserting the named preflight failure branch precedes GDB and the runner requires the attach PASS marker before release-GO.
 - [x] Add `test_attach_preflight_evaluates_failures_and_keeps_fd0_diagnostic_only` using a temporary proc-shaped fixture to execute the actual pre-GDB command prefix for all-pass, syscall-fd failure, and fd0-only mismatch cases.
 - [x] Run the per-predicate test against the old command; it failed because only the generic `FLR0350_GDB_ATTACH=FAIL precondition` existed. The first assertion initially dumped the 3528-byte command; it was shortened to a bounded failure message before rerunning the red check.
-- [ ] Keep the test assertions on the serial-output contract and gate ordering; do not add a fake rule that treats fd 0 as acceptable.
+- [x] Keep the test assertions on the serial-output contract and gate ordering; fd 0 remains diagnostic-only in this ticket.
 
 ### Task 2: Emit same-point named predicates without changing the gate
 
@@ -61,7 +61,7 @@ The observed example is a format example, not an expected Mini result. Implement
 - [x] Run all three focused tests; the behavioral fixture proves the exact failed syscall-FD predicate is named and that an fd0 mismatch remains diagnostic-only. The failure-before-GDB/GO test preserves an existing boundary rather than changing it.
 - [x] Run `sh -n work/commands/FLR-0350-attach-pre-submit.cmd`; it remains one command of 4041 bytes (limit 4096). `bash work/commands/FLR-0350-run-sync-producer.sh --check` passes all static/helper markers and 34 tests.
 - [x] Review the diff: all thirteen original acceptance predicates remain required; fd0/fd3 inode values are diagnostic only. Astra's judgment-only audit found no blocker and its mutation checks confirmed the test catches an inverted syscall-fd predicate or cleared failure accumulator.
-- [ ] Commit the tested change locally and record the exact commit in the FLR-0360 working log.
+- [x] Commit the tested change locally as `8c840b8d3c7f7dbcb5f0ccba3849043127067eb0`; record the exact commit in the FLR-0360 working log.
 
 ### Task 3: Bundle the exact commit and make one Mini diagnostic attempt
 
@@ -71,14 +71,22 @@ The observed example is a format example, not an expected Mini result. Implement
 - Execute on Mini: `bash work/commands/FLR-0350-run-sync-producer.sh flr0360-0001`
 - Inspect only: exact receiver/image identity, preflight summary, attach marker, QMP analysis, cleanup marker
 
-- [ ] Record the resolved receiver base commit before transfer and prove the worktree is clean.
-- [ ] Transfer the exact local commit by the standard bundle helper; record command, bundle SHA-256, local tip, receiver base/tip, clean state, fixed build/TMPDIR roles, and effective-template result.
-- [ ] Prove pinned kernel/rootfs/qemuboot hashes, BitBake idle, ports free, no prior run-owned targets, and absent evidence parent for `flr0360-0001`; if any preflight gate fails, do not launch QEMU or consume the ID.
-- [ ] Run only the one fresh ID `flr0360-0001`; log the exact role-redacted invocation before reading results.
-- [ ] Confirm helper/command provenance, then read the preflight marker. If any predicate fails, verify no GDB attach/GO marker and let the runner clean up; do not loosen the predicate.
-- [ ] If all predicates pass, record the next stage from the same run; do not infer 3D success from a GO marker or fixture-only pixels.
-- [ ] Preserve the QMP full-frame still and eight one-second frames/video, analyze full frame and the existing fixed 3D ROI, include pixel counts and SHA-256, and label pre-GO/post-GO accurately.
-- [ ] Verify `FLR0350_FIFO_CLEANUP=PASS removed=run-owned-fifo`, QMP quit accepted, app/QEMU/QMP residuals zero; do not issue a global kill.
-- [ ] Update the work log and ticket with facts/inferences/three-to-five ranked hypotheses/UNKNOWNs, failed probes, exact commands, and PDCA result. Close FLR-0360 only after its own evidence/privacy/checkpoint review; production 2D+3D remains a separate acceptance goal.
+- [x] Record receiver base `8de11b0e47304724f436d5567b55e62640a237d3` and prove the local worktree clean before transfer.
+- [x] Transfer exact tip `8c840b8d3c7f7dbcb5f0ccba3849043127067eb0` with the standard bundle helper; bundle SHA-256 `099cc98fa37f29d9d71fac5efdb1c0040e43971877f7edc9c09c52c20bb81669`; receiver tip, fixed build/TMPDIR roles, and effective TOPDIR/TMPDIR checks passed.
+- [x] Pinned kernel/rootfs/qemuboot hashes, BitBake idle, ports/processes, and fresh evidence parent passed the runner's preflight for `flr0360-0001`; only then did it create the run and start QEMU.
+- [x] Run only `flr0360-0001`; record the role-redacted invocation before reading markers.
+- [x] Confirm committed/source/staged helper identity and all 11 command files. Same-point attach output named `syscall_fd3` as the sole failed original predicate; no GDB attach, GO, or `FLR0350_EXEC` occurred.
+- [x] Preserve QMP full-frame still and eight frames; full frame and fixed 3D ROI both contain zero changed/chromatic/edge pixels. Classify all as pre-GO, not a rendering result.
+- [x] Verify run-owned FIFO removal, QMP quit, app exit, and zero run-owned QEMU/QMP/app residuals; no global kill.
+- [x] Update the working log and ticket with facts, inference, ranked hypotheses, UNKNOWNs, corrected probes, exact role-redacted commands, hashes, QMP evidence, and bounded PDCA result. The overall 2D+3D acceptance remains open.
+
+### FLR-0360 execution result
+
+- Bundle handoff: PASS; local tip and Mini receiver tip `8c840b8d3c7f7dbcb5f0ccba3849043127067eb0`; bundle SHA-256 `099cc98fa37f29d9d71fac5efdb1c0040e43971877f7edc9c09c52c20bb81669`; effective TOPDIR/TMPDIR PASS.
+- Fresh Mini runtime: `flr0360-0001`, qemux86-64, 6144 MiB. All pinned image hashes and QEMU preflight gates passed. Runtime helper committed/source/staged SHA-256 all equal `088e8e39ed1fc7dce175ad0fd2a027325b04815c68337a9e52fead2c9fb64fee`.
+- Same-point finding: the 13 original predicates had one failure, `syscall_fd3=FAIL`; `syscall_nr=0`, `syscall_fd=0x0`, and both `fd0_same_gate` and `fd3_same_gate` were PASS. No GDB/GO marker or release-GO file exists.
+- QMP: pre-launch PPM SHA-256 `2617e8773e7bf65962467a54d212e36715ea674fbe3b7d05dc322c0dec209dc6`; post-run PPM SHA-256 `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`; eight post-run frames have that same SHA. Full frame: 0 changed/chromatic/edge pixels, luma `[0,0]`; 3D ROI: 0 changed/chromatic/edge pixels. This black frame is before GO.
+- Teardown: GDB `not-running`, wrapper stopped, Flutter process count 0, run-owned FIFO removed, QMP quit accepted, residual targets and QMP socket 0.
+- Indexed PNG/MP4 derivatives are linked from the ticket/evidence index; original PPM/frames and focused serial logs remain under the Mini run evidence directory and the local run evidence copy.
 
 **Acceptance:** the first attach predicate is identified from same-point output, or every attach predicate passes and the next measured stage is recorded; acceptance semantics are unchanged; exactly one new Mini run is attributable to the committed bundle; QMP evidence and cleanup are complete; no rendering claim is made from pre-GO evidence.
