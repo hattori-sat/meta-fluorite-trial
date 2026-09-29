@@ -1,6 +1,6 @@
 # FLR-0372 — fetch pinned flutter-auto plugin submodules
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Owner: Yocto recipe metadata / Mini authoritative build roles
 - Created: 2026-09-30
@@ -78,18 +78,19 @@ renders or that production Sequoia is visible.
 
 ## Success criteria
 
-- [ ] The effective `plugins` URI is exactly one `gitsm://` item with the
+- [x] The effective `plugins` URI is exactly one `gitsm://` item with the
       existing URL, protocol, branch, name, destination, and pinned revision;
       no `git://` item remains for `name=plugins`.
-- [ ] Recipe-scoped clean → `do_fetch` → `do_unpack` places the expected
-      `sdbus-cpp` commit and `CMakeLists.txt` in the recipe worktree.
-- [ ] Candidate `do_patch`, `do_configure`, and `do_compile` pass on Mini at
+- [x] Recipe-scoped clean → forced `do_patch` (with its fetch/unpack task
+      dependencies) places the expected `sdbus-cpp` commit and `CMakeLists.txt`
+      in the recipe worktree.
+- [x] Candidate `do_patch`, `do_configure`, and `do_compile` pass on Mini at
       the recorded receiver commit; exact logs/status and available storage
       remain preserved.
-- [ ] No downloads/sstate/TMPDIR cleanup, unrelated source-revision change,
+- [x] No downloads/sstate/TMPDIR cleanup, unrelated source-revision change,
       runtime script change, QEMU run, or push occurs in this ticket.
-- [ ] FLR-0371 remains blocked until the prerequisite is proven; a compile
-      pass here is not a 3D-rendering verdict.
+- [x] The build prerequisite is proven without claiming a 3D result; FLR-0371
+      resumes separately for candidate-image and QMP runtime validation.
 
 ## Plan / Do / Check / Act
 
@@ -114,26 +115,39 @@ the runtime baseline; no runtime launcher is edited here.
   `do_patch` passed. Its compile attempt found the missing submodule described
   above. The fetcher correction and its validation are now this separate work
   unit.
+- The project `flutter-auto_2.0.bbappend` removes only the base plugin's
+  `git://` URI and appends the same URI as `gitsm://`; homescreen source,
+  `PLUGINS_COMMIT`, URI attributes, patch bodies, and runtime scripts remain
+  unchanged. The baseline lock was refreshed by the repository helper.
+- Commit `65e60a443255b3f02c37f3b778957a0dbfb1bdb2` was transferred to Mini as
+  bundle SHA-256
+  `748182a1760d7ce5a60bd565fa334501a506c78f2aa2bc97aea12886658b7da5`.
 
 ### Check
 
-Pending Mini URI, fetch/unpack, `do_patch`, `do_configure`, and `do_compile`
-results.
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| Effective source metadata | PASS | Exactly one plugin URI is `gitsm://`; base plugin HEAD remains `2163242e9973336153871ed63b34bb5ed8282145`; Mini metadata summary SHA-256 `7448694041bbe6ef4cc1c3e1d9a744a86208889fcecb90935c2d9abeeb250d9e` |
+| Submodule materialization | PASS | Parent gitlink and checked-out `sdbus-cpp` HEAD both `7fbfcec455a2af6efe3910baa3089ecba48a9d6d`; required `CMakeLists.txt` present |
+| Recipe clean / candidate patch | PASS | Fresh `FLR-0372-0001`; clean affected only `flutter-auto`; `do_patch=PASS`; summary SHA-256 `4548294a79da60429bf561d32c3d7b4c940e684fd9d53362e64906ad445cc07e` |
+| Candidate configure | PASS | 13 seconds; 2,685 tasks, 2,681 not rerun, all succeeded; four warnings; output SHA-256 `fcfdc74f0d1dc4880f1acdd284972b08a09bdf4781c384563b9194f88bf9a3aa` |
+| Candidate compile | PASS | 111 seconds; 2,686 tasks, 2,685 not rerun, compile succeeded; five warnings; output SHA-256 `6569249ecc9f74500d0ebb826113cf04696ac1bd80c717907a118df2fda02c7f` |
+| Mini postflight | PASS | Receiver clean at `65e60a443255b3f02c37f3b778957a0dbfb1bdb2`; BitBake idle; 66 GiB free |
+| Scope | PASS | No image build/QEMU run, cache deletion, runtime script edit, or push in FLR-0372 |
 
 ### Act
 
-- If all source/build checks pass, close FLR-0372 and resume FLR-0371 from a
-  new feature branch based on the integration dev branch; build the image,
-  then manually start Flutter over guest SSH and capture complete QMP
-  screenshot/video before teardown.
+- All FLR-0372 source/build prerequisite checks passed. FLR-0371 resumes from
+  `feature-flr-0371-lit-parameter-rgb-runtime`, based on the updated
+  integration dev branch. Build the candidate image, then manually start
+  Flutter over guest SSH and capture complete QMP screenshot/video before
+  teardown.
 - If the submodule is still absent, preserve the first failing task/log and
   open a distinct diagnosis only after classifying the new boundary. Do not
   alter the Devtool source patch or fetch other unrelated submodules.
 
 ## UNKNOWN
 
-- Whether switching only this effective plugin URI to `gitsm://` will populate
-  the expected gitlink checkout under the Mini's current cache/mirror policy.
 - Whether the FLR-0371 RGB-only assignment renders once the candidate image
   can be built.
 - Whether production Sequoia can be composed with the 2D HUD; no current

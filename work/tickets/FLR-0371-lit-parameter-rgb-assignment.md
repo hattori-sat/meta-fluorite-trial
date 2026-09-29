@@ -1,18 +1,18 @@
 # FLR-0371 — test LIT parameter color with RGB-only assignment
 
-- Status: Waiting — blocked by [FLR-0372](FLR-0372-fetch-plugin-git-submodules.md)
+- Status: In Progress
 - Priority: High
 - Owner: Mac Podman Devtool / Mini build / direct guest SSH / Flutter / QMP roles
 - Created: 2026-09-30
 - Predecessor: [FLR-0370 material-color dataflow trace](FLR-0370-trace-fixture-material-color-dataflow.md)
 - Implementation plan: [FLR-0371 plan](../../docs/superpowers/plans/2026-09-30-flr-0371-lit-parameter-rgb-assignment.md)
 - Baseline: current rootfs SHA-256 `5c8ca252181fac1a64669ae78de5b3fa590db1048f95f156db306df2f9d821ec`
-- Branch: `feature-flr-0371-lit-parameter-rgb-assignment` (local, no push)
+- Branch: `feature-flr-0371-lit-parameter-rgb-runtime` (local, no push)
 - Working log: [FLR-0371 working log](../logs/2026-09-30-flr0371.md)
-- Current blocker: candidate patch 0330 passes Mini `do_patch`, but the
-  candidate compile stops in `flutter-auto:do_configure` because the pinned
-  plugin's `sdbus-cpp` submodule is absent. FLR-0372 owns only the fetch-mode
-  correction; this ticket resumes after that prerequisite is verified.
+- Build prerequisite: [FLR-0372](FLR-0372-fetch-plugin-git-submodules.md) is
+  Done. The exact pinned `sdbus-cpp` gitlink is now fetched, and candidate
+  `do_patch`, `do_configure`, and `do_compile` pass. The full image and the
+  RGB-only candidate's runtime/QMP result remain unverified.
 
 ## Objective
 
