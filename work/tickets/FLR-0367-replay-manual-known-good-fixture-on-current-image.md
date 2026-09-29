@@ -8,6 +8,7 @@
 - Historical positive control: [FLR-0286 known-good combined fixture](FLR-0286-reproduce-known-good-combined-sequoia-hud.md)
 - Current image: rootfs SHA-256 `5c8ca252181fac1a64669ae78de5b3fa590db1048f95f156db306df2f9d821ec`
 - Run ID: `flr0367-0001` (one fresh attempt)
+- Branch: `feature-flr-0367-manual-known-good-fixture` (local continuation from the unmerged FLR-0366 feature tip; no push)
 - Working log: [FLR-0367 working log](../logs/2026-09-29-flr0367.md)
 
 ## Objective
