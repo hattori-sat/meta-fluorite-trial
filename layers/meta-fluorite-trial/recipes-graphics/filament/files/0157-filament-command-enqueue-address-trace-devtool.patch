@@ -1,0 +1,41 @@
+From 24a5ae666b218a431525572f15726262384e0926 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 06:51:48 +0000
+Subject: [PATCH] diag: trace command enqueue addresses
+
+---
+ .../backend/include/private/backend/CommandStream.h   | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/filament/backend/include/private/backend/CommandStream.h b/filament/backend/include/private/backend/CommandStream.h
+index 1e6b85639..18fb230cd 100644
+--- a/filament/backend/include/private/backend/CommandStream.h
++++ b/filament/backend/include/private/backend/CommandStream.h
+@@ -244,6 +244,12 @@ public:
+         using Cmd = COMMAND_TYPE(methodName);                                                   \
+         void* const p = allocateCommand(CommandBase::align(sizeof(Cmd)));                       \
+         new(p) Cmd(mDispatcher.methodName##_, #methodName, APPLY(std::move, params));            \
++        if (std::getenv("FLR0026_COMMAND_EXECUTION_TRACE") != nullptr &&                     \
++                (std::strcmp(#methodName, "commit") == 0 ||                                  \
++                 std::strcmp(#methodName, "endFrame") == 0)) {                                \
++            std::fprintf(stderr, "FLR0026_COMMAND_ENQUEUE name=%s command=%p\n",              \
++                    #methodName, p);                                                          \
++        }                                                                                       \
+         DEBUG_COMMAND_END(methodName, false);                                                   \
+     }
+ 
+@@ -264,6 +270,11 @@ public:
+         void* const p = allocateCommand(CommandBase::align(sizeof(Cmd)));                       \
+         new(p) Cmd(mDispatcher.methodName##_, #methodName "R", RetType(result),                \
+                 APPLY(std::move, params));                                                       \
++        if (std::getenv("FLR0026_COMMAND_EXECUTION_TRACE") != nullptr &&                     \
++                std::strcmp(#methodName, "createFence") == 0) {                               \
++            std::fprintf(stderr, "FLR0026_COMMAND_ENQUEUE name=%sR command=%p\n",             \
++                    #methodName, p);                                                          \
++        }                                                                                       \
+         DEBUG_COMMAND_END(methodName, false);                                                   \
+         return result;                                                                          \
+     }
+-- 
+2.34.1
+

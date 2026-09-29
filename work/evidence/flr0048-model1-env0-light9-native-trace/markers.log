@@ -1,0 +1,1713 @@
+[14:30:26.028193] [I] FLR0026_MODEL_SELECTED ordinal=0 asset=assets/models/sequoia_ngp.glb
+[14:30:26.028661] [I] FLR0026_MODEL_LOAD_PLAN total=60 limit=1 match= inspected=2 queued=1
+[14:30:26.032009] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=5 light_component=true instance_valid=true scene_has_entity=true scene_light_count=1 position=(74.5,1.2,68.85)
+[14:30:26.032206] [I] FLR0026_LIGHT_SELECTED ordinal=0 guid=126 type=POINT
+[14:30:26.032643] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=6 light_component=true instance_valid=true scene_has_entity=true scene_light_count=2 position=(74.5,1.2,67.15)
+[14:30:26.032656] [I] FLR0026_LIGHT_SELECTED ordinal=1 guid=128 type=POINT
+[14:30:26.033044] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=7 light_component=true instance_valid=true scene_has_entity=true scene_light_count=3 position=(69.5,1,68.85)
+[14:30:26.033057] [I] FLR0026_LIGHT_SELECTED ordinal=2 guid=130 type=POINT
+[14:30:26.033195] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=8 light_component=true instance_valid=true scene_has_entity=true scene_light_count=4 position=(69.5,1,67.15)
+[14:30:26.033208] [I] FLR0026_LIGHT_SELECTED ordinal=3 guid=132 type=POINT
+[14:30:26.033243] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=9 light_component=true instance_valid=true scene_has_entity=true scene_light_count=5 position=(74.5,1.2,68.85)
+[14:30:26.033250] [I] FLR0026_LIGHT_SELECTED ordinal=4 guid=134 type=POINT
+[14:30:26.033333] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=10 light_component=true instance_valid=true scene_has_entity=true scene_light_count=6 position=(74.5,1.2,67.15)
+[14:30:26.033341] [I] FLR0026_LIGHT_SELECTED ordinal=5 guid=136 type=POINT
+[14:30:26.033364] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=11 light_component=true instance_valid=true scene_has_entity=true scene_light_count=7 position=(69.5,1,68.85)
+[14:30:26.033369] [I] FLR0026_LIGHT_SELECTED ordinal=6 guid=138 type=POINT
+[14:30:26.033579] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=12 light_component=true instance_valid=true scene_has_entity=true scene_light_count=8 position=(69.5,1,67.15)
+[14:30:26.033590] [I] FLR0026_LIGHT_SELECTED ordinal=7 guid=140 type=POINT
+[14:30:26.033891] [I] FLR0026_LIGHT_PROPS guid=162 type=POINT color=(1,1,1) color_temperature=0 intensity=2.4e+07 position=(0,5,1) direction=(0,1,0) cast_light=true cast_shadows=true falloff=300.1 spot_inner=1 spot_outer=10 sun_radius=0 sun_halo_size=0 sun_halo_falloff=0
+[14:30:26.034239] [I] FLR0026_NATIVE_LIGHT_STATE native_entity=13 light_component=true instance_valid=true scene_has_entity=true scene_light_count=9 position=(0,5,1)
+[14:30:26.034254] [I] FLR0026_LIGHT_SELECTED ordinal=8 guid=162 type=POINT
+[14:30:26.034407] [I] FLR0026_LIGHT_PROPS guid=164 type=POINT color=(0.95686275,0.2627451,0.21176471) color_temperature=0 intensity=6.4e+07 position=(-15,5,-15) direction=(0,-1,0) cast_light=true cast_shadows=true falloff=10 spot_inner=0.1 spot_outer=0.3 sun_radius=0 sun_halo_size=0 sun_halo_falloff=0
+[14:30:26.034520] [I] FLR0026_LIGHT_SETUP_PLAN total=13 limit=9 type_filter= skip_guid_filter= trace_guid_filter=162,164 position_override_guid=0 position_override_enabled=false selected=9
+[14:30:26.059815] [I] FLR0026_SHAPE_READY guid=188 entity=14 renderable=true
+[14:30:26.060236] [I] FLR0026_SHAPE_READY guid=190 entity=15 renderable=true
+[14:30:26.060445] [I] FLR0026_SHAPE_READY guid=192 entity=16 renderable=true
+[14:30:26.328668] [I] FLR0026_SHAPE_READY guid=194 entity=17 renderable=true
+[14:30:26.329279] [I] FLR0026_SHAPE_READY guid=196 entity=18 renderable=true
+[14:30:26.329700] [I] FLR0026_SHAPE_READY guid=198 entity=19 renderable=true
+[14:30:26.330720] [I] FLR0026_SHAPE_READY guid=200 entity=20 renderable=true
+[14:30:26.330912] [I] FLR0026_SHAPE_READY guid=202 entity=21 renderable=true
+[14:30:26.331038] [I] FLR0026_SHAPE_READY guid=212 entity=22 renderable=true
+[14:30:26.331229] [I] FLR0026_SHAPE_READY guid=204 entity=23 renderable=true
+[14:30:26.331322] [I] FLR0026_SHAPE_READY guid=206 entity=24 renderable=true
+[14:30:26.331416] [I] FLR0026_SHAPE_READY guid=208 entity=25 renderable=true
+[14:30:26.331515] [I] FLR0026_SHAPE_READY guid=210 entity=26 renderable=true
+[14:30:26.331608] [I] FLR0026_SHAPE_READY guid=118 entity=27 renderable=true
+[14:30:26.331705] [I] FLR0026_SHAPE_READY guid=120 entity=28 renderable=true
+[14:30:26.331848] [I] FLR0026_SHAPE_READY guid=216 entity=29 renderable=true
+[14:30:26.331976] [I] FLR0026_SHAPE_READY guid=244 entity=30 renderable=true
+[14:30:26.332237] [I] FLR0026_SHAPE_READY guid=246 entity=31 renderable=true
+[14:30:26.332399] [I] FLR0026_SHAPE_READY guid=248 entity=32 renderable=true
+[14:30:26.332524] [I] FLR0026_SHAPE_READY guid=250 entity=33 renderable=true
+[14:30:26.332658] [I] FLR0026_SHAPE_READY guid=252 entity=34 renderable=true
+[14:30:26.332793] [I] FLR0026_SHAPE_READY guid=254 entity=35 renderable=true
+[14:30:26.332987] [I] FLR0026_SHAPE_READY guid=256 entity=36 renderable=true
+[14:30:26.333197] [I] FLR0026_SHAPE_READY guid=258 entity=37 renderable=true
+[14:30:26.333357] [I] FLR0026_SHAPE_READY guid=260 entity=38 renderable=true
+[14:30:26.333480] [I] FLR0026_SHAPE_READY guid=262 entity=39 renderable=true
+[14:30:26.333726] [I] FLR0026_SHAPE_READY guid=220 entity=40 renderable=true
+[14:30:26.333975] [I] FLR0026_SHAPE_READY guid=222 entity=41 renderable=true
+[14:30:26.334285] [I] FLR0026_SHAPE_READY guid=224 entity=42 renderable=true
+[14:30:26.334551] [I] FLR0026_SHAPE_READY guid=226 entity=43 renderable=true
+[14:30:26.334823] [I] FLR0026_SHAPE_READY guid=228 entity=44 renderable=true
+[14:30:26.335117] [I] FLR0026_SHAPE_READY guid=230 entity=45 renderable=true
+[14:30:26.335383] [I] FLR0026_SHAPE_READY guid=232 entity=46 renderable=true
+[14:30:26.335653] [I] FLR0026_SHAPE_READY guid=234 entity=47 renderable=true
+[14:30:26.335963] [I] FLR0026_SHAPE_READY guid=236 entity=48 renderable=true
+[14:30:26.336311] [I] FLR0026_SHAPE_READY guid=238 entity=49 renderable=true
+[14:30:26.336420] [I] FLR0026_SHAPE_READY guid=264 entity=50 renderable=true
+[14:30:26.443218] [I] FLR0026_MODEL_STAGE_PROGRESS seq=1 progress=0 assets=1
+[14:30:26.446679] [I] FLR0026_SHAPE_READY guid=197 entity=60 renderable=true
+[14:30:26.447675] [I] FLR0026_SHAPE_READY guid=199 entity=61 renderable=true
+[14:30:26.448262] [I] FLR0026_SHAPE_READY guid=201 entity=62 renderable=true
+[14:30:26.448722] [I] FLR0026_SHAPE_READY guid=203 entity=63 renderable=true
+[14:30:26.449294] [I] FLR0026_SHAPE_READY guid=205 entity=64 renderable=true
+[14:30:26.449806] [I] FLR0026_SHAPE_READY guid=207 entity=65 renderable=true
+[14:30:26.450386] [I] FLR0026_SHAPE_READY guid=209 entity=66 renderable=true
+[14:30:26.455405] [I] FLR0026_FRAME_BEGIN seq=1 started=true
+[14:30:26.635806] [I] FLR0026_MODEL_STAGE_ASSET_CREATED asset=assets/models/sequoia_ngp.glb guid=2 bytes=13671064 entities=22
+[14:30:26.732097] [I] FLR0026_MODEL_STAGE_ASYNC_BEGIN asset=assets/models/sequoia_ngp.glb guid=2
+[14:30:26.732373] [I] FLR0026_MODEL_STAGE_INSTANCE_READY asset=assets/models/sequoia_ngp.glb guid=2 instance=0x7f57901628e0
+[14:30:27.291799] [I] FLR0026_MODEL_STAGE_PROGRESS seq=2 progress=0.95652175 assets=1
+[14:30:27.293008] [I] FLR0026_FRAME_BEGIN seq=2 started=true
+[14:30:27.398386] [I] FLR0026_MODEL_STAGE_PROGRESS seq=3 progress=1 assets=1
+[14:30:27.398890] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=1
+[14:30:27.401809] [I] FLR0026_FRAME_BEGIN seq=3 started=false
+[14:30:27.503947] [I] FLR0026_MODEL_STAGE_PROGRESS seq=4 progress=1 assets=1
+[14:30:27.504187] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:27.606214] [I] FLR0026_MODEL_STAGE_PROGRESS seq=5 progress=1 assets=1
+[14:30:27.606348] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:27.708396] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:27.810412] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:27.914231] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.015368] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.018319] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.120706] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.129784] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.130422] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.130533] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.130608] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.130937] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.132044] [I] FLR0026_FRAME_BEGIN seq=10 started=false
+[14:30:28.232676] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.233188] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.233328] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.233407] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.233477] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.233795] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.335635] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.336017] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.336246] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.336338] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.336411] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.336725] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.438485] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.438884] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.438986] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.439161] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.439249] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.439572] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.541312] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.541763] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.541932] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.542060] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.542451] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.542770] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.644606] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.644981] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.645232] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.645435] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.645570] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.646044] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.750435] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.750922] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.751228] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.751342] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.751420] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.751724] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.860617] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.861018] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.861213] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.861302] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.861377] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.861679] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:28.963208] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:28.963453] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:28.963506] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:28.963611] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:28.963645] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:28.963820] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.068227] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.068504] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.068557] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.068590] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.068621] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.068790] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.169901] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.170837] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.170956] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.170993] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.171022] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.171248] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.171704] [I] FLR0026_FRAME_BEGIN seq=20 started=false
+[14:30:29.273591] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.274001] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.274208] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.274300] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.274373] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.274677] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.376333] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.376769] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.376876] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.377027] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.377280] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.377603] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.479415] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.479779] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.479882] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.479957] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.480028] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.480553] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.582348] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.582735] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.582841] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.582918] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.582989] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.583415] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.685262] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.685678] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.685785] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.685863] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.685935] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.686326] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.788045] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.788556] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.788662] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.788737] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.788834] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.789293] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:29.895303] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:29.895678] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:29.895774] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:29.895844] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:29.895909] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:29.896270] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.000216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.000519] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.000575] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.000614] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.000645] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.000821] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.103244] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.103494] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.103547] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.103581] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.103611] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.103841] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.215431] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.215680] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.215731] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.215764] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.215794] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.215964] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.219486] [I] FLR0026_FRAME_BEGIN seq=30 started=false
+[14:30:30.320217] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.320468] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.320518] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.320551] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.320582] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.320745] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.421850] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.422353] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.422467] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.422543] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.422612] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.422830] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.525210] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.525460] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.525512] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.525545] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.525576] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.525732] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.629683] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.629937] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.629990] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.630024] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.630055] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.630268] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.733015] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.733345] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.733403] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.733437] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.733468] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.733630] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.839224] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.839475] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.839527] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.839560] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.839644] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.839822] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:30.951210] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:30.951479] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:30.951535] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:30.951569] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:30.951600] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:30.951763] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.052681] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.052953] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.053006] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.053040] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.053132] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.053317] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.159232] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.159481] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.159535] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.159570] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.159600] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.159778] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.260664] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.260940] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.260992] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.261024] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.261054] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.261297] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.261774] [I] FLR0026_FRAME_BEGIN seq=40 started=false
+[14:30:31.365242] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.365511] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.365565] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.365600] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.365631] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.365792] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.467781] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.468018] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.468258] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.468539] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.468620] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.468783] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.569647] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.569899] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.569951] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.570046] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.570138] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.570303] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.671190] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.671441] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.671492] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.671527] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.671558] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.671731] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.784196] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.784449] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.784500] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.784533] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.784564] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.784736] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.890239] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.890499] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.890551] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.890585] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.890616] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.890787] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:31.991891] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:31.992442] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:31.992559] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:31.992637] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:31.992709] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:31.992876] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.096210] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.096472] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.096526] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.096559] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.096590] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.096746] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.200257] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.200510] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.200563] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.200597] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.200627] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.200803] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.303218] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.303469] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.303521] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.303555] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.303653] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.303835] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.304372] [I] FLR0026_FRAME_BEGIN seq=50 started=false
+[14:30:32.409248] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.409494] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.409546] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.409578] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.409608] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.409780] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.514572] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.514811] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.514865] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.514897] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.514926] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.515157] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.616357] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.616604] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.616657] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.616690] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.616721] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.616882] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.718000] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.718320] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.718377] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.718411] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.718442] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.718599] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.826210] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.826456] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.826507] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.826541] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.826573] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.826731] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:32.932230] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:32.932493] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:32.932547] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:32.932584] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:32.932615] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:32.932772] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.033830] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.034129] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.034193] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.034229] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.034314] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.034495] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.135589] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.135848] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.135906] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.135936] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.135970] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.136210] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.239230] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.239483] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.239539] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.239575] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.239607] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.239765] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.346256] [I] FLR0026_MODEL_STAGE_PROGRESS seq=60 progress=1 assets=1
+[14:30:33.346353] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.346549] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.346603] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.346638] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.346669] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.346820] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.347298] [I] FLR0026_FRAME_BEGIN seq=60 started=false
+[14:30:33.447701] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.447946] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.447999] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.448033] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.448119] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.448282] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.551218] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.551474] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.551529] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.551563] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.551594] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.551753] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.658334] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.658567] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.658617] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.658647] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.658674] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.658823] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.759563] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.759811] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.759919] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.759961] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.759992] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.760198] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.865112] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.865363] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.865416] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.865449] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.865485] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.865645] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:33.966690] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:33.966939] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:33.966989] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:33.967022] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:33.967053] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:33.967264] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.070208] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.070480] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.070531] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.070565] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.070595] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.070752] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.178380] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.178640] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.178688] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.178719] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.178747] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.178893] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.285460] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.285727] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.285783] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.285816] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.285847] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.286003] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.386816] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.387132] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.387195] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.387234] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.387266] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.387422] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.387816] [I] FLR0026_FRAME_BEGIN seq=70 started=false
+[14:30:34.490218] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.490516] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.490585] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.490621] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.490652] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.490808] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.594214] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.594453] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.594502] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.594534] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.594564] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.594712] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.695903] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.696450] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.696570] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.696651] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.696726] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.697005] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.797866] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.798170] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.798238] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.798272] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.798302] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.798457] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:34.903216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:34.903469] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:34.903523] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:34.903558] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:34.903588] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:34.903745] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.007254] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.007511] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.007561] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.007593] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.007623] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.007772] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.118444] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.118712] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.118769] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.118803] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.118833] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.118991] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.223417] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.223666] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.223717] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.223820] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.223857] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.224013] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.325184] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.325427] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.325479] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.325511] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.325542] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.325704] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.429971] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.430254] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.430308] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.430344] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.430374] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.430520] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.430898] [I] FLR0026_FRAME_BEGIN seq=80 started=false
+[14:30:35.536956] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.537448] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.537556] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.537632] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.537701] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.538004] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.642209] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.642451] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.642503] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.642535] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.642564] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.642719] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.747144] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.747400] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.747453] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.747484] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.747513] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.747676] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.853083] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.853330] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.853380] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.853412] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.853442] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.853594] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:35.954391] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:35.954641] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:35.954751] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:35.954790] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:35.954820] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:35.954977] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.058220] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.058480] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.058527] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.058557] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.058585] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.058734] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.159460] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.159701] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.159751] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.159783] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.159813] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.159964] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.261459] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.261704] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.261754] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.261790] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.261820] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.261973] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.365221] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.365473] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.365524] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.365557] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.365587] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.365742] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.466753] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.466989] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.467038] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.467112] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.467152] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.467302] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.467697] [I] FLR0026_FRAME_BEGIN seq=90 started=false
+[14:30:36.570383] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.570625] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.570677] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.570710] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.570741] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.570891] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.672743] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.673040] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.673201] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.673247] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.673278] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.673462] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.777211] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.777457] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.777509] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.777542] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.777572] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.777724] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.881388] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.881626] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.881680] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.881715] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.881746] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.881899] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:36.989209] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:36.989452] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:36.989503] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:36.989541] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:36.989572] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:36.989724] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.090524] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.090788] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.090841] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.090876] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.090907] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.091096] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.197239] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.197514] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.197567] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.197600] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.197630] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.197783] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.298572] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.298829] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.298885] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.298919] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.298949] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.299367] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.400365] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.400602] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.400654] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.400746] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.400784] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.400941] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.505416] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.505658] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.505710] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.505744] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.505774] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.505929] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.506447] [I] FLR0026_FRAME_BEGIN seq=100 started=false
+[14:30:37.609199] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.609457] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.609509] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.609542] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.609572] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.609730] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.725225] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.725475] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.725526] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.725560] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.725591] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.725746] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.840231] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.840471] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.840525] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.840558] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.840589] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.840741] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:37.941513] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:37.941763] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:37.941816] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:37.941849] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:37.941880] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:37.942037] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.045263] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.045539] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.045596] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.045630] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.045661] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.045817] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.152219] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.152471] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.152571] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.152615] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.152646] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.152803] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.255239] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.255491] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.255541] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.255573] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.255603] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.255756] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.377225] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.377582] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.377658] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.377714] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.377766] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.377937] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.478726] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.478946] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.478993] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.479024] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.479105] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.479278] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.580277] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.580522] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.580573] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.580607] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.580637] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.580805] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.581238] [I] FLR0026_FRAME_BEGIN seq=110 started=false
+[14:30:38.687968] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.688261] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.688315] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.688350] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.688381] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.688538] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.792215] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.792454] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.792503] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.792536] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.792567] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.792717] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.895210] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.895518] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.895577] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.895615] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.895646] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.895804] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:38.996609] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:38.996863] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:38.996915] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:38.996947] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:38.996977] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:38.997222] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.102200] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.102455] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.102507] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.102542] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.102574] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.102730] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.206229] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.206471] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.206521] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.206554] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.206584] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.206750] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.307503] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.307738] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.307792] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.307839] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.307871] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.308036] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.413182] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.413418] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.413468] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.413501] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.413531] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.413696] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.521196] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.521440] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.521494] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.521532] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.521568] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.521739] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.623371] [I] FLR0026_MODEL_STAGE_PROGRESS seq=120 progress=1 assets=1
+[14:30:39.623450] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.623619] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.623711] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.623749] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.623778] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.623932] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.624351] [I] FLR0026_FRAME_BEGIN seq=120 started=false
+[14:30:39.733430] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.733672] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.733722] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.733756] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.733788] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.733953] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.838251] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.838496] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.838550] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.838583] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.838613] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.838782] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:39.945539] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:39.945789] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:39.945842] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:39.945874] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:39.945905] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:39.946129] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.052713] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.052972] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.053027] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.053117] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.053157] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.053313] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.160974] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.161244] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.161299] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.161332] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.161362] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.161517] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.266356] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.266606] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.266655] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.266687] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.266717] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.266871] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.372285] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.372582] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.372636] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.372669] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.372698] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.372850] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.473557] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.473808] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.473858] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.473892] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.473922] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.474115] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.576248] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.576502] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.576549] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.576579] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.576606] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.576756] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.677516] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.677766] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.677821] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.677854] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.677884] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.678045] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.678507] [I] FLR0026_FRAME_BEGIN seq=130 started=false
+[14:30:40.784213] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.784456] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.784505] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.784536] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.784565] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.784725] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.886275] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.886532] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.886583] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.886616] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.886647] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.886798] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:40.990227] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:40.990471] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:40.990520] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:40.990552] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:40.990582] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:40.990732] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.091830] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.092432] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.092553] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.092632] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.092705] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.093037] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.196226] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.196474] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.196527] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.196560] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.196591] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.196762] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.297592] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.297837] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.297888] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.297921] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.297951] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.298159] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.407423] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.407663] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.407716] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.407748] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.407784] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.407941] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.512223] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.512467] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.512518] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.512551] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.512582] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.512735] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.628210] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.628462] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.628516] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.628548] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.628578] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.628739] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.729521] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.729767] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.729821] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.729854] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.729885] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.730143] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.730593] [I] FLR0026_FRAME_BEGIN seq=140 started=false
+[14:30:41.834214] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.834454] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.834505] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.834539] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.834570] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.834737] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:41.946236] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:41.946480] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:41.946530] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:41.946563] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:41.946593] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:41.946758] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.047549] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.047808] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.047860] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.047893] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.047924] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.048128] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.150220] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.150461] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.150511] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.150544] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.150574] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.150726] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.251503] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.251766] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.251816] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.251849] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.251879] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.252036] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.353136] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.353385] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.353437] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.353468] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.353496] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.353649] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.455839] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.456128] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.456193] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.456228] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.456258] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.456414] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.560576] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.560858] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.560915] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.560947] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.560977] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.561179] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.665392] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.665634] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.665688] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.665721] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.665751] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.665905] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.766681] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.766921] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.766972] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.767005] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.767035] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.767240] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.767634] [I] FLR0026_FRAME_BEGIN seq=150 started=false
+[14:30:42.868472] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.868728] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.868778] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.868821] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.868849] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.868999] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:42.975419] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:42.975661] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:42.975720] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:42.975756] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:42.975787] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:42.975959] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.080687] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.080945] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.080999] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.081032] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.081116] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.081303] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.182216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.182456] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.182508] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.182542] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.182573] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.182739] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.291215] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.291477] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.291529] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.291563] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.291594] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.291750] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.399015] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.399345] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.399399] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.399432] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.399462] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.399617] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.504306] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.504556] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.504606] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.504639] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.504669] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.504835] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.605974] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.606269] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.606328] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.606362] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.606393] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.606562] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.707252] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.707496] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.707552] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.707587] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.707618] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.707791] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.808576] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.808818] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.808870] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.808902] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.808933] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.809137] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:43.809537] [I] FLR0026_FRAME_BEGIN seq=160 started=false
+[14:30:43.910262] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:43.910519] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:43.910573] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:43.910609] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:43.910639] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:43.910862] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.011678] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.011933] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.011995] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.012028] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.012105] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.012270] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.113025] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.113347] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.113406] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.113440] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.113471] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.113630] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.214436] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.214694] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.214745] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.214778] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.214809] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.214961] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.320877] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.321167] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.321226] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.321261] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.321292] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.321450] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.422211] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.422458] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.422507] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.422539] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.422569] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.422720] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.528977] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.529295] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.529352] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.529388] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.529419] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.529574] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.630355] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.630595] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.630646] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.630678] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.630708] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.630861] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.740228] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.740516] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.740573] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.740605] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.740634] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.740785] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.848349] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.848602] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.848655] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.848688] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.848719] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.848875] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:44.849290] [I] FLR0026_FRAME_BEGIN seq=170 started=false
+[14:30:44.949698] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:44.949946] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:44.949999] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:44.950031] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:44.950138] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:44.950310] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.052236] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.052494] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.052550] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.052584] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.052616] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.052789] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.153629] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.153888] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.153943] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.153979] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.154014] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.154285] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.255120] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.255368] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.255420] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.255454] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.255486] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.255655] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.367283] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.367530] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.367581] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.367616] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.367649] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.367822] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.479231] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.479488] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.479542] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.479577] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.479609] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.479765] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.580553] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.580783] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.580836] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.580870] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.580900] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.581104] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.684267] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.684554] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.684612] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.684647] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.684681] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.684860] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.786629] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.786873] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.786927] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.786961] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.786993] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.787256] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.888020] [I] FLR0026_MODEL_STAGE_PROGRESS seq=180 progress=1 assets=1
+[14:30:45.888174] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.888346] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.888400] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.888438] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.888469] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.888618] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:45.889003] [I] FLR0026_FRAME_BEGIN seq=180 started=false
+[14:30:45.991403] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:45.991656] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:45.991709] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:45.991743] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:45.991775] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:45.991932] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.095221] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.095474] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.095526] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.095560] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.095639] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.095802] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.199976] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.200499] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.200556] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.200586] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.200614] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.200768] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.304219] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.304476] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.304535] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.304568] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.304599] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.304758] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.405584] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.405832] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.405883] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.405916] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.405947] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.406153] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.512370] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.512633] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.512692] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.512728] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.512759] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.512917] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.618219] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.618462] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.618512] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.618545] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.618576] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.618725] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.720529] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.723449] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.723507] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.723541] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.723571] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.723731] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.824632] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.824879] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.824929] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.824960] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.824989] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.825195] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.926136] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:46.926401] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:46.926455] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:46.926489] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:46.926521] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:46.926681] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:46.927196] [I] FLR0026_FRAME_BEGIN seq=190 started=false
+[14:30:47.027586] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.027842] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.027894] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.027927] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.027957] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.028172] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.134250] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.134516] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.134571] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.134605] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.134637] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.134815] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.237735] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.238356] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.238489] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.238569] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.238641] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.238847] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.339621] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.339866] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.339920] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.339952] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.339983] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.340209] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.444816] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.445050] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.445266] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.445305] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.445334] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.445498] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.549813] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.550061] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.550163] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.550198] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.550230] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.550437] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.651400] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.651640] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.651694] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.651727] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.651759] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.651909] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.764128] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.764359] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.764409] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.764445] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.764475] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.764629] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.878859] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.879203] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.879274] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.879308] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.879338] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.879497] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.995216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:47.995467] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:47.995521] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:47.995554] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:47.995586] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:47.995741] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:47.996205] [I] FLR0026_FRAME_BEGIN seq=200 started=false
+[14:30:48.096587] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.096847] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.096910] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.096945] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.096980] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.097204] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:48.200469] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.200728] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.200776] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.200806] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.200834] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.201010] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:48.301743] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.301985] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.302038] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.302134] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.302224] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.302408] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:48.406334] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.406580] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.406629] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.406662] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.406693] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.406849] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:48.510216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.510457] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.510508] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.510541] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.510573] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.510725] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:48.611514] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.611765] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.611815] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.611848] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.611878] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.612032] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:48.715375] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.715621] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.715673] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.715706] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.715738] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.715892] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:48.816691] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.816934] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.816985] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.817019] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.817049] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.817249] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:48.921314] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:48.921560] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:48.921612] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:48.921645] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:48.921676] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:48.921834] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.022696] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.022956] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.023010] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.023042] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.026162] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.026349] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.026784] [I] FLR0026_FRAME_BEGIN seq=210 started=false
+[14:30:49.128236] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.128476] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.128528] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.128562] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.128593] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.128748] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.232748] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.232980] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.233027] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.233058] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.233181] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.233335] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.336252] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.336504] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.336556] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.336590] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.336621] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.336780] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.444193] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.444439] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.444490] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.444524] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.444555] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.444709] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.550298] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.550548] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.550602] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.550635] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.550665] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.550836] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.657872] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.658157] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.658220] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.658254] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.658284] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.658441] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.764214] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.764458] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.764510] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.764544] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.764577] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.764779] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.871230] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.871479] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.871531] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.871566] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.871597] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.871767] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:49.972540] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:49.972784] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:49.972835] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:49.972868] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:49.972899] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:49.973120] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.075226] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.075483] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.075538] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.075572] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.075603] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.075780] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.076237] [I] FLR0026_FRAME_BEGIN seq=220 started=false
+[14:30:50.180872] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.181164] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.181225] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.181259] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.181290] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.181451] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.288238] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.288493] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.288544] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.288577] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.288608] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.288763] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.390229] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.390481] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.390536] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.390570] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.390602] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.390759] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.492321] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.492696] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.492745] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.492777] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.492868] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.493033] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.593803] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.594052] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.594204] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.594243] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.594275] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.594435] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.695229] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.695476] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.695532] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.695566] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.695597] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.695755] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.804248] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.804505] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.804557] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.804589] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.804620] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.804782] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:50.910205] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:50.910477] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:50.910529] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:50.910562] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:50.910594] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:50.910756] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.013749] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.014006] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.014213] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.014263] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.014294] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.014446] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.116209] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.116456] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.116509] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.116543] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.116575] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.116749] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.117204] [I] FLR0026_FRAME_BEGIN seq=230 started=false
+[14:30:51.217575] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.217830] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.217881] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.217975] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.218014] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.218247] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.318992] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.319319] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.319378] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.319412] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.319444] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.319620] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.422218] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.422465] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.422515] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.422548] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.422579] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.422735] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.523708] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.524314] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.524446] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.524532] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.524610] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.524906] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.625670] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.625931] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.625986] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.626020] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.626052] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.626280] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.727984] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.728332] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.728391] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.728426] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.728458] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.728616] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.832632] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.832878] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.832929] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.832963] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.832994] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.833214] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:51.938226] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:51.938472] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:51.938522] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:51.938554] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:51.938584] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:51.938800] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.039567] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.039825] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.039878] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.039912] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.039943] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.040166] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.140928] [I] FLR0026_MODEL_STAGE_PROGRESS seq=240 progress=1 assets=1
+[14:30:52.141016] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.141231] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.141289] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.141322] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.141352] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.141521] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.141918] [I] FLR0026_FRAME_BEGIN seq=240 started=false
+[14:30:52.242365] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.242615] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.242671] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.242705] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.242737] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.242912] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.349233] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.349489] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.349542] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.349574] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.349605] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.349762] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.450551] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.450796] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.450843] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.450874] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.450903] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.451122] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.552609] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.552885] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.552938] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.552973] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.553004] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.553251] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.654050] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.654364] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.654419] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.654506] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.654545] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.654754] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.761697] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.761944] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.762005] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.762043] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.762149] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.762322] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.868403] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.868644] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.868695] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.868728] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.868760] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.868919] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:52.969740] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:52.970037] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:52.970189] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:52.970237] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:52.970270] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:52.970435] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.074276] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.074535] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.074590] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.074624] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.074656] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.074817] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.175711] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.175960] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.176012] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.176049] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.176156] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.176331] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.176718] [I] FLR0026_FRAME_BEGIN seq=250 started=false
+[14:30:53.293216] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.293464] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.293515] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.293555] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.293593] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.293752] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.395215] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.395468] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.395568] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.395607] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.395636] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.395793] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.497251] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.497505] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.497556] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.497590] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.497621] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.497782] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.598618] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.598850] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.598899] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.598931] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.598964] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.599198] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.699970] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.700340] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.700402] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.700437] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.700468] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.700644] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.806231] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.806482] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.806533] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.806566] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.806597] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.806753] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:53.909219] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:53.909479] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:53.909533] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:53.909568] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:53.909600] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:53.909762] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.013660] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.013983] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.014041] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.014155] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.014200] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.014375] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.115225] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.117365] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.117427] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.117463] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.117548] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.117718] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.221248] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.221506] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.221558] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.221593] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.221624] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.221781] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.222291] [I] FLR0026_FRAME_BEGIN seq=260 started=false
+[14:30:54.329338] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.329746] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.329812] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.329847] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.329880] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.330198] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.439412] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.439653] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.439706] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.439743] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.439775] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.439936] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.541279] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.541524] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.541575] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.541607] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.541641] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.541797] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.647236] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.647479] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.647555] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.647589] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.647621] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.647782] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.754334] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.754747] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.754812] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.754847] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.754881] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.755140] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.855894] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.856188] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.856249] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.856338] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.856377] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.856535] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:54.960417] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:54.960655] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:54.960706] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:54.960737] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:54.960765] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:54.960917] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:55.064244] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:55.064499] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:55.064551] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:55.064583] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:55.064613] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:55.064768] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:55.168205] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:55.168449] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:55.168501] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:55.168533] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:55.168563] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:55.168718] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:55.269486] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:55.269732] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:55.269786] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:55.269819] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:55.269850] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:55.270007] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:55.270451] [I] FLR0026_FRAME_BEGIN seq=270 started=false
+[14:30:55.372469] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:55.372713] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:55.372766] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:55.372799] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:55.372828] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:55.373006] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:55.478257] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:55.478501] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:55.478549] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:55.478580] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:55.478616] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:55.478771] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:55.579591] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:55.579845] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:55.579962] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:55.580004] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:55.580037] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:55.580266] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:55.681118] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:55.681364] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:55.681423] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:55.681459] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:55.681491] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:55.681656] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[14:30:55.782452] [I] FLR0026_MODEL_STAGE_COMPLETE asset=assets/models/sequoia_ngp.glb pending_models=0
+[14:30:55.782698] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[14:30:55.782757] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[14:30:55.782792] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[14:30:55.782824] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[14:30:55.782988] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)

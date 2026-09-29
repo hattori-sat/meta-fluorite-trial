@@ -1,0 +1,34 @@
+From 72e3505fc6164d3f13e772d9764e0d53cd6f0330 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 14:45:46 +0000
+Subject: [PATCH] fix: restore queued non-instanced model assets
+
+---
+ .../core/systems/derived/model_system.cc           | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 8678282..fe03da0 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -443,6 +443,20 @@ void ModelSystem::updateAsyncAssetLoading() {
+           continue;
+         }
+ 
++        // Models queued while their shared asset was loading do not receive
++        // the asset pointer in queueModelLoad(). Restore it before handling
++        // non-instanced models, which read renderable entities directly from
++        // the FilamentAsset.
++        if (model->getInstancingMode() == ModelInstancingMode::none &&
++            model->getAsset() == nullptr && assetData.asset != nullptr) {
++          model->setAsset(assetData.asset);
++          model->setAssetInstance(assetData.asset->getInstance());
++          spdlog::debug(
++            "Restored loaded asset for non-instanced model({}) ({})",
++            modelGuid, assetPath
++          );
++        }
++
+         // Add model to scene
+         spdlog::debug("Loaded, adding model to scene: '{}'({})", model->getAssetPath(), modelGuid);
+ 

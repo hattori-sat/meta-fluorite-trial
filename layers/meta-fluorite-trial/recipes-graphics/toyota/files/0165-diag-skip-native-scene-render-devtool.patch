@@ -1,0 +1,30 @@
+From 0f5b899d81f7fe29c19e652c33f73ed09b61b132 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 10:55:47 +0000
+Subject: [PATCH] diag: skip native scene render for queue isolation
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index c00aa13..ffed61e 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1117,7 +1117,12 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     // Frame is being rendered
+     // TODO(kerberjg): send kPreRenderFrame event, async with wait
+     // spdlog::debug("=== RENDER FRAME ===");
+-    renderer->render(fview_);
++    const bool skipSceneRender = std::getenv("FLR0026_NATIVE_SKIP_SCENE_RENDER") != nullptr;
++    if (skipSceneRender) {
++      spdlog::info("FLR0026_NATIVE_SKIP_SCENE_RENDER enabled=true");
++    } else {
++      renderer->render(fview_);
++    }
+     if (native_readback_probe_enabled_ && native_readback_view_ && native_readback_target_ &&
+         !native_readback_probe_queued_) {
+       renderer->render(native_readback_view_);
+-- 
+2.34.1
+

@@ -1,0 +1,192 @@
+From 7b0429c9329eb93cf2f8818408b6ee2e117db3e2 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 09:06:33 +0000
+Subject: [PATCH] diag: trace Vulkan pipeline creation boundary
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp  | 36 +++++++++++++++++++
+ .../src/vulkan/VulkanPipelineCache.cpp        | 21 +++++++++++
+ .../src/vulkan/VulkanPipelineLayoutCache.cpp  | 12 +++++++
+ 3 files changed, 69 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 36ea6c14b..233cd070b 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -2039,6 +2039,10 @@ void VulkanDriver::blitDEPRECATED(TargetBufferFlags buffers,
+ }
+ 
+ void VulkanDriver::bindPipeline(PipelineState const& pipelineState) {
++    const bool tracePipeline = std::getenv("FLR0026_PIPELINE_TRACE") != nullptr;
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_BIND_BEGIN\n");
++    }
+     // This resets all of the pipeline states; the most relevant (needing reset) is .bindInDraw.
+     mPipelineState = {};
+ 
+@@ -2057,6 +2061,10 @@ void VulkanDriver::bindPipeline(PipelineState const& pipelineState) {
+     constexpr uint8_t descriptorSetMaskTable[4] = {0x1, 0x3, 0x7, 0xF};
+     fvkutils::DescriptorSetMask const descriptorSetMask =
+             fvkutils::DescriptorSetMask(descriptorSetMaskTable[layoutCount]);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_BIND_LAYOUTS_DONE count=%u\n",
++                static_cast<unsigned>(layoutCount));
++    }
+ 
+     if (mAppState.hasExternalSamplers()) {
+         auto const haveExternalSamplers = [&](auto layoutHandle) {
+@@ -2087,13 +2095,26 @@ void VulkanDriver::bindPipeline(PipelineState const& pipelineState) {
+                 return layout->getVkLayout();
+             });
+     auto program = resource_ptr<VulkanProgram>::cast(&mResourceManager, pipelineState.program);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_LAYOUT_BEGIN\n");
++    }
+     auto pipelineLayout = mPipelineLayoutCache.getLayout(vkLayouts, program);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_LAYOUT_DONE\n");
++    }
+     bindPipelineImpl(pipelineState, pipelineLayout, descriptorSetMask);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_BIND_DONE\n");
++    }
+ }
+ 
+ void VulkanDriver::bindPipelineImpl(PipelineState const& pipelineState,
+         VkPipelineLayout pipelineLayout, fvkutils::DescriptorSetMask descriptorSetMask) {
+     FVK_SYSTRACE_SCOPE();
++    const bool tracePipeline = std::getenv("FLR0026_PIPELINE_TRACE") != nullptr;
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_IMPL_BEGIN\n");
++    }
+     auto commands = mCurrentRenderPass.commandBuffer;
+     auto vbi = resource_ptr<VulkanVertexBufferInfo>::cast(&mResourceManager,
+             pipelineState.vertexBufferInfo);
+@@ -2102,7 +2123,13 @@ void VulkanDriver::bindPipelineImpl(PipelineState const& pipelineState,
+     PolygonOffset const& depthOffset = pipelineState.polygonOffset;
+ 
+     auto program = resource_ptr<VulkanProgram>::cast(&mResourceManager, pipelineState.program);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_PROGRAM_BEGIN\n");
++    }
+     commands->acquire(program);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_PROGRAM_DONE\n");
++    }
+ 
+     // Update the VK raster state.
+     auto rt = mCurrentRenderPass.renderTarget;
+@@ -2142,6 +2169,9 @@ void VulkanDriver::bindPipelineImpl(PipelineState const& pipelineState,
+     mPipelineCache.bindRasterState(vulkanRasterState);
+     mPipelineCache.bindPrimitiveTopology(topology);
+     mPipelineCache.bindVertexArray(attribDesc, bufferDesc, vbi->getAttributeCount());
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_STATE_DONE\n");
++    }
+ 
+     // Note that we cannot reinit mPipeline because the .bindInDraw metadata that needs to carry
+     // over even on bind.
+@@ -2150,7 +2180,13 @@ void VulkanDriver::bindPipelineImpl(PipelineState const& pipelineState,
+     mPipelineState.descriptorSetMask = descriptorSetMask;
+ 
+     mPipelineCache.bindLayout(pipelineLayout);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_CACHE_BIND_BEGIN\n");
++    }
+     mPipelineCache.bindPipeline(mCurrentRenderPass.commandBuffer);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_CACHE_BIND_DONE\n");
++    }
+ }
+ 
+ void VulkanDriver::bindRenderPrimitive(Handle<HwRenderPrimitive> rph) {
+diff --git a/filament/backend/src/vulkan/VulkanPipelineCache.cpp b/filament/backend/src/vulkan/VulkanPipelineCache.cpp
+index 1861a820e..e9cb7ad71 100644
+--- a/filament/backend/src/vulkan/VulkanPipelineCache.cpp
++++ b/filament/backend/src/vulkan/VulkanPipelineCache.cpp
+@@ -19,6 +19,9 @@
+ #include <utils/Log.h>
+ #include <utils/Panic.h>
+ 
++#include <cstdio>
++#include <cstdlib>
++
+ #include "VulkanConstants.h"
+ #include "VulkanHandles.h"
+ #include "vulkan/utils/Conversion.h"
+@@ -60,8 +63,15 @@ VulkanPipelineCache::PipelineCacheEntry* VulkanPipelineCache::getOrCreatePipelin
+ }
+ 
+ void VulkanPipelineCache::bindPipeline(VulkanCommandBuffer* commands) {
++    const bool tracePipeline = std::getenv("FLR0026_PIPELINE_TRACE") != nullptr;
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_CACHE_BEGIN\n");
++    }
+     VkCommandBuffer const cmdbuffer = commands->buffer();
+     PipelineCacheEntry* cacheEntry = getOrCreatePipeline();
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_CACHE_ENTRY_DONE\n");
++    }
+ 
+     // If an error occurred, allow higher levels to handle it gracefully.
+     assert_invariant(cacheEntry != nullptr && "Failed to create/find pipeline");
+@@ -71,6 +81,9 @@ void VulkanPipelineCache::bindPipeline(VulkanCommandBuffer* commands) {
+     if (!equal(mBoundPipeline, mPipelineRequirements)) {
+         mBoundPipeline = mPipelineRequirements;
+         vkCmdBindPipeline(cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, cacheEntry->handle);
++        if (tracePipeline) {
++            std::fprintf(stderr, "FLR0026_PIPELINE_CMD_BIND_DONE\n");
++        }
+     }
+ }
+ 
+@@ -223,8 +236,16 @@ VulkanPipelineCache::PipelineCacheEntry* VulkanPipelineCache::createPipeline() n
+     PipelineCacheEntry cacheEntry = {
+         .lastUsed = mCurrentTime,
+     };
++    const bool tracePipeline = std::getenv("FLR0026_PIPELINE_TRACE") != nullptr;
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_GRAPHICS_PIPELINE_CREATE_BEGIN\n");
++    }
+     VkResult error = vkCreateGraphicsPipelines(mDevice, mPipelineCache, 1, &pipelineCreateInfo,
+             VKALLOC, &cacheEntry.handle);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_GRAPHICS_PIPELINE_CREATE_DONE result=%d\n",
++                static_cast<int32_t>(error));
++    }
+     assert_invariant(error == VK_SUCCESS);
+     if (error != VK_SUCCESS) {
+         FVK_LOGE << "vkCreateGraphicsPipelines error " << error;
+diff --git a/filament/backend/src/vulkan/VulkanPipelineLayoutCache.cpp b/filament/backend/src/vulkan/VulkanPipelineLayoutCache.cpp
+index 256a616aa..5f730f23e 100644
+--- a/filament/backend/src/vulkan/VulkanPipelineLayoutCache.cpp
++++ b/filament/backend/src/vulkan/VulkanPipelineLayoutCache.cpp
+@@ -16,6 +16,9 @@
+ 
+ #include "VulkanPipelineLayoutCache.h"
+ 
++#include <cstdio>
++#include <cstdlib>
++
+ namespace filament::backend {
+ 
+ VkPipelineLayout VulkanPipelineLayoutCache::getLayout(
+@@ -68,7 +71,16 @@ VkPipelineLayout VulkanPipelineLayoutCache::getLayout(
+     };
+ 
+     VkPipelineLayout layout;
++    const bool tracePipeline = std::getenv("FLR0026_PIPELINE_TRACE") != nullptr;
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_LAYOUT_CREATE_BEGIN sets=%u push=%u\n",
++                static_cast<unsigned>(descSetLayoutCount),
++                static_cast<unsigned>(pushConstantRangeCount));
++    }
+     vkCreatePipelineLayout(mDevice, &info, VKALLOC, &layout);
++    if (tracePipeline) {
++        std::fprintf(stderr, "FLR0026_PIPELINE_LAYOUT_CREATE_DONE\n");
++    }
+ 
+     mPipelineLayouts[key] = {
+         .handle = layout,
+-- 
+2.34.1

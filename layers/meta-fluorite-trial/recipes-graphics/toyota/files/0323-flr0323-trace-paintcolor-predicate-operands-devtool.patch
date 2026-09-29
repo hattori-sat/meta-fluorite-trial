@@ -1,0 +1,36 @@
+From b383404e13951f405e6a919a1970b1ea2f528efb Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 08:39:16 +0000
+Subject: [PATCH] FLR-0323: trace PaintColor predicate operands
+
+---
+ .../filament_view/core/systems/derived/model_system.cc | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 617261e..bf0976b 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -536,18 +536,16 @@ void ModelSystem::setupRenderable(
+           fEntity.getId(), primitive, materialInstance->getName()
+         );
+       }
+-      if (
+-        std::getenv("FLR0317_PAINTCOLOR_PREDICATE_TRACE") != nullptr &&
+-        materialInstance->getName() == "PaintColor"
+-      ) {
++      if (std::getenv("FLR0317_PAINTCOLOR_PREDICATE_TRACE") != nullptr) {
+         spdlog::info(
+           "FLR0317_PAINTCOLOR_PREDICATE entity={} primitive={} flag={} asset_match={} "
+-          "material_match={} base_color_parameter={} asset_path={}",
++          "material_match={} base_color_parameter={} material_name={} asset_path={}",
+           fEntity.getId(), primitive,
+           std::getenv("FLR0316_PRODUCTION_BASE_COLOR_OVERRIDE") != nullptr,
+           model->getAssetPath().find("sequoia_ngp.glb") != std::string::npos,
+           materialInstance->getName() == "PaintColor",
+-          material->hasParameter("baseColorFactor"), model->getAssetPath()
++          material->hasParameter("baseColorFactor"), materialInstance->getName(),
++          model->getAssetPath()
+         );
+       }
+       std::array<filament::Material::ParameterInfo, 16> parameters{};

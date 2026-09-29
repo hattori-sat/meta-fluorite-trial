@@ -1,0 +1,22 @@
+From bbc1517c4acc86545a3a34874c33b91103d34537 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 19:30:24 +0000
+Subject: [PATCH] fix: use legacy Wayland damage request
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 20fb7f9..fcc31b9 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -692,7 +692,7 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+       obj->DrawFrame(frameTime);
+       if (obj->surface_ != nullptr) {
+-        wl_surface_damage_buffer(
++        wl_surface_damage(
+           obj->surface_,
+           0,
+           0,

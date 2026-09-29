@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sat, 22 Aug 2026 05:00:00 +0900
+Subject: [PATCH] filament_view: schedule software successor after drawing
+
+The software frame path recursively called OnFrame before completing the
+current frame promise. The next invocation then waited on that same promise,
+deadlocking before DrawFrame could advance ECS to Running. Draw the current
+frame first, complete its promise, and only then schedule the successor.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -695,1 +695,0 @@
+-      OnFrame(obj, nullptr, time + 100);
+@@ -710,0 +710,3 @@
++    if (callback == nullptr) {
++      OnFrame(obj, nullptr, time + 100);
++    }

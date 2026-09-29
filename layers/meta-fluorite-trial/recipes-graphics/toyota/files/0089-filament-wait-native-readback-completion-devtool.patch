@@ -1,0 +1,29 @@
+From 29769f9508e875754c4435defc8f655d054845b9 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 16:49:17 +0000
+Subject: [PATCH] diag: wait for native readback completion
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 8ab65c5..37c78b4 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -988,6 +988,12 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     }
+     // spdlog::debug("=== END FRAME ===");
+     renderer->endFrame();
++    if (native_readback_probe_enabled_ && native_readback_probe_queued_) {
++      _engine->flushAndWait();
++      spdlog::info("FLR0026_NATIVE_READBACK_FLUSH_WAIT_COMPLETED");
++      _engine->pumpMessageQueues();
++      spdlog::info("FLR0026_NATIVE_READBACK_MESSAGE_QUEUES_PUMPED_AFTER_WAIT");
++    }
+     if (shouldLogFrame) {
+       spdlog::info("FLR0026_FRAME_END seq={}", frameSequence);
+     }
+-- 
+2.34.1
+

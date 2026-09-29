@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 10 Aug 2026 23:20:00 +0900
+Subject: [PATCH] filament_view: start the software frame loop
+
+The Wayland callback path never advances on the qemux86-64 software-rendering
+surface, leaving the renderer at zero frames even though Filament entities and
+renderables were created. Start one software loop through the existing handler
+and pace successors for the TCG/llvmpipe rendering budget.
+
+---
+ .../plugins/filament_view/core/scene/view_target.cc    | 19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -19 +19,4 @@
+-#include <asio/post.hpp>
++#include <chrono>
++#include <thread>
++
++#include <asio/post.hpp>
+@@ -153,3 +153,8 @@
+   setupView(width, height);
+-
++  static bool softwareFrameLoopStarted = false;
++  if (!softwareFrameLoopStarted) {
++    softwareFrameLoopStarted = true;
++    OnFrame(this, nullptr, 0);
++  }
++
+   SPDLOG_TRACE("--{}", __FUNCTION__);
+@@ -421,3 +429,4 @@
+-    obj->callback_ = wl_surface_frame(obj->surface_);
+-    wl_callback_add_listener(obj->callback_, &ViewTarget::frame_listener, data);
+-
++    if (callback == nullptr) {
++      std::this_thread::sleep_for(std::chrono::milliseconds(100));
++      OnFrame(obj, nullptr, time + 100);
++    }

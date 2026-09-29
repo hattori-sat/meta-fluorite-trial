@@ -1,0 +1,1 @@
+printf 'FLR0260_SEQUOIA_DEFAULT_IBL_SKIP_MODEL_BEGIN\n'; grep -Ei 'model|asset|async|instance|scene add|renderable|resource|fatal|error|exception' /run/user/1001/flr0260-sequoia-default-ibl-skip.log | tail -n 260 || true; printf 'FLR0260_SEQUOIA_DEFAULT_IBL_SKIP_MODEL_END\n'

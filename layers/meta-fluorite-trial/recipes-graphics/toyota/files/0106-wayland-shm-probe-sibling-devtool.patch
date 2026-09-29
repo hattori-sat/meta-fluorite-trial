@@ -1,0 +1,26 @@
+From 36e356c3e29017a75c61769c7001f76f3920c857 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 20:38:10 +0000
+Subject: [PATCH] fix: place shm probe above filament sibling subsurface
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 6b67c70..9ce7f44 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -879,7 +879,11 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+     return;
+   }
+   wl_subsurface_set_position(probe_subsurface, 240, 120);
+-  wl_subsurface_place_above(probe_subsurface, parent_surface_);
++  // The protocol requires a sibling subsurface here, not the parent surface.
++  // The Filament surface is the sibling that this probe must be above.
++  if (subsurface_ != nullptr) {
++    wl_subsurface_place_above(probe_subsurface, subsurface_);
++  }
+   wl_subsurface_set_desync(probe_subsurface);
+ 
+   shm_probe_shm_ = registry_state.shm;
+-- 
+2.34.1
+

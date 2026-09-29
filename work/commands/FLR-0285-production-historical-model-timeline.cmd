@@ -1,0 +1,1 @@
+log=/run/user/1001/flr0272-production-one-model.log; for marker in FLR0026_SCENE_STAGE_ASSET_LOADED FLR0026_SCENE_STAGE_SCENE_ADD_DONE FLUORITE_VIEWTARGET_BEGIN_FRAME_TRUE FLR0026_SCENE_STAGE_DRAW_SUBMIT FLR0026_VK_QUEUE_PRESENT; do printf '%s\n' "-- $marker --"; grep -m 1 "$marker" "$log" || true; done; true

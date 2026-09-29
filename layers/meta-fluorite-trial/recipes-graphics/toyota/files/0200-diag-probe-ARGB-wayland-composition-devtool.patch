@@ -1,0 +1,65 @@
+From 7f64bba9dab5c2c26c62eb6e8f6196c285a46a9e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 8 Sep 2026 11:31:30 +0000
+Subject: [PATCH] diag: probe ARGB Wayland composition
+
+---
+ .../filament_view/core/scene/view_target.cc   | 29 ++++++++++++++++---
+ 1 file changed, 25 insertions(+), 4 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index e324781..cbfa395 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1014,7 +1014,22 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+     return;
+   }
+   auto* pixels = static_cast<uint32_t*>(data);
+-  if (std::getenv("FLR0026_3D_SHM_MOCK") != nullptr) {
++  const bool argbProbe = std::getenv("FLR0026_SHM_PROBE_ARGB") != nullptr;
++  const bool probeAboveParent =
++    std::getenv("FLR0026_SHM_PROBE_ABOVE_PARENT") != nullptr;
++  if (argbProbe) {
++    std::fill(pixels, pixels + static_cast<size_t>(probe_width) * probe_height, 0x00000000u);
++    for (uint32_t y = 40; y < 120; ++y) {
++      for (uint32_t x = 80; x < 160; ++x) {
++        pixels[static_cast<size_t>(y) * probe_width + x] = 0xffff0000u;
++      }
++    }
++    spdlog::info(
++      "FLR0026_WAYLAND_ARGB_PROBE_READY width={} height={} opaque_rect=80,40,80,80",
++      probe_width,
++      probe_height
++    );
++  } else if (std::getenv("FLR0026_3D_SHM_MOCK") != nullptr) {
+     drawMockCube(pixels, probe_width, probe_height);
+     spdlog::info(
+       "FLR0026_3D_SHM_MOCK_READY width={} height={} object=cube",
+@@ -1043,7 +1058,7 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+     static_cast<int32_t>(probe_width),
+     static_cast<int32_t>(probe_height),
+     static_cast<int32_t>(stride),
+-    WL_SHM_FORMAT_XRGB8888
++    argbProbe ? WL_SHM_FORMAT_ARGB8888 : WL_SHM_FORMAT_XRGB8888
+   );
+   if (buffer == nullptr) {
+     spdlog::error("FLR0026_WAYLAND_SHM_PROBE buffer_failed");
+@@ -1072,10 +1087,16 @@ void ViewTarget::setupShmProbe(const uint32_t width, const uint32_t height) {
+     wl_shm_destroy(registry_state.shm);
+     return;
+   }
+-  wl_subsurface_set_position(probe_subsurface, 240, 120);
++  wl_subsurface_set_position(
++    probe_subsurface,
++    probeAboveParent ? 0 : 240,
++    probeAboveParent ? 0 : 120
++  );
+   // The protocol requires a sibling subsurface here, not the parent surface.
+   // The Filament surface is the sibling that this probe must be above.
+-  if (subsurface_ != nullptr) {
++  if (probeAboveParent && parent_surface_ != nullptr) {
++    wl_subsurface_place_above(probe_subsurface, parent_surface_);
++  } else if (subsurface_ != nullptr) {
+     wl_subsurface_place_above(probe_subsurface, surface_);
+   }
+   wl_subsurface_set_desync(probe_subsurface);

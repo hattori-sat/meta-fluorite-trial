@@ -1,0 +1,28 @@
+From 812da4b87eedcb5cd5cc802df9e7f0a194015c60 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 21 Sep 2026 03:33:25 +0000
+Subject: [PATCH] FLR-0258: trace PlatformView handler return boundary
+
+---
+ .../homescreen/platform_views/platform_views_handler.cc       | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/shell/platform/homescreen/platform_views/platform_views_handler.cc b/shell/platform/homescreen/platform_views/platform_views_handler.cc
+index 77f238d..5ad2ee0 100644
+--- a/shell/platform/homescreen/platform_views/platform_views_handler.cc
++++ b/shell/platform/homescreen/platform_views/platform_views_handler.cc
+@@ -69,10 +69,14 @@ void PlatformViewsHandler::HandleMethodCall(
+   }
+ 
+   if (method_name == kMethodCreate) {
++    spdlog::info("FLR0258_PLATFORM_VIEWS_HANDLER_CREATE_BEGIN");
++    spdlog::info("FLR0258_PLATFORM_VIEWS_HANDLER_CREATE_CALL_BEGIN");
+     PluginsAoiPlatformViewCreate(engine_, engine_->flutter_asset_directory,
+                                  arguments, &PlatformViewAddListener,
+                                  &PlatformViewRemoveListener, this,
+                                  std::move(result));
++    spdlog::info("FLR0258_PLATFORM_VIEWS_HANDLER_CREATE_CALL_RETURN");
++    spdlog::info("FLR0258_PLATFORM_VIEWS_HANDLER_CREATE_END");
+   } else if (method_name == kMethodDispose) {
+     int32_t id = 0;
+     bool hybrid{};

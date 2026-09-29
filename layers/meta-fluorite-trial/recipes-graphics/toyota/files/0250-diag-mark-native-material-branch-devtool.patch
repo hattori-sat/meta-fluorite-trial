@@ -1,0 +1,25 @@
+From d38d25f190d9c63f2fd329a5ba525db1bbe80576 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 14 Sep 2026 13:10:59 +0000
+Subject: [PATCH] diag: mark native material branch
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index cb64ec0..e1fa6d8 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -313,6 +313,11 @@ void ViewTarget::setupNativeMinimalGeometry() {
+   filamat::MaterialBuilder materialBuilder;
+   const bool hardcodedNativeMaterialColor =
+     std::getenv("FLUORITE_NATIVE_HARDCODED_MATERIAL_COLOR") != nullptr;
++  spdlog::info(
++    "FLUORITE_NATIVE_MATERIAL_BRANCH hardcoded={} source={}",
++    hardcodedNativeMaterialColor,
++    hardcodedNativeMaterialColor ? "constant" : "parameter"
++  );
+   const char* nativeMaterialSource = hardcodedNativeMaterialColor
+     ? "void material(inout MaterialInputs material) {"
+       "  prepareMaterial(material);"

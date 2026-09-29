@@ -1,0 +1,22 @@
+From 3e03936bab4bfc9a334a2c0a1699464f5bf13494 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 09:16:02 +0000
+Subject: [PATCH] test: compare self-made Cube with culling disabled
+
+---
+ .../filament_scene/example/lib/shape_and_object_creators.dart   | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 10e403e..536abb4 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -46,6 +46,8 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+       // A/B: keep geometry, camera, and ViewTarget fixed while removing the
+       // lit-material path from this diagnostic fixture.
+       material: poGetUnlitMaterial(Colors.blue),
++      // A/B: match the visible native fixture's culling contract.
++      cullingEnabled: false,
+     ),
+   ];
+ }

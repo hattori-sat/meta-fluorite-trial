@@ -1,0 +1,47 @@
+From 3cb42f6287b607c93224f51b9a90313d62bc20f0 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 05:05:27 +0000
+Subject: [PATCH] diag: trace frame skipper fence status
+
+---
+ filament/src/FrameSkipper.cpp | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/filament/src/FrameSkipper.cpp b/filament/src/FrameSkipper.cpp
+index 4ff05c652..188001299 100644
+--- a/filament/src/FrameSkipper.cpp
++++ b/filament/src/FrameSkipper.cpp
+@@ -22,6 +22,8 @@
+ #include <utils/debug.h>
+ 
+ #include <algorithm>
++#include <cstdio>
++#include <cstdlib>
+ #include <utility>
+ 
+ #include <stddef.h>
+@@ -47,14 +49,21 @@ void FrameSkipper::terminate(DriverApi& driver) noexcept {
+ 
+ bool FrameSkipper::shouldRenderFrame(DriverApi& driver) const noexcept {
+     auto& fences = mDelayedFences;
++    const bool trace = std::getenv("FLR0026_SYNC_TRACE") != nullptr;
+     if (fences.front()) {
+         // Do we have a latency old fence?
+         auto status = driver.getFenceStatus(fences.front());
++        if (trace) {
++            std::fprintf(stderr, "FLR0026_FRAME_SKIP_STATUS status=%u\n",
++                    static_cast<unsigned int>(status));
++        }
+         if (UTILS_UNLIKELY(status == FenceStatus::TIMEOUT_EXPIRED)) {
+             // The fence hasn't signaled yet, skip this frame
+             return false;
+         }
+         assert_invariant(status == FenceStatus::CONDITION_SATISFIED);
++    } else if (trace) {
++        std::fprintf(stderr, "FLR0026_FRAME_SKIP_STATUS status=NO_FENCE\n");
+     }
+     return true;
+ }
+-- 
+2.34.1
+

@@ -1,0 +1,31 @@
+From 92940fd435de110e1dc40ccb8bddb854f3764068 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 04:16:06 +0000
+Subject: [PATCH] test: isolate proven native 3d fixture
+
+---
+ packages/filament_scene/example/lib/main.dart | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 121fed0..6e86a77 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -299,12 +299,11 @@ class _MyAppState extends State<MyApp> {
+   SceneView poGetFilamentScene() {
+     return SceneView(
+       filament: filamentViewApi,
+-      // Restore the production Example Demo scene after the native fixture
+-      // proved the visible Filament path.
+-      models: poGetModelList(),
+-      scene: poGetScene(),
+-      shapes: poGetScenesShapes(),
+-      cameras: poGetScenesCameras(),
++      // Isolate the previously proven self-made native 3D fixture.
++      models: null,
++      scene: poGetMinimal3dFixtureScene(),
++      shapes: poGetMinimal3dFixtureShapes(),
++      cameras: poGetMinimal3dFixtureCameras(),
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 

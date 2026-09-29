@@ -1,0 +1,1 @@
+printf '%s\n' '-- df --'; df -h; printf '%s\n' '-- df-inodes --'; df -i; printf '%s\n' '-- top-level-usage --'; du -x -k -d 1 / 2>/dev/null | sort -nr | head -n 20; printf '%s\n' '-- writable-usage --'; du -x -k -d 1 /run /tmp /var /home 2>/dev/null | sort -nr | head -n 30; true

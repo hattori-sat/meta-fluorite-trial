@@ -1,0 +1,55 @@
+From 58bbff3dfc3561e8779af21976571b1b289bf922 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 01:08:35 +0000
+Subject: [PATCH] diag: add native control fields
+
+---
+ plugins/filament_view/core/scene/view_target.h | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index c2fb8dd..101ed1d 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -25,10 +25,19 @@
+ #include <cstdint>
+ #include <event_channel.h>
+ #include <filament/Engine.h>
++#include <filament/utils/Entity.h>
+ #include <flutter_desktop_plugin_registrar.h>
+ #include <gltfio/AssetLoader.h>
+ #include <viewer/Settings.h>
+ 
++namespace filament {
++class IndexBuffer;
++class Material;
++class MaterialInstance;
++class Scene;
++class VertexBuffer;
++}  // namespace filament
++
+ namespace plugin_filament_view {
+ 
+ class Camera;
+@@ -169,6 +178,13 @@ class ViewTarget {
+     std::mutex frameLock_;
+     ::filament::View* fview_{};
+ 
++    ::filament::Scene* native_diagnostic_scene_{};
++    ::filament::VertexBuffer* native_diagnostic_vertex_buffer_{};
++    ::filament::IndexBuffer* native_diagnostic_index_buffer_{};
++    ::filament::Material* native_diagnostic_material_{};
++    ::filament::MaterialInstance* native_diagnostic_material_instance_{};
++    utils::Entity native_diagnostic_entity_;
++
+     // todo to be moved?
+     ::filament::gltfio::Animator* fanimator_;
+ 
+@@ -187,6 +203,7 @@ class ViewTarget {
+     void DrawFrame(uint32_t time);
+ 
+     void setupView(uint32_t width, uint32_t height);
++    void setupNativeMinimalGeometry();
+ 
+     uint32_t m_LastTime = 0;
+ };

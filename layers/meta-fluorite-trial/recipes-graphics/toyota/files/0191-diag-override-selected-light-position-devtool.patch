@@ -1,0 +1,80 @@
+From 6c1e4c4fc47ed0635f68fd76eaa23a621cda6a96 Mon Sep 17 00:00:00 2001
+From: Fluorite integration role <integration-role@localhost>
+Date: Sun, 6 Sep 2026 04:36:18 +0000
+Subject: [PATCH] diag: override selected light position
+
+---
+ .../serialization/scene_text_deserializer.cc  | 31 +++++++++++++++++--
+ 1 file changed, 29 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index b5d2e39..db6f3cb 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -16,6 +16,7 @@
+ #include "scene_text_deserializer.h"
+ 
+ #include <asio/post.hpp>
++#include <cstdio>
+ #include <cstdlib>
+ #include <core/entity/base/entityobject.h>
+ #include <core/include/literals.h>
+@@ -422,6 +423,9 @@ void SceneTextDeserializer::setUpLights() {
+   std::string light_type_filter;
+   std::string light_skip_guid_filter;
+   std::string light_trace_guid_filter;
++  EntityGUID light_position_override_guid = kNullGuid;
++  filament::math::float3 light_position_override;
++  bool light_position_override_enabled = false;
+   if (const char* raw_type = std::getenv("FLR0026_NATIVE_LIGHT_TYPE")) {
+     light_type_filter = raw_type;
+   }
+@@ -431,6 +435,21 @@ void SceneTextDeserializer::setUpLights() {
+   if (const char* raw_trace_guids = std::getenv("FLR0026_NATIVE_LIGHT_TRACE_GUIDS")) {
+     light_trace_guid_filter = raw_trace_guids;
+   }
++  if (const char* raw_override_guid = std::getenv("FLR0026_NATIVE_LIGHT_OVERRIDE_GUID")) {
++    if (const char* raw_override_position = std::getenv("FLR0026_NATIVE_LIGHT_OVERRIDE_POSITION")) {
++      char* guid_end = nullptr;
++      const auto parsed_guid = std::strtoll(raw_override_guid, &guid_end, 10);
++      float x = 0.0f;
++      float y = 0.0f;
++      float z = 0.0f;
++      if (guid_end != raw_override_guid && *guid_end == '\0' &&
++          std::sscanf(raw_override_position, "%f,%f,%f", &x, &y, &z) == 3) {
++        light_position_override_guid = static_cast<EntityGUID>(parsed_guid);
++        light_position_override = {x, y, z};
++        light_position_override_enabled = true;
++      }
++    }
++  }
+   if (const char* raw_limit = std::getenv("FLR0026_NATIVE_LIGHT_LIMIT")) {
+     char* end = nullptr;
+     const auto parsed_limit = std::strtoul(raw_limit, &end, 10);
+@@ -460,6 +479,13 @@ void SceneTextDeserializer::setUpLights() {
+       );
+       continue;
+     }
++    if (light_position_override_enabled && fst == light_position_override_guid) {
++      snd->setPosition(light_position_override);
++      spdlog::info(
++        "FLR0026_LIGHT_POSITION_OVERRIDE guid={} position=({},{},{})",
++        fst, light_position_override.x, light_position_override.y, light_position_override.z
++      );
++    }
+     if (!light_trace_guid_filter.empty()) {
+       const auto trace_guid_list = "," + light_trace_guid_filter + ",";
+       if (trace_guid_list.find(guid_token) != std::string::npos) {
+@@ -497,9 +523,10 @@ void SceneTextDeserializer::setUpLights() {
+ 
+   spdlog::info(
+     "FLR0026_LIGHT_SETUP_PLAN total={} limit={} type_filter={} skip_guid_filter={} "
+-    "trace_guid_filter={} selected={}",
++    "trace_guid_filter={} position_override_guid={} position_override_enabled={} selected={}",
+     lights_.size(), light_limit, light_type_filter, light_skip_guid_filter,
+-    light_trace_guid_filter, selected_lights
++    light_trace_guid_filter, light_position_override_guid, light_position_override_enabled,
++    selected_lights
+   );
+ 
+   // if a light didnt get deserialized, tell light system to create a default

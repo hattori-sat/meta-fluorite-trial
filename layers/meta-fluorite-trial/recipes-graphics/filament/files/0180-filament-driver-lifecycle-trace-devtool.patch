@@ -1,0 +1,71 @@
+From 78a32c4f0ac09913ca9fef2ddbbbc06eb8b7f6af Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 11:53:49 +0000
+Subject: [PATCH] diag: trace final Fluorite engine lifecycle
+
+---
+ filament/src/details/Engine.cpp | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/filament/src/details/Engine.cpp b/filament/src/details/Engine.cpp
+index 65631a42f..92b821883 100644
+--- a/filament/src/details/Engine.cpp
++++ b/filament/src/details/Engine.cpp
+@@ -82,6 +82,8 @@
+ 
+ #include <stddef.h>
+ #include <stdint.h>
++#include <cstdio>
++#include <cstdlib>
+ #include <stdlib.h>
+ #include <string.h>
+ 
+@@ -756,6 +758,11 @@ bool FEngine::flushAndWait(uint64_t const timeout) {
+ // -----------------------------------------------------------------------------------------------
+ 
+ int FEngine::loop() {
++    const bool lifecycleTrace = std::getenv("FLUORITE_DRIVER_LIFECYCLE_TRACE") != nullptr;
++    if (lifecycleTrace) {
++        std::fprintf(stderr, "FLUORITE_ENGINE_LOOP_ENTER backend=%d\n",
++                static_cast<int>(mBackend));
++    }
+     if (mPlatform == nullptr) {
+         mPlatform = PlatformFactory::create(&mBackend);
+         mOwnPlatform = true;
+@@ -772,7 +779,16 @@ int FEngine::loop() {
+ 
+     mDriver = mPlatform->createDriver(mSharedGLContext, getDriverConfig(this));
+ 
++    if (lifecycleTrace) {
++        std::fprintf(stderr, "FLUORITE_ENGINE_DRIVER_CREATED valid=%s\n",
++                mDriver ? "true" : "false");
++    }
++
+     mDriverBarrier.latch();
++    if (lifecycleTrace) {
++        std::fprintf(stderr, "FLUORITE_ENGINE_BARRIER_RELEASED driver=%s\n",
++                mDriver ? "ready" : "null");
++    }
+     if (UTILS_UNLIKELY(!mDriver)) {
+         // if we get here, it's because the driver couldn't be initialized and the problem has
+         // been logged.
+@@ -1416,9 +1432,19 @@ void* FEngine::streamAlloc(size_t const size, size_t const alignment) noexcept {
+ }
+ 
+ bool FEngine::execute() {
++    const bool lifecycleTrace = std::getenv("FLUORITE_DRIVER_LIFECYCLE_TRACE") != nullptr;
++    if (lifecycleTrace) {
++        std::fprintf(stderr, "FLUORITE_ENGINE_EXECUTE_ENTER\n");
++    }
+     // wait until we get command buffers to be executed (or thread exit requested)
+     auto const buffers = mCommandBufferQueue.waitForCommands();
++    if (lifecycleTrace) {
++        std::fprintf(stderr, "FLUORITE_ENGINE_EXECUTE_AFTER_WAIT count=%zu\n", buffers.size());
++    }
+     if (UTILS_UNLIKELY(buffers.empty())) {
++        if (lifecycleTrace) {
++            std::fprintf(stderr, "FLUORITE_ENGINE_EXECUTE_EMPTY_RETURN\n");
++        }
+         return false;
+     }
+ 

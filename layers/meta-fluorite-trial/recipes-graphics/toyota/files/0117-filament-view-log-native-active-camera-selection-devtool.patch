@@ -1,0 +1,21 @@
+From 5ee2375196aca7f28f7bfc8c402f50af3c08e84f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 01:45:20 +0000
+Subject: [PATCH] diag: log native active camera selection
+
+---
+ plugins/filament_view/core/systems/derived/view_target_system.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/view_target_system.cc b/plugins/filament_view/core/systems/derived/view_target_system.cc
+index d61bf8c..ab3d881 100644
+--- a/plugins/filament_view/core/systems/derived/view_target_system.cc
++++ b/plugins/filament_view/core/systems/derived/view_target_system.cc
+@@ -272,6 +272,7 @@ void ViewTargetSystem::setViewCamera(size_t viewId, EntityGUID cameraId) {
+     if (camera->getOwner()->getGuid() == cameraId) {
+       camera->setViewId(viewId);
+ 
++      spdlog::info("FLR0026_ACTIVE_CAMERA view={} camera={}", viewId, cameraId);
+       spdlog::debug("Setting camera {} as main camera for view target {}", cameraId, viewId);
+     }
+     // If found another camera with the same viewId, unset it

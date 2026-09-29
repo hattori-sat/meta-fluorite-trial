@@ -1,0 +1,27 @@
+From 06f421991d58d7387329060e704238637a65ad3b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 9 Sep 2026 07:26:58 +0000
+Subject: [PATCH] diag: clear skipped default skybox with public API
+
+---
+ .../core/scene/serialization/scene_text_deserializer.cc    | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index cbb3063..470dba4 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -227,6 +227,13 @@ void SceneTextDeserializer::RunPostSetupLoad() {
+   const bool skip_shapes = std::getenv("FLR0027_NATIVE_SKIP_SHAPES") != nullptr;
+   if (skip_skybox) {
+     spdlog::info("FLR0026_NATIVE_SKIP_SKYBOX enabled=true");
++    if (std::getenv("FLR0026_NATIVE_CLEAR_SKYBOX_ON_SKIP") != nullptr) {
++      const auto skyboxSystem = ECSManager::GetInstance()->getSystem<SkyboxSystem>(
++        "RunPostSetupLoad::clearSkippedSkybox"
++      );
++      skyboxSystem->setDefaultSkybox();
++      spdlog::info("FLR0026_NATIVE_CLEAR_SKYBOX_ON_SKIP enabled=true");
++    }
+   } else {
+     spdlog::trace("setUpSkybox");
+     setUpSkybox();

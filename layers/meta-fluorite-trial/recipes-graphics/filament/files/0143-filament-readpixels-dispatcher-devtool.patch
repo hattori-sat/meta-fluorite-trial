@@ -1,0 +1,74 @@
+[devtool-baseline-flr0026 88c61a5a9] diag: trace readPixels command dispatcher
+ 2 files changed, 21 insertions(+)
+88c61a5a928bd15b24aec96943b21237d2972341
+From 88c61a5a928bd15b24aec96943b21237d2972341 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 23:36:14 +0000
+Subject: [PATCH] diag: trace readPixels command dispatcher
+
+---
+ .../backend/include/private/backend/DriverAPI.inc     | 10 ++++++++++
+ filament/backend/src/CommandStreamDispatcher.h        | 11 +++++++++++
+ 2 files changed, 21 insertions(+)
+
+diff --git a/filament/backend/include/private/backend/DriverAPI.inc b/filament/backend/include/private/backend/DriverAPI.inc
+index a4b2a83ca..a0db3751d 100644
+--- a/filament/backend/include/private/backend/DriverAPI.inc
++++ b/filament/backend/include/private/backend/DriverAPI.inc
+@@ -497,6 +497,15 @@ DECL_DRIVER_API_0(stopCapture)
+  * --------------------
+  */
+ 
++#ifdef DECL_DRIVER_API_READ_PIXELS
++DECL_DRIVER_API_READ_PIXELS(readPixels,
++        backend::RenderTargetHandle, src,
++        uint32_t, x,
++        uint32_t, y,
++        uint32_t, width,
++        uint32_t, height,
++        backend::PixelBufferDescriptor&&, data)
++#else
+ DECL_DRIVER_API_N(readPixels,
+         backend::RenderTargetHandle, src,
+         uint32_t, x,
+@@ -504,6 +513,7 @@ DECL_DRIVER_API_N(readPixels,
+         uint32_t, width,
+         uint32_t, height,
+         backend::PixelBufferDescriptor&&, data)
++#endif
+ 
+ DECL_DRIVER_API_N(readBufferSubData,
+         backend::BufferObjectHandle, src,
+diff --git a/filament/backend/src/CommandStreamDispatcher.h b/filament/backend/src/CommandStreamDispatcher.h
+index 25db162de..f3fe0b901 100644
+--- a/filament/backend/src/CommandStreamDispatcher.h
++++ b/filament/backend/src/CommandStreamDispatcher.h
+@@ -22,6 +22,7 @@
+ 
+ #include <private/utils/Tracing.h>
+ 
++#include <utils/Logger.h>
+ #include <utils/compiler.h>
+ 
+ #include <utility>
+@@ -68,7 +69,17 @@ private:
+         ConcreteDriver& concreteDriver = static_cast<ConcreteDriver&>(driver);                  \
+         Cmd::execute(&ConcreteDriver::methodName##R, concreteDriver, base, next);               \
+      }
++#define DECL_DRIVER_API_READ_PIXELS(methodName, ...)                                            \
++    static void methodName(Driver& driver, CommandBase* base, intptr_t* next) {                 \
++        SYSTRACE()                                                                              \
++        LOG(INFO) << "FLR0026_READPIXELS_DISPATCH_BEGIN";                                      \
++        using Cmd = COMMAND_TYPE(methodName);                                                   \
++        ConcreteDriver& concreteDriver = static_cast<ConcreteDriver&>(driver);                  \
++        Cmd::execute(&ConcreteDriver::methodName, concreteDriver, base, next);                  \
++        LOG(INFO) << "FLR0026_READPIXELS_DISPATCH_DONE";                                       \
++     }
+ #include "private/backend/DriverAPI.inc"
++#undef DECL_DRIVER_API_READ_PIXELS
+ };
+ 
+ template<typename ConcreteDriver>
+-- 
+2.34.1
+

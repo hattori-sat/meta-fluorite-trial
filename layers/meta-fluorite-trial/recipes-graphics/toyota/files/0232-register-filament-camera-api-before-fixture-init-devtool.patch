@@ -1,0 +1,36 @@
+From 69bdd861419a4729fbf96bf3a0cd2476877bb614 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 05:16:02 +0000
+Subject: [PATCH] fix: register filament camera API before scene load on
+ current source
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index c2bed59..3e44273 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -263,9 +263,6 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+ 
+   ecs->RouteMessage(viewTargetCreationRequest);
+ 
+-  // Safeguarded to only be called once internal
+-  DeserializeDataAndSetupMessageChannels(registrar, params);
+-
+   if (!m_bHasSetupRegistrar) {
+     m_bHasSetupRegistrar = true;
+ 
+@@ -283,6 +280,11 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+     setupMessageChannels(registrar);
+   }
+ 
++  // Register the generated API before scene deserialization can trigger
++  // initial camera property messages from Dart.
++  // Safeguarded to only be called once internal
++  DeserializeDataAndSetupMessageChannels(registrar, params);
++
+   // Ok to be called infinite times.
+   KickOffRenderingLoops();
+ 

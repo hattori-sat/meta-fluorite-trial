@@ -18,6 +18,37 @@ deploy/
 *.spdx.tar.zst
 bitbake-cookerdaemon.log
 cooker-*.log
+work/artifacts/
+# Runtime captures and Devtool scratch stay outside Git. Tickets and concise
+# evidence indexes/checksums remain trackable; raw payloads are reproducible
+# from the recorded run identity.
+work/evidence/**/*.png
+work/evidence/**/*.ppm
+work/evidence/**/*.pgm
+work/evidence/**/*.mp4
+work/evidence/**/*.log
+work/latest-mac/**/*.png
+work/latest-mac/**/*.ppm
+work/latest-mac/**/*.pgm
+work/latest-mac/**/*.mp4
+work/latest-mac/**/*.log
+work/latest-mac/**/*.qemuboot.conf
+work/latest-mac/**/mini-rootfs-*/
+work/devtool-edit/
+work/devtool-source-edit/
+work/devtool-output-layer/
+work/**/*.bundle
+work/**/*.stage
+work/**/*.txt
+work/**/*.pid
+work/**/*.bin
+work/**/*.cc
+work/**/*.patch
+
+# Raw QEMU/runtime evidence kept beside the fixed Mini receiver is not a
+# source change. Keep its concise Markdown manifest in work/evidence/ instead.
+/evidence/
+.vscode/
 
 # Credentials and local settings
 .env

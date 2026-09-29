@@ -1,0 +1,32 @@
+From 2932c30884958fb9374d6163165eaccac281f213 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 12 Sep 2026 16:14:12 +0000
+Subject: [PATCH] fix: restore native-compatible material color wire format
+
+---
+ packages/filament_scene/lib/material/material.dart | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/lib/material/material.dart b/packages/filament_scene/lib/material/material.dart
+index e2b0eb1..8a43b4e 100644
+--- a/packages/filament_scene/lib/material/material.dart
++++ b/packages/filament_scene/lib/material/material.dart
+@@ -99,7 +99,7 @@ class MaterialParameter with Jsonable {
+ 
+   /// create a material parameter of color type.
+   MaterialParameter.color({required final Color color, required this.name}) {
+-    value = [color.r, color.g, color.b, color.a];
++    value = color.toHex();
+     type = MaterialType.color;
+   }
+ 
+@@ -164,8 +164,7 @@ class MaterialParameter with Jsonable {
+ 
+   /// create a material parameter of color type with baseColor parameter name.
+   MaterialParameter.baseColor({required final Color color, this.name = 'baseColor'}) {
+-    // color as float array
+-    value = [color.r, color.g, color.b, color.a];
++    value = color.toHex();
+     type = MaterialType.color;
+   }
+ 

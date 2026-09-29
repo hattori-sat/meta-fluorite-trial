@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sat, 22 Aug 2026 23:55:00 +0900
+Subject: [PATCH] filament-view: mark HDR texture mipmappable
+
+The HDR loader requests automatic mip levels and then generates them. On
+QEMU Vulkan the default usage mask does not include GEN_MIPMAPPABLE, so the
+operation trips Filament's precondition. Keep the required equirect mip
+levels and explicitly mark the texture usage for mip generation.
+
+---
+ .../filament_view/core/utils/hdr_loader.cc           | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc b/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/utils/hdr_loader.cc
+@@ -42,6 +42,9 @@ Texture* HDRLoader::createTextureFromImage(Engine* engine, LinearImage* image) {
+                        .width(image->getWidth())
+                        .height(image->getHeight())
++                       .usage(static_cast<Texture::Usage>(
++                           static_cast<unsigned int>(Texture::Usage::DEFAULT) |
++                           static_cast<unsigned int>(Texture::Usage::GEN_MIPMAPPABLE)))
+                        .levels(0xff)
+                        .format(Texture::InternalFormat::R11F_G11F_B10F)
+                        .sampler(Texture::Sampler::SAMPLER_2D)
+                        .build(*engine);
+-- 
+2.34.1

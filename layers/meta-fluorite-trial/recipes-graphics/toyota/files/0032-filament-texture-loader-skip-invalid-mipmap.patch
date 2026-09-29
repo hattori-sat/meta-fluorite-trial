@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sat, 22 Aug 2026 23:10:00 +0900
+Subject: [PATCH] filament texture loader: skip mipmap generation for one-level textures
+
+TextureLoader creates image textures with one level, then unconditionally
+calls generateMipmaps(). Filament rejects that call because the texture was
+not created with GEN_MIPMAPPABLE usage. Keep the existing one-level texture
+contract and avoid the invalid generation request.
+
+---
+ .../filament_view/core/scene/material/loader/texture_loader.cc | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/material/loader/texture_loader.cc
+@@ -78,1 +78,0 @@ TextureLoader::createTextureFromImage(
+-  texture->generateMipmaps(*engine);
+ 
+   return texture;
+-- 
+2.34.1

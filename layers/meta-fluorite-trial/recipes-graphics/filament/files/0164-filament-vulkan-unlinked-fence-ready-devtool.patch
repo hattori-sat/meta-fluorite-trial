@@ -1,0 +1,29 @@
+From 7453d81103931d6795bcd9cc467925e350f20d6b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 09:34:59 +0000
+Subject: [PATCH] diag: treat unlinked fence as ready
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 233cd070b..48e7306c6 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -1213,6 +1213,13 @@ FenceStatus VulkanDriver::fenceWait(FenceHandle const fh, uint64_t const timeout
+ 
+     std::shared_ptr const cmdfence = fence->wait(until);
+     if (!cmdfence) {
++        if (std::getenv("FLR0026_TREAT_UNLINKED_FENCE_READY") != nullptr) {
++            if (trace) {
++                std::fprintf(stderr,
++                        "FLR0026_FRAME_FENCE_WAIT_UNLINKED_READY\n");
++            }
++            return FenceStatus::CONDITION_SATISFIED;
++        }
+         if (trace) {
+             std::fprintf(stderr, "FLR0026_FRAME_FENCE_WAIT_LINKED linked=false\n");
+         }
+-- 
+2.34.1

@@ -2,9 +2,11 @@ SHELL := /bin/bash
 
 .DEFAULT_GOAL := help
 
+.PHONY: check-runtime-log-slice check-devtool-finish-contract check-devtool-component-rebase check-mini-recipe-patch-gate check-mini-bundle-handoff
+
 .PHONY: help setup setup-project setup-macos setup-build-host \
 	check-canonical check-privacy check-shell check-python check-mcp \
-	check-markdown check-file-sizes check-staged-whitespace verify ci
+	check-markdown check-file-sizes check-qemu-harness check-staged-whitespace verify ci
 
 help:
 	@printf '%s\n' \
@@ -49,9 +51,27 @@ check-markdown:
 check-file-sizes:
 	@bash scripts/check-file-sizes.sh .
 
+check-qemu-harness:
+	@bash tests/test-qemu-runtime-harness.sh
+
+check-runtime-log-slice:
+	@bash tests/test-runtime-log-slice.sh
+
+check-devtool-finish-contract:
+	@bash tests/test-devtool-finish-contract.sh
+
+check-devtool-component-rebase:
+	@bash tests/test-devtool-component-rebase.sh
+
+check-mini-recipe-patch-gate:
+	@bash tests/test-mini-recipe-patch-gate.sh
+
+check-mini-bundle-handoff:
+	@bash tests/test-podman-bundle-handoff.sh
+
 check-staged-whitespace:
 	@bash scripts/check-staged-whitespace.sh
 
-verify: check-canonical check-privacy check-shell check-python check-mcp check-markdown check-file-sizes
+verify: check-canonical check-privacy check-shell check-python check-mcp check-markdown check-file-sizes check-qemu-harness check-runtime-log-slice check-devtool-finish-contract check-devtool-component-rebase check-mini-recipe-patch-gate check-mini-bundle-handoff
 
 ci: verify

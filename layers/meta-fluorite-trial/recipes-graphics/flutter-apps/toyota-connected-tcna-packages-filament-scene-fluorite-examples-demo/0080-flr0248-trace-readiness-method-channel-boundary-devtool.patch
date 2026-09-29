@@ -1,0 +1,50 @@
+From 3cbbaad09b8cd3571228b267a59ef5a234dd1016 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 21 Sep 2026 04:04:19 +0900
+Subject: [PATCH] FLR-0248: trace Dart readiness method call
+
+---
+ .../example/lib/events/native_readiness.dart  | 21 +++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/events/native_readiness.dart b/packages/filament_scene/example/lib/events/native_readiness.dart
+index 7ae4247..2ca9bac 100644
+--- a/packages/filament_scene/example/lib/events/native_readiness.dart
++++ b/packages/filament_scene/example/lib/events/native_readiness.dart
+@@ -6,6 +6,7 @@ class NativeReadiness {
+   static const MethodChannel _readinessChecker = MethodChannel(
+     'plugin.filament_view.readiness_checker',
+   );
++  static int _readinessCallCount = 0;
+ 
+   /// Adds a one-time callback to be called when the native side is ready.
+   /// If a the native side is already ready, a check is scheduled immediately,
+@@ -49,10 +50,26 @@ class NativeReadiness {
+   }
+ 
+   Future<bool> isNativeReady() async {
++    final int callId = ++_readinessCallCount;
++    final bool traceCall = callId <= 3 || callId % 50 == 0;
++    if (traceCall) {
++      print('FLR0248_DART_CALL_BEGIN id=$callId');
++    }
+     try {
+-      final bool ready = await _readinessChecker.invokeMethod<bool>('isReady') ?? false;
+-      return ready;
++      final bool? ready = await _readinessChecker
++          .invokeMethod<bool>('isReady')
++          .timeout(const Duration(milliseconds: 500));
++      if (traceCall) {
++        print('FLR0248_DART_CALL_RETURN id=$callId ready=${ready ?? false}');
++      }
++      return ready ?? false;
++    } on TimeoutException {
++      print('FLR0248_DART_CALL_TIMEOUT id=$callId');
++      return false;
+     } catch (e) {
++      if (traceCall) {
++        print('FLR0248_DART_CALL_ERROR id=$callId type=${e.runtimeType}');
++      }
+       //print('Error checking native readiness: $e');
+       return false;
+     }

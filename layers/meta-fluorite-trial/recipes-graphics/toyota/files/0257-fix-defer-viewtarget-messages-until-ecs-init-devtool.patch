@@ -1,0 +1,86 @@
+From d79d130af69bd163a5864eddc2be1e7daf028590 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 12:39:20 +0000
+Subject: [PATCH] fix: defer ViewTarget messages until ECS initialization
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 58 +++++++++++++------
+ 1 file changed, 39 insertions(+), 19 deletions(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index 2492b1353..a8d2498c5 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -89,9 +89,36 @@ void RunOnceCheckAndInitializeECSystems() {
+ 
+ //////////////////////////////////////////////////////////////////////////////////////////
+ void KickOffRenderingLoops() {
+-  ECSMessage viewTargetStartRendering;
+-  viewTargetStartRendering.addData(ECSMessageType::ViewTargetStartRenderingLoops, true);
+-  ECSManager::GetInstance()->RouteMessage(viewTargetStartRendering);
++  const auto ecs = ECSManager::GetInstance();
++  post(*ecs->getStrand(), [ecs]() mutable {
++    ECSMessage viewTargetStartRendering;
++    viewTargetStartRendering.addData(ECSMessageType::ViewTargetStartRenderingLoops, true);
++    ecs->RouteMessage(viewTargetStartRendering);
++    spdlog::info("FLUORITE_VIEWTARGET_RENDERING_LOOPS_ROUTED");
++  });
++}
++
++//////////////////////////////////////////////////////////////////////////////////////////
++void RouteViewTargetCreationRequest(
++  ECSManager* const ecs,
++  const FlutterDesktopEngineRef engine,
++  const int32_t top,
++  const int32_t left,
++  const uint32_t width,
++  const uint32_t height
++) {
++  post(*ecs->getStrand(), [=]() mutable {
++    ECSMessage viewTargetCreationRequest;
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequest, engine);
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequestTop, top);
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequestLeft, left);
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequestWidth, width);
++    viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequestHeight, height);
++    ecs->RouteMessage(viewTargetCreationRequest);
++    spdlog::info(
++      "FLUORITE_VIEWTARGET_CREATE_REQUEST_ROUTED width={} height={}", width, height
++    );
++  });
+ }
+ 
+ //////////////////////////////////////////////////////////////////////////////////////////
+@@ -260,23 +287,16 @@ void FilamentViewPlugin::RegisterWithRegistrar(
+   // Safeguarded inside
+   RunOnceCheckAndInitializeECSystems();
+ 
+-  // Every time this method is called, we should create a new view target
+-  ECSMessage viewTargetCreationRequest;
+-  viewTargetCreationRequest.addData(ECSMessageType::ViewTargetCreateRequest, engine);
+-  viewTargetCreationRequest.addData(
+-    ECSMessageType::ViewTargetCreateRequestTop, static_cast<int>(top)
+-  );
+-  viewTargetCreationRequest.addData(
+-    ECSMessageType::ViewTargetCreateRequestLeft, static_cast<int>(left)
++  // Every time this method is called, we should create a new view target.
++  // Route it after the initialization post above, on the same strand.
++  RouteViewTargetCreationRequest(
++    ecs.get(),
++    engine,
++    static_cast<int32_t>(top),
++    static_cast<int32_t>(left),
++    static_cast<uint32_t>(width),
++    static_cast<uint32_t>(height)
+   );
+-  viewTargetCreationRequest.addData(
+-    ECSMessageType::ViewTargetCreateRequestWidth, static_cast<uint32_t>(width)
+-  );
+-  viewTargetCreationRequest.addData(
+-    ECSMessageType::ViewTargetCreateRequestHeight, static_cast<uint32_t>(height)
+-  );
+-
+-  ecs->RouteMessage(viewTargetCreationRequest);
+   spdlog::info("FLUORITE_VIEWTARGET_CREATE_ENQUEUED");
+ 
+   if (!m_bHasSetupRegistrar) {

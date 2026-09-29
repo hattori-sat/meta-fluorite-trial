@@ -1,0 +1,1 @@
+if test -r /run/user/1001/flr0285-production-trace.pid; then pid=$(cat /run/user/1001/flr0285-production-trace.pid); kill -TERM "$pid" 2>/dev/null || true; fi; sleep 1; pgrep -af flutter-auto || true; rm -f /run/user/1001/flr0285-production-trace.log /run/user/1001/flr0285-production-trace.pid /run/user/1001/flr0285-production-trace-preexec-env.log; df -h /run/user/1001

@@ -1,0 +1,27 @@
+From ccbce761513ad8915b19df45a38c7817860960fd Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 23:36:34 +0000
+Subject: [PATCH] test: rotate native fixture cube
+
+---
+ .../filament_scene/example/lib/shape_and_object_creators.dart | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 6533095..0ce8f74 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -35,7 +35,9 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+       id: generateGuid(),
+       position: Vector3(0, 0, 0),
+       scale: Vector3.all(1),
+-      rotation: Quaternion.identity(),
++      // Show the top and side faces so the diagnostic is visibly 3D rather
++      // than a front-facing square.
++      rotation: Quaternion.identity()..setEulerDegrees(25, 35, 0),
+       name: 'flr0023_fixture_cube',
+       // Emit saturated blue so the native geometry is unmistakable even when
+       // indirect-light or texture sampling is unavailable in the test image.
+-- 
+2.34.1
+

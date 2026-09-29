@@ -1,0 +1,41 @@
+From 044524ede363b096d15ba315fe17dbe9dac16d8c Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 10 Sep 2026 14:04:26 +0900
+Subject: [PATCH] diag: trace draw2 Vulkan output target
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 21 ++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index fba0666b8..0ee3a4c36 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -2269,6 +2269,27 @@ void VulkanDriver::bindDescriptorSet(
+ 
+ void VulkanDriver::draw2(uint32_t indexOffset, uint32_t indexCount, uint32_t instanceCount) {
+     FVK_SYSTRACE_SCOPE();
++    if (std::getenv("FLR0026_TARGET_TRACE") != nullptr) {
++        auto rt = mCurrentRenderPass.renderTarget;
++        if (rt) {
++            auto& color = rt->getColor0();
++            VkExtent2D const extent = rt->getExtent();
++            FVK_LOGI << "FLR0026_TARGET_DRAW2 swapchain=" << rt->isSwapChain()
++                     << " extent=" << extent.width << "x" << extent.height
++                     << " index_offset=" << indexOffset
++                     << " index_count=" << indexCount
++                     << " instances=" << instanceCount
++                     << " color_image=" << color.getImage()
++                     << " color_view=" << color.getImageView()
++                     << " color_format=" << static_cast<int>(color.getFormat())
++                     << " color_layout=" << static_cast<int>(color.getLayout());
++        } else {
++            FVK_LOGI << "FLR0026_TARGET_DRAW2 render_target=null"
++                     << " index_offset=" << indexOffset
++                     << " index_count=" << indexCount
++                     << " instances=" << instanceCount;
++        }
++    }
+     VkCommandBuffer cmdbuffer = mCurrentRenderPass.commandBuffer->buffer();
+     auto const& [doBindInDraw, bundle] = mPipelineState.bindInDraw;
+ 

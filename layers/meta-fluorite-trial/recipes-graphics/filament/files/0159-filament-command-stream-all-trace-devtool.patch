@@ -1,0 +1,52 @@
+From 3b1051bfb285d27ed83ad98cf3627ecc22db31fd Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 07:43:53 +0000
+Subject: [PATCH] diag: trace every command stream execution
+
+---
+ .../include/private/backend/CommandStream.h   | 21 ++++++++++++-------
+ 1 file changed, 14 insertions(+), 7 deletions(-)
+
+diff --git a/filament/backend/include/private/backend/CommandStream.h b/filament/backend/include/private/backend/CommandStream.h
+index 18fb230cd..ad3b52afc 100644
+--- a/filament/backend/include/private/backend/CommandStream.h
++++ b/filament/backend/include/private/backend/CommandStream.h
+@@ -80,10 +80,12 @@ public:
+         // a cost here (writing and reading the stack at each iteration), in the end it's
+         // probably better to pay the cost at just one location.
+         const char* const name = mName;
+-        const bool trace = name && std::getenv("FLR0026_COMMAND_EXECUTION_TRACE") != nullptr &&
+-                (std::strcmp(name, "commit") == 0 ||
+-                 std::strcmp(name, "createFenceR") == 0 ||
+-                 std::strcmp(name, "endFrame") == 0);
++        const bool trace = name && (
++                std::getenv("FLR0026_COMMAND_EXECUTION_ALL_TRACE") != nullptr ||
++                (std::getenv("FLR0026_COMMAND_EXECUTION_TRACE") != nullptr &&
++                        (std::strcmp(name, "commit") == 0 ||
++                         std::strcmp(name, "createFenceR") == 0 ||
++                         std::strcmp(name, "endFrame") == 0)));
+         if (trace) {
+             std::fprintf(stderr, "FLR0026_COMMAND_EXECUTE_BEGIN name=%s command=%p\n",
+                     name, static_cast<void*>(this));
+@@ -91,10 +93,15 @@ public:
+         intptr_t next;
+         mExecute(driver, this, &next);
+         if (trace) {
+-            std::fprintf(stderr, "FLR0026_COMMAND_EXECUTE_DONE name=%s command=%p\n",
+-                    name, static_cast<void*>(this));
++            auto const nextCommand = reinterpret_cast<CommandBase*>(
++                    reinterpret_cast<intptr_t>(this) + next);
++            std::fprintf(stderr,
++                    "FLR0026_COMMAND_EXECUTE_DONE name=%s command=%p next=%p delta=%lld\n",
++                    name, static_cast<void*>(this), static_cast<void*>(nextCommand),
++                    static_cast<long long>(next));
+         }
+-        return reinterpret_cast<CommandBase*>(reinterpret_cast<intptr_t>(this) + next);
++        return reinterpret_cast<CommandBase*>(
++                reinterpret_cast<intptr_t>(this) + next);
+     }
+ 
+     inline ~CommandBase() noexcept = default;
+-- 
+2.34.1
+

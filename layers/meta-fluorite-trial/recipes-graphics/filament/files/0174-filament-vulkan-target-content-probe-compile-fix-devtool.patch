@@ -1,0 +1,46 @@
+From 9acfd304e222cd2be087f16e5c96470859d66f30 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 10 Sep 2026 06:54:41 +0000
+Subject: [PATCH] fix: capture target probe constants
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 5fb257e62..dc5d51064 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -1819,16 +1819,17 @@ void VulkanDriver::endRenderPass(int) {
+                         [context = &mContext](uint32_t types, VkFlags reqs) {
+                             return context->selectMemoryType(types, reqs);
+                         },
+-                        [probeImage, extent](PixelBufferDescriptor&& result) {
+-                            auto const* const pixels =
++                        [probeImage, extent, pixelCount = PIXELS, componentCount = COMPONENTS](
++                                PixelBufferDescriptor&& result) {
++                            auto const* const pixelData =
+                                     static_cast<uint16_t const*>(result.buffer);
+                             size_t nonzeroPixels = 0;
+                             uint64_t wordSum = 0;
+-                            if (pixels) {
+-                                for (size_t pixel = 0; pixel < PIXELS; ++pixel) {
++                            if (pixelData) {
++                                for (size_t pixel = 0; pixel < pixelCount; ++pixel) {
+                                     bool nonzero = false;
+-                                    for (size_t component = 0; component < COMPONENTS; ++component) {
+-                                        uint16_t const word = pixels[pixel * COMPONENTS + component];
++                                    for (size_t component = 0; component < componentCount; ++component) {
++                                        uint16_t const word = pixelData[pixel * componentCount + component];
+                                         nonzero |= word != 0;
+                                         wordSum += word;
+                                     }
+@@ -1838,7 +1839,7 @@ void VulkanDriver::endRenderPass(int) {
+                             FVK_LOGI << "FLR0026_TARGET_PROBE_RESULT image=" << probeImage
+                                      << " extent=" << extent.width << "x" << extent.height
+                                      << " nonzero_pixels=" << nonzeroPixels
+-                                     << " total_pixels=" << PIXELS
++                                     << " total_pixels=" << pixelCount
+                                      << " half_word_sum=" << wordSum;
+                         });
+             }

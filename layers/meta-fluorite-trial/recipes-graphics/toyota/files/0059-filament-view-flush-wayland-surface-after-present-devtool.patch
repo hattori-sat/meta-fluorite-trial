@@ -1,0 +1,21 @@
+From ef81b37ee17cb07bcc2e850dd031e50dad9e227b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 12:44:23 +0000
+Subject: [PATCH] diag: flush Wayland surface after Filament present
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index b9e331a..4aa7cc0 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -737,6 +737,7 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+     // native surface can become visible to the compositor.
+     if (obj->surface_ != nullptr) {
+       wl_surface_commit(obj->surface_);
++      wl_display_flush(obj->display_);
+       spdlog::info("FLR0026_WAYLAND_SURFACE_COMMITTED committed=true");
+     }
+ 

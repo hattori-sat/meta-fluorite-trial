@@ -1,0 +1,28 @@
+From 92f123abf1702e505f98b70d4e8503b1b0a993d7 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 13:28:20 +0000
+Subject: [PATCH] diag: wait for offscreen readback completion
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index cf82385..9276755 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -965,10 +965,11 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+           readbackWidth,
+           &ViewTarget::OnNativeReadback,
+           this
+         )
+       );
++      _engine->flushAndWait();
+       spdlog::info(
+         "FLR0026_NATIVE_READBACK_QUEUED width={} height={}",
+         readbackWidth,
+         readbackHeight
+       );
+-- 
+2.34.1
+

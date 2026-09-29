@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 10 Aug 2026 18:00:00 +0900
+Subject: [PATCH] filament_scene: adapt active camera to v2 scene payload
+
+The v2 native deserializer creates a camera only from scene.camera.  It does
+not consume the root cameras list, but the Dart post-create path initializes
+the selected camera entity.  Put the selected camera into the scene map so
+both sides use the same entity GUID.
+
+---
+packages/filament_scene/lib/scene/scene_widget.dart | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -170,6 +170,11 @@ class _SceneViewState extends State<SceneView> {
+   void _setupCreationParams() {
+     //final model = widget.models?.toJson();
+     final JsonObject? scene = widget.scene?.toJson();
++    if (scene != null && widget.cameras != null && widget.cameras!.isNotEmpty) {
++      // flutter-auto v2 creates cameras from scene.camera, not root cameras.
++      // Keep the first active camera GUID aligned with Dart post-create setup.
++      scene['camera'] = widget.cameras!.first.toJson();
++    }
+     _creationParams["models"] = widget.models?.map((final param) => param.toJson()).toList();
+     _creationParams["scene"] = scene;
+     // use concatenated toFlatJson
+--
+2.34.1

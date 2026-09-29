@@ -1,0 +1,29 @@
+From aacd8a7a250e07898deaf7a71860df72b5dfb762 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 11:38:07 +0000
+Subject: [PATCH] test: emit blue from packaged lit fixture material
+
+---
+ .../example/lib/shape_and_object_creators.dart            | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index f927675..e537f64 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -37,10 +37,12 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+       scale: Vector3.all(1),
+       rotation: Quaternion.identity(),
+       name: 'flr0023_fixture_cube',
+-      // Use an emissive-independent unlit material for the diagnostic cube.
+-      // This isolates fragment visibility from indirect-light and PBR inputs.
+-      material: poGetUnlitMaterial(
++      // Keep the packaged lit material but emit blue light from the fixture.
++      // This isolates fragment visibility from indirect-light intensity.
++      material: poGetLitMaterial(
+         Colors.blue,
++        emissiveColor: Colors.blue,
++        emissiveIntensity: 1.0,
+       ),
+     ),
+   ];

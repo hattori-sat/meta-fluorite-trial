@@ -1,0 +1,1 @@
+for pidfile in /run/user/1001/flr0277-production-control.pid /run/user/1001/flr0277-production-skip.pid; do if test -s "$pidfile"; then pid=$(cat "$pidfile"); kill -TERM "$pid" 2>/dev/null || true; fi; done; sleep 1; pgrep -a flutter-auto || true

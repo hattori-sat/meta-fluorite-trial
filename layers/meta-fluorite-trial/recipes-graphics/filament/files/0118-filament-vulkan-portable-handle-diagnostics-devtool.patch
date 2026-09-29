@@ -1,0 +1,61 @@
+From 7b993a37cdea891401663a4dcc8991996b98d62b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 21:46:47 +0000
+Subject: [PATCH] fix: make Vulkan handle diagnostics portable
+
+---
+ .../src/vulkan/platform/VulkanPlatformLinuxWindows.cpp |  2 +-
+ .../vulkan/platform/VulkanPlatformSwapChainImpl.cpp    | 10 +++++-----
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformLinuxWindows.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformLinuxWindows.cpp
+index 3b2e60cdb..b27eb8114 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformLinuxWindows.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformLinuxWindows.cpp
+@@ -136,7 +136,7 @@ VulkanPlatform::SurfaceBundle VulkanPlatform::createVkSurfaceKHRImpl(void* nativ
+                 static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(ptrval->surface)),
+                 ptrval->width,
+                 ptrval->height,
+-                static_cast<unsigned long long>(surface));
++                static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(surface)));
+     #elif defined(LINUX_OR_FREEBSD) && defined(FILAMENT_SUPPORTS_X11)
+         if (g_x11_vk.library == nullptr) {
+             g_x11_vk.library = dlopen(LIBRARY_X11, RTLD_LOCAL | RTLD_NOW);
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index a41866b93..de5f4fc9f 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -267,8 +267,8 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
+             stderr,
+             "FLR0026_VK_SWAPCHAIN_CREATE caps=%d surface=%llx swapchain=%llx current=%ux%u chosen=%ux%u format=%d images=%zu\n",
+             static_cast<int32_t>(capsResult),
+-            static_cast<unsigned long long>(mSurface),
+-            static_cast<unsigned long long>(mSwapchain),
++            static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(mSurface)),
++            static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(mSwapchain)),
+             caps.currentExtent.width,
+             caps.currentExtent.height,
+             mSwapChainBundle.extent.width,
+@@ -309,7 +309,7 @@ VkResult VulkanPlatformSurfaceSwapChain::acquire(VulkanPlatform::ImageSyncData*
+             stderr,
+             "FLR0026_VK_SWAPCHAIN_ACQUIRE result=%d swapchain=%llx index=%u\n",
+             static_cast<int32_t>(result),
+-            static_cast<unsigned long long>(mSwapchain),
++            static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(mSwapchain)),
+             outImageSyncData->imageIndex);
+ 
+     // Users should be notified of a suboptimal surface, but it should not cause a cascade of
+@@ -337,8 +337,8 @@ VkResult VulkanPlatformSurfaceSwapChain::present(uint32_t index, VkSemaphore fin
+             stderr,
+             "FLR0026_VK_QUEUE_PRESENT result=%d surface=%llx swapchain=%llx index=%u\n",
+             static_cast<int32_t>(result),
+-            static_cast<unsigned long long>(mSurface),
+-            static_cast<unsigned long long>(mSwapchain),
++            static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(mSurface)),
++            static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(mSwapchain)),
+             currentIndex);
+ 
+     // On Android Q and above, a suboptimal surface is always reported after screen rotation:
+-- 
+2.34.1
+

@@ -1,0 +1,37 @@
+From 6e1f4b8d2a7c9e0f1b3d5a7c9e1f3b5d7a9c1e3f Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 19:30:00 +0900
+Subject: [PATCH] filament_view: process initial view target messages
+
+The ECS update loop starts from ViewTarget::DrawFrame, while the first
+ViewTarget and its rendering-loop message are queued during registrar setup.
+Process those initial messages on the ECS strand after serialized ECS
+initialization so the first frame can be scheduled. Keep this limited to the
+bootstrap queue; normal frame and scene messages remain asynchronous.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+Index: git/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+===================================================================
+--- git.orig/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
++++ git/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+@@ -280,0 +280,15 @@
++  // ECS update is entered by ViewTarget::DrawFrame. Drain the bootstrap
++  // messages first so ViewTarget creation can schedule that first frame.
++  const auto viewTargetSystem = ecs->getSystem<ViewTargetSystem>(__FUNCTION__);
++  if (pthread_self() == ecs->getFilamentAPIThreadID()) {
++    viewTargetSystem->ProcessMessages();
++  } else {
++    std::promise<void> startupPromise;
++    auto startupFuture = startupPromise.get_future();
++    post(*ecs->getStrand(), [&viewTargetSystem, &startupPromise] {
++      viewTargetSystem->ProcessMessages();
++      startupPromise.set_value();
++    });
++    startupFuture.wait();
++  }
++
+--
+2.34.1

@@ -1,0 +1,30 @@
+From fed6ebc218b5a6a8d346c0f66a971caee0b273c2 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 05:15:34 +0000
+Subject: [PATCH] FLR-0226: make Flutter parent Material surfaces transparent
+
+---
+ packages/filament_scene/example/lib/main.dart | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 5755a4a..100c707 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -207,10 +207,15 @@ class _MyAppState extends State<MyApp> {
+   @override
+   Widget build(BuildContext context) {
+     return MaterialApp(
++      color: Colors.transparent,
++      theme: ThemeData(
++        canvasColor: Colors.transparent,
++        scaffoldBackgroundColor: Colors.transparent,
++      ),
+       home: Scaffold(
+         backgroundColor: kFlr0026DiagnosticMock3d
+             ? const Color(0xff0b1020)
+-            : Colors.black.withAlpha(0),
++            : Colors.transparent,
+         body: Stack(
+           fit: StackFit.expand,
+           children: [

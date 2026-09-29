@@ -1,0 +1,1715 @@
+[13:31:26.732784] [I] FLR0026_NATIVE_SKIP_MODEL_LOAD enabled=true models=60 shapes=37 lights=13
+[13:31:26.733631] [I] FLR0027_NATIVE_SKIP_LIGHTS enabled=true lights=13
+[13:31:26.768485] [I] FLR0026_SHAPE_READY guid=188 entity=5 renderable=true
+[13:31:26.768880] [I] FLR0026_SHAPE_READY guid=190 entity=6 renderable=true
+[13:31:26.769079] [I] FLR0026_SHAPE_READY guid=192 entity=7 renderable=true
+[13:31:27.066771] [I] FLR0026_SHAPE_READY guid=194 entity=8 renderable=true
+[13:31:27.067405] [I] FLR0026_SHAPE_READY guid=196 entity=9 renderable=true
+[13:31:27.068015] [I] FLR0026_SHAPE_READY guid=198 entity=10 renderable=true
+[13:31:27.068605] [I] FLR0026_SHAPE_READY guid=200 entity=11 renderable=true
+[13:31:27.068918] [I] FLR0026_SHAPE_READY guid=202 entity=12 renderable=true
+[13:31:27.069048] [I] FLR0026_SHAPE_READY guid=212 entity=13 renderable=true
+[13:31:27.069172] [I] FLR0026_SHAPE_READY guid=204 entity=14 renderable=true
+[13:31:27.069318] [I] FLR0026_SHAPE_READY guid=206 entity=15 renderable=true
+[13:31:27.069428] [I] FLR0026_SHAPE_READY guid=208 entity=16 renderable=true
+[13:31:27.069540] [I] FLR0026_SHAPE_READY guid=210 entity=17 renderable=true
+[13:31:27.069641] [I] FLR0026_SHAPE_READY guid=118 entity=18 renderable=true
+[13:31:27.069736] [I] FLR0026_SHAPE_READY guid=120 entity=19 renderable=true
+[13:31:27.069892] [I] FLR0026_SHAPE_READY guid=216 entity=20 renderable=true
+[13:31:27.070019] [I] FLR0026_SHAPE_READY guid=244 entity=21 renderable=true
+[13:31:27.070198] [I] FLR0026_SHAPE_READY guid=246 entity=22 renderable=true
+[13:31:27.070378] [I] FLR0026_SHAPE_READY guid=248 entity=23 renderable=true
+[13:31:27.070530] [I] FLR0026_SHAPE_READY guid=250 entity=24 renderable=true
+[13:31:27.070725] [I] FLR0026_SHAPE_READY guid=252 entity=25 renderable=true
+[13:31:27.070871] [I] FLR0026_SHAPE_READY guid=254 entity=26 renderable=true
+[13:31:27.071011] [I] FLR0026_SHAPE_READY guid=256 entity=27 renderable=true
+[13:31:27.071131] [I] FLR0026_SHAPE_READY guid=258 entity=28 renderable=true
+[13:31:27.071249] [I] FLR0026_SHAPE_READY guid=260 entity=29 renderable=true
+[13:31:27.071457] [I] FLR0026_SHAPE_READY guid=262 entity=30 renderable=true
+[13:31:27.071733] [I] FLR0026_SHAPE_READY guid=220 entity=31 renderable=true
+[13:31:27.071983] [I] FLR0026_SHAPE_READY guid=222 entity=32 renderable=true
+[13:31:27.072229] [I] FLR0026_SHAPE_READY guid=224 entity=33 renderable=true
+[13:31:27.072538] [I] FLR0026_SHAPE_READY guid=226 entity=34 renderable=true
+[13:31:27.072805] [I] FLR0026_SHAPE_READY guid=228 entity=35 renderable=true
+[13:31:27.073156] [I] FLR0026_SHAPE_READY guid=230 entity=36 renderable=true
+[13:31:27.073468] [I] FLR0026_SHAPE_READY guid=232 entity=37 renderable=true
+[13:31:27.073732] [I] FLR0026_SHAPE_READY guid=234 entity=38 renderable=true
+[13:31:27.074088] [I] FLR0026_SHAPE_READY guid=236 entity=39 renderable=true
+[13:31:27.074419] [I] FLR0026_SHAPE_READY guid=238 entity=40 renderable=true
+[13:31:27.074577] [I] FLR0026_SHAPE_READY guid=264 entity=41 renderable=true
+[13:31:27.182740] [I] FLR0026_SHAPE_READY guid=197 entity=51 renderable=true
+[13:31:27.183360] [I] FLR0026_SHAPE_READY guid=199 entity=52 renderable=true
+[13:31:27.183716] [I] FLR0026_SHAPE_READY guid=201 entity=53 renderable=true
+[13:31:27.184182] [I] FLR0026_SHAPE_READY guid=203 entity=54 renderable=true
+[13:31:27.184671] [I] FLR0026_SHAPE_READY guid=205 entity=55 renderable=true
+[13:31:27.185545] [I] FLR0026_SHAPE_READY guid=207 entity=56 renderable=true
+[13:31:27.186039] [I] FLR0026_SHAPE_READY guid=209 entity=57 renderable=true
+[13:31:27.190939] [I] FLR0026_FRAME_BEGIN seq=1 started=true
+[13:31:27.301573] [I] FLR0026_FRAME_BEGIN seq=2 started=true
+[13:31:27.405109] [I] FLR0026_FRAME_BEGIN seq=3 started=false
+[13:31:28.113004] [I] FLR0026_FRAME_BEGIN seq=10 started=false
+[13:31:28.521465] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:28.636130] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:28.636795] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:28.636886] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:28.636949] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:28.637357] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:28.738689] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:28.738979] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:28.739068] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:28.739134] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:28.739514] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:28.840869] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:28.841061] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:28.841134] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:28.841198] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:28.841605] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:28.942862] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:28.943189] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:28.943264] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:28.943453] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:28.943794] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.044962] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.045174] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.045343] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.045437] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.045735] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.146880] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.147169] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.147316] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.147396] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.147699] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.148036] [I] FLR0026_FRAME_BEGIN seq=20 started=false
+[13:31:29.249106] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.249426] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.249513] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.249579] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.249882] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.357517] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.357729] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.357808] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.357881] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.359606] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.467704] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.467821] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.467853] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.467938] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.468107] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.577068] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.577192] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.577225] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.577306] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.577486] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.682768] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.683067] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.683183] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.683373] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.683593] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.784756] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.784959] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.785038] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.785100] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.785480] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.886683] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.886903] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.886979] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.887047] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.887417] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:29.988643] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:29.988860] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:29.988940] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:29.989008] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:29.989370] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.090643] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.090862] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.090935] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.091000] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.091403] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.192686] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.192912] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.192988] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.193055] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.193472] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.193904] [I] FLR0026_FRAME_BEGIN seq=30 started=false
+[13:31:30.294858] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.295088] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.295164] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.295228] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.295661] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.397809] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.397993] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.398070] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.398137] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.398806] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.499833] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.499952] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.499983] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.500011] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.500164] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.603528] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.603652] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.603684] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.603712] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.603882] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.711901] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.712034] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.712066] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.712094] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.712327] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.816050] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.816264] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.816367] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.816395] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.816570] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:30.922550] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:30.922673] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:30.922705] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:30.922733] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:30.922893] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.023557] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.023670] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.023702] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.023730] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.023899] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.125988] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.126108] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.126140] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.126168] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.126373] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.234523] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.234645] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.234677] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.234706] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.234858] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.235014] [I] FLR0026_FRAME_BEGIN seq=40 started=false
+[13:31:31.338016] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.338125] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.338158] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.338186] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.338341] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.443573] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.443688] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.443726] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.443754] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.443909] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.548083] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.548207] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.548240] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.548335] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.548552] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.649123] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.649234] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.649324] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.649356] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.649522] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.756559] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.756682] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.756716] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.756744] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.756921] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.860583] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.860709] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.860749] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.860776] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.860954] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:31.962076] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:31.962204] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:31.962238] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:31.962315] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:31.962495] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.068393] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.068523] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.068613] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.068646] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.068806] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.172581] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.172706] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.172742] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.172769] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.172930] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.273519] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.273635] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.273666] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.273694] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.273851] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.274007] [I] FLR0026_FRAME_BEGIN seq=50 started=false
+[13:31:32.381553] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.381672] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.381705] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.381734] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.381893] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.483657] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.483774] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.483805] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.483832] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.483993] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.591722] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.591903] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.591936] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.591966] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.592192] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.692987] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.693107] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.693140] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.693167] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.693377] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.794009] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.794133] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.794166] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.794194] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.794401] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:32.903535] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:32.903654] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:32.903685] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:32.903713] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:32.903925] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.004562] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.004694] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.004726] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.004754] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.004914] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.105858] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.105981] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.106013] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.106040] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.106193] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.210260] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.210392] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.210425] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.210453] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.210613] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.318554] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.318672] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.318704] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.318731] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.318885] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.319040] [I] FLR0026_FRAME_BEGIN seq=60 started=false
+[13:31:33.419564] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.419680] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.419712] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.419740] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.419895] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.521522] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.521638] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.521670] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.521698] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.521856] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.624553] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.624673] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.624705] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.624733] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.624890] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.738560] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.738684] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.738717] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.738744] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.738897] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.839867] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.840166] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.840385] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.840482] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.840780] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:33.942587] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:33.942709] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:33.942741] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:33.942768] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:33.942919] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.045558] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.045680] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.045711] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.045739] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.045890] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.148544] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.148666] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.148698] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.148726] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.148887] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.249592] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.249687] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.249718] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.249745] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.249897] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.357540] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.357648] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.357681] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.357710] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.357866] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.358029] [I] FLR0026_FRAME_BEGIN seq=70 started=false
+[13:31:34.460559] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.460961] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.461004] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.461034] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.461195] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.563750] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.563867] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.563899] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.563927] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.564079] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.670825] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.670931] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.670962] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.671034] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.671193] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.773613] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.773734] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.773766] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.773795] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.773953] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.878564] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.878697] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.878729] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.878757] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.878916] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:34.981221] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:34.981432] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:34.981466] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:34.981494] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:34.981655] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.091541] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.091672] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.091704] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.091732] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.091888] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.193712] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.193829] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.193860] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.193886] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.194038] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.300555] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.300676] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.300709] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.300737] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.300911] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.401581] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.401705] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.401740] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.401769] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.401941] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.402104] [I] FLR0026_FRAME_BEGIN seq=80 started=false
+[13:31:35.502566] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.502687] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.502719] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.502746] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.502974] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.607854] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.608180] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.608220] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.608249] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.615529] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.716282] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.716411] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.716443] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.716470] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.716629] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.822556] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.822674] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.822705] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.822732] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.822885] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:35.931346] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:35.931482] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:35.931516] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:35.931545] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:35.931708] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.035236] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.035425] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.035458] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.035486] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.035656] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.136358] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.136481] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.136513] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.136541] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.136699] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.241655] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.241770] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.241801] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.241829] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.241984] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.348552] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.348671] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.348702] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.348729] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.348889] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.452589] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.452706] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.452737] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.452764] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.452971] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.453132] [I] FLR0026_FRAME_BEGIN seq=90 started=false
+[13:31:36.554960] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.555160] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.555233] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.555459] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.555634] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.657140] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.657311] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.657353] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.657382] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.657546] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.758204] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.758412] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.758447] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.758475] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.758636] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.859383] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.859501] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.859533] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.859560] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.859715] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:36.960581] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:36.960703] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:36.960736] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:36.960765] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:36.960940] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.063536] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.063666] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.063697] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.063723] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.063878] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.165627] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.165748] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.165780] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.165809] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.165970] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.272741] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.272892] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.272924] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.272951] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.273111] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.375489] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.375645] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.375683] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.375711] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.375872] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.479494] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.479611] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.479642] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.479670] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.479833] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.480033] [I] FLR0026_FRAME_BEGIN seq=100 started=false
+[13:31:37.590020] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.590143] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.590176] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.590204] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.590476] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.693676] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.693806] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.693837] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.693864] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.694021] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.799564] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.799690] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.799723] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.799752] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.799917] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:37.909843] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:37.909953] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:37.909985] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:37.910012] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:37.910165] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.011137] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.011455] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.011532] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.011595] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.011898] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.113412] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.113532] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.113563] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.113591] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.113744] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.214428] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.214549] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.214581] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.214609] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.214821] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.318882] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.318971] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.319002] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.319029] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.319181] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.422437] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.422554] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.422584] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.422615] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.422764] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.526550] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.526673] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.526704] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.526730] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.526883] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.527041] [I] FLR0026_FRAME_BEGIN seq=110 started=false
+[13:31:38.627565] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.627683] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.627715] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.627742] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.627900] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.728905] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.729021] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.729052] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.729078] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.729245] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.830457] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.830579] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.830610] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.830635] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.830807] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:38.932546] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:38.932669] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:38.932701] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:38.932728] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:38.932908] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.043755] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.043879] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.043911] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.043937] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.044095] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.150743] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.151005] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.151045] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.151074] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.151234] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.257559] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.257684] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.257717] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.257744] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.257896] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.367554] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.367682] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.367716] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.367744] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.367908] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.468573] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.468695] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.468728] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.468756] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.468919] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.569588] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.569712] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.569746] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.569775] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.569951] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.570117] [I] FLR0026_FRAME_BEGIN seq=120 started=false
+[13:31:39.674461] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.674578] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.674609] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.674635] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.674803] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.779545] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.779667] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.779700] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.779728] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.779904] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.880544] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.880663] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.880694] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.880971] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.881164] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:39.989560] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:39.989686] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:39.989719] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:39.989801] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:39.989972] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.097553] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.097685] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.097719] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.097747] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.097906] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.199769] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.199881] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.199914] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.199942] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.200100] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.303348] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.303463] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.303494] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.303520] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.303670] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.404397] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.404534] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.404566] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.404593] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.404747] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.518579] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.518689] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.518721] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.518748] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.518906] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.619637] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.619764] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.619796] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.619826] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.619988] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.620148] [I] FLR0026_FRAME_BEGIN seq=130 started=false
+[13:31:40.722816] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.722943] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.722975] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.723002] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.723158] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.826674] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.826793] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.826824] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.826851] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.827004] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:40.927727] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:40.927852] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:40.927883] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:40.927909] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:40.928061] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.029617] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.029745] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.029776] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.029803] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.029954] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.130993] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.131114] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.131144] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.131170] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.131382] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.232045] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.232162] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.232194] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.232221] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.232406] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.340967] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.341064] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.341096] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.341123] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.341280] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.442016] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.442136] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.442167] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.442195] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.442396] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.544554] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.544675] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.544706] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.544734] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.544898] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.650702] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.650855] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.650892] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.650925] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.651116] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.651369] [I] FLR0026_FRAME_BEGIN seq=140 started=false
+[13:31:41.753188] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.753380] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.753465] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.753501] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.753662] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.857894] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.858013] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.858045] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.858072] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.858229] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:41.962566] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:41.962677] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:41.962711] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:41.962739] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:41.962900] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.063566] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.063695] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.063726] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.063752] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.063905] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.164580] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.164701] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.164733] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.164762] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.164927] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.265685] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.265789] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.265821] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.265850] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.266008] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.370580] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.370699] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.370732] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.370761] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.370922] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.471569] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.471677] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.471708] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.471736] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.471907] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.574222] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.574442] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.574477] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.574507] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.574770] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.678758] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.678927] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.678965] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.678992] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.679177] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.679385] [I] FLR0026_FRAME_BEGIN seq=150 started=false
+[13:31:42.783788] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.783909] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.783942] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.783970] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.784134] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.885097] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.885213] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.885244] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.885334] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.885498] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:42.994570] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:42.994679] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:42.994712] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:42.994741] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:42.994902] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.101544] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.101672] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.101703] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.101730] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.101898] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.202613] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.202727] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.202757] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.202783] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.202946] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.305566] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.305680] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.305711] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.305739] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.305912] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.406626] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.406761] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.406793] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.406821] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.406985] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.510561] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.510687] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.510719] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.510804] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.510993] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.612627] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.612745] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.612776] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.612803] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.612977] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.716543] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.716666] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.716698] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.716726] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.716893] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.717057] [I] FLR0026_FRAME_BEGIN seq=160 started=false
+[13:31:43.820799] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.820936] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.820967] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.820995] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.821152] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:43.923179] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:43.923417] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:43.923455] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:43.923482] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:43.923639] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.026725] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.026859] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.026892] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.026920] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.027080] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.128023] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.128144] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.128176] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.128203] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.128416] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.230574] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.230688] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.230720] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.230748] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.230900] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.332753] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.332892] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.332924] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.332951] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.333106] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.438435] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.438564] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.438597] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.438623] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.438786] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.539416] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.539538] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.539569] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.539597] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.539759] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.640420] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.640544] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.640576] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.640604] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.640762] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.742675] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.742792] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.742822] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.742849] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.743006] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.743160] [I] FLR0026_FRAME_BEGIN seq=170 started=false
+[13:31:44.846555] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.846682] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.846715] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.846742] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.846902] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:44.947577] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:44.947703] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:44.947735] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:44.947763] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:44.947924] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.048891] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.049027] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.049059] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.049086] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.049245] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.158558] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.158680] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.158713] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.158741] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.158898] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.259559] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.259671] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.259702] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.259785] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.259943] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.363620] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.363746] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.363779] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.363808] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.363969] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.464585] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.464688] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.464720] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.464748] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.464928] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.565573] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.565696] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.565729] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.565757] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.565931] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.668735] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.668865] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.668897] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.668925] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.669101] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.771571] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.771701] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.771734] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.771763] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.771923] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.772086] [I] FLR0026_FRAME_BEGIN seq=180 started=false
+[13:31:45.877549] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.877665] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.877698] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.877725] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.877885] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:45.979569] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:45.979691] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:45.979724] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:45.979752] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:45.979912] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.083855] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.083988] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.084018] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.084044] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.084200] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.186823] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.186956] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.186989] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.187018] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.187186] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.288552] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.288671] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.288703] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.288730] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.288891] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.390566] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.390666] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.390699] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.390727] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.390887] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.493027] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.493148] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.493180] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.493207] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.493425] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.595562] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.595690] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.595724] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.595753] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.595914] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.698545] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.698664] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.698695] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.698722] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.698878] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.799556] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.799675] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.799707] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.799735] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.799912] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:46.800071] [I] FLR0026_FRAME_BEGIN seq=190 started=false
+[13:31:46.900858] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:46.900978] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:46.901010] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:46.901040] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:46.901214] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.001948] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.002077] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.002168] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.002204] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.002423] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.107246] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.107412] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.107446] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.107475] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.107638] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.217584] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.217708] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.217741] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.217770] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.217930] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.322722] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.322841] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.322874] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.322902] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.323065] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.427561] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.427748] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.427824] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.427889] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.428192] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.531558] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.531680] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.531713] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.531743] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.531907] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.632571] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.632694] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.632728] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.632757] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.632927] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.733578] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.733704] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.733737] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.733765] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.733925] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.849058] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.849184] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.849216] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.849244] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.849500] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:47.849658] [I] FLR0026_FRAME_BEGIN seq=200 started=false
+[13:31:47.956559] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:47.956669] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:47.956702] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:47.956731] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:47.956911] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.070538] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.070675] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.070707] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.070736] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.070912] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.173682] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.173862] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.173897] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.173925] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.174156] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.277689] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.277826] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.277859] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.277887] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.278051] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.378993] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.379110] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.379142] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.379171] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.379380] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.483697] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.483819] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.483850] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.483876] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.484057] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.585004] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.585125] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.585157] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.585185] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.585419] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.689104] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.689224] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.689313] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.689350] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.689510] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.792750] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.792898] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.792934] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.793021] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.793197] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.902536] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:48.902655] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:48.902687] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:48.902716] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:48.902873] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:48.903031] [I] FLR0026_FRAME_BEGIN seq=210 started=false
+[13:31:49.006573] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.006705] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.006735] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.006762] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.006927] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.114083] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.114411] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.114505] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.114575] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.114772] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.217335] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.217461] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.217495] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.217524] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.217723] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.319559] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.319678] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.319710] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.319738] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.319915] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.420620] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.420726] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.420759] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.420787] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.420963] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.525112] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.525233] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.525320] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.525359] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.525517] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.635158] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.635340] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.635384] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.635414] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.635577] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.736422] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.736545] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.736578] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.736607] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.736762] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.837778] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.837902] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.837942] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.837970] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.838131] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.943903] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:49.944023] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:49.944055] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:49.944083] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:49.947314] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:49.947585] [I] FLR0026_FRAME_BEGIN seq=220 started=false
+[13:31:50.048462] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.048594] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.048627] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.048654] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.048833] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.152603] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.152725] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.152757] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.152785] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.152969] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.259336] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.259461] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.259493] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.259522] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.259682] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.365565] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.365687] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.365719] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.365747] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.365916] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.468542] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.468657] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.468688] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.468716] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.468894] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_SWAPCHAIN_FLUSH_BEGIN\nFLR0026_VK_COMMAND_END_BEGIN buffer=0x7fd49c026940\nFLR0026_VK_COMMAND_END_DONE buffer=0x7fd49c026940\nFLR0026_VK_QUEUE_SUBMIT_BEGIN queue=0x7fd49c02c550 fence=0x7fd49db03cf0\nFLR0026_VK_QUEUE_SUBMIT_DONE result=0 queue=0x7fd49c02c550 fence=0x7fd49db03cf0\nFLR0026_VK_SWAPCHAIN_FLUSH_DONE flushed=true\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_BEGIN\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=true\nFLR0026_VK_PRESENT_WAIT_SEMAPHORE enabled=true\nFLR0026_VK_QUEUE_PRESENT_BEGIN queue=0x7fd49c02c550 swapchain=0x7fd49dbaddb0 index=0\n[13:31:50.570875] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.571000] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.571032] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.571061] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.572992] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.676804] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.676935] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.676968] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.676996] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.677156] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.780695] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.780879] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.780912] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.780941] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.781168] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.882003] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.882126] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.882162] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.882190] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.882402] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.988539] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:50.988665] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:50.988697] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:50.988726] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:50.988894] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:50.989061] [I] FLR0026_FRAME_BEGIN seq=230 started=false
+[13:31:51.089553] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.089683] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.089716] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.089744] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.089917] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:51.190524] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.190647] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.190679] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.190707] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.190877] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:51.291538] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.291659] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.291753] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.291788] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.291967] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:51.392690] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.392814] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.392847] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.392875] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.393034] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:51.494018] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.494143] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.494180] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.494208] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.494415] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:51.597723] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.597909] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.597943] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.597973] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.598204] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:51.698993] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.699116] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.699150] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.699178] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.699382] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:51.805528] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.805653] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.805684] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.805711] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.805868] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:51.906657] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:51.906771] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:51.906801] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:51.906828] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:51.906978] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.007903] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.008029] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.008061] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.008089] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.008302] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.008469] [I] FLR0026_FRAME_BEGIN seq=240 started=false
+[13:31:52.109225] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.109397] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.109431] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.109460] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.109622] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.212982] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.213117] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.213149] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.213178] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.213399] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.318554] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.318677] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.318717] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.318746] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.318909] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.425525] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.425649] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.425683] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.425712] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.425870] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.529522] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.529636] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.529675] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.529703] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.529876] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.635538] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.635665] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.635698] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.635727] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.635903] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.750538] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.750661] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.750700] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.750728] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.750918] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.853183] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.853411] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.853449] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.853479] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.853650] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:52.956529] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:52.956649] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:52.956680] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:52.956709] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:52.956883] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.069524] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.069657] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.069689] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.069717] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.069938] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.070106] [I] FLR0026_FRAME_BEGIN seq=250 started=false
+[13:31:53.170571] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.170694] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.170726] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.170754] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.170910] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.273718] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.273833] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.273864] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.273892] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.274051] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.380298] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.380480] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.380515] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.380547] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.380780] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.486560] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.486683] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.486715] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.486744] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.486903] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.587876] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.588190] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.588233] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.588344] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.588525] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.691230] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.691403] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.691436] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.691463] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.691621] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.795367] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.795494] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.795528] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.795557] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.795720] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:53.902539] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:53.902651] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:53.902684] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:53.902712] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:53.902870] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:54.003531] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:54.003687] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:54.003725] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:54.003754] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:54.003915] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:31:54.110533] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:54.110656] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:54.110688] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:54.110716] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:54.110873] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:54.703662] [I] FLR0026_FRAME_BEGIN seq=260 started=true
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:31:54.813128] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:54.813301] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:54.813348] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:54.813381] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:54.813563] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_SWAPCHAIN_FLUSH_BEGIN\nFLR0026_VK_COMMAND_END_BEGIN buffer=0x7fd49c0251c0\nFLR0026_VK_COMMAND_END_DONE buffer=0x7fd49c0251c0\nFLR0026_VK_QUEUE_SUBMIT_BEGIN queue=0x7fd49c02c550 fence=0x7fd49db008b0\nFLR0026_VK_QUEUE_SUBMIT_DONE result=0 queue=0x7fd49c02c550 fence=0x7fd49db008b0\nFLR0026_VK_SWAPCHAIN_FLUSH_DONE flushed=true\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_BEGIN\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=true\nFLR0026_VK_PRESENT_WAIT_SEMAPHORE enabled=true\nFLR0026_VK_QUEUE_PRESENT_BEGIN queue=0x7fd49c02c550 swapchain=0x7fd49dbaddb0 index=0\n[13:31:58.800436] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:58.800675] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:58.800865] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:58.800954] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:58.801349] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:58.902654] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:58.902849] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:58.902923] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:58.902993] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:58.903374] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.004653] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.004893] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.004960] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.005017] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.005331] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.106584] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.106779] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.106850] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.106917] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.107190] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.208490] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.208703] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.208776] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.208865] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.209165] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.310453] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.310665] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.310739] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.310803] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.311118] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.412207] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.412496] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.412563] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.412620] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.412909] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.514115] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.514462] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.514565] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.514630] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.514928] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.615968] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.616151] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.616221] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.616385] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.616678] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.617000] [I] FLR0026_FRAME_BEGIN seq=270 started=false
+[13:31:59.717970] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.718235] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.718483] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.718561] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.718879] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.820040] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.820233] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.820407] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.820481] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.820789] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:31:59.922114] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:31:59.922545] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:31:59.922632] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:31:59.922697] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:31:59.922994] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.024121] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.024483] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.024563] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.024629] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.024943] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.126080] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.126452] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.126552] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.126619] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.126923] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.228070] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.228401] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.228492] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.228577] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.228895] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.329856] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.330052] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.330122] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.330184] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.330602] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.431755] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.431949] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.432021] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.432084] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.432427] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.533669] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.533794] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.533824] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.533851] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.534061] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.634977] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.635153] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.635217] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.635420] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.635709] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.635998] [I] FLR0026_FRAME_BEGIN seq=280 started=false
+[13:32:00.736767] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.736984] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.737058] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.737124] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.737683] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.838769] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.838949] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.839014] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.839071] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.839535] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:00.940763] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:00.940961] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:00.941028] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:00.941086] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:00.941490] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.044721] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.044939] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.045008] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.045068] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.045442] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.147994] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.148123] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.148155] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.148182] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.148419] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.250527] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.250643] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.250674] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.250701] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.250855] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.351504] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.351626] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.351658] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.351686] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.351843] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.454522] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.454696] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.454733] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.454761] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.454926] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.555549] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.555666] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.555698] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.555727] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.555887] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.658523] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.658636] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.658667] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.658695] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.658847] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.659002] [I] FLR0026_FRAME_BEGIN seq=290 started=false
+[13:32:01.759730] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.761346] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.761426] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.761460] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.761628] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.862293] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.862411] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.862443] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.862470] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.862625] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:01.964592] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:01.964711] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:01.964744] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:01.964772] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:01.964941] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.065538] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.065665] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.065696] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.065724] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.065877] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.168540] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.168658] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.168691] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.168720] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.168887] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.269526] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.269643] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.269674] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.269761] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.269924] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.372531] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.372841] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.372896] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.372927] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.373094] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.473790] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.473902] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.473933] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.473961] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.474116] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.576538] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.576663] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.576696] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.576725] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.576894] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.677759] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.677941] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.678008] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.678067] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.678230] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.678485] [I] FLR0026_FRAME_BEGIN seq=300 started=false
+[13:32:02.779104] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.779450] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.779545] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.779603] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.779861] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.880775] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.880971] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.881037] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.881097] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.881581] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:02.982808] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:02.983011] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:02.983087] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:02.983155] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:02.983560] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:03.086698] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:03.086845] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:03.086878] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:03.086906] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:03.087066] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:03.187918] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:03.188105] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:03.188147] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:03.188177] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:03.188464] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:05.130548] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:05.130674] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:05.130705] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:05.130731] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:05.130910] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:07.020535] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:07.020667] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:07.020698] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:07.020724] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:07.020914] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:08.985400] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:08.985528] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:08.985562] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:08.985591] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:08.985772] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:10.969658] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:10.969845] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:10.969879] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:10.969908] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:10.970167] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:12.945658] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:12.945803] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:12.945836] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:12.945863] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:12.946048] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:14.815084] [I] FLR0026_FRAME_BEGIN seq=310 started=true
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+FLR0026_VK_SWAPCHAIN_FLUSH_BEGIN\nFLR0026_VK_COMMAND_END_BEGIN buffer=0x7fd49c0251c0\nFLR0026_VK_COMMAND_END_DONE buffer=0x7fd49c0251c0\nFLR0026_VK_QUEUE_SUBMIT_BEGIN queue=0x7fd49c02c550 fence=0x7fd49db008b0\nFLR0026_VK_QUEUE_SUBMIT_DONE result=0 queue=0x7fd49c02c550 fence=0x7fd49db008b0\nFLR0026_VK_SWAPCHAIN_FLUSH_DONE flushed=true\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_BEGIN\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=true\nFLR0026_VK_PRESENT_WAIT_SEMAPHORE enabled=true\nFLR0026_VK_QUEUE_PRESENT_BEGIN queue=0x7fd49c02c550 swapchain=0x7fd49dbaddb0 index=1\n[13:32:14.924559] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:14.924685] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:14.924717] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:14.924746] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:14.924933] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:16.912556] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:16.912707] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:16.912740] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:16.912768] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:16.912958] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:18.913557] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:18.913694] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:18.913728] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:18.913757] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:18.913931] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:20.878794] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:20.878922] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:20.878954] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:20.878982] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:20.879207] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:22.815566] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:22.815698] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:22.815731] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:22.815759] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:22.815938] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:24.832160] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:24.832400] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:24.832439] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:24.832467] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:24.832649] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:26.786782] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:26.786972] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:26.787007] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:26.787036] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:26.787350] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:28.772549] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:28.772687] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:28.772719] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:28.772747] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:28.772937] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:30.765690] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:30.765891] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:30.765927] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:30.765957] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:30.766232] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:32.739545] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:32.739678] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:32.739717] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:32.739745] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:32.739918] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:34.595753] [I] FLR0026_FRAME_BEGIN seq=320 started=true
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+FLR0026_VK_SWAPCHAIN_FLUSH_BEGIN\nFLR0026_VK_COMMAND_END_BEGIN buffer=0x7fd49c0251c0\nFLR0026_VK_COMMAND_END_DONE buffer=0x7fd49c0251c0\nFLR0026_VK_QUEUE_SUBMIT_BEGIN queue=0x7fd49c02c550 fence=0x7fd49db008b0\nFLR0026_VK_QUEUE_SUBMIT_DONE result=0 queue=0x7fd49c02c550 fence=0x7fd49db008b0\nFLR0026_VK_SWAPCHAIN_FLUSH_DONE flushed=true\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_BEGIN\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=true\nFLR0026_VK_PRESENT_WAIT_SEMAPHORE enabled=true\nFLR0026_VK_QUEUE_PRESENT_BEGIN queue=0x7fd49c02c550 swapchain=0x7fd49dbaddb0 index=1\n[13:32:34.714511] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:34.714637] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:34.714670] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:34.714697] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:34.714888] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:36.678529] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:36.678660] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:36.678692] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:36.678720] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:36.678893] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:38.658546] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:38.658679] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:38.658712] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:38.658740] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:38.658918] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:40.639544] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:40.639672] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:40.639704] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:40.639783] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:40.639961] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:42.619377] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:42.619511] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:42.619559] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:42.619604] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:42.619785] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:44.541412] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:44.541559] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:44.541591] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:44.541618] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:44.541796] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:46.476513] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:46.476644] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:46.476676] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:46.476704] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:46.476878] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:48.431819] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:48.431943] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:48.431975] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:48.432003] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:48.432174] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:50.399548] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:50.399704] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:50.399738] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:50.399767] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:50.399992] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:52.312530] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:52.312667] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:52.312700] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:52.312728] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:52.312908] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+[13:32:54.131362] [I] FLR0026_FRAME_BEGIN seq=330 started=true
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+FLR0026_VK_SWAPCHAIN_FLUSH_BEGIN\nFLR0026_VK_COMMAND_END_BEGIN buffer=0x7fd49c0251c0\nFLR0026_VK_COMMAND_END_DONE buffer=0x7fd49c0251c0\nFLR0026_VK_QUEUE_SUBMIT_BEGIN queue=0x7fd49c02c550 fence=0x7fd49db008b0\nFLR0026_VK_QUEUE_SUBMIT_DONE result=0 queue=0x7fd49c02c550 fence=0x7fd49db008b0\nFLR0026_VK_SWAPCHAIN_FLUSH_DONE flushed=true\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_BEGIN\nFLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=true\nFLR0026_VK_PRESENT_WAIT_SEMAPHORE enabled=true\nFLR0026_VK_QUEUE_PRESENT_BEGIN queue=0x7fd49c02c550 swapchain=0x7fd49dbaddb0 index=1\n[13:32:54.244529] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:54.244651] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:54.244683] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:54.244712] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:54.244884] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:32:56.202529] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:56.202659] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:56.202690] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:56.202717] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:56.202889] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=0
+[13:32:58.138547] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:32:58.138680] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:32:58.138713] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:32:58.138741] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:32:58.138916] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)
+FLR0026_VK_QUEUE_PRESENT result=0 surface=7fd49de0b110 swapchain=7fd49dbaddb0 index=1
+[13:33:00.054192] [E] [handleMessage] Exception in handler: Entity(164): Light not found
+[13:33:00.054412] [E] [handleMessage] Exception in handler: Entity(166): Light not found
+[13:33:00.054502] [E] [handleMessage] Exception in handler: Entity(168): Light not found
+[13:33:00.054536] [E] [handleMessage] Exception in handler: Entity(170): Light not found
+[13:33:00.054711] [I] FLR0026_CAMERA_APPLIED head=(5,0,-5) targetPresent=true target=(0,0,0) dolly=(5,0,5)

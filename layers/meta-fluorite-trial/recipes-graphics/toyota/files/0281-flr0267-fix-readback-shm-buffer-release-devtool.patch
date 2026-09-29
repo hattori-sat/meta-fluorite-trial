@@ -1,0 +1,276 @@
+From 27099cff7f35ff32b32a0b22236f329bd4283688 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 23 Sep 2026 20:04:18 +0000
+Subject: [PATCH] FLR-0267: use released readback SHM buffers
+
+---
+ .../filament_view/core/scene/view_target.cc   | 113 +++++++++++++++---
+ .../filament_view/core/scene/view_target.h    |   6 +
+ 2 files changed, 102 insertions(+), 17 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index deccb78..e07b6ee 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -257,6 +257,12 @@ ViewTarget::~ViewTarget() {
+   _engine->destroy(fview_);
+   _engine->destroy(fswapChain_);
+ 
++  for (auto& buffer : shm_readback_buffers_) {
++    if (buffer != nullptr) {
++      wl_buffer_destroy(buffer);
++      buffer = nullptr;
++    }
++  }
+   if (shm_buffer_) {
+     wl_buffer_destroy(shm_buffer_);
+     shm_buffer_ = nullptr;
+@@ -273,7 +279,10 @@ ViewTarget::~ViewTarget() {
+     munmap(shm_data_, shm_size_);
+     shm_data_ = nullptr;
+     shm_size_ = 0;
++    shm_buffer_size_ = 0;
+   }
++  shm_readback_next_ = 0;
++  for (auto& busy : shm_readback_buffer_busy_) busy = false;
+   if (shm_subsurface_) {
+     wl_subsurface_destroy(shm_subsurface_);
+     shm_subsurface_ = nullptr;
+@@ -471,6 +480,7 @@ void ViewTarget::setupVisibleShmCube(const uint32_t width, const uint32_t height
+   const uint32_t top = height > cubeHeight ? (height - cubeHeight) / 2u : 0u;
+   const size_t stride = static_cast<size_t>(cubeWidth) * 4u;
+   const size_t size = stride * static_cast<size_t>(cubeHeight);
++  const size_t poolSize = size * (readbackBridge ? 3u : 1u);
+   const char* const name = "/fluorite-visible-shm-cube";
+   const int fd = shm_open(name, O_CREAT | O_RDWR, 0600);
+   if (fd < 0) {
+@@ -479,14 +489,14 @@ void ViewTarget::setupVisibleShmCube(const uint32_t width, const uint32_t height
+     return;
+   }
+   shm_unlink(name);
+-  if (ftruncate(fd, static_cast<off_t>(size)) != 0) {
++  if (ftruncate(fd, static_cast<off_t>(poolSize)) != 0) {
+     spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE ftruncate_errno={}", errno);
+     close(fd);
+     wl_shm_destroy(registryState.shm);
+     return;
+   }
+ 
+-  void* data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++  void* data = mmap(nullptr, poolSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+   if (data == MAP_FAILED) {
+     spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE mmap_errno={}", errno);
+     close(fd);
+@@ -495,11 +505,11 @@ void ViewTarget::setupVisibleShmCube(const uint32_t width, const uint32_t height
+   }
+   drawVisibleShmCube(static_cast<uint32_t*>(data), cubeWidth, cubeHeight);
+ 
+-  auto* pool = wl_shm_create_pool(registryState.shm, fd, static_cast<int32_t>(size));
++  auto* pool = wl_shm_create_pool(registryState.shm, fd, static_cast<int32_t>(poolSize));
+   close(fd);
+   if (pool == nullptr) {
+     spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE pool_failed");
+-    munmap(data, size);
++    munmap(data, poolSize);
+     wl_shm_destroy(registryState.shm);
+     return;
+   }
+@@ -514,11 +524,40 @@ void ViewTarget::setupVisibleShmCube(const uint32_t width, const uint32_t height
+   if (buffer == nullptr) {
+     spdlog::error("FLUORITE_NATIVE_VISIBLE_SHM_CUBE buffer_failed");
+     wl_shm_pool_destroy(pool);
+-    munmap(data, size);
++    munmap(data, poolSize);
+     wl_shm_destroy(registryState.shm);
+     return;
+   }
+ 
++  if (readbackBridge) {
++    for (size_t slot = 0; slot < 2; ++slot) {
++      auto* readbackBuffer = wl_shm_pool_create_buffer(
++        pool,
++        static_cast<int32_t>(size * (slot + 1u)),
++        static_cast<int32_t>(cubeWidth),
++        static_cast<int32_t>(cubeHeight),
++        static_cast<int32_t>(stride),
++        WL_SHM_FORMAT_XRGB8888
++      );
++      if (readbackBuffer == nullptr ||
++          wl_buffer_add_listener(readbackBuffer, &shm_buffer_listener, this) != 0) {
++        if (readbackBuffer != nullptr) wl_buffer_destroy(readbackBuffer);
++        for (auto& buffer : shm_readback_buffers_) {
++          if (buffer != nullptr) {
++            wl_buffer_destroy(buffer);
++            buffer = nullptr;
++          }
++        }
++        wl_buffer_destroy(buffer);
++        wl_shm_pool_destroy(pool);
++        munmap(data, poolSize);
++        wl_shm_destroy(registryState.shm);
++        return;
++      }
++      shm_readback_buffers_[slot] = readbackBuffer;
++    }
++  }
++
+   auto* const compositor = state_->view_controller->view->GetDisplay()->GetCompositor();
+   auto* const subcompositor = state_->view_controller->view->GetDisplay()->GetSubCompositor();
+   auto* shmSurface = wl_compositor_create_surface(compositor);
+@@ -530,7 +569,13 @@ void ViewTarget::setupVisibleShmCube(const uint32_t width, const uint32_t height
+     if (shmSurface != nullptr) wl_surface_destroy(shmSurface);
+     wl_buffer_destroy(buffer);
+     wl_shm_pool_destroy(pool);
+-    munmap(data, size);
++    for (auto& readbackBuffer : shm_readback_buffers_) {
++      if (readbackBuffer != nullptr) {
++        wl_buffer_destroy(readbackBuffer);
++        readbackBuffer = nullptr;
++      }
++    }
++    munmap(data, poolSize);
+     wl_shm_destroy(registryState.shm);
+     return;
+   }
+@@ -545,7 +590,10 @@ void ViewTarget::setupVisibleShmCube(const uint32_t width, const uint32_t height
+   shm_surface_ = shmSurface;
+   shm_subsurface_ = shmSubsurface;
+   shm_data_ = data;
+-  shm_size_ = size;
++  shm_size_ = poolSize;
++  shm_buffer_size_ = size;
++  shm_readback_next_ = 0;
++  for (auto& busy : shm_readback_buffer_busy_) busy = false;
+   const auto setupThreadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
+   spdlog::info(
+     "FLUORITE_NATIVE_READBACK_SHM_SETUP thread_id={} surface={} buffer={}",
+@@ -575,27 +623,43 @@ void ViewTarget::publishReadbackToVisibleShm(
+ ) {
+   constexpr uint32_t outputWidth = 360;
+   constexpr uint32_t outputHeight = 280;
++  int selectedSlot = -1;
++  for (size_t offset = 0; offset < 2; ++offset) {
++    const size_t slot = (shm_readback_next_ + offset) % 2u;
++    if (shm_readback_buffers_[slot] != nullptr && !shm_readback_buffer_busy_[slot]) {
++      selectedSlot = static_cast<int>(slot);
++      break;
++    }
++  }
+   if (bytes == nullptr || shm_data_ == nullptr || shm_surface_ == nullptr ||
+-      shm_buffer_ == nullptr || display_ == nullptr || width < outputWidth ||
+-      height < outputHeight || shm_size_ < static_cast<size_t>(outputWidth) * outputHeight * 4) {
++      shm_readback_buffers_[0] == nullptr || shm_readback_buffers_[1] == nullptr ||
++      display_ == nullptr || width < outputWidth || height < outputHeight ||
++      shm_buffer_size_ < static_cast<size_t>(outputWidth) * outputHeight * 4 ||
++      selectedSlot < 0) {
+     spdlog::warn(
+-      "FLUORITE_NATIVE_READBACK_SHM_PUBLISH_SKIPPED valid={}",
++      "FLUORITE_NATIVE_READBACK_SHM_PUBLISH_SKIPPED valid={} selected_slot={}",
+       bytes != nullptr && shm_data_ != nullptr && shm_surface_ != nullptr &&
+-      shm_buffer_ != nullptr && display_ != nullptr
++      shm_readback_buffers_[0] != nullptr && shm_readback_buffers_[1] != nullptr &&
++      display_ != nullptr,
++      selectedSlot
+     );
+     return;
+   }
++  shm_readback_buffer_busy_[selectedSlot] = true;
++  shm_readback_next_ = (static_cast<uint32_t>(selectedSlot) + 1u) % 2u;
+ 
+   const uint32_t sourceLeft = (width - outputWidth) / 2u;
+   const uint32_t sourceTop = (height - outputHeight) / 2u;
+   const auto publishThreadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
+   spdlog::info(
+-    "FLUORITE_NATIVE_READBACK_SHM_PUBLISH_BEGIN thread_id={} surface={} buffer={}",
++    "FLUORITE_NATIVE_READBACK_SHM_PUBLISH_BEGIN thread_id={} surface={} buffer={} slot={}",
+     publishThreadId,
+     static_cast<void*>(shm_surface_),
+-    static_cast<void*>(shm_buffer_)
++    static_cast<void*>(shm_readback_buffers_[selectedSlot]),
++    selectedSlot
+   );
+-  auto* const destination = static_cast<uint8_t*>(shm_data_);
++  auto* const destination = static_cast<uint8_t*>(shm_data_) +
++    shm_buffer_size_ * (static_cast<size_t>(selectedSlot) + 1u);
+   size_t nonzeroPixels = 0;
+   size_t chromaticPixels = 0;
+   for (uint32_t y = 0; y < outputHeight; ++y) {
+@@ -618,20 +682,21 @@ void ViewTarget::publishReadbackToVisibleShm(
+     }
+   }
+ 
+-  wl_surface_attach(shm_surface_, shm_buffer_, 0, 0);
++  wl_surface_attach(shm_surface_, shm_readback_buffers_[selectedSlot], 0, 0);
+   wl_surface_damage(shm_surface_, 0, 0, outputWidth, outputHeight);
+   wl_surface_commit(shm_surface_);
+   const int flushResult = wl_display_flush(display_);
+   spdlog::info(
+     "FLUORITE_NATIVE_READBACK_SHM_PUBLISHED source=({}, {}) size={}x{} "
+-    "nonzero_pixels={} chromatic_pixels={} flush_result={}",
++    "nonzero_pixels={} chromatic_pixels={} flush_result={} slot={}",
+     sourceLeft,
+     sourceTop,
+     outputWidth,
+     outputHeight,
+     nonzeroPixels,
+     chromaticPixels,
+-    flushResult
++    flushResult,
++    selectedSlot
+   );
+ }
+ 
+@@ -1127,6 +1192,20 @@ void ViewTarget::SendFrameViewCallback(
+ /////////////////////////////////////////////////////////////////////////
+ const wl_callback_listener ViewTarget::frame_listener = {.done = OnFrame};
+ 
++void ViewTarget::OnShmBufferRelease(void* data, wl_buffer* buffer) {
++  auto* target = static_cast<ViewTarget*>(data);
++  if (target == nullptr) return;
++  for (size_t slot = 0; slot < 2; ++slot) {
++    if (target->shm_readback_buffers_[slot] == buffer) {
++      target->shm_readback_buffer_busy_[slot] = false;
++      spdlog::info("FLUORITE_NATIVE_READBACK_SHM_RELEASE slot={}", slot);
++      return;
++    }
++  }
++}
++
++const wl_buffer_listener ViewTarget::shm_buffer_listener = {.release = OnShmBufferRelease};
++
+ /**
+  * Renders the model and updates the Filament camera.
+  *
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index 73f799f..1b094b8 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -154,6 +154,7 @@ class ViewTarget {
+     void setupWaylandSubsurface();
+     void setupVisibleShmCube(uint32_t width, uint32_t height);
+     void publishReadbackToVisibleShm(const uint8_t* bytes, uint32_t width, uint32_t height);
++    static void OnShmBufferRelease(void* data, wl_buffer* buffer);
+ 
+     FlutterDesktopEngineState* state_;
+     filament::viewer::Settings settings_;
+@@ -173,8 +174,12 @@ class ViewTarget {
+     wl_shm* shm_{};
+     wl_shm_pool* shm_pool_{};
+     wl_buffer* shm_buffer_{};
++    wl_buffer* shm_readback_buffers_[2]{};
++    bool shm_readback_buffer_busy_[2]{};
++    uint32_t shm_readback_next_{};
+     void* shm_data_{};
+     size_t shm_size_{};
++    size_t shm_buffer_size_{};
+ 
+     struct _native_window {
+         struct wl_display* display;
+@@ -205,6 +210,7 @@ class ViewTarget {
+     static void OnFrame(void* data, wl_callback* callback, uint32_t time);
+ 
+     static const wl_callback_listener frame_listener;
++    static const wl_buffer_listener shm_buffer_listener;
+     int _prev_fps_counter = 0;
+     int _fps_counter = 0;
+     uint32_t _last_fps_reset_time = 0;

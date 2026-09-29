@@ -1,0 +1,27 @@
+From 650994ac80978cccd0cd61f902d4fa821e35b0e9 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 01:56:38 +0000
+Subject: [PATCH] diag: add opaque ViewTarget probe
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 098119e..aade482 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -209,7 +209,12 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+   fview_->setVisibleLayers(0xff, 0xff);
+   fview_->setViewport({0, 0, width, height});
+ 
+-  fview_->setBlendMode(filament::View::BlendMode::TRANSLUCENT);
++  const bool forceOpaque = std::getenv("FLUORITE_NATIVE_FORCE_OPAQUE") != nullptr;
++  fview_->setBlendMode(
++    forceOpaque ? filament::View::BlendMode::OPAQUE : filament::View::BlendMode::TRANSLUCENT);
++  if (forceOpaque) {
++    spdlog::info("FLUORITE_NATIVE_FORCE_OPAQUE enabled=true");
++  }
+ 
+   if (std::getenv("FLUORITE_NATIVE_MINIMAL_GEOMETRY") != nullptr) {
+     setupNativeMinimalGeometry();

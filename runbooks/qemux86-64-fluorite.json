@@ -1,0 +1,14 @@
+{
+  "schema": "fluorite.runbook/v1",
+  "id": "qemux86-64-fluorite",
+  "title": "Bounded qemux86-64 Fluorite session",
+  "description": "Run the fixed macOS qemux86-64 Fluorite artifact with Cocoa display, serial capture, and mandatory snapshot storage.",
+  "risk": "target_mutation",
+  "parameters": {},
+  "steps": [{
+    "id": "qemu-session",
+    "argv": ["qemu-system-x86_64", "-machine", "q35", "-accel", "tcg,thread=multi", "-m", "2048", "-smp", "4", "-cpu", "qemu64,+ssse3,+sse4.1,+sse4.2,+popcnt", "-kernel", "./bzImage", "-append", "root=/dev/sda rw console=ttyS0,115200n8", "-drive", "file=./agl-ivi-image-flutter-qemux86-64.rootfs.ext4,format=raw,if=ide", "-snapshot", "-display", "cocoa", "-serial", "mon:stdio", "-netdev", "user,id=net0", "-device", "virtio-net-pci,netdev=net0", "-device", "virtio-vga", "-device", "virtio-rng-pci", "-usb", "-device", "usb-tablet", "-device", "usb-kbd"],
+    "root": "qemu_artifact",
+    "timeout_seconds": 120
+  }]
+}

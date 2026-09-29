@@ -1,0 +1,22 @@
+From 88b69e9454bb02eee270c2026827226bf700719f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 05:46:54 +0000
+Subject: [PATCH] diag: use opaque Filament view blend mode
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 80af172..5b45509 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -206,7 +206,7 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+   fview_->setVisibleLayers(0xff, 0xff);
+   fview_->setViewport({0, 0, width, height});
+ 
+-  fview_->setBlendMode(filament::View::BlendMode::TRANSLUCENT);
++  fview_->setBlendMode(filament::View::BlendMode::OPAQUE);
+ 
+   // on mobile, better use lower quality color buffer
+   // filament::View::RenderQuality renderQuality{};

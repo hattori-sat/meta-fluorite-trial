@@ -1,0 +1,62 @@
+From a82201364ce1d1e8a6bf5b99aa66b9e0ba05f7ab Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 07:51:09 +0000
+Subject: [PATCH] FLR-0285: apply production camera before draw
+
+---
+ .../filament_view/core/scene/view_target.cc   | 35 ++++++++++---------
+ 1 file changed, 18 insertions(+), 17 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 3884b82..d6dad6b 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1154,23 +1154,6 @@ void ViewTarget::updateCameraSettings(
+     }
+   }
+ 
+-  const char* productionCameraProfile = std::getenv("FLR0285_NATIVE_PRODUCTION_CAMERA");
+-  if (productionCameraProfile != nullptr && std::strcmp(productionCameraProfile, "wide") == 0) {
+-    camera_->setProjection(
+-      60.0, calculateAspectRatio(), kDefaultNearPlane, 5000.0,
+-      filament::Camera::Fov::VERTICAL
+-    );
+-    camera_->lookAt(
+-      filament::math::double3{800.0, 450.0, 800.0},
+-      filament::math::double3{0.0, 0.0, -80.0},
+-      filament::math::double3{0.0, 1.0, 0.0}
+-    );
+-    spdlog::info(
+-      "FLR0285_PRODUCTION_CAMERA profile=wide eye=(800,450,800) target=(0,0,-80) "
+-      "fov=60 near=0.05 far=5000"
+-    );
+-  }
+-
+   // Update eyes
+   // NOTE: currently disabled, unnecessary until we support stereo rendering
+   // if (cameraData._dirtyEyes) {
+@@ -1395,6 +1378,24 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+                           std::chrono::steady_clock::now() - cpuUpdateStart
+   )
+                           .count();
++
++  const char* productionCameraProfile = std::getenv("FLR0285_NATIVE_PRODUCTION_CAMERA");
++  if (productionCameraProfile != nullptr && std::strcmp(productionCameraProfile, "wide") == 0) {
++    camera_->setProjection(
++      60.0, calculateAspectRatio(), kDefaultNearPlane, 5000.0,
++      filament::Camera::Fov::VERTICAL
++    );
++    camera_->lookAt(
++      filament::math::double3{800.0, 450.0, 800.0},
++      filament::math::double3{0.0, 0.0, -80.0},
++      filament::math::double3{0.0, 1.0, 0.0}
++    );
++    spdlog::info(
++      "FLR0285_PRODUCTION_CAMERA profile=wide eye=(800,450,800) target=(0,0,-80) "
++      "fov=60 near=0.05 far=5000"
++    );
++  }
++
+   // spdlog::debug(
+   //   "[{}] CPU frametime: {:.2f}ms", __FUNCTION__,
+   //   std::chrono::duration<double, std::milli>(cpuUpdateDuration).count()

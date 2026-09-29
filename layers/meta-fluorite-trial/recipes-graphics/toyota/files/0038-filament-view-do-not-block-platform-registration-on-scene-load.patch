@@ -1,0 +1,21 @@
+From 8a7c6e5d4b3a2910f8e7d6c5b4a3928171615141 Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 15:00:00 +0900
+Subject: [PATCH] filament_view: do not block platform registration on scene load
+
+Platform-view creation runs on a Flutter message thread. Waiting there for
+the scene deserializer to finish on the ECS strand prevents readiness calls
+and other Flutter messages from being serviced. The deserializer is already
+posted to the ECS strand, so let registration return while that work runs.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc b/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+@@ -126,1 +126,0 @@ void DeserializeDataAndSetupMessageChannels(
+-    initFuture.wait();
+-- 
+2.39.2

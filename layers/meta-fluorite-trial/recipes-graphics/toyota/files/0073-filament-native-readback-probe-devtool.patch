@@ -1,0 +1,84 @@
+From 6d1e5ddfc90e7757e4e6237a55fd3d4dcad0e1b8 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 12:02:40 +0000
+Subject: [PATCH] diag: read back native renderer pixels
+
+---
+ .../filament_view/core/scene/view_target.cc   | 54 +++++++++++++++++++
+ 1 file changed, 54 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 60a1e3f..aa6cb5f 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -30,6 +30,7 @@
+ #include <filament/SwapChain.h>
+ #include <filament/View.h>
+ #include <filament/Viewport.h>
++#include <filament/backend/PixelBufferDescriptor.h>
+ #include <filament/math/TMatHelpers.h>
+ #include <filament/math/mat4.h>
+ #include <filament/math/vec4.h>
+@@ -827,6 +828,59 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     // TODO(kerberjg): send kPreRenderFrame event, async with wait
+     // spdlog::debug("=== RENDER FRAME ===");
+     renderer->render(fview_);
++    if (std::getenv("FLR0026_NATIVE_READBACK_PROBE") != nullptr) {
++      static bool readbackProbeQueued = false;
++      if (!readbackProbeQueued) {
++        readbackProbeQueued = true;
++        const uint32_t readbackWidth = native_window_.width;
++        const uint32_t readbackHeight = native_window_.height;
++        const size_t readbackSize = static_cast<size_t>(readbackWidth) *
++          static_cast<size_t>(readbackHeight) * 4u;
++        auto* pixels = new uint8_t[readbackSize]();
++        renderer->readPixels(
++          0,
++          0,
++          readbackWidth,
++          readbackHeight,
++          filament::backend::PixelBufferDescriptor(
++            pixels,
++            readbackSize,
++            filament::backend::PixelBufferDescriptor::PixelDataFormat::RGBA,
++            filament::backend::PixelBufferDescriptor::PixelDataType::UBYTE,
++            1,
++            0,
++            0,
++            readbackWidth,
++            [](void* buffer, size_t size, void*) {
++              const auto* bytes = static_cast<const uint8_t*>(buffer);
++              size_t nonBlackPixels = 0;
++              uint8_t maxChannel = 0;
++              for (size_t offset = 0; offset + 3 < size; offset += 4) {
++                const uint8_t red = bytes[offset];
++                const uint8_t green = bytes[offset + 1];
++                const uint8_t blue = bytes[offset + 2];
++                if (red != 0 || green != 0 || blue != 0) {
++                  ++nonBlackPixels;
++                }
++                maxChannel = std::max(maxChannel, std::max(red, std::max(green, blue)));
++              }
++              spdlog::info(
++                "FLR0026_NATIVE_READBACK_RESULT bytes={} nonblack={} max_channel={}",
++                size,
++                nonBlackPixels,
++                static_cast<unsigned int>(maxChannel)
++              );
++              delete[] static_cast<uint8_t*>(buffer);
++            }
++          )
++        );
++        spdlog::info(
++          "FLR0026_NATIVE_READBACK_QUEUED width={} height={}",
++          readbackWidth,
++          readbackHeight
++        );
++      }
++    }
+     // spdlog::debug("=== END FRAME ===");
+     renderer->endFrame();
+     // TODO(kerberjg): send kPostRenderFrame event, async with wait
+-- 
+2.34.1
+

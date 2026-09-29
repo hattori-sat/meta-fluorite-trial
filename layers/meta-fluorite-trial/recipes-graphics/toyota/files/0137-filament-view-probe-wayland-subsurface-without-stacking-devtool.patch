@@ -1,0 +1,47 @@
+From 96ac75ca3088bdfac162567d7236240f981cadba Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 3 Sep 2026 16:39:24 +0000
+Subject: [PATCH] diag: probe Wayland subsurface without stacking
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index f60871f..24829ab 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -336,15 +336,15 @@ void ViewTarget::setupWaylandSubsurface() {
+     return;
+   }
+ 
+-  const bool siblingStackProbe = std::getenv("FLR0026_WAYLAND_SIBLING_STACK") != nullptr;
+-  wl_subsurface_place_above(
+-    subsurface_, siblingStackProbe ? surface_ : parent_surface_
+-  );
++  const bool skipStackProbe = std::getenv("FLR0026_WAYLAND_SKIP_STACK") != nullptr;
++  if (!skipStackProbe) {
++    wl_subsurface_place_above(subsurface_, parent_surface_);
++  }
+   wl_subsurface_set_position(subsurface_, left_, top_);
+   wl_subsurface_set_desync(subsurface_);
+   spdlog::info(
+     "FLR0026_WAYLAND_SURFACE_CREATED surface={} subsurface={} parent={} position=({}, {}) "
+-    "surface_ptr={} parent_ptr={} display_ptr={} sibling_stack={} stacking_target_ptr={}",
++    "surface_ptr={} parent_ptr={} display_ptr={} skip_stack={}",
+     surface_ != nullptr,
+     subsurface_ != nullptr,
+     parent_surface_ != nullptr,
+@@ -353,8 +353,7 @@ void ViewTarget::setupWaylandSubsurface() {
+     static_cast<void*>(surface_),
+     static_cast<void*>(parent_surface_),
+     static_cast<void*>(display_),
+-    siblingStackProbe,
+-    static_cast<void*>(siblingStackProbe ? surface_ : parent_surface_)
++    skipStackProbe
+   );
+ }
+ 
+-- 
+2.34.1
+

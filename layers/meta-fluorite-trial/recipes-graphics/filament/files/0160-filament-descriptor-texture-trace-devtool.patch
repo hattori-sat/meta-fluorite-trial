@@ -1,0 +1,54 @@
+From e6518ee72891e045302fdc6383d970934c528942 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 08:02:18 +0000
+Subject: [PATCH] diag: trace descriptor texture updates
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index b1e72a430..36ea6c14b 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -480,10 +480,18 @@ void VulkanDriver::updateDescriptorSetTexture(
+         backend::TextureHandle th,
+         SamplerParams params) {
+     FVK_SYSTRACE_SCOPE();
++    const bool traceDescriptor = std::getenv("FLR0026_DESCRIPTOR_TRACE") != nullptr;
++    if (traceDescriptor) {
++        std::fprintf(stderr, "FLR0026_DESCRIPTOR_TEXTURE_BEGIN binding=%u\n",
++                static_cast<unsigned>(binding));
++    }
+     auto set = resource_ptr<VulkanDescriptorSet>::cast(&mResourceManager, dsh);
+     auto texture = resource_ptr<VulkanTexture>::cast(&mResourceManager, th);
+ 
+     if (UTILS_UNLIKELY(mExternalImageManager.isExternallySampledTexture(texture))) {
++        if (traceDescriptor) {
++            std::fprintf(stderr, "FLR0026_DESCRIPTOR_TEXTURE_EXTERNAL\n");
++        }
+         mExternalImageManager.bindExternallySampledTexture(set, binding, texture, params);
+         mAppState.hasBoundExternalImages = true;
+     } else {
+@@ -491,9 +499,18 @@ void VulkanDriver::updateDescriptorSetTexture(
+             .sampler = params,
+         };
+         VkSampler const vksampler = mSamplerCache.getSampler(cacheParams);
++        if (traceDescriptor) {
++            std::fprintf(stderr, "FLR0026_DESCRIPTOR_TEXTURE_SAMPLER_READY\n");
++        }
+         mDescriptorSetCache.updateSampler(set, binding, texture, vksampler);
++        if (traceDescriptor) {
++            std::fprintf(stderr, "FLR0026_DESCRIPTOR_TEXTURE_UPDATED\n");
++        }
+         mExternalImageManager.clearTextureBinding(set, binding);
+     }
++    if (traceDescriptor) {
++        std::fprintf(stderr, "FLR0026_DESCRIPTOR_TEXTURE_DONE\n");
++    }
+ }
+ 
+ void VulkanDriver::copyToMemoryMappedBuffer(MemoryMappedBufferHandle mmbh, size_t offset,
+-- 
+2.34.1
+

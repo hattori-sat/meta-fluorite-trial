@@ -1,0 +1,22 @@
+From 81aaf717705b4b236fb1aa32b4e73088ba674ae9 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 30 Aug 2026 17:59:03 +0000
+Subject: [PATCH] diag: make Filament child surface opaque
+
+---
+ plugins/filament_view/core/systems/derived/filament_system.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/filament_system.cc b/plugins/filament_view/core/systems/derived/filament_system.cc
+index 220fa03..3aced29 100644
+--- a/plugins/filament_view/core/systems/derived/filament_system.cc
++++ b/plugins/filament_view/core/systems/derived/filament_system.cc
+@@ -49,6 +49,8 @@ void FilamentSystem::onSystemInit() {
+   auto clearOptions = frenderer_->getClearOptions();
+   clearOptions.clear = true;
+   clearOptions.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
++  // FLR-0026 diagnostic: make the native child surface unmistakable.
++  clearOptions.clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+   frenderer_->setClearOptions(clearOptions);
+ }
+ 

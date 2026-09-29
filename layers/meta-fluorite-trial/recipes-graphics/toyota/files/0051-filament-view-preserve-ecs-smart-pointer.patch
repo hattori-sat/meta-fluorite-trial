@@ -1,0 +1,22 @@
+From 9b87d444ee9844829587b1026bc0c278e07c44ce Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite@example.invalid>
+Date: Sun, 30 Aug 2026 17:03:44 +0000
+Subject: [PATCH] fix: preserve ecs smart pointer for async indirect light
+
+---
+ .../filament_view/core/systems/derived/indirect_light_system.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/indirect_light_system.cc b/plugins/filament_view/core/systems/derived/indirect_light_system.cc
+index a67fa44..a1840ad 100644
+--- a/plugins/filament_view/core/systems/derived/indirect_light_system.cc
++++ b/plugins/filament_view/core/systems/derived/indirect_light_system.cc
+@@ -58,7 +58,7 @@ std::future<Resource<std::string_view>> IndirectLightSystem::setIndirectLight(
+   const auto radiance = indirectLight->radiance_;
+   const auto irradiance = indirectLight->irradiance_;
+   const auto rotation = indirectLight->rotation_;
+-  const auto* ecs_ptr = ecs;
++  const auto ecs_ptr = ecs;
+   const asio::io_context::strand& strand_(*ecs->getStrand());
+ 
+   post(strand_, [

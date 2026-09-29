@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 10 Aug 2026 20:00:00 +0900
+Subject: [PATCH] filament_view: register default light before its component
+
+The default-light path creates an ECS component immediately after creating
+its owning entity.  ECSManager requires the entity to be registered first;
+otherwise an empty scene aborts with checkHasEntity during startup.
+
+---
+ .../core/systems/derived/light_system.cc              | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/light_system.cc b/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/light_system.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -42,0 +43 @@ void LightSystem::vCreateDefaultLight() {
++  ecs->addEntity(m_poDefaultLight);
+@@ -55 +55,0 @@ void LightSystem::vCreateDefaultLight() {
+-  ecs->addEntity(m_poDefaultLight);
+--
+2.34.1

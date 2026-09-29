@@ -1,0 +1,22 @@
+From ef1351d44a3c5bf35ac91d306a81fec6174b346d Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 05:11:02 +0000
+Subject: [PATCH] diag: test opaque Filament swapchain
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 8a4e3a5..80af172 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -181,7 +181,7 @@ void ViewTarget::InitializeFilamentInternals(const uint32_t width, const uint32_
+   );
+ 
+   _engine = filamentSystem->getFilamentEngine();
+-  fswapChain_ = _engine->createSwapChain(&native_window_, filament::SwapChain::CONFIG_TRANSPARENT);
++  fswapChain_ = _engine->createSwapChain(&native_window_);
+   fview_ = _engine->createView();
+ 
+   setupView(width, height);

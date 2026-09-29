@@ -1,0 +1,24 @@
+From 5c247d18e76718c04247a39a1ec495038cd94e49 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 13:14:49 +0000
+Subject: [PATCH] FLR-0238: isolate marker-only parent setState
+
+---
+ packages/filament_scene/example/lib/main.dart | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 8b07bcb..744fb15 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -252,8 +252,8 @@ class _MyAppState extends State<MyApp> {
+                   // FLR-0235: keep the tap boundary without Material hover
+                   // state painting over the native 3D surface.
+                   onTap: () {
+-                    print('FLR0236_SCENE_ACTIVATION id=3 name=Planetarium');
+-                    setState(() => _setScene(3));
++                    print('FLR0238_SCENE_TAP_MARKER_ONLY id=3 name=Planetarium');
++                    setState(() {});
+                   },
+                   child: Container(
+                     width: 99,

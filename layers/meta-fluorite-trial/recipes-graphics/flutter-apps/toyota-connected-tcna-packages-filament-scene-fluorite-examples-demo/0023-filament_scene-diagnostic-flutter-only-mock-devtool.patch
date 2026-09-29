@@ -1,0 +1,34 @@
+From 762b37d8057de3dbd12fd17f9e534c6364f0e2dd Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 13:17:22 +0000
+Subject: [PATCH] diag: detach native SceneView for Flutter mock
+
+---
+ packages/filament_scene/example/lib/main.dart | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 7f2070e..a178f08 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -208,7 +208,10 @@ class _MyAppState extends State<MyApp> {
+         body: Stack(
+           fit: StackFit.expand,
+           children: [
+-            _filamentViewWidget,
++            // Native SceneView is intentionally detached for the Flutter-only
++            // mock run; this distinguishes child-surface occlusion from
++            // Flutter widget painting.
++            if (!kFlr0026DiagnosticMock3d) _filamentViewWidget,
+ 
+             if (_sceneView != null) _sceneView!,
+ 
+@@ -330,7 +333,7 @@ class Flr0026DiagnosticMock3d extends StatelessWidget {
+           child: const Padding(
+             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+             child: Text(
+-              'FLR-0026 MOCK 3D',
++              'FLR-0026 MOCK 3D (Flutter only)',
+               style: TextStyle(
+                 color: Color(0xffe0f2fe),
+                 fontSize: 12,

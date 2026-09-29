@@ -1,0 +1,21 @@
+From 41a56cd65ebdc165f3d0ea7a554bdf3bdad1f3f4 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 02:43:22 +0000
+Subject: [PATCH] test: offset minimal 3d fixture camera
+
+---
+ .../filament_scene/example/lib/shape_and_object_creators.dart    | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 9660b89..3163471 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -54,6 +54,7 @@ List<Camera> poGetMinimal3dFixtureCameras() {
+       name: 'flr0023_fixture_camera',
+       orbitOriginPoint: Vector3.zero(),
+       orbitDistance: 5,
++      dollyOffset: Vector3(5, 0, 0),
+       targetPoint: Vector3.zero(),
+     ),
+   ];

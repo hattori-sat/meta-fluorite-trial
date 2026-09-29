@@ -1,0 +1,37 @@
+From 858e57536f62804259a2b3fac5a1e372ddcdfc45 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 13:52:51 +0000
+Subject: [PATCH] diag: make Flutter mock surface self contained
+
+---
+ packages/filament_scene/example/lib/main.dart | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index a178f08..794cb7c 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -112,6 +112,12 @@ class _MyAppState extends State<MyApp> {
+   void initState() {
+     super.initState();
+ 
++    if (kFlr0026DiagnosticMock3d) {
++      // Keep this run independent from native readiness so the Flutter-only
++      // surface can prove that it paints and commits on its own.
++      return;
++    }
++
+     _filamentViewWidget = poGetFilamentScene();
+ 
+     unawaited(
+@@ -204,7 +210,9 @@ class _MyAppState extends State<MyApp> {
+   Widget build(BuildContext context) {
+     return MaterialApp(
+       home: Scaffold(
+-        backgroundColor: Colors.black.withAlpha(0),
++        backgroundColor: kFlr0026DiagnosticMock3d
++            ? const Color(0xff0b1020)
++            : Colors.black.withAlpha(0),
+         body: Stack(
+           fit: StackFit.expand,
+           children: [

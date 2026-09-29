@@ -1,0 +1,47 @@
+From 608c1c42071caca8c32bb5f0148ebfc73e1e2459 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 15:40:48 +0000
+Subject: [PATCH] diag: trace Vulkan readback payload at driver completion
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 5d65a4e46..46104a95c 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -74,6 +74,18 @@ uint32_t fluoriteTraceChecksum(const void* data, size_t size) noexcept {
+     return hash;
+ }
+ 
++size_t fluoriteTraceNonzeroBytes(const void* data, size_t size) noexcept {
++    if (data == nullptr || size == 0) {
++        return 0;
++    }
++    auto const* bytes = static_cast<uint8_t const*>(data);
++    size_t nonzero = 0;
++    for (size_t i = 0; i < size; i++) {
++        nonzero += bytes[i] != 0;
++    }
++    return nonzero;
++}
++
+ VmaAllocator createAllocator(VkInstance instance, VkPhysicalDevice physicalDevice,
+         VkDevice device) {
+     VmaAllocator allocator;
+@@ -2046,6 +2058,14 @@ void VulkanDriver::readPixels(Handle<HwRenderTarget> src, uint32_t x, uint32_t y
+                 return context.selectMemoryType(types, reqs);
+             },
+             [this](PixelBufferDescriptor&& pbd) {
++                if (std::getenv("FLUORITE_NATIVE_SWAPCHAIN_READBACK") != nullptr) {
++                    FVK_LOGI << "FLUORITE_NATIVE_SWAPCHAIN_READBACK_DRIVER_RESULT bytes="
++                             << pbd.size
++                             << " nonzero_bytes="
++                             << fluoriteTraceNonzeroBytes(pbd.buffer, pbd.size)
++                             << " checksum="
++                             << fluoriteTraceChecksum(pbd.buffer, pbd.size);
++                }
+                 scheduleDestroy(std::move(pbd));
+             });
+     FVK_LOGI << "FLR0026_VK_READBACK_DRIVER_EXIT";

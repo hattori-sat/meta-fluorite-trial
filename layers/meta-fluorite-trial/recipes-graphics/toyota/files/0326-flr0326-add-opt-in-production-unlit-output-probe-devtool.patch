@@ -1,0 +1,107 @@
+From f35c5dc0e70a09247767e3a8a8465e49d5a7ca35 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 11:00:25 +0000
+Subject: [PATCH] FLR-0326: add opt-in production unlit output probe
+
+---
+ .../core/systems/derived/model_system.cc      | 58 +++++++++++++++++++
+ .../core/systems/derived/model_system.h       |  3 +
+ 2 files changed, 61 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 3e50257..6203ced 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -30,6 +30,7 @@
+ #include <filament/Scene.h>
+ #include <filament/Material.h>
+ #include <filament/MaterialInstance.h>
++#include <filamat/MaterialBuilder.h>
+ #include <filament/math/vec3.h>
+ #include <filament/math/vec4.h>
+ #include <filament/gltfio/ResourceLoader.h>
+@@ -566,6 +567,55 @@ void ModelSystem::setupRenderable(
+           boundMaterialInstance == nullptr ? "<null>" : boundMaterialInstance->getName()
+         );
+       }
++      if (
++        !production_unlit_override_applied_ &&
++        std::getenv("FLR0326_PRODUCTION_UNLIT_OVERRIDE") != nullptr &&
++        primitive == 0 &&
++        model->getAssetPath().find("sequoia_ngp.glb") != std::string::npos &&
++        std::string_view{materialInstance->getName()} == "PaintColor"
++      ) {
++        filamat::MaterialBuilder::init();
++        filamat::MaterialBuilder materialBuilder;
++        materialBuilder
++          .name("fluorite_flr0326_production_unlit_probe")
++          .material(
++            "void material(inout MaterialInputs material) {"
++            "  prepareMaterial(material);"
++            "  material.baseColor = vec4(1.0, 0.0, 1.0, 1.0);"
++            "}"
++          )
++          .shading(filamat::MaterialBuilder::Shading::UNLIT)
++          .targetApi(filamat::MaterialBuilder::TargetApi::ALL)
++          .platform(filamat::MaterialBuilder::Platform::ALL);
++        const auto package = materialBuilder.build(_engine->getJobSystem());
++        if (package.getSize() != 0) {
++          production_unlit_diagnostic_material_ = filament::Material::Builder()
++            .package(package.getData(), package.getSize())
++            .build(*_engine);
++          if (production_unlit_diagnostic_material_ != nullptr) {
++            production_unlit_diagnostic_material_instance_ =
++              production_unlit_diagnostic_material_->createInstance();
++          }
++        }
++        if (production_unlit_diagnostic_material_instance_ != nullptr) {
++          _rcm->setMaterialInstanceAt(
++            ri, primitive, production_unlit_diagnostic_material_instance_
++          );
++          production_unlit_override_applied_ = true;
++          spdlog::info(
++            "FLR0326_PRODUCTION_UNLIT_OVERRIDE_DONE entity={} primitive={} "
++            "source_material={} replacement_material={} color=(1,0,1,1)",
++            fEntity.getId(), primitive, materialInstance->getName(),
++            production_unlit_diagnostic_material_->getName()
++          );
++        } else {
++          spdlog::warn(
++            "FLR0326_PRODUCTION_UNLIT_OVERRIDE_SKIPPED entity={} primitive={} "
++            "reason=material_build_failed package_size={}",
++            fEntity.getId(), primitive, package.getSize()
++          );
++        }
++      }
+       std::array<filament::Material::ParameterInfo, 16> parameters{};
+       const auto parameterCount = material->getParameters(parameters.data(), parameters.size());
+       for (size_t parameter = 0; parameter < parameterCount; ++parameter) {
+@@ -1037,6 +1087,14 @@ void ModelSystem::update(double /*deltaTime*/) {
+ ////////////////////////////////////////////////////////////////////////////////////
+ void ModelSystem::onDestroy() {
+   destroyAllAssetsOnModels();
++  if (production_unlit_diagnostic_material_instance_ != nullptr) {
++    _engine->destroy(production_unlit_diagnostic_material_instance_);
++    production_unlit_diagnostic_material_instance_ = nullptr;
++  }
++  if (production_unlit_diagnostic_material_ != nullptr) {
++    _engine->destroy(production_unlit_diagnostic_material_);
++    production_unlit_diagnostic_material_ = nullptr;
++  }
+   delete resourceLoader_;
+   resourceLoader_ = nullptr;
+ 
+diff --git a/plugins/filament_view/core/systems/derived/model_system.h b/plugins/filament_view/core/systems/derived/model_system.h
+index 0cbac8c..ac7ad13 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.h
++++ b/plugins/filament_view/core/systems/derived/model_system.h
+@@ -111,6 +111,9 @@ class ModelSystem : public System {
+     bool diagnostic_scene_models_added_{false};
+     bool production_emissive_override_applied_{false};
+     bool production_base_color_override_applied_{false};
++    filament::Material* production_unlit_diagnostic_material_{};
++    filament::MaterialInstance* production_unlit_diagnostic_material_instance_{};
++    bool production_unlit_override_applied_{false};
+ 
+     /// Creates renderables and adds them to the scene
+     /// Expects the model to have been loaded first

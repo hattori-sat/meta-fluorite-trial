@@ -1,0 +1,26 @@
+From cc28d2ae9b2eee418aa2ad2dfc96fa3a536fd3c7 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 10:11:18 +0000
+Subject: [PATCH] FLR-0234: keep Scenes hover overlay transparent
+
+---
+ packages/filament_scene/example/lib/main.dart | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index e410a69..341c506 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -246,6 +246,12 @@ class _MyAppState extends State<MyApp> {
+               top: 24,
+               right: 24,
+               child: FilledButton(
++                // FLR-0234: keep pointer delivery and button activation, but
++                // do not paint an opaque hover overlay over the 2D/3D view.
++                style: ButtonStyle(
++                  overlayColor:
++                      WidgetStateProperty.all<Color?>(Colors.transparent),
++                ),
+                 onPressed: () {},
+                 child: const Text('Scenes'),
+               ),

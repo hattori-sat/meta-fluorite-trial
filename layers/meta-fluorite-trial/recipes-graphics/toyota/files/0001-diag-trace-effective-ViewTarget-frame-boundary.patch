@@ -1,0 +1,58 @@
+From 96e91a5e2591651568b9c9f807245c6e9eca0215 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 03:04:55 +0000
+Subject: [PATCH] diag: trace current ViewTarget frame boundary
+
+---
+ .../filament_view/core/scene/view_target.cc   | 23 +++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index e266a9b..8e74b00 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -692,6 +692,17 @@ const wl_callback_listener ViewTarget::frame_listener = {.done = OnFrame};
+  * rendered
+  */
+ void ViewTarget::DrawFrame(const uint32_t time) {
++  const bool traceFrameBoundary = std::getenv("FLUORITE_VIEWTARGET_FRAME_TRACE") != nullptr;
++  if (traceFrameBoundary) {
++    spdlog::info(
++      "FLUORITE_VIEWTARGET_DRAW_FRAME_BEGIN time={} swapchain={} view={} scene={}",
++      time,
++      fswapChain_ != nullptr,
++      fview_ != nullptr,
++      fview_ != nullptr && fview_->getScene() != nullptr
++    );
++  }
++
+   if (m_LastTime == 0) {
+     m_LastTime = time;
+   }
+@@ -759,14 +770,26 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // spdlog::debug("=== BEGIN FRAME ===");
+   if (renderer->beginFrame(
+         fswapChain_, std::chrono::steady_clock::now().time_since_epoch().count())) {
++    if (traceFrameBoundary) {
++      spdlog::info("FLUORITE_VIEWTARGET_BEGIN_FRAME_TRUE");
++    }
+     // Frame is being rendered
+     // TODO(kerberjg): send kPreRenderFrame event, async with wait
+     // spdlog::debug("=== RENDER FRAME ===");
+     renderer->render(fview_);
++    if (traceFrameBoundary) {
++      spdlog::info("FLUORITE_VIEWTARGET_RENDER_RETURN");
++    }
+     // spdlog::debug("=== END FRAME ===");
+     renderer->endFrame();
++    if (traceFrameBoundary) {
++      spdlog::info("FLUORITE_VIEWTARGET_END_FRAME");
++    }
+     // TODO(kerberjg): send kPostRenderFrame event, async with wait
+   } else {
++    if (traceFrameBoundary) {
++      spdlog::info("FLUORITE_VIEWTARGET_BEGIN_FRAME_FALSE");
++    }
+     // beginFrame failed, the renderer couldn't render this frame
+     // spdlog::error("[{}] BEGINFRAME FAILED!", __FUNCTION__);
+   }

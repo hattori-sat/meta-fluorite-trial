@@ -1,0 +1,66 @@
+From 14186713cbf434eca907c13d4da153ee17819b6f Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 21:54:56 +0000
+Subject: [PATCH] fix: defer async model source release
+
+---
+ .../core/systems/derived/model_system.cc      | 21 ++++++++++++-------
+ 1 file changed, 13 insertions(+), 8 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index fd63e23..8996836 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -442,6 +442,10 @@ void ModelSystem::updateAsyncAssetLoading() {
+     }
+ 
+     if (assetData.state == AssetLoadingState::loaded) {
++      // Source data is needed by ResourceLoader until asyncUpdateLoad() has
++      // reached 100%. Keep it alive through scene insertion, then preserve
++      // the previous memory-saving behavior for non-instanced assets.
++      bool releaseSourceData = !assetData.loadingInstances.empty();
+       if (trace) {
+         spdlog::info(
+           "FLR0026_MODEL_STAGE_COMPLETE asset={} pending_models={}", assetPath,
+@@ -453,10 +457,15 @@ void ModelSystem::updateAsyncAssetLoading() {
+         // get the model
+         std::shared_ptr<Model> model = _models[modelGuid];
+         if (model == nullptr) {
++          releaseSourceData = false;
+           spdlog::error("[{}] Model {} not found", __FUNCTION__, modelGuid);
+           continue;
+         }
+ 
++        if (model->getInstancingMode() != ModelInstancingMode::none) {
++          releaseSourceData = false;
++        }
++
+         if (model->isInScene()) {
+           spdlog::warn("Model {} is already in scene, skipping load", model->name);
+           continue;
+@@ -514,6 +523,10 @@ void ModelSystem::updateAsyncAssetLoading() {
+         }
+       }
+ 
++      if (releaseSourceData && assetData.asset != nullptr) {
++        assetData.asset->releaseSourceData();
++      }
++
+       // clear the loading instances
+       assetData.loadingInstances.clear();
+     }
+@@ -634,14 +647,6 @@ void ModelSystem::loadModelFromFile(EntityGUID modelGuid, const std::string& bas
+         model->setAsset(asset);
+         _assets[assetPath].asset = asset;  // important! if not set, secondaries cannot be created
+ 
+-        // release source data
+-        if (model->getInstancingMode() == ModelInstancingMode::none) {
+-          spdlog::trace("[loadModelFromFile] Non-secondary loaded: releasing source "
+-                        "data");
+-          asset->releaseSourceData();  // TODO: do we also call this for
+-                                       // primaries after instancing?
+-        }
+-
+         assetInstance = asset->getInstance();
+         runtime_assert(
+           assetInstance != nullptr, "[loadModelFromFile] Failed to fetch primary asset instance"

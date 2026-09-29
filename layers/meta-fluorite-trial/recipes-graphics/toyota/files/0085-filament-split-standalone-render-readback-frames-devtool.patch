@@ -1,0 +1,54 @@
+From 1f02a4db22dfc7ec646d6bfead829c8b2266f7c0 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 15:52:11 +0000
+Subject: [PATCH] fix: split standalone render and readback frames
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 10 ++++++++--
+ plugins/filament_view/core/scene/view_target.h  |  1 +
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 1eef30b..79533d7 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -949,9 +949,9 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     // TODO(kerberjg): send kPreRenderFrame event, async with wait
+     // spdlog::debug("=== RENDER FRAME ===");
+     renderer->render(fview_);
+-    if (native_readback_probe_enabled_ && native_readback_view_ && native_readback_target_ &&
+-        !native_readback_probe_queued_) {
++    if (native_readback_probe_pending_ && native_readback_target_) {
+       native_readback_probe_queued_ = true;
++      native_readback_probe_pending_ = false;
+       constexpr uint32_t readbackWidth = 240;
+       constexpr uint32_t readbackHeight = 160;
+       const size_t readbackSize = static_cast<size_t>(readbackWidth) *
+@@ -987,6 +987,12 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     }
+     // spdlog::debug("=== END FRAME ===");
+     renderer->endFrame();
++    if (native_readback_probe_enabled_ && native_readback_view_ && native_readback_target_ &&
++        !native_readback_probe_queued_ && !native_readback_probe_pending_) {
++      renderer->renderStandaloneView(native_readback_view_);
++      native_readback_probe_pending_ = true;
++      spdlog::info("FLR0026_NATIVE_READBACK_STANDALONE_RENDERED");
++    }
+     if (shouldLogFrame) {
+       spdlog::info("FLR0026_FRAME_END seq={}", frameSequence);
+     }
+diff --git a/plugins/filament_view/core/scene/view_target.h b/plugins/filament_view/core/scene/view_target.h
+index a28bf11..a863e2a 100644
+--- a/plugins/filament_view/core/scene/view_target.h
++++ b/plugins/filament_view/core/scene/view_target.h
+@@ -176,6 +176,7 @@ class ViewTarget {
+     bool shm_probe_attached_{};
+     std::atomic<bool> shm_probe_content_ready_{false};
+     bool native_readback_probe_enabled_{};
++    bool native_readback_probe_pending_{};
+     bool native_readback_probe_queued_{};
+ 
+     struct _native_window {
+-- 
+2.34.1
+

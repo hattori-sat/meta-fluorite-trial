@@ -1,0 +1,37 @@
+From 8faa07145d7f315244f5c3661f93151f1f7af63e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 09:48:30 +0000
+Subject: [PATCH] FLR-0325: trace post-override material output
+
+---
+ .../core/systems/derived/model_system.cc        | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 2fd1d89..3e50257 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -549,6 +549,23 @@ void ModelSystem::setupRenderable(
+           model->getAssetPath()
+         );
+       }
++      if (
++        std::getenv("FLR0325_POST_OVERRIDE_TRACE") != nullptr &&
++        material->hasParameter("baseColorFactor")
++      ) {
++        const auto value = materialInstance->getParameter<filament::math::float4>(
++          "baseColorFactor"
++        );
++        const auto* boundMaterialInstance = _rcm->getMaterialInstanceAt(ri, primitive);
++        spdlog::info(
++          "FLR0325_POST_OVERRIDE entity={} primitive={} same_instance={} "
++          "value=({},{},{},{}) bound_material={} bound_instance={}",
++          fEntity.getId(), primitive, boundMaterialInstance == materialInstance,
++          value.x, value.y, value.z, value.w,
++          boundMaterialInstance == nullptr ? "<null>" : boundMaterialInstance->getMaterial()->getName(),
++          boundMaterialInstance == nullptr ? "<null>" : boundMaterialInstance->getName()
++        );
++      }
+       std::array<filament::Material::ParameterInfo, 16> parameters{};
+       const auto parameterCount = material->getParameters(parameters.data(), parameters.size());
+       for (size_t parameter = 0; parameter < parameterCount; ++parameter) {

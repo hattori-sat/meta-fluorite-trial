@@ -1,0 +1,22 @@
+From 9de434cc5f9a1a83afdeafb4e7ea73d2a0066e71 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 08:49:48 +0900
+Subject: [PATCH] diag: use Vulkan image accessor
+
+---
+ filament/backend/src/vulkan/VulkanSwapChain.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index d47e49cef..bd17946f5 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -114,7 +114,7 @@ fvkmemory::resource_ptr<VulkanTexture> VulkanSwapChain::getCurrentColor() const
+     auto const color = mColors[imageIndex];
+     if (std::getenv("FLUORITE_SWAPCHAIN_TRACE") != nullptr) {
+         std::fprintf(stderr, "FLUORITE_SWAPCHAIN_CURRENT_COLOR index=%u image=%p\n",
+-                imageIndex, static_cast<void*>(color->getImage()));
++                imageIndex, static_cast<void*>(color->getVkImage()));
+     }
+     return color;
+ }

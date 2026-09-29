@@ -1,0 +1,23 @@
+From 1fd22efd9acd0b80c7bd2c670cf17e25fd796b8a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 19 Sep 2026 20:54:56 +0000
+Subject: [PATCH] diag: disable Vulkan swapchain clipping for Wayland probe
+
+---
+ .../src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp        | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index b3e1fe47e..cba5a3a0e 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -278,7 +278,8 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
+ 
+             .compositeAlpha = compositeAlpha,
+             .presentMode = desiredPresentMode,
+-            .clipped = VK_TRUE,
++            // Keep pixels defined even when the native Wayland surface is a subsurface.
++            .clipped = VK_FALSE,
+ 
+             .oldSwapchain = mSwapchain,
+     };

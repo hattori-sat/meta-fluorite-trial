@@ -1,0 +1,50 @@
+From d551a73c47d9f9fb2013ee8640c6df6155eb4acc Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 22:27:54 +0000
+Subject: [PATCH] FLR-0306: trace production material output
+
+---
+ .../core/systems/derived/model_system.cc      | 20 +++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 02456d9..f171039 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -17,6 +17,7 @@
+ #include "collision_system.h"
+ 
+ #include <algorithm>  // for max
++#include <array>
+ #include <asio/post.hpp>
+ #include <cassert>
+ #include <core/components/derived/collider.h>
+@@ -489,11 +490,26 @@ void ModelSystem::setupRenderable(
+       const auto* material = materialInstance->getMaterial();
+       spdlog::info(
+         "FLR0280_MODEL_MATERIAL entity={} primitive={} present=true instance={} material={} "
+-        "shading={} blending={} color_write={} depth_write={} double_sided={}",
++        "shading={} blending={} transparency={} color_write={} depth_write={} double_sided={} "
++        "alpha_to_coverage={} mask_threshold={} parameter_count={}",
+         fEntity.getId(), primitive, materialInstance->getName(), material->getName(),
+         static_cast<int>(material->getShading()), static_cast<int>(material->getBlendingMode()),
+-        material->isColorWriteEnabled(), material->isDepthWriteEnabled(), material->isDoubleSided()
++        static_cast<int>(material->getTransparencyMode()), material->isColorWriteEnabled(),
++        material->isDepthWriteEnabled(), material->isDoubleSided(),
++        material->isAlphaToCoverageEnabled(), material->getMaskThreshold(),
++        material->getParameterCount()
+       );
++      std::array<filament::Material::ParameterInfo, 16> parameters{};
++      const auto parameterCount = material->getParameters(parameters.data(), parameters.size());
++      for (size_t parameter = 0; parameter < parameterCount; ++parameter) {
++        const auto& info = parameters[parameter];
++        spdlog::info(
++          "FLR0306_MODEL_PARAMETER entity={} primitive={} index={} name={} sampler={} "
++          "subpass={} count={}",
++          fEntity.getId(), primitive, parameter, info.name, info.isSampler, info.isSubpass,
++          info.count
++        );
++      }
+     }
+   }
+ 

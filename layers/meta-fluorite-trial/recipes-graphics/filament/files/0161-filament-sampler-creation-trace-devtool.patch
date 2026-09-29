@@ -1,0 +1,54 @@
+From cc789a0f690e5cd1b4ff81ee02eb3e696af48fcc Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 08:20:33 +0000
+Subject: [PATCH] diag: trace Vulkan sampler creation
+
+---
+ .../backend/src/vulkan/VulkanSamplerCache.cpp | 22 +++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanSamplerCache.cpp b/filament/backend/src/vulkan/VulkanSamplerCache.cpp
+index 8fde2e608..8a3f94327 100644
+--- a/filament/backend/src/vulkan/VulkanSamplerCache.cpp
++++ b/filament/backend/src/vulkan/VulkanSamplerCache.cpp
+@@ -21,6 +21,9 @@
+ 
+ #include <utils/Panic.h>
+ 
++#include <cstdio>
++#include <cstdlib>
++
+ using namespace bluevk;
+ 
+ namespace filament::backend {
+@@ -57,8 +60,27 @@ VkSampler VulkanSamplerCache::getSampler(Params params) {
+         .borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+         .unnormalizedCoordinates = VK_FALSE,
+     };
++    const bool traceSampler = std::getenv("FLR0026_SAMPLER_TRACE") != nullptr;
++    if (traceSampler) {
++        std::fprintf(stderr,
++                "FLR0026_SAMPLER_CREATE_BEGIN mag=%d min=%d mip=%d wrap=%d,%d,%d "
++                "aniso=%u max_aniso=%g compare=%d\n",
++                static_cast<int>(samplerInfo.magFilter),
++                static_cast<int>(samplerInfo.minFilter),
++                static_cast<int>(samplerInfo.mipmapMode),
++                static_cast<int>(samplerInfo.addressModeU),
++                static_cast<int>(samplerInfo.addressModeV),
++                static_cast<int>(samplerInfo.addressModeW),
++                static_cast<unsigned>(samplerParams.anisotropyLog2),
++                static_cast<double>(samplerInfo.maxAnisotropy),
++                static_cast<int>(samplerInfo.compareEnable));
++    }
+     VkSampler sampler;
+     VkResult result = vkCreateSampler(mDevice, &samplerInfo, VKALLOC, &sampler);
++    if (traceSampler) {
++        std::fprintf(stderr, "FLR0026_SAMPLER_CREATE_DONE result=%d\n",
++                static_cast<int32_t>(result));
++    }
+     FILAMENT_CHECK_POSTCONDITION(result == VK_SUCCESS) << "Unable to create sampler."
+                                                        << " error=" << static_cast<int32_t>(result);
+     mCache.insert({ params, sampler });
+-- 
+2.34.1
+

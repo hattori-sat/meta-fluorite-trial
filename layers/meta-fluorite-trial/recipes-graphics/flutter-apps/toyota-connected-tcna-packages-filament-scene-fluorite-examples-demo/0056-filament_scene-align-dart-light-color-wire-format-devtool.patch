@@ -1,0 +1,22 @@
+From 8ed3a4598039a617a176e2b6e1f7d5996e0c758a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 07:17:16 +0000
+Subject: [PATCH] fix: align Dart Light color wire format
+
+---
+ packages/filament_scene/lib/scene/light/light.dart | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/lib/scene/light/light.dart b/packages/filament_scene/lib/scene/light/light.dart
+index b952e41..e30ab8a 100644
+--- a/packages/filament_scene/lib/scene/light/light.dart
++++ b/packages/filament_scene/lib/scene/light/light.dart
+@@ -201,7 +201,7 @@ class Light extends Entity {
+   JsonObject toJson() => <String, dynamic>{
+     ...super.toJson(),
+     'type': type.value,
+-    'color': color?.storage64,
++    'color': color?.toHex(),
+     'colorTemperature': colorTemperature,
+     'intensity': intensity,
+     'position': position?.toJson(),

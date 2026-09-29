@@ -1,0 +1,41 @@
+From b61ce701b46b2b1e29675a9b44088d145363ecad Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 09:16:28 +0000
+Subject: [PATCH] FLR-0285: reapply fixture camera after ECS update
+
+---
+ .../filament_view/core/scene/view_target.cc   | 21 +++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 39beefd..4e193ab 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1387,6 +1387,27 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   )
+                           .count();
+ 
++  const bool pureFixtureCamera =
++    std::getenv("FLUORITE_NATIVE_PURE_FIXTURE") != nullptr &&
++    std::getenv("FLUORITE_NATIVE_FIXTURE_LOCAL_CAMERA") != nullptr &&
++    std::getenv("FLUORITE_NATIVE_MINIMAL_GEOMETRY") != nullptr;
++  if (pureFixtureCamera) {
++    camera_->setProjection(
++      60.0, calculateAspectRatio(), kDefaultNearPlane, kDefaultFarPlane,
++      filament::Camera::Fov::VERTICAL
++    );
++    camera_->lookAt(
++      filament::math::double3{0.0, 0.0, 5.0},
++      filament::math::double3{0.0, 0.0, 0.0},
++      filament::math::double3{0.0, 1.0, 0.0}
++    );
++    if (traceFrameBoundary) {
++      spdlog::info(
++        "FLUORITE_NATIVE_FIXTURE_CAMERA_FRAME_APPLIED eye=(0,0,5) target=(0,0,0)"
++      );
++    }
++  }
++
+   const char* productionCameraProfile = std::getenv("FLR0285_NATIVE_PRODUCTION_CAMERA");
+   if (productionCameraProfile != nullptr && std::strcmp(productionCameraProfile, "wide") == 0) {
+     camera_->setProjection(

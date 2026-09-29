@@ -1,0 +1,76 @@
+From 7c72a1841acd60a1c79d7c742dd4be1e0b4b7db7 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 19:13:48 +0000
+Subject: [PATCH] diag: trace filament vulkan present path
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp                   | 2 ++
+ filament/backend/src/vulkan/VulkanSwapChain.cpp                | 3 +++
+ .../src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp        | 3 +++
+ 3 files changed, 8 insertions(+)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index aa0e9c84d..2964463c8 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -44,6 +44,7 @@
+ #endif
+ 
+ #include <chrono>
++#include <cstdio>
+ 
+ using namespace bluevk;
+ 
+@@ -1772,6 +1773,7 @@ void VulkanDriver::makeCurrent(Handle<HwSwapChain> drawSch, Handle<HwSwapChain>
+ 
+ void VulkanDriver::commit(Handle<HwSwapChain> sch) {
+     FVK_SYSTRACE_SCOPE();
++    std::fprintf(stderr, "FLR0026_VK_COMMIT\n");
+ 
+     auto swapChain = resource_ptr<VulkanSwapChain>::cast(&mResourceManager, sch);
+ 
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index 3fa4cf6ea..d6e24dff6 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -22,6 +22,8 @@
+ #include <utils/FixedCapacityVector.h>
+ #include <utils/Panic.h>
+ 
++#include <cstdio>
++
+ using namespace bluevk;
+ using namespace utils;
+ 
+@@ -105,6 +107,7 @@ void VulkanSwapChain::update() {
+ }
+ 
+ void VulkanSwapChain::present(DriverBase& driver) {
++    std::fprintf(stderr, "FLR0026_VK_SWAPCHAIN_PRESENT headless=%s\n", mHeadless ? "true" : "false");
+     if (!mHeadless && mTransitionSwapChainImageLayoutForPresent) {
+         VulkanCommandBuffer& commands = mCommands->get();
+         VkImageSubresourceRange const subresources{
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index b79b9bd68..d5b23143b 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -23,6 +23,8 @@
+ 
+ #include <backend/DriverEnums.h>
+ 
++#include <cstdio>
++
+ using namespace bluevk;
+ using namespace utils;
+ 
+@@ -309,6 +311,7 @@ VkResult VulkanPlatformSurfaceSwapChain::present(uint32_t index, VkSemaphore fin
+             .pImageIndices = &currentIndex,
+     };
+     VkResult result = vkQueuePresentKHR(mQueue, &presentInfo);
++    std::fprintf(stderr, "FLR0026_VK_QUEUE_PRESENT result=%d index=%u\n", static_cast<int32_t>(result), currentIndex);
+ 
+     // On Android Q and above, a suboptimal surface is always reported after screen rotation:
+     // https://android-developers.googleblog.com/2020/02/handling-device-orientation-efficiently.html
+-- 
+2.34.1
+

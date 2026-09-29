@@ -1,0 +1,29 @@
+From 3243511bf2b7ccb84054046db9860a1b4fe65181 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 16:20:18 +0000
+Subject: [PATCH] fix: pump native readback callbacks
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index edd1328..1776f65 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1044,6 +1044,12 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // );
+ 
+   m_LastTime = time;
++  if (_engine != nullptr) {
++    _engine->pumpMessageQueues();
++    if (native_readback_probe_enabled_) {
++      spdlog::info("FLR0026_NATIVE_READBACK_MESSAGE_QUEUES_PUMPED");
++    }
++  }
+   attachShmProbe();
+ }
+ 
+-- 
+2.34.1
+

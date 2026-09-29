@@ -1,0 +1,30 @@
+From d0583288f06a31cd776ddc37c4ee5564a0cc9098 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 21 Sep 2026 02:39:29 +0000
+Subject: [PATCH] FLR-0257: trace PlatformView create result delivery
+
+---
+ plugins/generated_plugin_registrant.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/generated_plugin_registrant.cc b/plugins/generated_plugin_registrant.cc
+index b30dad449..43d5f7c9f 100644
+--- a/plugins/generated_plugin_registrant.cc
++++ b/plugins/generated_plugin_registrant.cc
+@@ -182,7 +182,9 @@ void PluginsAoiPlatformViewCreate(
+         registrar, id, viewType, direction, top, left, width, height, params,
+         flutter_asset_directory, engine, addListener, removeListener,
+         platform_view_context);
++    spdlog::info("FLR0257_PLATFORM_VIEW_RESULT_SUCCESS_BEGIN id={}", id);
+     result->Success(flutter::EncodableValue(id));
++    spdlog::info("FLR0257_PLATFORM_VIEW_RESULT_SUCCESS_RETURN id={}", id);
+   } else
+ #endif
+ #if ENABLE_PLUGIN_LAYER_PLAYGROUND_VIEW
+@@ -219,4 +221,4 @@ void PluginsAoiPlatformViewCreate(
+     spdlog::error("Platform View type not registered: {}", viewType);
+     result->NotImplemented();
+   }
+-}
+\ No newline at end of file
++}

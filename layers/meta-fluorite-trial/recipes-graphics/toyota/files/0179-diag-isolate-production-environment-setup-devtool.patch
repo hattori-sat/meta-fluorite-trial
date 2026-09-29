@@ -1,0 +1,36 @@
+From 112b128849889a5dd79207656297576f2fdbfb6c Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 18:18:52 +0000
+Subject: [PATCH] diag: isolate production environment setup
+
+---
+ .../scene/serialization/scene_text_deserializer.cc | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index dc04f9a..0e459b4 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -217,12 +217,18 @@ void SceneTextDeserializer::RunPostSetupLoad() {
+     spdlog::trace("setUpLoadingModels");
+     setUpLoadingModels();
+   }
+-  spdlog::trace("setUpSkybox");
+-  setUpSkybox();
++  if (std::getenv("FLR0026_NATIVE_SKIP_ENVIRONMENT") != nullptr) {
++    spdlog::info("FLR0026_NATIVE_SKIP_ENVIRONMENT enabled=true");
++  } else {
++    spdlog::trace("setUpSkybox");
++    setUpSkybox();
++  }
+   spdlog::trace("setUpLights");
+   setUpLights();
+-  spdlog::trace("setUpIndirectLight");
+-  setUpIndirectLight();
++  if (std::getenv("FLR0026_NATIVE_SKIP_ENVIRONMENT") == nullptr) {
++    spdlog::trace("setUpIndirectLight");
++    setUpIndirectLight();
++  }
+   spdlog::trace("setUpShapes");
+   setUpShapes();
+   spdlog::trace("setUpEntities");

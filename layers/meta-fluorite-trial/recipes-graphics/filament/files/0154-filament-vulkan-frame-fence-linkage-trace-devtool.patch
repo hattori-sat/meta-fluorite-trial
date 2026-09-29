@@ -1,0 +1,90 @@
+From 658804d467e48f1768c96a2639e241bacf0739eb Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 05:29:32 +0000
+Subject: [PATCH] diag: trace frame fence linkage
+
+---
+ .../backend/src/vulkan/VulkanAsyncHandles.h   |  6 +++++
+ filament/backend/src/vulkan/VulkanDriver.cpp  | 23 +++++++++++++++++--
+ 2 files changed, 27 insertions(+), 2 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanAsyncHandles.h b/filament/backend/src/vulkan/VulkanAsyncHandles.h
+index 1ce9cd05e..f26fb556e 100644
+--- a/filament/backend/src/vulkan/VulkanAsyncHandles.h
++++ b/filament/backend/src/vulkan/VulkanAsyncHandles.h
+@@ -27,6 +27,8 @@
+ 
+ #include <chrono>
+ #include <cstdint>
++#include <cstdio>
++#include <cstdlib>
+ #include <memory>
+ #include <mutex>
+ #include <shared_mutex>
+@@ -43,6 +45,10 @@ struct VulkanCmdFence {
+     void setStatus(VkResult const value) {
+         std::lock_guard const l(mLock);
+         mStatus = value;
++        if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++            std::fprintf(stderr, "FLR0026_VK_CMD_FENCE_STATUS fence=%p status=%d\n",
++                    static_cast<void*>(mFence), static_cast<int>(value));
++        }
+         mCond.notify_all();
+     }
+ 
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 3b524b7fa..b1e72a430 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -870,7 +870,13 @@ void VulkanDriver::createFenceR(Handle<HwFence> fh, utils::CString&& tag) {
+     // it with appropriate VulkanCmdFence, which is associated with the current, recording command
+     // buffer.
+     auto fence = resource_ptr<VulkanFence>::cast(&mResourceManager, fh);
+-    fence->setFence(cmdbuf->getFenceStatus());
++    auto cmdFenceStatus = cmdbuf->getFenceStatus();
++    fence->setFence(cmdFenceStatus);
++    if (std::getenv("FLR0026_SYNC_TRACE") != nullptr) {
++        std::fprintf(stderr, "FLR0026_FRAME_FENCE_LINK cmd_buffer=%p vk_fence=%p cmd_status=%p\n",
++                static_cast<void*>(cmdbuf), static_cast<void*>(cmdbuf->getVkFence()),
++                static_cast<void*>(cmdFenceStatus.get()));
++    }
+     mResourceManager.associateHandle(fh.getId(), std::move(tag));
+ }
+ 
+@@ -1177,6 +1183,7 @@ FenceStatus VulkanDriver::getFenceStatus(Handle<HwFence> const fh) {
+ 
+ FenceStatus VulkanDriver::fenceWait(FenceHandle const fh, uint64_t const timeout) {
+     auto fence = resource_ptr<VulkanFence>::cast(&mResourceManager, fh);
++    const bool trace = std::getenv("FLR0026_SYNC_TRACE") != nullptr;
+ 
+     // we have to take into account that the STL's wait_for() actually works with
+     // time_points relative to steady_clock::now() internally.
+@@ -1189,12 +1196,24 @@ FenceStatus VulkanDriver::fenceWait(FenceHandle const fh, uint64_t const timeout
+ 
+     std::shared_ptr const cmdfence = fence->wait(until);
+     if (!cmdfence) {
++        if (trace) {
++            std::fprintf(stderr, "FLR0026_FRAME_FENCE_WAIT_LINKED linked=false\n");
++        }
+         return FenceStatus::TIMEOUT_EXPIRED;
+     }
+ 
+     // now we are holding a reference to our VulkanCmdFence, so we know it can't
+     // disappear while we wait
+-    return cmdfence->wait(mPlatform->getDevice(), timeout, until);
++    if (trace) {
++        std::fprintf(stderr, "FLR0026_FRAME_FENCE_WAIT_LINKED linked=true cmd_status=%p status=%d\n",
++                static_cast<void*>(cmdfence.get()), static_cast<int>(cmdfence->getStatus()));
++    }
++    auto const status = cmdfence->wait(mPlatform->getDevice(), timeout, until);
++    if (trace) {
++        std::fprintf(stderr, "FLR0026_FRAME_FENCE_WAIT_RESULT status=%u\n",
++                static_cast<unsigned int>(status));
++    }
++    return status;
+ }
+ 
+ void VulkanDriver::getPlatformSync(Handle<HwSync> sh, CallbackHandler* handler,
+-- 
+2.34.1
+

@@ -1,0 +1,57 @@
+From b4f0760e9c54c85b9440eb64b918fbc0fecee35e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 20:23:23 +0000
+Subject: [PATCH] FLR-0302: trace production world transforms
+
+---
+ .../core/systems/derived/model_system.cc      | 37 +++++++++++++++++++
+ 1 file changed, 37 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 1bf5b96..ebf0a99 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -318,6 +318,43 @@ void ModelSystem::addModelToScene(EntityGUID modelGuid) {
+   ecs->getSystem<TransformSystem>("ModelSystem::addModelToScene")
+     ->applyTransform(model->getGuid(), true);
+ 
++  if (std::getenv("FLR0302_PRODUCTION_TRANSFORM_TRACE") != nullptr) {
++    const auto logWorldTransform = [&](const char* role, const FilamentEntity entity) {
++      const auto transformInstance = _tm->getInstance(entity);
++      if (!transformInstance.isValid()) {
++        spdlog::info(
++          "FLR0302_PRODUCTION_TRANSFORM role={} entity={} valid=false",
++          role, entity.getId()
++        );
++        return;
++      }
++
++      const auto parentEntity = _tm->getParent(transformInstance);
++      const auto world = _tm->getWorldTransform(transformInstance);
++      spdlog::info(
++        "FLR0302_PRODUCTION_TRANSFORM role={} entity={} valid=true parent={} "
++        "world_translation=({},{},{}) world_scale=({},{},{})",
++        role, entity.getId(), parentEntity.getId(), world[3].x, world[3].y, world[3].z,
++        filament::math::length(world[0].xyz), filament::math::length(world[1].xyz),
++        filament::math::length(world[2].xyz)
++      );
++    };
++
++    logWorldTransform("root", instanceEntity);
++    size_t transformSampleCount = 0;
++    for (const auto entity : renderables) {
++      if (transformSampleCount >= 4) break;
++      const auto renderableInstance = _rcm->getInstance(entity);
++      if (!renderableInstance.isValid()) continue;
++      logWorldTransform("renderable", entity);
++      ++transformSampleCount;
++    }
++    spdlog::info(
++      "FLR0302_PRODUCTION_TRANSFORM_SAMPLE model={} renderable_samples={}",
++      modelGuid, transformSampleCount
++    );
++  }
++
+   // Set up renderable
+   auto renderable = model->getComponent<CommonRenderable>();
+   renderable->_fInstance = _rcm->getInstance(instanceEntity);

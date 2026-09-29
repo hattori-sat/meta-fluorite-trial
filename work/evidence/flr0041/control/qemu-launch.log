@@ -1,0 +1,15 @@
+runqemu - INFO - Continuing with the following parameters:
+KERNEL: [/mnt/yocto/flr0023-tmp-835a04e-selfinstall/deploy/images/qemux86-64/bzImage--6.6.111+git0+50530c858c_2a17dc587a-r0-qemux86-64-20260405092846.bin]
+MACHINE: [qemux86-64]
+FSTYPE: [ext4]
+ROOTFS: [/mnt/yocto/flr0023-tmp-835a04e-selfinstall/deploy/images/qemux86-64/agl-ivi-image-flutter-qemux86-64.rootfs-20260907112505.ext4]
+CONFFILE: [/mnt/yocto/flr0023-tmp-835a04e-selfinstall/deploy/images/qemux86-64/agl-ivi-image-flutter-qemux86-64.rootfs-20260907112505.qemuboot.conf]
+
+runqemu - INFO - Network configuration: ip=dhcp
+runqemu - INFO - Port forward: hostfwd=tcp:127.0.0.1:2222-:22 hostfwd=tcp:127.0.0.1:2323-:23
+runqemu - INFO - Running /mnt/yocto/flr0023-tmp-835a04e-selfinstall/work/x86_64-linux/qemu-helper-native/1.0/recipe-sysroot-native/usr/bin/qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:35:02 -netdev user,id=net0,hostfwd=tcp:127.0.0.1:2222-:22,hostfwd=tcp:127.0.0.1:2323-:23,tftp=/mnt/yocto/flr0023-tmp-835a04e-selfinstall/deploy/images/qemux86-64 -object rng-random,filename=/dev/urandom,id=rng0 -device virtio-rng-pci,rng=rng0 -drive file=/mnt/yocto/flr0023-tmp-835a04e-selfinstall/deploy/images/qemux86-64/agl-ivi-image-flutter-qemux86-64.rootfs-20260907112505.ext4,if=virtio,format=raw -vga vmware -display default,show-cursor=on -usb -device usb-tablet -device virtio-rng-pci -vga virtio  -machine q35 -cpu qemu64,+ssse3,+sse4.1,+sse4.2,+popcnt -smp 4 -m 2048  -display sdl,show-cursor=on -device virtio-vga -snapshot -qmp unix:/mnt/yocto/flourite-qemux86-64/qemu-evidence/flr0041/control/qmp.sock,server,nowait -serial mon:vc -serial null -device virtio-vga  -display sdl,show-cursor=on  -kernel /mnt/yocto/flr0023-tmp-835a04e-selfinstall/deploy/images/qemux86-64/bzImage--6.6.111+git0+50530c858c_2a17dc587a-r0-qemux86-64-20260405092846.bin -append 'root=/dev/vda rw  ip=dhcp oprofile.timer=1 tsc=reliable no_timer_check rcupdate.rcu_expedited=1 console=ttyS0,115200n8 quiet swiotlb=0 '
+
+runqemu - INFO - Host uptime: 695253.37
+
+runqemu - INFO - Received signal: 15
+runqemu - INFO - Cleaning up

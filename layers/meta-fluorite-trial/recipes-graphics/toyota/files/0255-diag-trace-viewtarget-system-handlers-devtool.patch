@@ -1,0 +1,64 @@
+From 89bfac7902c13960b32bdde802f4a4901d72dee4 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Tue, 15 Sep 2026 10:49:14 +0000
+Subject: [PATCH] diag: trace ViewTarget system handlers
+
+---
+ .../core/systems/derived/view_target_system.cc             | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/view_target_system.cc b/plugins/filament_view/core/systems/derived/view_target_system.cc
+index d61bf8c..1b94f60 100644
+--- a/plugins/filament_view/core/systems/derived/view_target_system.cc
++++ b/plugins/filament_view/core/systems/derived/view_target_system.cc
+@@ -43,6 +43,7 @@ smarter_raw_ptr<utils::EntityManager> _em = nullptr;
+ 
+ ////////////////////////////////////////////////////////////////////////////////////
+ void ViewTargetSystem::onSystemInit() {
++  spdlog::info("FLUORITE_VIEWTARGET_SYSTEM_INIT_BEGIN");
+   // Get filament engine
+   _filamentSystem = ecs->getSystem<FilamentSystem>("ViewTargetSystem::onSystemInit");
+   _engine = _filamentSystem->getFilamentEngine();
+@@ -52,6 +53,7 @@ void ViewTargetSystem::onSystemInit() {
+    *  Message handlers
+    */
+   registerMessageHandler(ECSMessageType::ViewTargetCreateRequest, [this](const ECSMessage& msg) {
++    spdlog::info("FLUORITE_VIEWTARGET_CREATE_HANDLER_BEGIN");
+     spdlog::trace("ViewTargetCreateRequest");
+ 
+     const auto state = msg.getData<FlutterDesktopEngineState*>(
+@@ -64,6 +66,7 @@ void ViewTargetSystem::onSystemInit() {
+ 
+     const auto nWhich = nSetupViewTargetFromDesktopState(top, left, state);
+     getViewTarget(nWhich)->InitializeFilamentInternals(width, heigth);
++    spdlog::info("FLUORITE_VIEWTARGET_CREATE_HANDLER_END");
+ 
+     // setCameraFromSerializedData();
+ 
+@@ -73,8 +76,10 @@ void ViewTargetSystem::onSystemInit() {
+   registerMessageHandler(
+     ECSMessageType::ViewTargetStartRenderingLoops,
+     [this](const ECSMessage& /*msg*/) {
++      spdlog::info("FLUORITE_VIEWTARGET_START_HANDLER_BEGIN count={}", _viewTargets.size());
+       spdlog::trace("ViewTargetStartRenderingLoops");
+       KickOffFrameRenderingLoops();
++      spdlog::info("FLUORITE_VIEWTARGET_START_HANDLER_END");
+       spdlog::trace("ViewTargetStartRenderingLoops Complete");
+     }
+   );
+@@ -157,6 +162,7 @@ void ViewTargetSystem::onSystemInit() {
+ 
+     // setCameraFromSerializedData();
+   });
++  spdlog::info("FLUORITE_VIEWTARGET_SYSTEM_INIT_END");
+ }
+ 
+ void ViewTargetSystem::initializeEntity(EntityGUID entityGuid) {
+@@ -301,6 +307,7 @@ ViewTarget* ViewTargetSystem::getViewTarget(size_t index) const {
+ 
+ ////////////////////////////////////////////////////////////////////////////////////
+ void ViewTargetSystem::KickOffFrameRenderingLoops() const {
++  spdlog::info("FLUORITE_VIEWTARGET_KICKOFF_FRAME_LOOPS count={}", _viewTargets.size());
+   spdlog::debug("Kicking off frame rendering loops for {} view targets", _viewTargets.size());
+   for (const auto& viewTarget : _viewTargets) {
+     viewTarget->setInitialized();

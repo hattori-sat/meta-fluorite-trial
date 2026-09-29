@@ -1,0 +1,54 @@
+From 0fe0ac9bedfd31a33824f2a0f9aba56e14a17a17 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 13:14:52 +0000
+Subject: [PATCH] diag: trace production scene visibility
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index a42e10b..2e06703 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -30,10 +30,11 @@
+ #include <filament/Fence.h>
+ #include <filament/IndexBuffer.h>
+ #include <filament/Material.h>
+ #include <filament/RenderTarget.h>
+ #include <filament/RenderableManager.h>
++#include <filament/Scene.h>
+ #include <filament/SwapChain.h>
+ #include <filament/Texture.h>
+ #include <filament/View.h>
+ #include <filament/Viewport.h>
+ #include <filament/backend/PixelBufferDescriptor.h>
+@@ -1179,10 +1180,28 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+ 
+   const auto ecs = ECSManager::GetInstance();
+   const auto filamentSystem = ecs->getSystem<FilamentSystem>("DrawFrame");
+   const auto renderer = filamentSystem->getFilamentRenderer();
+ 
++  if (std::getenv("FLR0026_SCENE_VISIBILITY_TRACE") != nullptr && shouldLogFrame) {
++    const auto* const scene = filamentSystem->getFilamentScene();
++    const auto cameraEntity = fview_->getCamera().getEntity();
++    const auto viewport = fview_->getViewport();
++    spdlog::info(
++      "FLR0026_SCENE_VISIBILITY seq={} scene={} entities={} renderables={} lights={} "
++      "camera_entity={} viewport={}x{}",
++      frameSequence,
++      scene != nullptr,
++      scene != nullptr ? scene->getEntityCount() : 0u,
++      scene != nullptr ? scene->getRenderableCount() : 0u,
++      scene != nullptr ? scene->getLightCount() : 0u,
++      cameraEntity.getId(),
++      viewport.width,
++      viewport.height
++    );
++  }
++
+   pollNativeReadbackFence();
+ 
+   if (std::getenv("FLR0026_WAYLAND_ROUNDTRIP") != nullptr && display_ != nullptr) {
+     const int roundtripResult = wl_display_roundtrip(display_);
+     if (shouldLogFrame) {
+-- 
+2.34.1
+

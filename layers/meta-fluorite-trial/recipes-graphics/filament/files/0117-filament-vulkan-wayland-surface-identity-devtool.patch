@@ -1,0 +1,112 @@
+From 896d24d20cfb44616ba4fb193c1ef5562af02746 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 2 Sep 2026 21:35:48 +0000
+Subject: [PATCH] diag: trace Wayland Vulkan surface identity
+
+---
+ .../platform/VulkanPlatformLinuxWindows.cpp   | 10 ++++++
+ .../platform/VulkanPlatformSwapChainImpl.cpp  | 32 +++++++++++++++++--
+ 2 files changed, 40 insertions(+), 2 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformLinuxWindows.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformLinuxWindows.cpp
+index 7305bae5c..3b2e60cdb 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformLinuxWindows.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformLinuxWindows.cpp
+@@ -28,6 +28,7 @@
+ 
+ #include <stdint.h>
+ #include <stddef.h>
++#include <cstdio>
+ 
+ #if defined(__linux__) || defined(__FreeBSD__)
+ #define LINUX_OR_FREEBSD 1
+@@ -127,6 +128,15 @@ VulkanPlatform::SurfaceBundle VulkanPlatform::createVkSurfaceKHRImpl(void* nativ
+         VkResult const result = vkCreateWaylandSurfaceKHR(instance, &createInfo, VKALLOC,
+                 (VkSurfaceKHR*) &surface);
+         FILAMENT_CHECK_POSTCONDITION(result == VK_SUCCESS) << "vkCreateWaylandSurfaceKHR error.";
++        std::fprintf(
++                stderr,
++                "FLR0026_VK_WAYLAND_SURFACE_CREATE result=%d display=%llx wl_surface=%llx extent=%ux%u vk_surface=%llx\n",
++                static_cast<int32_t>(result),
++                static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(ptrval->display)),
++                static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(ptrval->surface)),
++                ptrval->width,
++                ptrval->height,
++                static_cast<unsigned long long>(surface));
+     #elif defined(LINUX_OR_FREEBSD) && defined(FILAMENT_SUPPORTS_X11)
+         if (g_x11_vk.library == nullptr) {
+             g_x11_vk.library = dlopen(LIBRARY_X11, RTLD_LOCAL | RTLD_NOW);
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index d5b23143b..a41866b93 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -24,6 +24,7 @@
+ #include <backend/DriverEnums.h>
+ 
+ #include <cstdio>
++#include <cstdint>
+ 
+ using namespace bluevk;
+ using namespace utils;
+@@ -150,7 +151,8 @@ VulkanPlatformSurfaceSwapChain::~VulkanPlatformSurfaceSwapChain() {
+ VkResult VulkanPlatformSurfaceSwapChain::create() {
+     VkSurfaceFormatKHR surfaceFormat = {};
+     VkSurfaceCapabilitiesKHR caps;
+-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mPhysicalDevice, mSurface, &caps);
++    VkResult const capsResult = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
++            mPhysicalDevice, mSurface, &caps);
+ 
+     // The general advice is to require one more than the minimum swap chain length, since the
+     // absolute minimum could easily require waiting for a driver or presentation layer to release
+@@ -261,6 +263,19 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
+             mSwapChainBundle.depthFormat, mIsProtected);
+     mSwapChainBundle.isProtected = mIsProtected;
+ 
++    std::fprintf(
++            stderr,
++            "FLR0026_VK_SWAPCHAIN_CREATE caps=%d surface=%llx swapchain=%llx current=%ux%u chosen=%ux%u format=%d images=%zu\n",
++            static_cast<int32_t>(capsResult),
++            static_cast<unsigned long long>(mSurface),
++            static_cast<unsigned long long>(mSwapchain),
++            caps.currentExtent.width,
++            caps.currentExtent.height,
++            mSwapChainBundle.extent.width,
++            mSwapChainBundle.extent.height,
++            static_cast<int32_t>(surfaceFormat.format),
++            mSwapChainBundle.colors.size());
++
+     FVK_LOGI << "vkCreateSwapchain"
+            << ": " << mSwapChainBundle.extent.width << "x" << mSwapChainBundle.extent.height << ", "
+            << surfaceFormat.format << ", " << surfaceFormat.colorSpace << ", "
+@@ -290,6 +305,13 @@ VkResult VulkanPlatformSurfaceSwapChain::acquire(VulkanPlatform::ImageSyncData*
+     VkResult result = vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX,
+             outImageSyncData->imageReadySemaphore, VK_NULL_HANDLE, &outImageSyncData->imageIndex);
+ 
++    std::fprintf(
++            stderr,
++            "FLR0026_VK_SWAPCHAIN_ACQUIRE result=%d swapchain=%llx index=%u\n",
++            static_cast<int32_t>(result),
++            static_cast<unsigned long long>(mSwapchain),
++            outImageSyncData->imageIndex);
++
+     // Users should be notified of a suboptimal surface, but it should not cause a cascade of
+     // log messages or a loop of re-creations.
+     if (result == VK_SUBOPTIMAL_KHR && !mSuboptimal) {
+@@ -311,7 +333,13 @@ VkResult VulkanPlatformSurfaceSwapChain::present(uint32_t index, VkSemaphore fin
+             .pImageIndices = &currentIndex,
+     };
+     VkResult result = vkQueuePresentKHR(mQueue, &presentInfo);
+-    std::fprintf(stderr, "FLR0026_VK_QUEUE_PRESENT result=%d index=%u\n", static_cast<int32_t>(result), currentIndex);
++    std::fprintf(
++            stderr,
++            "FLR0026_VK_QUEUE_PRESENT result=%d surface=%llx swapchain=%llx index=%u\n",
++            static_cast<int32_t>(result),
++            static_cast<unsigned long long>(mSurface),
++            static_cast<unsigned long long>(mSwapchain),
++            currentIndex);
+ 
+     // On Android Q and above, a suboptimal surface is always reported after screen rotation:
+     // https://android-developers.googleblog.com/2020/02/handling-device-orientation-efficiently.html
+-- 
+2.34.1
+

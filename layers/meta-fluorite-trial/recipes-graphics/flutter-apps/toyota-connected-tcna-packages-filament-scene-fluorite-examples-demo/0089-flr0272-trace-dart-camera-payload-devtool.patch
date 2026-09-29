@@ -1,0 +1,24 @@
+From 93f1f9972e0ee43b2c0ea68c3f72b10eabd6558d Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 01:06:35 +0000
+Subject: [PATCH] FLR-0272: trace Dart camera payload
+
+---
+ packages/filament_scene/lib/scene/scene_widget.dart | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+index 919a68b..b19c7d9 100644
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -201,6 +201,10 @@ class ModelViewerState extends State<SceneView> {
+       // from scene.camera. Do not send the legacy root cameras list.
+       scene['camera'] = widget.cameras!.first.toJson();
+     }
++    print(
++      'FLR0272_CAMERA_PAYLOAD cameras=${widget.cameras?.length ?? 0} '
++      'scene=${scene != null} scene_camera=${scene?['camera'] != null}',
++    );
+     _creationParams["models"] = widget.models?.map((final param) => param.toJson()).toList();
+     _creationParams["scene"] = scene;
+     // use concatenated toFlatJson

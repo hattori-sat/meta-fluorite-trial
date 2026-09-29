@@ -1,0 +1,24 @@
+From a79b8b57014f81d6b04210a77f72193d22e79058 Mon Sep 17 00:00:00 2001
+From: Fluorite integration role <integration-role@localhost>
+Date: Mon, 7 Sep 2026 14:53:32 +0000
+Subject: [PATCH] diag: allow runtime shadow-caster disable
+
+---
+ plugins/filament_view/core/systems/derived/light_system.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 48e3b9c..17aafe1 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -117,7 +117,9 @@ void LightSystem::BuildLight(Light& light) {
+   builder.position(light.getPosition());
+   builder.direction(light.getDirection());
+   builder.castLight(light.getCastLight());
+-  builder.castShadows(light.getCastShadows());
++  const bool disableShadowCasting =
++    std::getenv("FLR0026_NATIVE_LIGHT_DISABLE_SHADOWS") != nullptr;
++  builder.castShadows(light.getCastShadows() && !disableShadowCasting);
+   builder.falloff(light.getFalloffRadius());
+ 
+   builder.spotLightCone(light.getSpotLightConeInner(), light.getSpotLightConeOuter());

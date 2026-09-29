@@ -1,0 +1,39 @@
+From a0170a6450bcf22c8fd3f2198f318230d39274e6 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 25 Sep 2026 00:45:53 +0000
+Subject: [PATCH] FLR-0310: probe production light order
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 6634bc0..7f90626 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1448,6 +1448,13 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   const auto ecs = ECSManager::GetInstance();
+   const auto filamentSystem = ecs->getSystem<FilamentSystem>("DrawFrame");
+   const auto renderer = filamentSystem->getFilamentRenderer();
++  const bool productionLightBeforeEcsUpdate =
++    std::getenv("FLR0310_PRODUCTION_SCENE_LIGHT_BEFORE_ECS_UPDATE") != nullptr;
++
++  if (productionLightBeforeEcsUpdate) {
++    setupProductionProbeLight();
++    spdlog::info("FLR0310_PRODUCTION_SCENE_LIGHT_ORDER mode=before-ecs-update");
++  }
+ 
+   // Frames from Native to dart, currently run in order of
+   // - updateFrame - Called regardless if a frame is going to be drawn or not
+@@ -1466,7 +1473,10 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   )
+                           .count();
+ 
+-  setupProductionProbeLight();
++  if (!productionLightBeforeEcsUpdate) {
++    setupProductionProbeLight();
++    spdlog::info("FLR0310_PRODUCTION_SCENE_LIGHT_ORDER mode=after-ecs-update");
++  }
+ 
+   const bool pureFixtureCamera =
+     std::getenv("FLUORITE_NATIVE_PURE_FIXTURE") != nullptr &&

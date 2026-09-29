@@ -1,0 +1,33 @@
+From 5ac26bd8cf961591a63788443a8f684374ec156a Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Tue, 8 Sep 2026 08:57:19 +0000
+Subject: [PATCH] diag: force transparent frame clear
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index f365a1b..e324781 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1345,7 +1345,18 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+     }
+   }
+ 
+-  if (std::getenv("FLR0026_NATIVE_CLEAR_PROBE") != nullptr) {
++  if (std::getenv("FLR0026_NATIVE_ALPHA_CLEAR_PROBE") != nullptr) {
++    filament::Renderer::ClearOptions clearOptions{};
++    clearOptions.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
++    clearOptions.clear = true;
++    clearOptions.discard = true;
++    renderer->setClearOptions(clearOptions);
++    static bool alphaClearProbeLogged = false;
++    if (!alphaClearProbeLogged) {
++      spdlog::info("FLR0026_NATIVE_ALPHA_CLEAR_PROBE_ENABLED color=transparent renderer=true");
++      alphaClearProbeLogged = true;
++    }
++  } else if (std::getenv("FLR0026_NATIVE_CLEAR_PROBE") != nullptr) {
+     filament::Renderer::ClearOptions clearOptions{};
+     clearOptions.clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+     clearOptions.clear = true;

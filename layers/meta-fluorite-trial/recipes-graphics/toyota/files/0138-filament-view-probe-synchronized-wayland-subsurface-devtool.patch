@@ -1,0 +1,42 @@
+From 42274b700eff2bdcaf435df139c16a6a19910563 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 3 Sep 2026 16:53:06 +0000
+Subject: [PATCH] diag: probe synchronized Wayland subsurface
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 24829ab..c00aa13 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -341,10 +341,13 @@ void ViewTarget::setupWaylandSubsurface() {
+     wl_subsurface_place_above(subsurface_, parent_surface_);
+   }
+   wl_subsurface_set_position(subsurface_, left_, top_);
+-  wl_subsurface_set_desync(subsurface_);
++  const bool syncProbe = std::getenv("FLR0026_WAYLAND_SYNC") != nullptr;
++  if (!syncProbe) {
++    wl_subsurface_set_desync(subsurface_);
++  }
+   spdlog::info(
+     "FLR0026_WAYLAND_SURFACE_CREATED surface={} subsurface={} parent={} position=({}, {}) "
+-    "surface_ptr={} parent_ptr={} display_ptr={} skip_stack={}",
++    "surface_ptr={} parent_ptr={} display_ptr={} skip_stack={} sync={}",
+     surface_ != nullptr,
+     subsurface_ != nullptr,
+     parent_surface_ != nullptr,
+@@ -353,7 +356,8 @@ void ViewTarget::setupWaylandSubsurface() {
+     static_cast<void*>(surface_),
+     static_cast<void*>(parent_surface_),
+     static_cast<void*>(display_),
+-    skipStackProbe
++    skipStackProbe,
++    syncProbe
+   );
+ }
+ 
+-- 
+2.34.1
+

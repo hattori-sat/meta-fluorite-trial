@@ -1,0 +1,27 @@
+From 71ff463397117533cda799680f10052b6a65b8f0 Mon Sep 17 00:00:00 2001
+From: Fluorite-devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 11:07:04 +0000
+Subject: [PATCH] test: use unlit material for 3d fixture
+
+---
+ .../example/lib/shape_and_object_creators.dart              | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/shape_and_object_creators.dart b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+index 881fd6a..f927675 100644
+--- a/packages/filament_scene/example/lib/shape_and_object_creators.dart
++++ b/packages/filament_scene/example/lib/shape_and_object_creators.dart
+@@ -37,10 +37,10 @@ List<Shape> poGetMinimal3dFixtureShapes() {
+       scale: Vector3.all(1),
+       rotation: Quaternion.identity(),
+       name: 'flr0023_fixture_cube',
+-      material: poGetLitMaterial(
++      // Use an emissive-independent unlit material for the diagnostic cube.
++      // This isolates fragment visibility from indirect-light and PBR inputs.
++      material: poGetUnlitMaterial(
+         Colors.blue,
+-        roughness: 0.6,
+-        metallic: 0.0,
+       ),
+     ),
+   ];

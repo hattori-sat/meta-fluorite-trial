@@ -1,0 +1,78 @@
+From 2b0cc553090dda829acfc7a2d87c4343c03ea960 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 16:02:28 +0000
+Subject: [PATCH] FLR-0242: isolate generic StatefulSceneView mount
+
+---
+ packages/filament_scene/example/lib/main.dart | 44 ++++++++++++++++++-
+ 1 file changed, 42 insertions(+), 2 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 869bb87..eb82170 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -54,6 +54,40 @@ final ValueNotifier<FrameProfilingData> frameProfilingDataNotifier =
+ // only used to separate Flutter composition from the native Filament path.
+ const bool kFlr0026DiagnosticMock3d = false;
+ 
++/// FLR-0242 diagnostic child. It exercises the common StatefulSceneView
++/// mount contract without Planetarium-specific state or native commands.
++class _Flr0242InertSceneView extends StatefulSceneView {
++  const _Flr0242InertSceneView({
++    required super.filament,
++    required super.frameController,
++    required super.collisionController,
++    required super.readinessController,
++  });
++
++  @override
++  State<_Flr0242InertSceneView> createState() => _Flr0242InertSceneViewState();
++}
++
++class _Flr0242InertSceneViewState
++    extends StatefulSceneViewState<_Flr0242InertSceneView> {
++  @override
++  void onCreate() {
++    print('FLR0242_GENERIC_INERT_ONCREATE');
++  }
++
++  @override
++  void onUpdateFrame(FilamentViewApi filament, double dt) {}
++
++  @override
++  void onTriggerEvent(String eventName, [dynamic eventData]) {}
++
++  @override
++  void onDestroy() {}
++
++  @override
++  Widget build(BuildContext context) => const SizedBox.shrink();
++}
++
+ ////////////////////////////////////////////////////////////////////////
+ void main() {
+   FlutterError.onError = (FlutterErrorDetails details) {
+@@ -164,6 +198,12 @@ class _MyAppState extends State<MyApp> {
+         collisionController: _collisionEventChannel,
+         readinessController: _nativeReadiness,
+       ),
++      5 => _Flr0242InertSceneView(
++        filament: filamentViewApi,
++        frameController: _frameEventChannel,
++        collisionController: _collisionEventChannel,
++        readinessController: _nativeReadiness,
++      ),
+       _ => throw UnsupportedError("nothiiiing"),
+     };
+   }
+@@ -264,8 +304,8 @@ class _MyAppState extends State<MyApp> {
+                   // FLR-0235: keep the tap boundary without Material hover
+                   // state painting over the native 3D surface.
+                   onTap: () {
+-                    print('FLR0240_SCENE_SUBTREE_ACTIVATION id=3 name=Planetarium');
+-                    _setScene(3);
++                    print('FLR0242_SCENE_SUBTREE_ACTIVATION id=5 name=GenericInertStatefulSceneView');
++                    _setScene(5);
+                   },
+                   child: Container(
+                     width: 99,

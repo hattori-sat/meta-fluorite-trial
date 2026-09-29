@@ -1,0 +1,22 @@
+From 23ff1347f1aa4a67503591a4e13cfdc2a37faad3 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Mon, 31 Aug 2026 14:36:23 +0000
+Subject: [PATCH] diag: run native Filament path without Flutter mock
+
+---
+ packages/filament_scene/example/lib/main.dart | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 794cb7c..95fefa9 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -52,7 +52,7 @@ final ValueNotifier<FrameProfilingData> frameProfilingDataNotifier =
+ 
+ // FLR-0026 diagnostic switch. This overlay is intentionally obvious and is
+ // only used to separate Flutter composition from the native Filament path.
+-const bool kFlr0026DiagnosticMock3d = true;
++const bool kFlr0026DiagnosticMock3d = false;
+ 
+ ////////////////////////////////////////////////////////////////////////
+ void main() {

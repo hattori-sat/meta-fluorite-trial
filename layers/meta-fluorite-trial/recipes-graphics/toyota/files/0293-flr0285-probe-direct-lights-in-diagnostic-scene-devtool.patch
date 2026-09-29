@@ -1,0 +1,86 @@
+From c9dc2aae7fd5f91672effe7062b05431612b814e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@localhost>
+Date: Thu, 24 Sep 2026 22:51:30 +0900
+Subject: [PATCH] FLR-0285: probe direct lights in diagnostic scene
+
+---
+ .../filament_view/core/scene/view_target.cc   |  3 +++
+ .../core/systems/derived/light_system.cc      | 19 +++++++++++++++++++
+ .../core/systems/derived/light_system.h       |  6 ++++++
+ 3 files changed, 28 insertions(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index df48ab4..7e9cf11 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -19,6 +19,7 @@
+ #include <core/include/additionalmath.h>
+ #include <core/include/literals.h>
+ #include <core/systems/derived/filament_system.h>
++#include <core/systems/derived/light_system.h>
+ #include <core/systems/derived/model_system.h>
+ #include <core/systems/derived/transform_system.h>
+ #include <core/systems/derived/view_target_system.h>
+@@ -1434,6 +1435,8 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+       native_diagnostic_scene_ != nullptr) {
+     const auto modelSystem = ecs->getSystem<ModelSystem>("DrawFrame");
+     modelSystem->addLoadedModelsToScene(native_diagnostic_scene_);
++    const auto lightSystem = ecs->getSystem<LightSystem>("DrawFrame");
++    lightSystem->addLoadedLightsToScene(native_diagnostic_scene_);
+     const auto defaultScene = filamentSystem->getFilamentScene();
+     native_diagnostic_scene_->setSkybox(defaultScene->getSkybox());
+     native_diagnostic_scene_->setIndirectLight(defaultScene->getIndirectLight());
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 8f74863..8df87de 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -63,6 +63,25 @@ void LightSystem::BuildLightAndAddToScene(Light& light) {
+   AddLightToScene(light);
+ }
+ 
++////////////////////////////////////////////////////////////////////////////////////
++void LightSystem::addLoadedLightsToScene(filament::Scene* scene) {
++  if (scene == nullptr) {
++    spdlog::warn("FLR0285_NATIVE_LIGHT_SCENE_ADD skipped scene=null");
++    return;
++  }
++
++  std::size_t added = 0;
++  for (const auto& light : ecs->getComponentsOfType<Light>()) {
++    if (light != nullptr && light->m_poFilamentEntityLight) {
++      scene->addEntity(light->m_poFilamentEntityLight);
++      ++added;
++    }
++  }
++  spdlog::info(
++    "FLR0285_NATIVE_LIGHT_SCENE_ADD lights={} scene=diagnostic", added
++  );
++}
++
+ ////////////////////////////////////////////////////////////////////////////////////
+ void LightSystem::BuildLight(Light& light) {
+   const auto filamentSystem = ecs->getSystem<FilamentSystem>("BuildLight");
+diff --git a/plugins/filament_view/core/systems/derived/light_system.h b/plugins/filament_view/core/systems/derived/light_system.h
+index 2954d6c..1b41f1b 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.h
++++ b/plugins/filament_view/core/systems/derived/light_system.h
+@@ -20,6 +20,8 @@
+ #include <core/entity/base/entityobject.h>
+ #include <future>
+ 
++#include <filament/Scene.h>
++
+ #include <core/systems/base/system.h>
+ 
+ namespace plugin_filament_view {
+@@ -37,6 +39,10 @@ class LightSystem : public System {
+     void BuildLight(Light& light);
+     void BuildLightAndAddToScene(Light& light);
+ 
++    // Adds already-built direct-light entities to an opt-in diagnostic Scene.
++    // The production Scene remains unchanged.
++    void addLoadedLightsToScene(::filament::Scene* scene);
++
+     // Disallow copy and assign.
+     LightSystem(const LightSystem&) = delete;
+     LightSystem& operator=(const LightSystem&) = delete;

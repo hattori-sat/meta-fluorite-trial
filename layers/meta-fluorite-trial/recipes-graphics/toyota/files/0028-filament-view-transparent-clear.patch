@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Sat, 22 Aug 2026 20:20:00 +0900
+Subject: [PATCH] filament-view: keep the Filament surface transparent
+
+The native subsurface is composited above the Flutter parent. Clear it with
+zero alpha so the Flutter controls remain visible around rendered geometry.
+
+---
+ .../filament_view/core/systems/derived/filament_system.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/filament_system.cc b/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/filament_system.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/filament_system.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/systems/derived/filament_system.cc
+@@ -50,0 +51,1 @@
++  clearOptions.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};

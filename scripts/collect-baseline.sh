@@ -24,4 +24,4 @@ done
 printf '%s\n' '== independent layers =='
 git -C "$AGL_ROOT/meta-vulkan" status --short --branch
 git -C "$AGL_ROOT/meta-vulkan" rev-parse HEAD
-find "$AGL_ROOT/meta-local" -type f -not -path '*/.git/*' -exec sha256sum {} + | sort -k2
+find "${PROJECT_ROOT:-$HOME/work/meta-fluorite-trial}/layers/meta-fluorite-trial" -type f -not -path '*/.git/*' -exec sha256sum {} + | sort -k2

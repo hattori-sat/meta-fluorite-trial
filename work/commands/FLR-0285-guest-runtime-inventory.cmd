@@ -1,0 +1,1 @@
+printf '%s\n' '-- runtime files --'; find /run/user/1001 -maxdepth 1 -type f -printf '%f %s bytes\n' | sort; printf '%s\n' '-- app --'; ps -eo pid,user,args | grep '[f]lutter-auto' || true; printf '%s\n' '-- launcher logs --'; find /run/user/1001 -maxdepth 1 -type f -name 'flr0280*' -o -name 'flr0285*' -printf '%f %s bytes\n' | sort; true

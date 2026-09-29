@@ -1,0 +1,1 @@
+PID=$(cat /run/user/1001/flr0285-native-model-scene-culling.pid 2>/dev/null || true); if [ -n "$PID" ]; then kill -TERM "$PID" 2>/dev/null || true; fi; sleep 1; if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then kill -KILL "$PID" 2>/dev/null || true; fi; printf 'FLR0285_NATIVE_MODEL_SCENE_CULLING_STOP_DONE pid=%s\n' "$PID"

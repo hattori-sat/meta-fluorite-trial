@@ -1,0 +1,56 @@
+From b88d6033224fc6a686b68d97e55215ed34e4f1e5 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 15:48:16 +0000
+Subject: [PATCH] diag: trace submit and present semaphore ownership
+
+---
+ filament/backend/src/vulkan/VulkanCommands.cpp       | 12 ++++++++++++
+ .../vulkan/platform/VulkanPlatformSwapChainImpl.cpp  |  5 +++--
+ 2 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanCommands.cpp b/filament/backend/src/vulkan/VulkanCommands.cpp
+index 0814d9ab9c..00f4ecd977 100644
+--- a/filament/backend/src/vulkan/VulkanCommands.cpp
++++ b/filament/backend/src/vulkan/VulkanCommands.cpp
+@@ -228,6 +228,14 @@ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+         submitInfo.pNext = &protectedSubmitInfo;
+     }
+ 
++    const bool fluoritePresentTrace = std::getenv("FLUORITE_PRESENT_TRACE") != nullptr;
++    if (fluoritePresentTrace) {
++        std::fprintf(stderr,
++                "FLUORITE_VK_SUBMIT_BEGIN wait_count=%u signal=%p fence=%p\n",
++                static_cast<unsigned>(submitInfo.waitSemaphoreCount),
++                static_cast<void*>(submissionSemaphore), static_cast<void*>(mFence));
++    }
++
+ #if FVK_ENABLED(FVK_DEBUG_COMMAND_BUFFER)
+     FVK_LOGI << "Submitting cmdbuffer=" << mBuffer
+              << " wait=(";
+@@ -255,6 +263,10 @@ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+             static_cast<void*>(mQueue), static_cast<void*>(mFence));
+     UTILS_UNUSED_IN_RELEASE VkResult result =
+         vkQueueSubmit(mQueue, 1, &submitInfo, mFence);
++    if (fluoritePresentTrace) {
++        std::fprintf(stderr, "FLUORITE_VK_SUBMIT_RETURN result=%d signal=%p\n",
++                static_cast<int32_t>(result), static_cast<void*>(submissionSemaphore));
++    }
+     std::fprintf(stderr, "FLR0026_VK_QUEUE_SUBMIT_DONE result=%d queue=%p fence=%p\\n",
+             static_cast<int32_t>(result), static_cast<void*>(mQueue), static_cast<void*>(mFence));
+     if (std::getenv("FLR0026_QUEUE_FENCE_TRACE") != nullptr && result == VK_SUCCESS) {
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index d1e8fcf586..b3e1fe47e5 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -385,8 +385,9 @@ VkResult VulkanPlatformSurfaceSwapChain::present(uint32_t index, VkSemaphore fin
+     const bool fluoritePresentTrace = std::getenv("FLUORITE_PRESENT_TRACE") != nullptr;
+     if (fluoritePresentTrace) {
+         std::fprintf(stderr,
+-                "FLUORITE_VK_QUEUE_PRESENT_ENTER index=%u wait=%s\n",
+-                currentIndex, skipFinishedSemaphore ? "false" : "true");
++                "FLUORITE_VK_QUEUE_PRESENT_ENTER index=%u wait=%s semaphore=%p\n",
++                currentIndex, skipFinishedSemaphore ? "false" : "true",
++                static_cast<void*>(finishedDrawing));
+     }
+     std::fprintf(stderr, "FLR0026_VK_QUEUE_PRESENT_BEGIN queue=%p swapchain=%p index=%u\\n",
+             static_cast<void*>(mQueue), static_cast<void*>(mSwapchain), currentIndex);

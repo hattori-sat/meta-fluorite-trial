@@ -1,0 +1,54 @@
+From 23b0f2b8e9eb02c1911966f4175b897c709fdcab Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 5 Sep 2026 06:18:52 +0000
+Subject: [PATCH] diag: separate production shape and light setup
+
+---
+ .../serialization/scene_text_deserializer.cc  | 22 +++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+index 14e8812..0b7bcc8 100644
+--- a/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
++++ b/plugins/filament_view/core/scene/serialization/scene_text_deserializer.cc
+@@ -222,22 +222,36 @@ void SceneTextDeserializer::RunPostSetupLoad() {
+       std::getenv("FLR0026_NATIVE_SKIP_SKYBOX") != nullptr;
+   const bool skip_indirect_light = skip_environment ||
+       std::getenv("FLR0026_NATIVE_SKIP_INDIRECT_LIGHT") != nullptr;
++  const bool skip_lights = std::getenv("FLR0027_NATIVE_SKIP_LIGHTS") != nullptr;
++  const bool skip_shapes = std::getenv("FLR0027_NATIVE_SKIP_SHAPES") != nullptr;
+   if (skip_skybox) {
+     spdlog::info("FLR0026_NATIVE_SKIP_SKYBOX enabled=true");
+   } else {
+     spdlog::trace("setUpSkybox");
+     setUpSkybox();
+   }
+-  spdlog::trace("setUpLights");
+-  setUpLights();
++  if (skip_lights) {
++    spdlog::info(
++      "FLR0027_NATIVE_SKIP_LIGHTS enabled=true lights={}", lights_.size()
++    );
++  } else {
++    spdlog::trace("setUpLights");
++    setUpLights();
++  }
+   if (skip_indirect_light) {
+     spdlog::info("FLR0026_NATIVE_SKIP_INDIRECT_LIGHT enabled=true");
+   } else {
+     spdlog::trace("setUpIndirectLight");
+     setUpIndirectLight();
+   }
+-  spdlog::trace("setUpShapes");
+-  setUpShapes();
++  if (skip_shapes) {
++    spdlog::info(
++      "FLR0027_NATIVE_SKIP_SHAPES enabled=true shapes={}", shapes_.size()
++    );
++  } else {
++    spdlog::trace("setUpShapes");
++    setUpShapes();
++  }
+   spdlog::trace("setUpEntities");
+   setUpEntities();
+ 

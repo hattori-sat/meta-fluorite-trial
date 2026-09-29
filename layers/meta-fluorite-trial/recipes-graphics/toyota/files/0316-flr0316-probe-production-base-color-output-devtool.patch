@@ -1,0 +1,59 @@
+From 10acc4166a0aff06038ac5622d0bd55c1bfd73a2 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@localhost>
+Date: Fri, 25 Sep 2026 11:54:09 +0900
+Subject: [PATCH] FLR-0316: probe PaintColor base color output
+
+---
+ .../core/systems/derived/model_system.cc      | 19 +++++++++++++++++++
+ .../core/systems/derived/model_system.h       |  1 +
+ 2 files changed, 20 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index aec04f7..5d85cd9 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -30,6 +30,7 @@
+ #include <filament/Material.h>
+ #include <filament/MaterialInstance.h>
+ #include <filament/math/vec3.h>
++#include <filament/math/vec4.h>
+ #include <filament/gltfio/ResourceLoader.h>
+ #include <filament/gltfio/TextureProvider.h>
+ #include <filament/gltfio/materials/uberarchive.h>
+@@ -517,6 +518,24 @@ void ModelSystem::setupRenderable(
+           fEntity.getId(), primitive, materialInstance->getName()
+         );
+       }
++      if (
++        !production_base_color_override_applied_ && primitive == 0 &&
++        std::getenv("FLR0316_PRODUCTION_BASE_COLOR_OVERRIDE") != nullptr &&
++        model->getAssetPath().find("sequoia_ngp.glb") != std::string::npos &&
++        materialInstance->getName() == "PaintColor" &&
++        material->hasParameter("baseColorFactor")
++      ) {
++        materialInstance->setParameter(
++          "baseColorFactor", filament::RgbaType::LINEAR,
++          filament::math::float4{1.0f, 0.0f, 1.0f, 1.0f}
++        );
++        production_base_color_override_applied_ = true;
++        spdlog::info(
++          "FLR0316_PRODUCTION_BASE_COLOR_OVERRIDE_DONE entity={} primitive={} material={} "
++          "value=(1,0,1,1)",
++          fEntity.getId(), primitive, materialInstance->getName()
++        );
++      }
+       std::array<filament::Material::ParameterInfo, 16> parameters{};
+       const auto parameterCount = material->getParameters(parameters.data(), parameters.size());
+       for (size_t parameter = 0; parameter < parameterCount; ++parameter) {
+diff --git a/plugins/filament_view/core/systems/derived/model_system.h b/plugins/filament_view/core/systems/derived/model_system.h
+index a3fec66..0cbac8c 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.h
++++ b/plugins/filament_view/core/systems/derived/model_system.h
+@@ -110,6 +110,7 @@ class ModelSystem : public System {
+     std::map<EntityGUID, std::shared_ptr<Model>> _models{};
+     bool diagnostic_scene_models_added_{false};
+     bool production_emissive_override_applied_{false};
++    bool production_base_color_override_applied_{false};
+ 
+     /// Creates renderables and adds them to the scene
+     /// Expects the model to have been loaded first

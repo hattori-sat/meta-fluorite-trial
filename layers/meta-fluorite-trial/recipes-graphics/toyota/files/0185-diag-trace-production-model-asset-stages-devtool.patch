@@ -1,0 +1,129 @@
+From 1c5e5135e201bef6e15a85e99a543f6e6f28d697 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 20:57:16 +0000
+Subject: [PATCH] diag: trace production model asset stages
+
+---
+ .../core/systems/derived/model_system.cc      | 61 +++++++++++++++++++
+ 1 file changed, 61 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 24bd7dc..fd63e23 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -19,6 +19,7 @@
+ #include <algorithm>  // for max
+ #include <asio/post.hpp>
+ #include <cassert>
++#include <cstdlib>
+ #include <core/components/derived/collider.h>
+ #include <core/entity/base/entityobject.h>
+ #include <core/include/file_utils.h>
+@@ -409,8 +410,20 @@ void ModelSystem::updateAsyncAssetLoading() {
+   // load, then load that physics data onto a collider if required. This gives
+   // us visuals without colliders in a scene with <tons> of objects; but would
+   // eventually settle
++  const bool trace = std::getenv("FLR0026_MODEL_STAGE_TRACE") != nullptr;
++  static unsigned int updateSequence = 0;
++  static float previousProgress = -1.0f;
++  ++updateSequence;
++
+   resourceLoader_->asyncUpdateLoad();
+   const float percentComplete = resourceLoader_->asyncGetLoadProgress();
++  if (trace && (updateSequence <= 5 || percentComplete != previousProgress || updateSequence % 60 == 0)) {
++    spdlog::info(
++      "FLR0026_MODEL_STAGE_PROGRESS seq={} progress={} assets={}", updateSequence,
++      percentComplete, _assets.size()
++    );
++    previousProgress = percentComplete;
++  }
+   if (percentComplete != 1.0f) {
+     spdlog::trace("[{}] Model async loading progress: {}%", __FUNCTION__, percentComplete * 100.0f);
+     return;
+@@ -429,6 +442,12 @@ void ModelSystem::updateAsyncAssetLoading() {
+     }
+ 
+     if (assetData.state == AssetLoadingState::loaded) {
++      if (trace) {
++        spdlog::info(
++          "FLR0026_MODEL_STAGE_COMPLETE asset={} pending_models={}", assetPath,
++          assetData.loadingInstances.size()
++        );
++      }
+       // if the asset is loaded, load the models
+       for (auto& modelGuid : assetData.loadingInstances) {
+         // get the model
+@@ -455,7 +474,19 @@ void ModelSystem::updateAsyncAssetLoading() {
+             spdlog::trace("Loading model as instance: {}", model->getAssetPath());
+             createModelInstance(model.get());
+             spdlog::trace("Model instanced, adding to scene...");
++            if (trace) {
++              spdlog::info(
++                "FLR0026_MODEL_STAGE_SCENE_ADD_BEGIN asset={} guid={} mode=secondary",
++                model->getAssetPath(), modelGuid
++              );
++            }
+             addModelToScene(modelGuid);
++            if (trace) {
++              spdlog::info(
++                "FLR0026_MODEL_STAGE_SCENE_ADD_DONE asset={} guid={} mode=secondary",
++                model->getAssetPath(), modelGuid
++              );
++            }
+             spdlog::trace("Model added to scene! Yay!");
+ 
+             // Set up collider children
+@@ -466,7 +497,19 @@ void ModelSystem::updateAsyncAssetLoading() {
+           case ModelInstancingMode::none:
+             // load the model as a single object
+             spdlog::trace("Loading model as single object: {}", model->getAssetPath());
++            if (trace) {
++              spdlog::info(
++                "FLR0026_MODEL_STAGE_SCENE_ADD_BEGIN asset={} guid={} mode=none",
++                model->getAssetPath(), modelGuid
++              );
++            }
+             addModelToScene(modelGuid);
++            if (trace) {
++              spdlog::info(
++                "FLR0026_MODEL_STAGE_SCENE_ADD_DONE asset={} guid={} mode=none",
++                model->getAssetPath(), modelGuid
++              );
++            }
+             break;
+         }
+       }
+@@ -575,8 +618,19 @@ void ModelSystem::loadModelFromFile(EntityGUID modelGuid, const std::string& bas
+         filament::gltfio::FilamentInstance* assetInstance = nullptr;
+ 
+         asset = assetLoader_->createAsset(buffer.data(), static_cast<uint32_t>(buffer.size()));
++        if (std::getenv("FLR0026_MODEL_STAGE_TRACE") != nullptr) {
++          spdlog::info(
++            "FLR0026_MODEL_STAGE_ASSET_CREATED asset={} guid={} bytes={} entities={}",
++            assetPath, modelGuid, buffer.size(), asset->getEntityCount()
++          );
++        }
+         spdlog::trace("[loadModelFromFile] asyncBeginLoad");
+         resourceLoader_->asyncBeginLoad(asset);
++        if (std::getenv("FLR0026_MODEL_STAGE_TRACE") != nullptr) {
++          spdlog::info(
++            "FLR0026_MODEL_STAGE_ASYNC_BEGIN asset={} guid={}", assetPath, modelGuid
++          );
++        }
+         model->setAsset(asset);
+         _assets[assetPath].asset = asset;  // important! if not set, secondaries cannot be created
+ 
+@@ -595,6 +649,13 @@ void ModelSystem::loadModelFromFile(EntityGUID modelGuid, const std::string& bas
+ 
+         model->setAssetInstance(assetInstance);
+ 
++        if (std::getenv("FLR0026_MODEL_STAGE_TRACE") != nullptr) {
++          spdlog::info(
++            "FLR0026_MODEL_STAGE_INSTANCE_READY asset={} guid={} instance={}",
++            assetPath, modelGuid, static_cast<const void*>(assetInstance)
++          );
++        }
++
+         spdlog::debug("Loaded glb model successfully from {}", assetPath);
+       } else {
+         spdlog::error("Couldn't load glb model from {}", assetPath);

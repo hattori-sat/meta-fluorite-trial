@@ -1,0 +1,70 @@
+From 2a26c801f9ef178b5b0ff1131284a1978bd5c230 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 10:32:33 +0000
+Subject: [PATCH 1/2] fix: activate isolated fixture camera
+
+---
+ packages/filament_scene/example/lib/main.dart | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index deb0f33..8e2e83d 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -295,22 +295,28 @@ class _MyAppState extends State<MyApp> {
+     );
+   }
+ 
+   ////////////////////////////////////////////////////////////////////////
+   SceneView poGetFilamentScene() {
++    final List<Camera> fixtureCameras = poGetMinimal3dFixtureCameras();
+     return SceneView(
+       filament: filamentViewApi,
+       // Reproduce the known-good minimal fixture input path.
+       models: <Model>[],
+       scene: poGetMinimal3dFixtureScene(),
+       shapes: poGetMinimal3dFixtureShapes(),
+-      cameras: poGetMinimal3dFixtureCameras(),
++      cameras: fixtureCameras,
+       onCreated: (SceneController controller) async {
+         print('poGetFilamentScene onCreated');
+ 
+         poController = controller;
+ 
++        // The fixture camera starts detached so production cameras do not
++        // claim view 0 before activation. Select it explicitly for this
++        // isolated proof path after SceneView binds the camera engine.
++        fixtureCameras.single.setActive();
++
+         _frameEventChannel.setController(filamentViewApi);
+         _collisionEventChannel.setController(filamentViewApi);
+ 
+         print('poGetFilamentScene onCreated completed');
+       },
+
+From 098cb69ac8559646eae121357b3b056f368a987b Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 10:43:58 +0000
+Subject: [PATCH 2/2] fix: infer fixture camera list type
+
+---
+ packages/filament_scene/example/lib/main.dart | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index 8e2e83d..8350dae 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -295,11 +295,11 @@ class _MyAppState extends State<MyApp> {
+     );
+   }
+ 
+   ////////////////////////////////////////////////////////////////////////
+   SceneView poGetFilamentScene() {
+-    final List<Camera> fixtureCameras = poGetMinimal3dFixtureCameras();
++    final fixtureCameras = poGetMinimal3dFixtureCameras();
+     return SceneView(
+       filament: filamentViewApi,
+       // Reproduce the known-good minimal fixture input path.
+       models: <Model>[],
+       scene: poGetMinimal3dFixtureScene(),

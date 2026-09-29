@@ -1,0 +1,36 @@
+From a1bbc3827117ca4d64e024fd6581cdbc837ec145 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 13:43:15 +0000
+Subject: [PATCH] fix: use Filament Box accessors in geometry trace
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 17a4b3c..ba70c63 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -1241,16 +1241,16 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+           frameSequence,
+           entity.getId(),
+           world[3].x,
+           world[3].y,
+           world[3].z,
+-          bounds.min.x,
+-          bounds.min.y,
+-          bounds.min.z,
+-          bounds.max.x,
+-          bounds.max.y,
+-          bounds.max.z,
++          bounds.getMin().x,
++          bounds.getMin().y,
++          bounds.getMin().z,
++          bounds.getMax().x,
++          bounds.getMax().y,
++          bounds.getMax().z,
+           renderableManager.getLayerMask(renderable)
+         );
+         ++sampleCount;
+       });
+     }
+-- 
+2.34.1
+

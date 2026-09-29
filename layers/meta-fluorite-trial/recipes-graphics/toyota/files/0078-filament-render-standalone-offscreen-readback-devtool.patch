@@ -1,0 +1,101 @@
+From f5539a2c6629f1bba8c6a738a7d7b562a9578d13 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Wed, 2 Sep 2026 13:16:43 +0000
+Subject: [PATCH] fix: render standalone offscreen readback view
+
+---
+ .../filament_view/core/scene/view_target.cc   | 55 ++++++++++---------
+ 1 file changed, 28 insertions(+), 27 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 0dd3963..cf82385 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -910,18 +910,46 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+   // drawing a frame.
+ 
+   // ECS Update
+   const auto cpuUpdateStart = std::chrono::steady_clock::now();
+   ecs->update(deltaTime);
++  double cpuFrametime = std::chrono::duration<double, std::milli>(
++                          std::chrono::steady_clock::now() - cpuUpdateStart
++  )
++                          .count();
++  // spdlog::debug(
++  //   "[{}] CPU frametime: {:.2f}ms", __FUNCTION__,
++  //   std::chrono::duration<double, std::milli>(cpuUpdateDuration).count()
++  // );
++
++  // TODO(kerberjg): send kUpdateFrame event, async with wait
++
++  // Render the scene, unless the renderer wants to skip the frame.
++  const auto gpuDrawStart = std::chrono::steady_clock::now();
++  // spdlog::debug("=== BEGIN FRAME ===");
++  const bool frameStarted = renderer->beginFrame(
++    fswapChain_, std::chrono::steady_clock::now().time_since_epoch().count()
++  );
++  if (shouldLogFrame) {
++    spdlog::info("FLR0026_FRAME_BEGIN seq={} started={}", frameSequence, frameStarted);
++  }
++  if (frameStarted) {
++    // Frame is being rendered
++    // TODO(kerberjg): send kPreRenderFrame event, async with wait
++    // spdlog::debug("=== RENDER FRAME ===");
++    renderer->render(fview_);
++    // spdlog::debug("=== END FRAME ===");
++    renderer->endFrame();
+     if (native_readback_probe_enabled_ && native_readback_target_ &&
+         !native_readback_probe_queued_) {
+       native_readback_probe_queued_ = true;
+       constexpr uint32_t readbackWidth = 240;
+       constexpr uint32_t readbackHeight = 160;
+       const size_t readbackSize = static_cast<size_t>(readbackWidth) *
+         static_cast<size_t>(readbackHeight) * 4u;
+       auto* pixels = new uint8_t[readbackSize]();
++      renderer->renderStandaloneView(fview_);
+       renderer->readPixels(
+         native_readback_target_,
+         0,
+         0,
+         readbackWidth,
+@@ -943,37 +971,10 @@ void ViewTarget::DrawFrame(const uint32_t time) {
+         "FLR0026_NATIVE_READBACK_QUEUED width={} height={}",
+         readbackWidth,
+         readbackHeight
+       );
+     }
+-  double cpuFrametime = std::chrono::duration<double, std::milli>(
+-                          std::chrono::steady_clock::now() - cpuUpdateStart
+-  )
+-                          .count();
+-  // spdlog::debug(
+-  //   "[{}] CPU frametime: {:.2f}ms", __FUNCTION__,
+-  //   std::chrono::duration<double, std::milli>(cpuUpdateDuration).count()
+-  // );
+-
+-  // TODO(kerberjg): send kUpdateFrame event, async with wait
+-
+-  // Render the scene, unless the renderer wants to skip the frame.
+-  const auto gpuDrawStart = std::chrono::steady_clock::now();
+-  // spdlog::debug("=== BEGIN FRAME ===");
+-  const bool frameStarted = renderer->beginFrame(
+-    fswapChain_, std::chrono::steady_clock::now().time_since_epoch().count()
+-  );
+-  if (shouldLogFrame) {
+-    spdlog::info("FLR0026_FRAME_BEGIN seq={} started={}", frameSequence, frameStarted);
+-  }
+-  if (frameStarted) {
+-    // Frame is being rendered
+-    // TODO(kerberjg): send kPreRenderFrame event, async with wait
+-    // spdlog::debug("=== RENDER FRAME ===");
+-    renderer->render(fview_);
+-    // spdlog::debug("=== END FRAME ===");
+-    renderer->endFrame();
+     if (shouldLogFrame) {
+       spdlog::info("FLR0026_FRAME_END seq={}", frameSequence);
+     }
+     // TODO(kerberjg): send kPostRenderFrame event, async with wait
+   } else {
+-- 
+2.34.1
+

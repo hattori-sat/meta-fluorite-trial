@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Trial <fluorite-trial@example.invalid>
+Date: Sat, 22 Aug 2026 21:40:00 +0900
+Subject: [PATCH] filament_view: dispatch frame events on platform runner
+
+MethodChannel::InvokeMethod sends through Flutter's BinaryMessenger. The
+Filament frame callback runs on the ECS strand, while flutter-auto already
+provides a platform TaskRunner for engine messages. Dispatch the event there
+so the ECS/render strand is never blocked by the messenger.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+Index: git/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+===================================================================
+--- git.orig/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
++++ git/ivi-homescreen-plugins/plugins/filament_view/filament_view_plugin.cc
+@@ -17,0 +18,1 @@
++#include <flutter_desktop_engine_state.h>
+@@ -47,0 +48,1 @@
++FlutterDesktopEngineState* g_flutterEngineState = nullptr;
+@@ -181,5 +182,22 @@
+-  FilamentViewPlugin::eventBus->InvokeMethod(
+-    "call_" + eventName,
+-    std::make_unique<flutter::EncodableValue>(encodableMap)
+-  );
+-  spdlog::trace("InvokeMethod done! Returning future");
++  auto invokeEvent = [eventName, encodableMap = std::move(encodableMap)]() mutable {
++    FilamentViewPlugin::eventBus->InvokeMethod(
++      "call_" + eventName,
++      std::make_unique<flutter::EncodableValue>(encodableMap)
++    );
++  };
++  auto* engineState = g_flutterEngineState;
++  auto* platformTaskRunner = engineState == nullptr ? nullptr : engineState->platform_task_runner;
++  if (engineState == nullptr || platformTaskRunner == nullptr ||
++      engineState->flutter_engine == nullptr || FilamentViewPlugin::eventBus == nullptr) {
++    spdlog::trace("Skipping frame event {} until Flutter engine is ready", eventName);
++    auto it = FilamentViewPlugin::_eventCallbacks.find(eventId);
++    if (it != FilamentViewPlugin::_eventCallbacks.end()) {
++      it->second->set_value();
++      FilamentViewPlugin::_eventCallbacks.erase(it);
++    }
++  } else if (!platformTaskRunner->IsThreadEqual(pthread_self())) {
++    post(*platformTaskRunner->GetStrandContext(),
++         std::move(invokeEvent));
++  } else {
++    invokeEvent();
++  }
+@@ -222,0 +231,1 @@
++  g_flutterEngineState = engine;

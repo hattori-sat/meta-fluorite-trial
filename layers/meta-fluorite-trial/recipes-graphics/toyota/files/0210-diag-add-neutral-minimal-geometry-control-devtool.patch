@@ -1,0 +1,48 @@
+From 6bce593a243d055619ffc77bfde7dcf9821b420a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 11 Sep 2026 19:46:06 +0000
+Subject: [PATCH] diag: add neutral minimal geometry control
+
+---
+ .../filament_view/core/scene/view_target.cc   | 21 ++++++++++++++-----
+ 1 file changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index a27cbe1..82bb058 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -545,18 +545,29 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+ 
+   _initCamera();
+ 
++  const bool neutralMinimalGeometry =
++    std::getenv("FLUORITE_NATIVE_MINIMAL_GEOMETRY") != nullptr;
+   const bool minimalGeometryTransparent =
++    std::getenv("FLUORITE_NATIVE_MINIMAL_GEOMETRY_TRANSPARENT") != nullptr ||
+     std::getenv("FLR0026_NATIVE_MINIMAL_GEOMETRY_TRANSPARENT") != nullptr;
+-  if (std::getenv("FLR0026_NATIVE_MINIMAL_GEOMETRY") != nullptr) {
++  if (neutralMinimalGeometry ||
++      std::getenv("FLR0026_NATIVE_MINIMAL_GEOMETRY") != nullptr) {
+     setupNativeMinimalGeometry();
+     fview_->setScene(native_diagnostic_scene_);
+     if (!minimalGeometryTransparent) {
+       fview_->setBlendMode(filament::View::BlendMode::OPAQUE);
+     }
+-    spdlog::info(
+-      "FLR0026_NATIVE_MINIMAL_GEOMETRY_ENABLED scene=true transparent={}",
+-      minimalGeometryTransparent
+-    );
++    if (neutralMinimalGeometry) {
++      spdlog::info(
++        "FLUORITE_NATIVE_MINIMAL_GEOMETRY_ENABLED scene=true transparent={}",
++        minimalGeometryTransparent
++      );
++    } else {
++      spdlog::info(
++        "FLR0026_NATIVE_MINIMAL_GEOMETRY_ENABLED scene=true transparent={}",
++        minimalGeometryTransparent
++      );
++    }
+   }
+ 
+   if (std::getenv("FLR0026_NATIVE_MINIMAL_GEOMETRY_IN_PRODUCTION") != nullptr) {

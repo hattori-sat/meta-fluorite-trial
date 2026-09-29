@@ -1,0 +1,52 @@
+From c40e51d18fb51264a82ee93c29bb8c77b30865ee Mon Sep 17 00:00:00 2001
+From: Fluorite integration role <integration-role@localhost>
+Date: Mon, 7 Sep 2026 10:55:38 +0000
+Subject: [PATCH] diag: trace selected native light state
+
+---
+ .../core/systems/derived/light_system.cc      | 25 +++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 6575c12..17edfd6 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -17,6 +17,7 @@
+ #include "light_system.h"
+ 
+ #include <asio/post.hpp>
++#include <cstdlib>
+ #include <core/components/derived/light.h>
+ #include <core/entity/base/entityobject.h>
+ #include <core/include/color.h>
+@@ -60,6 +61,30 @@ void LightSystem::CreateDefaultLight() {
+ void LightSystem::BuildLightAndAddToScene(Light& light) {
+   BuildLight(light);
+   AddLightToScene(light);
++
++  if (std::getenv("FLR0026_NATIVE_LIGHT_OPERATION_TRACE") != nullptr) {
++    const auto filamentSystem = ecs->getSystem<FilamentSystem>(
++      "lightManager::BuildLightAndAddToSceneTrace"
++    );
++    const auto* const engine = filamentSystem->getFilamentEngine();
++    const auto& lightManager = engine->getLightManager();
++    const auto nativeEntity = light.m_poFilamentEntityLight;
++    const auto nativeInstance = lightManager.getInstance(nativeEntity);
++    const auto* const scene = filamentSystem->getFilamentScene();
++    const auto& position = light.getPosition();
++    spdlog::info(
++      "FLR0026_NATIVE_LIGHT_STATE native_entity={} light_component={} "
++      "instance_valid={} scene_has_entity={} scene_light_count={} position=({},{},{})",
++      nativeEntity.getId(),
++      lightManager.hasComponent(nativeEntity),
++      nativeInstance.isValid(),
++      scene != nullptr && scene->hasEntity(nativeEntity),
++      scene != nullptr ? scene->getLightCount() : 0u,
++      position.x,
++      position.y,
++      position.z
++    );
++  }
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////////////

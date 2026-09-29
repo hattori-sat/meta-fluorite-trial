@@ -1,0 +1,46 @@
+From 327d935acf503a641586e0f5251b0f86dd36cc63 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 24 Sep 2026 00:46:32 +0000
+Subject: [PATCH] FLR-0272: restore proven scene camera contract
+
+---
+ .../filament_scene/lib/scene/scene_widget.dart  | 17 +++++++----------
+ 1 file changed, 7 insertions(+), 10 deletions(-)
+
+diff --git a/packages/filament_scene/lib/scene/scene_widget.dart b/packages/filament_scene/lib/scene/scene_widget.dart
+index 5c86a99..919a68b 100644
+--- a/packages/filament_scene/lib/scene/scene_widget.dart
++++ b/packages/filament_scene/lib/scene/scene_widget.dart
+@@ -196,14 +196,13 @@ class ModelViewerState extends State<SceneView> {
+ 
+     //final model = widget.models?.toJson();
+     final JsonObject? scene = widget.scene?.toJson();
++    if (scene != null && widget.cameras != null && widget.cameras!.isNotEmpty) {
++      // The current native v2 deserializer creates the ViewTarget camera
++      // from scene.camera. Do not send the legacy root cameras list.
++      scene['camera'] = widget.cameras!.first.toJson();
++    }
+     _creationParams["models"] = widget.models?.map((final param) => param.toJson()).toList();
+     _creationParams["scene"] = scene;
+-    // The current native deserializer consumes the root-level cameras list,
+-    // creates ECS Camera entities, and ViewTargetSystem applies their
+-    // projection/transform to the Filament view. Keep the Dart payload on
+-    // that supported contract instead of placing it in scene.camera, which
+-    // the native scene-level parser does not consume.
+-    _creationParams["cameras"] = widget.cameras?.map((final param) => param.toJson()).toList();
+     // use concatenated toFlatJson
+     _creationParams["shapes"] = widget.shapes
+         ?.map((final param) => param.toFlatJson().map(normalizeShape).toList())
+@@ -227,10 +226,8 @@ class ModelViewerState extends State<SceneView> {
+       // TODO(kerberjg): just keep a list of entities in a single map
+       widget.models?.forEach((final model) => model.initialize(widget.filament));
+       widget.shapes?.forEach((final shape) => shape.initialize(widget.filament));
+-      // Root cameras are registered as native ECS entities by the scene
+-      // deserializer. Bind the Dart camera to that existing entity so its
+-      // target/orbit/projection updates reach ViewTargetSystem.
+-      widget.cameras?.forEach((final camera) => camera.initialize(widget.filament));
++      // scene.camera is already owned by the native ViewTarget. The generated
++      // camera mutation channels are not implemented by this native API.
+ 
+       // Call the onCreated callback with the controller
+       print('FLR0256_ON_CREATED_DISPATCH_BEGIN id=$id');

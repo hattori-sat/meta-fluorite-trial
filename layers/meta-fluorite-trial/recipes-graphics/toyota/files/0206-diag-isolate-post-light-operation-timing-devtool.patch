@@ -1,0 +1,41 @@
+From 6b3597d1bcd86b76034c4c2a733d1fd4fdff6041 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 10 Sep 2026 21:16:56 +0000
+Subject: [PATCH] diag: isolate post-light operation timing
+
+---
+ .../core/systems/derived/light_system.cc            | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/light_system.cc b/plugins/filament_view/core/systems/derived/light_system.cc
+index 17aafe1..5eb750f 100644
+--- a/plugins/filament_view/core/systems/derived/light_system.cc
++++ b/plugins/filament_view/core/systems/derived/light_system.cc
+@@ -17,7 +17,9 @@
+ #include "light_system.h"
+ 
+ #include <asio/post.hpp>
++#include <chrono>
+ #include <cstdlib>
++#include <thread>
+ #include <core/components/derived/light.h>
+ #include <core/entity/base/entityobject.h>
+ #include <core/include/color.h>
+@@ -62,6 +64,17 @@ void LightSystem::BuildLightAndAddToScene(Light& light) {
+   BuildLight(light);
+   AddLightToScene(light);
+ 
++  if (const char* rawDelayUs =
++        std::getenv("FLR0026_NATIVE_LIGHT_OPERATION_DELAY_US")) {
++    char* end = nullptr;
++    const long delayUs = std::strtol(rawDelayUs, &end, 10);
++    if (end != rawDelayUs && *end == '\0' && delayUs > 0 && delayUs <= 1000000) {
++      spdlog::info("FLR0026_NATIVE_LIGHT_OPERATION_DELAY_BEGIN delay_us={}", delayUs);
++      std::this_thread::sleep_for(std::chrono::microseconds(delayUs));
++      spdlog::info("FLR0026_NATIVE_LIGHT_OPERATION_DELAY_DONE delay_us={}", delayUs);
++    }
++  }
++
+   if (std::getenv("FLR0026_NATIVE_LIGHT_OPERATION_TRACE") != nullptr) {
+     const auto filamentSystem = ecs->getSystem<FilamentSystem>(
+       "lightManager::BuildLightAndAddToSceneTrace"

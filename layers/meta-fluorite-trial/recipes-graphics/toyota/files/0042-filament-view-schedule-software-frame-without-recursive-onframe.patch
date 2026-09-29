@@ -1,0 +1,40 @@
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -653,12 +653,21 @@
+ 
+ ////////////////////////////////////////////////////////////////////////////
+ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time) {
+-  // lock surface
+-    if (callback == nullptr) {
+-      static uint32_t lastSoftwareFrameTime = static_cast<uint32_t>(-1);
+-      if (lastSoftwareFrameTime == time) return;
+-      lastSoftwareFrameTime = time;
+-    }
++  if (callback == nullptr) {
++    const auto obj = static_cast<ViewTarget*>(data);
++    const auto drawSoftwareFrame = std::make_shared<std::function<void(uint32_t)>>();
++    *drawSoftwareFrame = [obj, drawSoftwareFrame](const uint32_t frameTime) {
++      std::this_thread::sleep_for(std::chrono::milliseconds(100));
++      obj->DrawFrame(frameTime);
++      post(*ECSManager::GetInstance()->getStrand(), [drawSoftwareFrame, frameTime] {
++        (*drawSoftwareFrame)(frameTime + 100);
++      });
++    };
++    post(*ECSManager::GetInstance()->getStrand(), [drawSoftwareFrame, time] {
++      (*drawSoftwareFrame)(time);
++    });
++    return;
++  }
+
+   const auto obj = static_cast<ViewTarget*>(data);
+   std::lock_guard<std::mutex> lock(obj->frameLock_);
+@@ -706,10 +715,6 @@
+     // spdlog::debug("[OnFrame] === (wl) callback end ===");
+     promise->set_value();
+   });
+-    if (callback == nullptr) {
+-      OnFrame(obj, nullptr, time + 100);
+-    }
+-
+   // DON'T wait for the future here (see above in this method)
+ }

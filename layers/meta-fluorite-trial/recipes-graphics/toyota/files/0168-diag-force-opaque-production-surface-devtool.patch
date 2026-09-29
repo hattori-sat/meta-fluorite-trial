@@ -1,0 +1,31 @@
+From 48578a217b87e29ffe8987e84c71e2f608fd4b6e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Fri, 4 Sep 2026 12:54:16 +0000
+Subject: [PATCH] diag: allow opaque production surface probe
+
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 0b900a0..a42e10b 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -474,11 +474,16 @@ void ViewTarget::setupView(uint32_t width, uint32_t height) {
+ 
+   // this probably needs to change
+   fview_->setVisibleLayers(0xff, 0xff);
+   fview_->setViewport({0, 0, width, height});
+ 
+-  fview_->setBlendMode(filament::View::BlendMode::TRANSLUCENT);
++  const bool forceOpaque = std::getenv("FLR0026_NATIVE_FORCE_OPAQUE") != nullptr;
++  fview_->setBlendMode(
++    forceOpaque ? filament::View::BlendMode::OPAQUE : filament::View::BlendMode::TRANSLUCENT);
++  if (forceOpaque) {
++    spdlog::info("FLR0026_NATIVE_FORCE_OPAQUE enabled=true");
++  }
+ 
+   // on mobile, better use lower quality color buffer
+   // filament::View::RenderQuality renderQuality{};
+   // renderQuality.hdrColorBuffer = filament::View::QualityLevel::MEDIUM;
+   // fview_->setRenderQuality(renderQuality);
+-- 
+2.34.1
+

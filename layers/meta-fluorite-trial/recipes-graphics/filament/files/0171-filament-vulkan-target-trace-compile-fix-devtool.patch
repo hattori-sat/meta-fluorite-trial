@@ -1,0 +1,22 @@
+From e712f5c77849f3e45eba7e747e91f953b8a3dc25 Mon Sep 17 00:00:00 2001
+From: Codex Devtool <codex-devtool@localhost>
+Date: Thu, 10 Sep 2026 12:43:55 +0900
+Subject: [PATCH] fix: keep Vulkan target trace attachment mutable
+
+---
+ filament/backend/src/vulkan/VulkanDriver.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanDriver.cpp b/filament/backend/src/vulkan/VulkanDriver.cpp
+index 44c7fe9ba..fba0666b8 100644
+--- a/filament/backend/src/vulkan/VulkanDriver.cpp
++++ b/filament/backend/src/vulkan/VulkanDriver.cpp
+@@ -1905,7 +1905,7 @@ void VulkanDriver::readPixels(Handle<HwRenderTarget> src, uint32_t x, uint32_t y
+     }
+     auto srcTarget = resource_ptr<VulkanRenderTarget>::cast(&mResourceManager, src);
+     if (std::getenv("FLR0026_TARGET_TRACE") != nullptr) {
+-        auto const& color = srcTarget->getColor0();
++        auto& color = srcTarget->getColor0();
+         VkExtent2D const extent = srcTarget->getExtent();
+         FVK_LOGI << "FLR0026_TARGET_READBACK_BEGIN target_handle=" << src.getId()
+                  << " swapchain=" << srcTarget->isSwapChain()

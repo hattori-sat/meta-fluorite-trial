@@ -1,0 +1,106 @@
+From 99621b62fec3f37b3a6385e072c1b5954d8fd359 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 07:05:59 +0000
+Subject: [PATCH] diag: trace Vulkan present substeps
+
+---
+ filament/backend/src/vulkan/VulkanCommands.cpp            | 8 ++++++++
+ filament/backend/src/vulkan/VulkanSwapChain.cpp           | 8 +++++++-
+ .../src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp   | 2 ++
+ 3 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/filament/backend/src/vulkan/VulkanCommands.cpp b/filament/backend/src/vulkan/VulkanCommands.cpp
+index 1c58a4a16..616ed0262 100644
+--- a/filament/backend/src/vulkan/VulkanCommands.cpp
++++ b/filament/backend/src/vulkan/VulkanCommands.cpp
+@@ -27,10 +27,12 @@
+ #include <utils/CString.h>
+ #include <utils/Log.h>
+ #include <utils/Panic.h>
+ #include <utils/debug.h>
+ 
++#include <cstdio>
++
+ using namespace bluevk;
+ using namespace utils;
+ 
+ namespace filament::backend {
+ 
+@@ -196,11 +198,13 @@ void VulkanCommandBuffer::begin() noexcept {
+ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+     while (mMarkerCount > 0) {
+         popMarker();
+     }
+ 
++    std::fprintf(stderr, "FLR0026_VK_COMMAND_END_BEGIN buffer=%p\\n", static_cast<void*>(mBuffer));
+     vkEndCommandBuffer(mBuffer);
++    std::fprintf(stderr, "FLR0026_VK_COMMAND_END_DONE buffer=%p\\n", static_cast<void*>(mBuffer));
+ 
+     VkSemaphore submissionSemaphore = mSubmission->getVkSemaphore();
+     VkSubmitInfo submitInfo{
+         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+         .waitSemaphoreCount = mWaitSemaphores.size(),
+@@ -232,12 +236,16 @@ fvkmemory::resource_ptr<VulkanSemaphore> VulkanCommandBuffer::submit() {
+     FVK_LOGI << ") "
+              << " signal=" << submissionSemaphore
+              << " fence=" << mFence;
+ #endif
+ 
++    std::fprintf(stderr, "FLR0026_VK_QUEUE_SUBMIT_BEGIN queue=%p fence=%p\\n",
++            static_cast<void*>(mQueue), static_cast<void*>(mFence));
+     UTILS_UNUSED_IN_RELEASE VkResult result =
+         vkQueueSubmit(mQueue, 1, &submitInfo, mFence);
++    std::fprintf(stderr, "FLR0026_VK_QUEUE_SUBMIT_DONE result=%d queue=%p fence=%p\\n",
++            static_cast<int32_t>(result), static_cast<void*>(mQueue), static_cast<void*>(mFence));
+     mFenceStatus->setStatus(VK_NOT_READY);
+ 
+ #if FVK_ENABLED(FVK_DEBUG_COMMAND_BUFFER)
+     if (result != VK_SUCCESS) {
+         FVK_LOGD << "Failed command buffer submission result: " << result;
+diff --git a/filament/backend/src/vulkan/VulkanSwapChain.cpp b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+index d6e24dff6..67e841f4e 100644
+--- a/filament/backend/src/vulkan/VulkanSwapChain.cpp
++++ b/filament/backend/src/vulkan/VulkanSwapChain.cpp
+@@ -118,15 +118,21 @@ void VulkanSwapChain::present(DriverBase& driver) {
+                 .layerCount = mLayerCount,
+         };
+         mColors[mCurrentSwapIndex]->transitionLayout(&commands, subresources, VulkanLayout::PRESENT);
+     }
+ 
+-    mCommands->flush();
++    std::fprintf(stderr, "FLR0026_VK_SWAPCHAIN_FLUSH_BEGIN\\n");
++    const bool flushed = mCommands->flush();
++    std::fprintf(stderr, "FLR0026_VK_SWAPCHAIN_FLUSH_DONE flushed=%s\\n",
++            flushed ? "true" : "false");
+ 
+     // We only present if it is not headless. No-op for headless.
+     if (!mHeadless) {
++        std::fprintf(stderr, "FLR0026_VK_FINISHED_SIGNAL_ACQUIRE_BEGIN\\n");
+         auto finishedDrawing = mCommands->acquireFinishedSignal();
++        std::fprintf(stderr, "FLR0026_VK_FINISHED_SIGNAL_ACQUIRE_DONE present=%s\\n",
++                finishedDrawing ? "true" : "false");
+         mFinishedDrawing[mCurrentSwapIndex] = finishedDrawing;
+         VkResult const result =
+                 mPlatform->present(swapChain, mCurrentSwapIndex, finishedDrawing->getVkSemaphore());
+         FILAMENT_CHECK_POSTCONDITION(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR ||
+                 result == VK_ERROR_OUT_OF_DATE_KHR)
+diff --git a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+index 27d72d5df..cc5cf9779 100644
+--- a/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
++++ b/filament/backend/src/vulkan/platform/VulkanPlatformSwapChainImpl.cpp
+@@ -330,10 +330,12 @@ VkResult VulkanPlatformSurfaceSwapChain::present(uint32_t index, VkSemaphore fin
+             .pWaitSemaphores = &finishedDrawing,
+             .swapchainCount = 1,
+             .pSwapchains = &mSwapchain,
+             .pImageIndices = &currentIndex,
+     };
++    std::fprintf(stderr, "FLR0026_VK_QUEUE_PRESENT_BEGIN queue=%p swapchain=%p index=%u\\n",
++            static_cast<void*>(mQueue), static_cast<void*>(mSwapchain), currentIndex);
+     VkResult result = vkQueuePresentKHR(mQueue, &presentInfo);
+     std::fprintf(
+             stderr,
+             "FLR0026_VK_QUEUE_PRESENT result=%d surface=%llx swapchain=%llx index=%u\n",
+             static_cast<int32_t>(result),
+-- 
+2.34.1
+

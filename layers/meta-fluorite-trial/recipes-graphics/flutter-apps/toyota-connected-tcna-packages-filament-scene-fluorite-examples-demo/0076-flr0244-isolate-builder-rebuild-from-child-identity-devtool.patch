@@ -1,0 +1,33 @@
+From 310436476ad384e1c7d4e44320e434bccc87eb67 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 20 Sep 2026 17:02:42 +0000
+Subject: [PATCH] FLR-0244: isolate builder rebuild from child identity
+
+---
+ packages/filament_scene/example/lib/main.dart | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/packages/filament_scene/example/lib/main.dart b/packages/filament_scene/example/lib/main.dart
+index fbd8535..9b9bdee 100644
+--- a/packages/filament_scene/example/lib/main.dart
++++ b/packages/filament_scene/example/lib/main.dart
+@@ -234,8 +234,8 @@ class _MyAppState extends State<MyApp> {
+ 
+             ValueListenableBuilder<Widget?>(
+               valueListenable: _sceneViewNotifier,
+-              builder: (context, sceneView, child) =>
+-                  sceneView ?? const SizedBox.shrink(),
++              child: const SizedBox.shrink(),
++              builder: (context, sceneView, child) => child!,
+             ),
+ 
+             if (kFlr0026DiagnosticMock3d)
+@@ -264,7 +264,7 @@ class _MyAppState extends State<MyApp> {
+                   // FLR-0235: keep the tap boundary without Material hover
+                   // state painting over the native 3D surface.
+                   onTap: () {
+-                    print('FLR0243_SCENE_SUBTREE_ACTIVATION id=5 name=PlainInertWidget');
++                    print('FLR0244_SCENE_SUBTREE_ACTIVATION id=5 name=StableChildBuilderRebuild');
+                     _setScene(5);
+                   },
+                   child: Container(

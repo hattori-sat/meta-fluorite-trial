@@ -1,0 +1,22 @@
+From f9bad22bc5fc3041b397d15027221457e06b0f8a Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 3 Sep 2026 00:51:40 +0000
+Subject: [PATCH] fix: use radians for planetarium camera
+
+---
+ .../filament_scene/example/lib/scenes/planetarium_scene.dart    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+index 8dc47d9..43ccb33 100644
+--- a/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
++++ b/packages/filament_scene/example/lib/scenes/planetarium_scene.dart
+@@ -60,7 +60,7 @@ class PlanetariumSceneView extends StatefulSceneView {
+   static final Camera camera = Camera(
+     id: objectGuids['camera']!,
+     orbitOriginPoint: scenePosition,
+-    orbitAngles: Vector2(0, 90),
++    orbitAngles: Vector2(0, radians(90)),
+     orbitDistance: 80,
+     name: 'planetariumCamera',
+   );

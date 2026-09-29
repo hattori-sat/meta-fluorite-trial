@@ -1,0 +1,21 @@
+From ff412ab38f1c465b36979b76d4ce1154941b6e29 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sun, 13 Sep 2026 12:02:41 +0000
+Subject: [PATCH] diag: flush Wayland child surface after present
+
+---
+ plugins/filament_view/core/scene/view_target.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plugins/filament_view/core/scene/view_target.cc b/plugins/filament_view/core/scene/view_target.cc
+index 4b303ec..c8e6b1d 100644
+--- a/plugins/filament_view/core/scene/view_target.cc
++++ b/plugins/filament_view/core/scene/view_target.cc
+@@ -617,6 +617,7 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time)
+     wl_subsurface_set_position(obj->subsurface_, obj->left_, obj->top_);
+ 
+     wl_surface_commit(obj->surface_);
++    wl_display_flush(obj->display_);
+   });
+ }
+ 

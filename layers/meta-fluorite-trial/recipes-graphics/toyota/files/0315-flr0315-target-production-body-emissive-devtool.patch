@@ -1,0 +1,30 @@
+From 990ab7d2dc7d46842cbbfb5ed9a1473dccaf55af Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@localhost>
+Date: Fri, 25 Sep 2026 11:13:06 +0900
+Subject: [PATCH] FLR-0315: target PaintColor emissive diagnostic
+
+---
+ plugins/filament_view/core/systems/derived/model_system.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 4cb4f01..aec04f7 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -504,6 +504,7 @@ void ModelSystem::setupRenderable(
+         !production_emissive_override_applied_ && primitive == 0 &&
+         std::getenv("FLR0307_PRODUCTION_EMISSIVE_OVERRIDE") != nullptr &&
+         model->getAssetPath().find("sequoia_ngp.glb") != std::string::npos &&
++        materialInstance->getName() == "PaintColor" &&
+         material->hasParameter("emissiveFactor")
+       ) {
+         materialInstance->setParameter(
+@@ -511,7 +512,7 @@ void ModelSystem::setupRenderable(
+         );
+         production_emissive_override_applied_ = true;
+         spdlog::info(
+-          "FLR0307_PRODUCTION_EMISSIVE_OVERRIDE_DONE entity={} primitive={} material={} "
++          "FLR0315_PRODUCTION_BODY_EMISSIVE_OVERRIDE_DONE entity={} primitive={} material={} "
+           "value=(1,0,1)",
+           fEntity.getId(), primitive, materialInstance->getName()
+         );

@@ -1,0 +1,1 @@
+log=/run/user/1001/flr0285-production-no-model-skip-shapes.log; grep -E 'FLR0026_VK_QUEUE_SUBMIT_(BEGIN|DONE)|FLUORITE_VK_SUBMIT_(BEGIN|RETURN)|FLR0026_VK_QUEUE_PRESENT|FLR0026_VK_PRESENT_BOUNDARY' "$log" | tail -n 80; true

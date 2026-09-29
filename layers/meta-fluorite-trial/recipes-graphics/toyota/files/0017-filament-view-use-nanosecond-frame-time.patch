@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Fluorite Integration Role
+Date: Mon, 17 Aug 2026 19:10:00 +0900
+Subject: [PATCH] filament_view: use nanosecond frame time
+
+Filament expects beginFrame timestamps in the absolute steady-clock nanoseconds
+epoch while the Wayland callback and the QEMU software loop use milliseconds.
+Use the current steady-clock value at the renderer boundary and discard
+duplicate software timestamps so only one successor chain drives the swapchain.
+
+---
+ ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+--- a/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
++++ b/ivi-homescreen-plugins/plugins/filament_view/core/scene/view_target.cc
+@@ -609,1 +609,1 @@
+-  if (renderer->beginFrame(fswapChain_, time)) {
++  if (renderer->beginFrame(fswapChain_, std::chrono::steady_clock::now().time_since_epoch().count())) {
+@@ -656,2 +656,8 @@ void ViewTarget::OnFrame(void* data, wl_callback* callback, const uint32_t time) {
+   // lock surface
++    if (callback == nullptr) {
++      static uint32_t lastSoftwareFrameTime = static_cast<uint32_t>(-1);
++      if (lastSoftwareFrameTime == time) return;
++      lastSoftwareFrameTime = time;
++    }
++
+   const auto obj = static_cast<ViewTarget*>(data);
