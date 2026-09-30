@@ -62,6 +62,31 @@ must remain unchanged.
   no external image URIs or missing references were found.
 - Current candidate identities are pinned above. Example Demo 3.32.5 and
   6144 MiB QEMU memory were used in the recent Mini runtime trials.
+- The fixed Podman container is running with the documented project RW, AGL
+  RO, and state RW binds; the wrapper `status` probe passed. The mounted project
+  worktree is clean on `devtool-flr-0371-mount` at `a3e7799`; normalized Git
+  common-dir and origin checks match this active feature worktree. Its branch
+  is intentionally older, so any layer artifact must be generated/committed
+  from a temporary mount checkout based on the active feature tip, then restore
+  the mounted worktree to its original branch.
+- Official Devtool status reports exactly one active component:
+  `fluorite-plugins` at the fixed `sources/fluorite-plugins` path. The source
+  repository is clean on `devtool-FLR-0371-source`, HEAD
+  `7548f28bf50b3c3241efcfe8d4612440c0da0825`, parent
+  `599bf4ea72b2a5874fd3f296b756941eb05de946`. The committed layer patch 0330
+  has `From 7548f28...` and SHA-256
+  `069420d5293dc1f74ad739a18a4e9540cbf44efb16b4a3140d33113e122e3333`; it is
+  the final plugin patch registration in the active `flutter-auto_2.0.bbappend`.
+- The proven fixture material is defined by
+  `material.baseColor.rgb = materialParams.color`, a FLOAT3 `color` parameter,
+  UNLIT shading, and linear blue `(0.05, 0.45, 1.0)`. These exact shader,
+  parameter, shading, and value are present in the committed FLR-0371 source.
+- The production `ModelSystem` already exposes `model->getAssetPath()`, a
+  renderable primitive-count loop, `_rcm->setMaterialInstanceAt()`, and an
+  `onDestroy()` sequence that destroys model assets before diagnostic material
+  instances/materials. The old FLR-0326 branch uses a different fixed-magenta
+  shader and is restricted to primitive 0 / `PaintColor` inside the optional
+  model-content trace block.
 - The ticket branch is clean at start. No source, recipe, patch, build, image,
   or runtime changes have been made for FLR-0383 yet.
 - FLR-0382 runs 0003–0005 reached scene/draw and two successful present

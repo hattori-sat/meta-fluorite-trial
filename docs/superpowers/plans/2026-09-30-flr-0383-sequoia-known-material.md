@@ -74,17 +74,17 @@ is defective.
 **Files:** ticket, dated working log, `TASKS.md`, this plan; then read-only
 inspection of the existing Devtool environment.
 
-- [ ] Record canonical-repository guard, branch/HEAD, clean tree, and FLR-0382
+- [x] Record canonical-repository guard, branch/HEAD, clean tree, and FLR-0382
   handoff in the work log.
-- [ ] Confirm the exact current patch stack includes 0326, 0330, and 0279 in
+- [x] Confirm the exact current patch stack includes 0326, 0330, and 0279 in
   the expected order, and inspect their source/API changes before editing.
-- [ ] Inspect existing Podman container and bind, `devtool status`, fixed
+- [x] Inspect existing Podman container and bind, `devtool status`, fixed
   source path, source Git status/HEAD, active component recipe, and baseline
   provenance. Reuse them only if exact and clean.
-- [ ] Read the current `ModelSystem::setupRenderable()` and `onDestroy()` plus
+- [x] Read the current `ModelSystem::setupRenderable()` and `onDestroy()` plus
   the existing material builder and asset-path/primitive APIs from source and
   patch history. Decide exact ownership/lifetime only from that code evidence.
-- [ ] Record two alternatives and the chosen discriminator in the ticket:
+- [x] Record two alternatives and the chosen discriminator in the ticket:
   parameter override (already falsified on production), one-primitive magenta
   replacement (older-image negative), and all-Sequoia-primitives known-blue
   UNLIT replacement (chosen).
