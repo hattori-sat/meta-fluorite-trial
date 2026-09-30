@@ -1,6 +1,6 @@
 # FLR-0375 — inspect the production Sequoia GLB image references
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Owner: candidate-image package inspection / Filament GLB asset roles
 - Created: 2026-09-30
@@ -34,6 +34,16 @@ rendering fix.
 - FLR-0374 did not transfer a QEMU disk image to Mac. Keep that boundary; the
   only extracted object in this ticket may be the single Sequoia GLB, if
   needed for parsing.
+- Candidate rootfs SHA-256 matched exactly. The installed GLB is
+  13,671,064 bytes with SHA-256
+  `cde9efd067a75c1f5b99b8fb529b5bb4636956193188bd15add3bccc349109ec`.
+- GLB v2 declares the exact file length and has JSON+BIN chunks; its one
+  buffer and 108 bufferViews are in bounds.
+- All 23 images are embedded PNGs referenced through bufferViews. All 23
+  passed PNG signature, chunk CRC, IHDR/IDAT/IEND, and deflate checks. There
+  are zero external image URIs and zero image/bufferView range errors.
+- All 23 texture sources and all 23 material texture references resolve to
+  valid image/texture indices; no reference errors were found.
 
 ## 4W1H (excluding Why)
 
@@ -54,9 +64,9 @@ rendering fix.
    views or data URIs, with valid bounds and non-empty payloads; this falsifies
    a missing external-path explanation but not runtime binding/sampling.
 3. **The GLB is structurally sound but runtime material/camera/render output is
-   wrong.** Prediction: all referenced payloads are present, while FLR-0374's
-   no-vehicle/no-HUD QMP result remains. This is not proof of which runtime
-   stage fails.
+   wrong.** Supported at the static asset boundary: all referenced payloads
+   are present, while FLR-0374's no-vehicle/no-HUD QMP result remains. This is
+   not proof of which runtime stage fails.
 
 ## Scope and success criteria
 
@@ -67,10 +77,9 @@ rendering fix.
   installed `sequoia_ngp.glb` and, if useful, extract only that single model
   into the run evidence directory. Do not mount the image read-write, modify
   the rootfs, or transfer the rootfs/kernel/QEMU image to Mac.
-- Parse the GLB header/JSON chunk and report buffer lengths, image URI or
+- Parse the GLB header/JSON chunk and validate buffer lengths, image URI or
   buffer-view source, texture-to-image indices, material texture references,
-  and any out-of-bounds or missing payload. Do not print or retain image pixel
-  data.
+  and image payload integrity. Do not print or retain image pixel data.
 - Record rootfs and GLB hashes, exact package path, bounded parse output, and
   an explicit verdict: external path missing, embedded/present, malformed, or
   UNKNOWN.
@@ -105,28 +114,37 @@ rendering fix.
 
 ### Do
 
-- Ticket opened after FLR-0374 confirmed the repeated Oops and preserved the
-  full QMP frame. No GLB has been extracted or inspected yet.
+- Verified the exact rootfs hash, then used read-only `debugfs` to extract
+  only the installed Sequoia GLB into `$BUILD_EVIDENCE/flr0375-0001/`.
+- Validated GLB structure, all 23 embedded PNG payloads, all texture sources,
+  and all material texture references. No rootfs mount or mutation, QEMU,
+  Flutter, build, Devtool, or script edit occurred.
+- An initial `stat` measured the symlink itself (59 bytes); `readlink -f` and
+  `stat -L` corrected the measurement to the image target. The first parser
+  pass checked PNG signatures and bounds only; a second pass checked CRC and
+  deflate for every image. Only the verified second pass is used for verdict.
 
 ### Check
 
 | Gate | Expected | Actual | Result |
 | --- | --- | --- | --- |
-| Canonical repository / active ticket | Guard passes; FLR-0375 sole active | Pending | PENDING |
-| Candidate identity | Exact rootfs hash matches FLR-0371/0374 | Pending | PENDING |
-| GLB structure | Valid header and bounded JSON | Pending | PENDING |
-| Image references | Every referenced image is embedded or resolves to a packaged file | Pending | PENDING |
-| Scope | No image/build/runtime mutation | Read-only inspection only | PENDING |
+| Canonical repository / active ticket | Guard passes; FLR-0375 sole active | PASS | PASS |
+| Candidate identity | Exact rootfs hash matches FLR-0371/0374 | `949921c8…` exact match | PASS |
+| GLB structure | Valid header and bounded JSON | GLB2/file length/chunks valid; 108 bufferViews, zero range errors | PASS |
+| Image references | Every referenced image is embedded or resolves to a packaged file | 23 embedded PNGs validated; 0 external URIs; all 23 texture/material references valid | PASS |
+| Scope | No image/build/runtime mutation | One read-only GLB extraction; no QEMU, build, patch, or script changes | PASS |
 
 ### Act
 
-- Pending exact-candidate GLB inspection. Do not patch based only on the
-  top-level `Reading: sequoia_ngp.glb` or emissive texture-ready marker.
+- Missing external texture files are falsified for this exact packaged GLB.
+  Do not add a path patch. Runtime sampling remains unproven.
+- Open FLR-0376 to replay Flutter manually with the known-good explicit
+  `agl-driver` Wayland session environment; FLR-0374 did not record that
+  environment contract. Keep all launcher scripts unchanged until the manual
+  invocation produces a successful observable screen.
 
 ## UNKNOWN
 
-- Whether all base-color, metallic/roughness, normal, and emissive images are
-  embedded and valid in the packaged GLB.
 - Whether texture coordinates and material instances sample those images at
   runtime.
 - Whether active camera 12 frames the production vehicle; this is outside the
