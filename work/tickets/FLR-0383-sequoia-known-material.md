@@ -1,6 +1,6 @@
 # FLR-0383 — apply a known-visible material to every Sequoia primitive
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Owner: Mac Podman Devtool / meta-fluorite-trial / Mini BitBake / QEMU / guest Flutter / QMP evidence roles
 - Created: 2026-09-30
@@ -279,6 +279,14 @@ must remain unchanged.
   until the comparison discriminates that boundary.
 - If build, launch, or live-capture gates fail, record the failed gate and stop
   at that boundary; do not reinterpret a stale or post-timeout frame.
+
+### Handoff — 2026-09-30
+
+- The bounded UNLIT trial remains a negative visible-pixel result. The next
+  independent material discriminator is [FLR-0385](FLR-0385-apply-lit-material-to-sequoia.md),
+  which transfers the already QMP-proven LIT/RGB fixture material to Sequoia.
+  FLR-0383's image and evidence remain unchanged; the new test is not a retry
+  under this ticket.
 
 ## UNKNOWN
 
