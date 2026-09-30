@@ -107,14 +107,33 @@ must remain unchanged.
   patch, registration, baseline lock, ticket, plan, working log, and dashboard
   were committed locally as `39301804ab6991384bfdc0580c1d6a3c08fe6424`, parent
   `1c828a4647e6514024d4086727d48819b23bbd93`; the branch is clean and was not
-  pushed. No Mini build, image, or FLR-0383 runtime has run.
+  pushed. At commit time no Mini tasks had run; subsequent bundle, patch, and
+  compile results are recorded immediately below.
 - Read-only Mini preflight resolved the active receiver from the QEMU build's
   effective `bblayers.conf`: it is clean at `f61566f1fe74110479152301b9c1cb86f950615b`.
   The documented fixed inbox bundle has SHA-256
   `075a52a8608ea2c193871c44d679bf00c4e1ec2ad322b0a16d3b5c2263248f8d` and
   advertises that same tip. The existing QEMU build/TMPDIR profile matches its
   layer path, there are zero active BitBake processes, and 63 GiB is free on
-  the build filesystem. No receiver/build/TMPDIR state has changed.
+  the build filesystem. At this initial check no receiver/build/TMPDIR state
+  had changed; subsequent handoff and recipe-task results follow.
+- The standard bundle helper PASSed from receiver base
+  `f61566f1fe74110479152301b9c1cb86f950615b` to exact tip
+  `6c0855957347a18ff3990545a02a2d7f94aa719a`. Local and remote bundle
+  SHA-256 matched at
+  `7c373dba7bf49c3be4fc8316883ec09ef433cec6c695f890207bbaa156caee1b`;
+  receiver checkout and effective TOPDIR/TMPDIR checks PASSed.
+- The first recipe-patch gate call stopped before BitBake because this fixed
+  build directory requires explicit `BUILD_AGL_ROOT`; no clean or patch task
+  ran. Resolving the existing source by the build's persisted TEMPLATECONF and
+  rerunning the same gate produced `do_patch=PASS` after its recipe-scoped
+  `clean`.
+- On the same exact receiver/build/TMPDIR, `flutter-auto do_compile=PASS`:
+  2686 tasks attempted, 2681 already current, all succeeded. Four warnings
+  only report the intentional forced `do_patch`/`do_compile` tasks as tainted.
+  Evidence summaries and the bounded full compile log are in the receiver's
+  FLR-0383 evidence directory. After compile, no BitBake process remained and
+  64 GiB was free. No image build or FLR-0383 QEMU/runtime has run yet.
 - FLR-0382 runs 0003–0005 reached scene/draw and two successful present
   returns, but the third present was unmatched; run 0005's QMP still/video
   were captured after timeout and are not live render evidence. Its live
@@ -196,9 +215,13 @@ must remain unchanged.
   missing FLR-0338/0339/0340 evidence links and no FLR-0383 link errors.
 - PASS: local commit `39301804ab6991384bfdc0580c1d6a3c08fe6424` with parent
   `1c828a4647e6514024d4086727d48819b23bbd93`; branch clean, no push.
-- Pending: verified Mini bundle/checkout, Mini `do_patch`/`do_compile`/image
-  build, runtime binding markers, live blue Sequoia ROI with simultaneous HUD,
-  and exact teardown.
+- PASS: bundle SHA-256 above reached the fixed inbox; receiver is exact tip
+  `6c0855957347a18ff3990545a02a2d7f94aa719a`; effective TOPDIR/TMPDIR match.
+- PASS: Mini `do_patch` and `do_compile`; no active BitBake process, 64 GiB
+  free. The first gate invocation lacked the explicit AGL-root role and stopped
+  before BitBake; resolving it from TEMPLATECONF made the same gate pass.
+- Pending: full image build, runtime binding markers, live blue Sequoia ROI
+  with simultaneous HUD, and exact teardown.
 
 ### Act
 

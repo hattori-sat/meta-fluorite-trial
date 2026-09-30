@@ -128,9 +128,13 @@ recipe registration.
   `From` is the source commit, its two files are only `model_system.cc` and
   `model_system.h`, append registration count is one, and workspace
   `initial_rev` is `7548f28…`.
-- [ ] Deliver the committed patch to the Mini and run authoritative `do_patch`
+- [x] Deliver the committed patch to the Mini and run authoritative `do_patch`
   and `do_compile` before the full image build; do not compile through a
-  Mac-side Yocto provider graph.
+  Mac-side Yocto provider graph. PASS: bundle tip `6c08559`, remote SHA-256
+  verified, `do_patch=PASS`, `do_compile=PASS` (2686 tasks; all succeeded).
+  The first patch-gate invocation stopped before BitBake because the helper
+  required explicit `BUILD_AGL_ROOT`; resolving the unique template-matched
+  source root allowed the same gate to pass. FLR-0384 tracks the helper fix.
 
 ## Task 3: Validate and deliver the layer change
 
@@ -146,10 +150,16 @@ recipe registration.
   update, and evidence docs, with generic role identity; record full commit
   and parent. PASS: commit `39301804ab6991384bfdc0580c1d6a3c08fe6424`, parent
   `1c828a4647e6514024d4086727d48819b23bbd93`; no push.
-- [ ] Create a bundle from the verified Mini receiver base, validate its
-  advertised commits and SHA-256, and transfer it to the fixed receiver.
-- [ ] Verify Mini checkout is exactly the local ticket tip and that effective
+- [x] Create a bundle from the verified Mini receiver base, validate its
+  advertised commits and SHA-256, and transfer it to the fixed receiver. PASS:
+  receiver base `f61566f`; bundle SHA-256
+  `7c373dba7bf49c3be4fc8316883ec09ef433cec6c695f890207bbaa156caee1b`.
+- [x] Verify Mini checkout is exactly the local ticket tip and that effective
   recipe inputs and fixed build/TMPDIR roles match the documented profile.
+  PASS: receiver tip `6c0855957347a18ff3990545a02a2d7f94aa719a`, exact
+  `bblayers.conf` receiver, TOPDIR/TMPDIR gates PASS. A following evidence-only
+  documentation commit will be rebundled so the image build uses the exact
+  current tip.
 - [ ] Record available storage and build preconditions; notify the user before
   a long image build. Run target `do_patch`, focused compile, then the image
   build, stopping at first failure. Preserve caches and evidence.
