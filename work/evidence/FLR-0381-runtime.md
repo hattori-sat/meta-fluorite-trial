@@ -59,12 +59,15 @@ separately collected and remains UNKNOWN.
 
 ## Interpretation
 
-Compared with FLR-0380's black QMP frame, removing `WAYLAND_DEBUG` correlates
-with a stable gray framebuffer on two runs; it does not restore the Sequoia or
-HUD. FLR-0378's silhouette used `FLR0026_SCENE_STAGE_TRACE=1`, unlike these
-low-volume runs. This is the next isolated runtime comparison, not evidence
-that tracing fixes rendering. The no-light profile cannot diagnose normal
-light or texture output.
+Both stills were gray, but run 0001's liveness at still capture was not proven.
+The single liveness-verified capture (run 0002) had a stable gray framebuffer
+across its still and eight-frame video. Compared with FLR-0380's black QMP
+frame, removing `WAYLAND_DEBUG` correlates with gray output but does not
+establish causality or restore the Sequoia/HUD. FLR-0378's silhouette used
+`FLR0026_SCENE_STAGE_TRACE=1`, unlike these low-volume runs. The separate
+FLR-0382 ticket isolates that trace condition; it is not evidence that tracing
+fixes rendering. The no-light profile cannot diagnose normal light or texture
+output.
 
 Historical controls remain distinct: FLR-0371/FLR-0286 prove a self-made
 Filament fixture plus HUD; FLR-0049/FLR-0070 are historical production

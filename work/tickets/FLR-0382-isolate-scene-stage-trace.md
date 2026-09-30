@@ -33,6 +33,25 @@ camera, compositor, or general 3D investigation.
   `WAYLAND_DEBUG` or scene-stage trace. One capture passed the live-process
   gate and showed uniform gray across the full frame and all eight video frames;
   neither vehicle nor HUD pixels were present. See its QMP evidence manifest.
+- FLR-0382 run `flr0382-0001` manually used the same profile with only
+  `FLR0026_SCENE_STAGE_TRACE=1` added and `WAYLAND_DEBUG` absent. The guest
+  launcher recorded timeout status `124`; the outer SSH invocation also ended
+  with `124`. Its bounded runtime log is 3,065,644 bytes / 27,832 lines, with
+  13,409 `ASSET_READY` records, two `QUEUE_PRESENT_RETURN result=0` records,
+  then a third present-enter without a recorded return. The QMP still and all
+  eight video frames were captured after the app timeout; they are black and
+  hash-identical to the pre-Flutter frame
+  (`d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`).
+  This is not a live-render observation and does not decide whether trace
+  changes the rendered scene.
+- The owned QEMU was quit through QMP; both recorded PIDs, the QMP socket, and
+  forwarded ports were absent in the independent post-teardown check.
+- The registered diagnostic patch `0279-diag-trace-current-production-scene-stages-devtool.patch`
+  gates additional `spdlog::info` records on this environment variable. It
+  logs draw boundaries and scene/model state; `ASSET_READY` is emitted from
+  the repeated asset-loading update. Static diff shows no intended render-state
+  mutation, so any pixel change would indicate timing/logging correlation,
+  not a direct geometry fix.
 - The observed difference is not enough to establish that tracing changes
   graphics behavior; logging overhead, run variation, and missing raw FLR-0378
   output remain possible factors.
@@ -64,8 +83,9 @@ camera, compositor, or general 3D investigation.
 ## Scope and success criteria
 
 - Reuse the exact candidate, existing Mini QEMU/runtime harness, bundle, and
-  evidence roles. Use one new run directory `flr0382-0001`; do not create a
-  second build/TMPDIR or copy a disk image to Mac.
+  evidence roles. Use unique run directories (`flr0382-0001` was the first
+  attempt; the planned retry uses `flr0382-0002`); do not create a second
+  build/TMPDIR or copy a disk image to Mac.
 - Before launch, check canonical branch, one active ticket, no residual QEMU,
   QMP socket/ports, guest session/bundle, helper identity, candidate hashes,
   and available Mini storage. Fail closed before Flutter if any check fails.
@@ -113,18 +133,61 @@ camera, compositor, or general 3D investigation.
 
 ### Do
 
-- Pending manual runtime execution. No script or source edits.
+- Reused the existing Mini QEMU/runtime harness and exact candidate hashes;
+  started one QEMU and manually launched `/usr/bin/flutter-auto` as
+  `agl-driver` with the FLR-0381 no-light profile plus only
+  `FLR0026_SCENE_STAGE_TRACE=1`. No source, build, patch, or persistent script
+  changed.
+- The direct guest launch was bounded at 45 seconds. The app status file and
+  outer SSH invocation both reported `124`; raw runtime log and PPMs remain on
+  Mini. Selected log summary: 13,409 `ASSET_READY`, two present returns with
+  result `0`, then a present-enter with no captured return.
+- Captured one post-timeout QMP still and eight post-timeout QMP frames before
+  teardown. Converted only those QMP artifacts to workspace-local PNG/MP4
+  review copies; raw PPMs/log remain on Mini and the image/video extensions
+  remain intentionally ignored by Git.
+- QMP-quit the exact run and independently verified zero recorded QEMU/runqemu
+  PIDs, zero forwarded ports, and no residual QMP socket.
 
 ### Check
 
-- Pending live-capture gate, pixel/marker analysis, statuses, and teardown.
+- **Live-capture gate: NOT MET.** The Flutter process had already timed out
+  before the saved QMP images; therefore these pixels cannot establish its
+  live output. The post-timeout still and all eight video frames are black and
+  byte-hash-identical to the pre-Flutter frame. No vehicle, HUD, or chroma is
+  visible in those post-timeout frames.
+- **Runtime sequence:** the bounded log recorded two successful present
+  returns (`result=0`) followed by a present-enter with no recorded return;
+  app/outer-SSH status was `124`. This does not identify why the third return
+  was absent or whether a live frame briefly differed.
+- **Teardown: PASS.** QMP quit was accepted; recorded PIDs, socket, and
+  forwarded ports were absent afterward.
+
+## Visual evidence
+
+- Post-timeout QMP full-frame PNG review copy is workspace-local at
+  `work/evidence/FLR-0382-0001-post-timeout.png` (intentionally ignored by
+  `.gitignore`); SHA-256
+  `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`.
+- Eight-frame post-timeout QMP MP4 review copy is workspace-local at
+  `work/evidence/FLR-0382-0001-post-timeout.mp4` (intentionally ignored by
+  `.gitignore`); SHA-256
+  `e1cd12d484871c53ac253c5ceb850c3f7448fe459317031354eae8b4fb56103f`.
+- Authoritative raw PPMs and runtime log remain under the Mini role path
+  `$BUILD_EVIDENCE/flr0382-0001/qemu`; raw media are not committed.
+- Both are explicitly post-timeout, not live Flutter acceptance evidence. All
+  eight raw QMP PPM hashes equal the pre-Flutter frame hash above.
 
 ### Act
 
-- Do not modify a persistent script from a trace-only or silhouette-only result.
-  If the live frame remains gray, use its stage/present evidence to select the
-  next smallest process boundary; do not repeat texture-path inventory or
-  broad camera/light sweeps without new pixels.
+- Keep this ticket In Progress: its live-QMP acceptance gate was not met. For
+  the same one-variable comparison, use a fresh run ID (`flr0382-0002`) and
+  start the bounded QMP/liveness observer before manually invoking Flutter, so
+  capture is triggered during the process lifetime. Do not change the trace
+  profile, source, or persistent scripts in that retry.
+- Do not reopen the already completed texture inventory or broad camera/light
+  sweeps. Use a valid live frame plus the present/stage sequence to choose the
+  next boundary.
 - Production colored Sequoia and the 2D HUD in one QMP frame remain the goal.
 
 ## UNKNOWN
