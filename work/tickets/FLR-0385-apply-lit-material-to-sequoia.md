@@ -33,8 +33,9 @@ the CPU/GPU HUD are visible together.
 - The existing opt-in `FLR0305_PRODUCTION_SCENE_LIGHT` installs the same
   diagnostic SUN parameters in the default production scene. It can be reused
   for a conditional second profile; no new light implementation is needed.
-- The latest committed Sequoia material code is in patch 0331. The persistent
-  Devtool source was read-only checked before editing: clean branch
+- The pre-change Sequoia material code is in patch 0331; this ticket generates
+  patch 0332 to switch that diagnostic override to LIT. The persistent Devtool
+  source was read-only checked before editing: clean branch
   `devtool-FLR-0383-source`, HEAD exactly
   `4acaa4c0194303227a2207bbbed9ea2249b72efb`. Patch 0331's `From` matches that
   HEAD and is registered once after 0330. Its all-primitive binding and
@@ -59,25 +60,28 @@ the CPU/GPU HUD are visible together.
 | Dimension | Observation | Evidence |
 | --- | --- | --- |
 | What | Known-positive LIT material on all selected Sequoia renderables; HUD and visible colored car in one frame | FLR-0371-0004 and FLR-0383-0001 |
-| Where | `ModelSystem::setupRenderable` in the split `fluorite-plugins` source; Mini's fixed authoritative Yocto build and QEMU | Patch 0331 and fixed build/runtime runbooks |
+| Where | `ModelSystem::setupRenderable` in the split `fluorite-plugins` source; Mini's fixed authoritative Yocto build and QEMU | Patches 0331/0332 and fixed build/runtime runbooks |
 | When | Fresh layer patch/image, then profile A and conditionally profile B in one QEMU instance | This ticket's single run ID `flr0385-0001` |
 | Who | Devtool source, layer integration, Mini BitBake, guest `agl-driver`, Flutter, QMP evidence roles | Role-scoped runbook |
-| How | Same shader/color as FLR-0371; bind all primitive slots; A keeps the production profile; B changes only the existing SUN opt-in | Source diff and PID-bracketed QMP evidence |
+| How | Same shader/color as FLR-0371; bind all primitive slots; A keeps the production profile; B would add only the existing SUN opt-in | Patch 0332; A logs; live-QMP capture still missing |
 
 ### Process analysis
 
 | Step | Expected | Current observation | Evidence |
 | --- | --- | --- | --- |
 | Material positive control | Fixture LIT/RGB path creates visible blue pixels with HUD | Proven on FLR-0371 candidate | FLR-0371-0004 screenshot/measurements |
-| Sequoia override | Same material binds all selected primitive slots | Prior UNLIT path bound 24; new LIT path not yet implemented | FLR-0383-0001 |
-| Scene lighting | Profile A preserves production conditions; profile B adds only the existing SUN probe | A/B not yet run | To be recorded in this ticket |
-| Visible output | Full QMP image contains identifiable Sequoia and HUD together | UNKNOWN | QMP capture pending |
+| Sequoia override | Same material binds all selected primitive slots | Profile A logs `READY=1`, `BOUND=24` in A1–A3; LIT source is in patch 0332 | A1–A3 app logs on Mini |
+| Scene lighting | A preserves production conditions; B adds only the existing SUN probe | A ran three times; B was correctly skipped because A reproduced an `FEngine::loop` kernel Oops and was not a healthy negative | A3 app log and bounded kernel journal window |
+| Visible output | Live QMP image contains identifiable Sequoia and HUD together | UNKNOWN: no live-PID-bracketed QMP frame was captured. A post-exit frame is all black and is invalid as render evidence. | A3 live-gate output and post-exit QMP PPM/PNG |
 
 ### Problem point
 
-The first unproven boundary is whether a proven LIT material, bound to Sequoia
-renderables, produces visible pixels in the production view. The current record
-does not isolate material from light or downstream visibility/present/composition.
+The first runtime divergence is after the first successful queue-present return:
+the next `FLR0026_VK_QUEUE_PRESENT_BEGIN` has no matching return, and the guest
+records an `FEngine::loop` kernel page fault. LIT material setup later reaches
+`READY=1`/`BOUND=24`, but there is no valid live QMP frame. The current evidence
+does not distinguish a render/present stall from a capture-timing failure, and
+does not establish whether the material itself emits visible pixels.
 
 ### Ideal condition and success measure
 
@@ -178,8 +182,6 @@ HUD pixel measurements, and successful-present/liveness result.
   once after 0331, and the authorized baseline lock refresh records 425 files.
 - The layer patch, registration, baseline lock, and evidence are locally
   committed as `c4be4e997f5926b26dfb3c3df429ca1961308545` (no push).
-- Layer patch, registration, baseline lock, and evidence are locally committed
-  as `c4be4e997f5926b26dfb3c3df429ca1961308545`; no push.
 - Read-only Mini preflight: the current QEMU build's `bblayers.conf` selects the
   clean fixed receiver at `748978266c9a9c66dd1a5301b56927896ae9cb2f`. Its
   existing TMPDIR is the build's `tmp`; BitBake is idle and the build filesystem
@@ -189,8 +191,43 @@ HUD pixel measurements, and successful-present/liveness result.
 - Four pre-existing bundle files have different hashes; none was deleted. Use
   the existing path explicitly named `inbox` as the single incoming destination
   for this handoff.
-- Bundle transfer, Mini `do_patch`, compile, image build, and QEMU runtime
-  evidence are still pending.
+- The verified Git bundle advanced the fixed Mini receiver to
+  `fe92b7760deaf9feb2e09b5370565be7798b4eca`; the Mini layer tree is clean.
+- Mini `flutter-auto do_patch`, `do_compile`, and the full
+  `agl-ivi-image-flutter` build passed (11,898 tasks; seven warnings: six
+  forced-task taint notices and one existing `flutter-auto-dbg` buildpaths QA
+  warning). The existing build/TMPDIR and caches were reused.
+- Candidate artifacts: rootfs SHA-256
+  `ff0f801c35e5f67fb83dd73d47cf19242f372c4d981be0dda55531ece5e5a398`,
+  qemuboot SHA-256
+  `4a82822cea7292210504c09eff6e57ab7ab0977d1dd0712a8df0c1c78c830910`,
+  kernel SHA-256
+  `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`.
+- Profile A was manually launched as UID 1001 with the LIT override and
+  production lighting unchanged. A1/A2/A3 reached `READY=1`, `BOUND=24`; the
+  first present returned `0`, while the second present had no recorded return.
+  A2 and A3 have `FEngine::loop` kernel Oops evidence; A3's bounded app exit
+  status is `124`, with no coredump.
+- The A3 live gate ran after the 180-second timeout: saved PID 905 was gone,
+  app count was zero, while the retained log still had `READY=1`, `BOUND=24`,
+  and two present entries. The resulting post-exit QMP frame is 1280×800,
+  uniformly black; SHA-256
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`.
+  It matches the earlier A1 post-exit frame and is not a live-render result.
+  The central 3D ROI `(440,220,400,360)` has 0 changed, edge, and chromatic
+  pixels; HUD ROI `(1120,0,160,80)` has 0/12,800 pixels in each category; left
+  vehicle ROI `(0,100,320,310)` has 0/99,200. Review PNG: [A3 post-exit QMP frame](../evidence/FLR-0385-0001/qmp-profile-a3-post-exit.png);
+  8-frame video: [A3 post-exit QMP video](../evidence/FLR-0385-0001/qmp-profile-a3-post-exit.mp4), SHA-256
+  `46ba4306456a4973d0d7b01e72416fb7fbc5d4cf357939f46cfe99a6069e448d`.
+  These are local ignored review media; raw PPM and frames remain on Mini under
+  `$BUILD_EVIDENCE/flr0385-0001/qemu/`.
+- A3 kernel window records `BUG: unable to handle page fault`, Oops `[#3]`,
+  CPU 2, `FEngine::loop`, kernel `6.6.111-yocto-standard`; no coredump was
+  found. The SUN profile B was not run because the runtime was faulted, not a
+  healthy material-only negative.
+- QMP `quit` was accepted. The harness found zero QEMU/runqemu/flutter-auto
+  residuals; QMP socket absent, ports 10930–10932 free, and no BitBake/pseudo/
+  image-task residuals.
 
 ### Check
 
@@ -198,22 +235,28 @@ HUD pixel measurements, and successful-present/liveness result.
 | --- | --- | --- | --- |
 | Canonical/branch/ticket | Canonical guard, one active ticket, clean feature base | PASS; feature branch clean at local layer commit | PASS |
 | Devtool baseline | Exact 0331 source baseline, clean and single component | PASS; one component, clean source, exact full revision | PASS |
-| Patch/build | Official 0332, Mini `do_patch`, compile and image pass | Official 0332 provenance and local registration PASS; Mini handoff/build pending | PENDING |
-| Runtime A/B | Live QMP shows Sequoia+HUD; profile B only if needed | Pending | PENDING |
-| Teardown/evidence | QMP-only, retained logs, zero QEMU/app/socket/port residuals | Pending | PENDING |
+| Patch/build | Official 0332, Mini `do_patch`, compile and image pass | PASS at Mini receiver tip `fe92b77`; all three build gates passed, artifact hashes recorded | PASS |
+| Runtime A | Live QMP shows Sequoia+HUD | `READY=1`/`BOUND=24`, but A1–A3 did not produce a valid live capture; A3 exited `124` after an `FEngine::loop` Oops. Post-exit screen is black and invalid for acceptance. | UNKNOWN |
+| Runtime B | Add only existing SUN probe if A is healthy but visually negative | Skipped: A was faulted, so the precondition was not met | NOT RUN |
+| Teardown/evidence | QMP-only records and zero QEMU/app/socket/port residuals | PASS; post-exit still and eight frames retained on Mini; no raw PPM copied to Mac | PASS |
 
 ### Act
 
 - If A shows Sequoia and HUD, stop the experiment and preserve the simpler
   profile; do not add SUN or touch the original material path.
-- If A is visually negative but healthy, try B with only the existing SUN
-  switch. If B is also negative, use the captured boundary to choose the next
-  separate ticket; do not sweep light/camera/texture variables.
+- Do not run B while the `FEngine::loop` Oops/unmatched present is present; the
+  lighting comparison would not be a clean discriminator.
+- Keep this ticket active until a live-PID-bracketed QMP frame is captured.
+  Prearrange a bounded capture at the known material-ready window before any
+  same-profile retry; do not rebuild or change light/camera/texture variables.
 
 ## Unknowns
 
-- Whether profile A produces any visible Sequoia pixels on the newly built
-  candidate.
+- Whether profile A produces any visible Sequoia pixels while the app is live;
+  no valid live QMP capture exists yet.
+- Whether the recurring second-present/FEngine page-fault boundary is causal
+  for the absent frame, and its root cause; correlation is established, cause
+  is UNKNOWN.
 - If B helps, whether the added SUN is causal by itself or interacts with
   other scene lights/material normals; this experiment does not replace
   unknown pre-existing scene lights.
