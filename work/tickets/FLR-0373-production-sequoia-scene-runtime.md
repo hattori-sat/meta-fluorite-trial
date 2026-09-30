@@ -190,7 +190,7 @@ overrides unset and capture the entire QMP frame before judging.
   SHA-256 `186acbdddf9e84a0466b8ac4c8941d7ad085b27bea010de3aed9f0e38777aef5`;
   all eight source PPMs are identical.
 - Raw pre-Flutter QMP PPM SHA-256
-  `d4e96a65fd4f8c97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`;
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`;
   production full-frame PPM SHA-256
   `f686a3c2769cb2bc59b362bdc1d956c2d1d128cbcbfa6ea45ffe2eb92b4a5265`.
 - Raw PPMs, eight frames, helper copies, selected gate/identity/stop records,

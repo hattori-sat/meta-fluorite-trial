@@ -1,6 +1,6 @@
 # FLR-0374 — correlate manual present stall with preserved kernel evidence
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Owner: Mini QEMU / strict guest SSH / manual Flutter / QMP and kernel-evidence roles
 - Created: 2026-09-30
@@ -35,12 +35,67 @@ boundary; it does not claim production 2D+3D acceptance passed.
 - FLR-0366 separately recorded an `FEngine::loop` kernel Oops after the same
   2-enter/1-return pattern. GDB caught no signal; `llvm::CmpInst::isOrdered`
   was a symbol correlation, not an established fault cause.
-- FLR-0373's app log was volatile under `/run/user/1001` and was not copied
-  before QEMU shutdown. Current-run Oops/coredump state is UNKNOWN.
+- At FLR-0374 opening, FLR-0373's app log was volatile under `/run/user/1001`
+  and was not copied before QEMU shutdown; the new run's Oops/coredump state
+  was therefore UNKNOWN until this ticket's observation.
 - FLR-0371 established the manual route: the QEMU helper starts one identified
   guest, strict root SSH is pinned only after QEMU listener ownership is
   verified, then root uses `su` to launch the app as `agl-driver`. Direct guest
   SSH as `agl-driver` was rejected by public-key authentication.
+
+## Result
+
+- Exact candidate image hashes matched FLR-0371/0373. QEMU used 6144 MiB; the
+  guest, compositor, Wayland socket, and Example Demo 3.32.5 bundle passed
+  preflight. One `/usr/bin/flutter-auto` ran manually as UID 1001, PID 703;
+  only `FLUORITE_PRESENT_TRACE=1` was set, with fixture/light/camera/color
+  overrides absent.
+- The app log has two `FLUORITE_VK_QUEUE_PRESENT_ENTER` markers and exactly
+  one `FLUORITE_VK_QUEUE_PRESENT_RETURN result=0`; the second enter has no
+  return. At guest monotonic 575.268590 s, the kernel reported a user-mode
+  page-fault Oops on TID 746 (`FEngine::loop`). PID 703 survived and TID 746
+  was absent afterward. Guest uptime/app elapsed put the Oops about 35 seconds
+  after launch. No coredump was listed.
+- Oops context: CR2 `0x00000000267f8750`, RSP `0x00007fb8267f8750`, user RIP
+  `0x7fb888079541`. RIP maps to `libLLVM.so.18.1` Build-ID
+  `359c1108040bc6bc1af64bb639d0b25385858051`, file offset `0xb1d541`,
+  `llvm::CmpInst::isOrdered`. The recorded instructions are register-only;
+  this symbol is not a proven invalid-memory access cause.
+- Runtime log reports reading `assets/models/sequoia_ngp.glb`; emissive
+  texture index 6 later becomes ready and is applied. This does not prove that
+  all GLB images load or that any texture is sampled. The log has 28
+  “No default parameter value” messages; their effect is UNKNOWN.
+- The full QMP frame is 1280×800: a gray-white field and a large black
+  polygon, with no recognizable Sequoia or HUD. Native ROI
+  `(440,220,400,360)` is uniform black; HUD ROI `(1120,0,160,80)` is uniform
+  gray with zero chromatic pixels. Raw PPM SHA-256:
+  `f686a3c2769cb2bc59b362bdc1d956c2d1d128cbcbfa6ea45ffe2eb92b4a5265`.
+- All eight sequence captures have that same PPM hash; no visual transition
+  appears across the replay. Pre-Flutter QMP was fully black, PPM hash
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`.
+- Local QMP screenshot `work/evidence/FLR-0374-0001/FLR-0374-0001-qmp-production.png`,
+  SHA-256 `dddb1b3e017d85600974be4d48c3b4e57990d9460eb573f24cd8587ff477c19d`;
+  eight-frame replay `work/evidence/FLR-0374-0001/FLR-0374-0001-qmp-sequence.mp4`,
+  SHA-256 `3c3f8c4a87549b8954388c3ff44c7ab91951dc972bca7e92b90ea1a2a70b07ab`.
+  These review derivatives are ignored runtime artifacts; source QMP PPM and
+  frames remain on Mini under the role-based evidence directory.
+  App log SHA-256:
+  `da93fc8951647019b7eeff23133d6b3d068ebaeb875dc3e0363ecfa298411847`.
+- Bounded app/kernel/thread/QMP evidence is retained under
+  `$BUILD_EVIDENCE/flr0374-0001/qemu/`; local review derivatives are under
+  `work/evidence/FLR-0374-0001/`. No QEMU disk image was copied to Mac.
+- PID 703 was stopped after UID/command verification. The existing QMP
+  harness accepted quit; independent Mini checks found zero target processes,
+  absent run socket, and free reserved ports. No source, recipe, image, or
+  launcher script changed.
+
+### Measurement correction
+
+- The initial derived `runtime-gate-final.txt` counted generic `result=0`
+  text and incorrectly reported `present_success=12`. It is retained as a
+  failed check. The exact queue-present marker reports one successful return;
+  see the corrected exact-marker count above, the local ignored
+  `runtime-gate-corrected.txt`, and the raw Mini app log.
 
 ## Hypotheses and predictions
 
@@ -73,8 +128,9 @@ boundary; it does not claim production 2D+3D acceptance passed.
   SSH followed by `su`; use only `FLUORITE_PRESENT_TRACE=1`. Do not invoke an
   app-launch helper.
 - Observe only selected present/error markers, app PID/thread state, and
-  kernel Oops/coredump state for at most 300 seconds after app start. Poll a
-  bounded summary at 5-second intervals; do not dump whole logs.
+  kernel Oops/coredump state for at most 300 seconds after app start. Stop
+  early on Oops or app exit. Poll a bounded summary at 5-second intervals; do
+  not dump whole logs.
 - Before stopping the app or QEMU, persist at most the last 256 KiB of its app
   log, selected kernel Oops/journal context, coredump listing/availability,
   exact process/thread state, marker counts, and hashes under
@@ -106,26 +162,45 @@ Save logs and QMP evidence before exact-PID/QMP teardown.
 
 ### Do
 
-- Ticket opened from FLR-0373's manually observed 2-enter/1-return state and
-  missing volatile-log evidence. No run has started yet.
+- Run `flr0374-0001` used the exact candidate image and manual strict SSH →
+  `su` → Flutter route. No app-launch helper or script edit was used.
+- A nested guest SSH command without `-n` consumed the remainder of a
+  stdin-fed Mini wrapper. Read-back proved its expected artifact was absent,
+  so it was not accepted as a pass. Later probes used `ssh -n`, `pipefail`,
+  and explicit artifact checks. An over-escaped `$!` left the PID file blank;
+  read-only identity inspection found PID 703 before any retry, and no
+  duplicate app was started.
+- `coredumpctl list --boot` was unsupported; corrected
+  `coredumpctl list --no-pager` reported no coredumps. A generic `result=0`
+  count yielded 12 and failed the exact-marker cross-check; the corrected
+  queue-present return count is 1. Both the failed derivative and correction
+  are retained.
+- Full run findings and command corrections are in the
+  [working log](../logs/2026-09-30-flr0374.md).
 
 ### Check
 
 | Gate | Expected | Actual | Result |
 | --- | --- | --- | --- |
-| Image and guest identity | Exact candidate hashes and ready guest | Pending | PENDING |
-| Manual app route | One app as UID 1001, fixture overrides absent | Pending | PENDING |
-| Event classification | Oops, app exit, continued presents, or bounded no-Oops state with timestamped evidence | Pending | PENDING |
-| Save-before-stop | Bounded app/kernel/process evidence and QMP still/sequence persisted | Pending | PENDING |
-| Teardown | Exact app/QEMU gone; socket and ports free | Pending | PENDING |
+| Image and guest identity | Exact candidate hashes and ready guest | Candidate hashes, kernel, compositor, Wayland, bundle, and zero-stale-app preflight passed | PASS |
+| Manual app route | One app as UID 1001, fixture overrides absent | PID 703, UID 1001, exact Example Demo; only present-trace override | PASS |
+| Event classification | Oops, app exit, continued presents, or bounded no-Oops state with evidence | 2 exact queue-present enters / 1 successful return; TID 746 Oops/disappearance; parent survived; no coredump | PASS for classification; rendering gate FAIL |
+| Save-before-stop | Bounded app/kernel/process evidence and QMP still/sequence persisted | App log, Oops excerpts, thread/process snapshots, QMP PPM/eight frames, ROI and hashes saved before stop | PASS |
+| Teardown | Exact app/QEMU gone; socket and ports free | PID 703 stopped; QMP quit accepted; independent process/socket/port checks zero | PASS |
 
 ### Act
 
-- Pending the one manual runtime observation. No source or runner automation
-  changes before its result.
+- Close this ticket as a diagnostic evidence unit, not as a rendering fix.
+  FLR-0375 inspects the exact candidate's packaged Sequoia GLB image
+  references. The recurring fault already has dedicated historical
+  investigations in FLR-0337/0338/0339/0340 and FLR-0366; do not repeat that
+  trace without a new discriminator. Keep launch scripts unchanged.
 
 ## Visual evidence
 
-- Pending fresh QMP-only full-frame screenshot and short sequence for
-  `flr0374-0001`; do not substitute FLR-0373 or FLR-0366 evidence for this
-  run's capture.
+- QMP-only pre-Flutter baseline PNG is retained locally as
+  `work/evidence/FLR-0374-0001/FLR-0374-0001-qmp-pre-flutter.png`
+  (SHA-256 `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`).
+- The production screenshot and eight-frame replay listed above belong to
+  `flr0374-0001`; they are not a rendering pass. Runtime media remains ignored
+  by Git; the ticket retains run identity and checksums.
