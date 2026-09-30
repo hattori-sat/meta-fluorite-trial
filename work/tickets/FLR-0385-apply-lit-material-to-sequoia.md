@@ -176,15 +176,28 @@ HUD pixel measurements, and successful-present/liveness result.
   `395f3b86033c65786fc212a94356bc67d48bffe10156b9327ae82fc8a6f86339`; its
   file list is exactly the two `ModelSystem` files. The recipe registers it
   once after 0331, and the authorized baseline lock refresh records 425 files.
-- FLR-0385 layer patch commit, bundle transfer, Mini `do_patch`, compile, image
-  build, and QEMU runtime evidence are still pending.
+- The layer patch, registration, baseline lock, and evidence are locally
+  committed as `c4be4e997f5926b26dfb3c3df429ca1961308545` (no push).
+- Layer patch, registration, baseline lock, and evidence are locally committed
+  as `c4be4e997f5926b26dfb3c3df429ca1961308545`; no push.
+- Read-only Mini preflight: the current QEMU build's `bblayers.conf` selects the
+  clean fixed receiver at `748978266c9a9c66dd1a5301b56927896ae9cb2f`. Its
+  existing TMPDIR is the build's `tmp`; BitBake is idle and the build filesystem
+  has 63 GiB available. The build's persisted `TEMPLATECONF` has exactly one
+  matching AGL source root. The standard handoff helper will verify effective
+  TOPDIR/TMPDIR before changing the receiver.
+- Four pre-existing bundle files have different hashes; none was deleted. Use
+  the existing path explicitly named `inbox` as the single incoming destination
+  for this handoff.
+- Bundle transfer, Mini `do_patch`, compile, image build, and QEMU runtime
+  evidence are still pending.
 
 ### Check
 
 | Gate | Expected | Actual | Result |
 | --- | --- | --- | --- |
-| Canonical/branch/ticket | Canonical guard, one active ticket, clean feature base | Initial branch created; ticket/dashboard verification pending | PENDING |
-| Devtool baseline | Exact 0331 source baseline, clean and single component | Pending read-only verification | PENDING |
+| Canonical/branch/ticket | Canonical guard, one active ticket, clean feature base | PASS; feature branch clean at local layer commit | PASS |
+| Devtool baseline | Exact 0331 source baseline, clean and single component | PASS; one component, clean source, exact full revision | PASS |
 | Patch/build | Official 0332, Mini `do_patch`, compile and image pass | Official 0332 provenance and local registration PASS; Mini handoff/build pending | PENDING |
 | Runtime A/B | Live QMP shows Sequoia+HUD; profile B only if needed | Pending | PENDING |
 | Teardown/evidence | QMP-only, retained logs, zero QEMU/app/socket/port residuals | Pending | PENDING |
@@ -199,8 +212,6 @@ HUD pixel measurements, and successful-present/liveness result.
 
 ## Unknowns
 
-- Whether the current persistent Devtool source still exactly matches
-  `4acaa4c` and patch 0331; it must be checked before mutation.
 - Whether profile A produces any visible Sequoia pixels on the newly built
   candidate.
 - If B helps, whether the added SUN is causal by itself or interacts with
