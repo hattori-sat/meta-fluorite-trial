@@ -228,3 +228,5 @@ SRC_URI:append = " file://0326-flr0326-add-opt-in-production-unlit-output-probe-
 SRC_URI:append = " file://0327-flr0332-trace-nav-surface-frame-trigger-devtool.patch;patchdir=ivi-homescreen-plugins"
 
 SRC_URI:append = " file://0330-flr0371-lit-parameter-rgb-assignment-devtool.patch;patchdir=ivi-homescreen-plugins"
+
+SRC_URI:append = " file://0331-flr0383-sequoia-known-unlit-material-devtool.patch;patchdir=ivi-homescreen-plugins"

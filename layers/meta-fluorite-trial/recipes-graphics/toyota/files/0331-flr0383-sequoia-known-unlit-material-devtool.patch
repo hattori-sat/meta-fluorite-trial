@@ -1,0 +1,111 @@
+From 4acaa4c0194303227a2207bbbed9ea2249b72efb Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 30 Sep 2026 11:14:52 +0000
+Subject: [PATCH] feat: apply known UNLIT material to Sequoia
+
+---
+ .../core/systems/derived/model_system.cc      | 69 +++++++++++++++++++
+ .../core/systems/derived/model_system.h       |  3 +
+ 2 files changed, 72 insertions(+)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index af670ff..8b4146c 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -630,6 +630,67 @@ void ModelSystem::setupRenderable(
+     }
+   }
+ 
++  if (
++    std::getenv("FLUORITE_SEQUOIA_UNLIT_MATERIAL_OVERRIDE") != nullptr &&
++    model->getAssetPath().find("sequoia_ngp.glb") != std::string::npos
++  ) {
++    if (!sequoia_known_unlit_material_build_attempted_) {
++      sequoia_known_unlit_material_build_attempted_ = true;
++      filamat::MaterialBuilder::init();
++      filamat::MaterialBuilder materialBuilder;
++      materialBuilder
++        .name("fluorite_flr0383_sequoia_known_unlit_blue")
++        .material(
++          "void material(inout MaterialInputs material) {"
++          "  prepareMaterial(material);"
++          "  material.baseColor.rgb = materialParams.color;"
++          "}"
++        )
++        .parameter("color", filament::backend::UniformType::FLOAT3)
++        .shading(filamat::MaterialBuilder::Shading::UNLIT)
++        .targetApi(filamat::MaterialBuilder::TargetApi::ALL)
++        .platform(filamat::MaterialBuilder::Platform::ALL);
++      const auto package = materialBuilder.build(_engine->getJobSystem());
++      if (package.getSize() != 0) {
++        sequoia_known_unlit_material_ = filament::Material::Builder()
++          .package(package.getData(), package.getSize())
++          .build(*_engine);
++        if (sequoia_known_unlit_material_ != nullptr) {
++          sequoia_known_unlit_material_instance_ =
++            sequoia_known_unlit_material_->createInstance();
++          if (sequoia_known_unlit_material_instance_ != nullptr) {
++            sequoia_known_unlit_material_instance_->setParameter(
++              "color", filament::RgbType::LINEAR,
++              filament::math::float3{0.05f, 0.45f, 1.0f}
++            );
++            spdlog::info(
++              "FLUORITE_SEQUOIA_UNLIT_MATERIAL_READY color=(0.05,0.45,1.0)"
++            );
++          }
++        }
++      }
++      if (sequoia_known_unlit_material_instance_ == nullptr) {
++        spdlog::warn(
++          "FLUORITE_SEQUOIA_UNLIT_MATERIAL_BUILD_FAILED package_size={}",
++          package.getSize()
++        );
++      }
++    }
++
++    if (sequoia_known_unlit_material_instance_ != nullptr) {
++      const auto primitiveCount = _rcm->getPrimitiveCount(ri);
++      for (size_t primitive = 0; primitive < primitiveCount; ++primitive) {
++        _rcm->setMaterialInstanceAt(
++          ri, primitive, sequoia_known_unlit_material_instance_
++        );
++      }
++      spdlog::info(
++        "FLUORITE_SEQUOIA_UNLIT_MATERIAL_BOUND entity={} primitives={} path={}",
++        fEntity.getId(), primitiveCount, model->getAssetPath()
++      );
++    }
++  }
++
+   const auto commonRenderable = model->getCommonRenderable();
+   _rcm->setCastShadows(ri, commonRenderable->IsCastShadowsEnabled());
+   _rcm->setReceiveShadows(ri, commonRenderable->IsReceiveShadowsEnabled());
+@@ -1103,6 +1164,14 @@ void ModelSystem::onDestroy() {
+     _engine->destroy(production_unlit_diagnostic_material_);
+     production_unlit_diagnostic_material_ = nullptr;
+   }
++  if (sequoia_known_unlit_material_instance_ != nullptr) {
++    _engine->destroy(sequoia_known_unlit_material_instance_);
++    sequoia_known_unlit_material_instance_ = nullptr;
++  }
++  if (sequoia_known_unlit_material_ != nullptr) {
++    _engine->destroy(sequoia_known_unlit_material_);
++    sequoia_known_unlit_material_ = nullptr;
++  }
+   delete resourceLoader_;
+   resourceLoader_ = nullptr;
+ 
+diff --git a/plugins/filament_view/core/systems/derived/model_system.h b/plugins/filament_view/core/systems/derived/model_system.h
+index ac7ad13..32864b9 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.h
++++ b/plugins/filament_view/core/systems/derived/model_system.h
+@@ -114,6 +114,9 @@ class ModelSystem : public System {
+     filament::Material* production_unlit_diagnostic_material_{};
+     filament::MaterialInstance* production_unlit_diagnostic_material_instance_{};
+     bool production_unlit_override_applied_{false};
++    filament::Material* sequoia_known_unlit_material_{};
++    filament::MaterialInstance* sequoia_known_unlit_material_instance_{};
++    bool sequoia_known_unlit_material_build_attempted_{false};
+ 
+     /// Creates renderables and adds them to the scene
+     /// Expects the model to have been loaded first

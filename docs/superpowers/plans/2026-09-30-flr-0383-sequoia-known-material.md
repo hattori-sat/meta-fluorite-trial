@@ -13,12 +13,15 @@ editing, prove the mounted checkout, active Devtool component, source HEAD, and
 recipe-applied baseline are clean and match the committed layer. Make an
 opt-in diagnostic path that creates a proven UNLIT blue material and binds it
 to every renderable primitive belonging to `sequoia_ngp.glb`; leave the normal
-production material path unchanged when the flag is unset. Generate the layer
-patch only through the existing official Devtool finish helper, validate and
-commit it locally, transfer the verified Git bundle to the Mini receiver, run
-the authoritative Yocto build there, and manually launch Flutter over the
-established guest SSH path. Judge only full-frame QMP still/video captured
-while the app is live.
+production material path unchanged when the flag is unset. Generate the
+split-component patch only through
+`scripts/rebase-fluorite-devtool-component.sh`, which invokes official
+`devtool update-recipe --mode patch --append --no-remove`. Use current source
+HEAD `7548f28bf50b3c3241efcfe8d4612440c0da0825` as the effective baseline so
+patch 0330 is not re-emitted. Validate and commit the resulting layer patch,
+transfer the verified Git bundle to the Mini receiver, run the authoritative
+Yocto build there, and manually launch Flutter over the established guest SSH
+path. Judge only full-frame QMP still/video captured while the app is live.
 
 **Tech Stack:** Filament C++, Yocto/OpenEmbedded Devtool, Podman, Git bundles,
 Mini PC BitBake, QEMU/runqemu, strict guest SSH, QMP PNG/MP4 evidence.
@@ -57,8 +60,9 @@ is defective.
   mismatched, or not at the exact current layer state, stop and reconcile that
   same workspace before changing source.
 - Do not hand-author or edit generated patch text. Commit the Devtool source
-  change first, use the existing official `devtool finish` helper, then validate
-  the generated patch and its single registration under the recipe.
+  change first, then use the split-component `rebase-fluorite-devtool-component`
+  helper and its official `devtool update-recipe` operation. Never use the
+  parent-recipe `finish` helper for `fluorite-plugins`.
 - Keep the change opt-in. With the flag unset, preserve the original production
   GLB materials, textures, lighting, camera, scene, HUD, and launch behavior.
 - Do not modify launch scripts, run `cleanall`, run `cleansstate`, delete
@@ -84,6 +88,9 @@ inspection of the existing Devtool environment.
 - [x] Read the current `ModelSystem::setupRenderable()` and `onDestroy()` plus
   the existing material builder and asset-path/primitive APIs from source and
   patch history. Decide exact ownership/lifetime only from that code evidence.
+- [x] Read the active Devtool workspace append: `initial_rev` is
+  `599bf4ea…` and it contains earlier patch 0330. Use current source HEAD
+  `7548f28…` as the next effective baseline so 0330 is not regenerated.
 - [x] Record two alternatives and the chosen discriminator in the ticket:
   parameter override (already falsified on production), one-primitive magenta
   replacement (older-image negative), and all-Sequoia-primitives known-blue
@@ -95,23 +102,35 @@ inspection of the existing Devtool environment.
 `ModelSystem` material-selection seam; generated layer patch and its existing
 recipe registration.
 
-- [ ] Add one new, clearly named opt-in flag. Do not reuse or overload the
+- [x] Add one new, clearly named opt-in flag. Do not reuse or overload the
   FLR-0326 legacy magenta diagnostic state.
-- [ ] Reuse the known-working UNLIT material construction and parameter
+- [x] Reuse the known-working UNLIT material construction and parameter
   contract from the current fixture/patch history, with its recorded blue
   color; do not add a dependency on SUN/light, texture lookup, or shader edits.
-- [ ] Bind that material to every renderable primitive belonging to the
+- [x] Bind that material to every renderable primitive belonging to the
   production `sequoia_ngp.glb`, not just primitive 0 or `PaintColor`.
-- [ ] Keep default production behavior identical when the flag is unset.
+- [x] Keep default production behavior identical when the flag is unset.
   Restrict markers to bounded setup/binding summaries; do not add per-frame or
   asset-loop log floods.
-- [ ] Verify ownership/destruction follows existing Filament lifetime rules;
-  perform source diff, formatting/whitespace checks, and focused compile or
-  available unit validation before layer generation.
-- [ ] Commit the source change in the existing Devtool source Git. Generate
-  the patch only with `scripts/finish-fluorite-devtool-patch.sh`, then verify
-  source path, parent, patch bytes/SHA, patch order, and exactly-one bbappend
-  registration.
+- [x] Verify ownership/destruction follows existing Filament lifetime rules;
+  perform the two-file source diff and whitespace checks before layer
+  generation. `clang-format` is unavailable on the host and in the fixed
+  container, so Mini `do_compile` remains the authoritative C++ validation.
+- [x] Commit only the source change in the existing Devtool source Git and run
+  `scripts/rebase-fluorite-devtool-component.sh` with baseline
+  `7548f28bf50b3c3241efcfe8d4612440c0da0825` and that source commit. It must
+  reset/re-add the split component from this exact baseline and invoke official
+  `devtool update-recipe --mode patch --append --no-remove`. Verify generated
+  `From` matches source commit `4acaa4c0194303227a2207bbbed9ea2249b72efb`
+  and the patch does not re-emit 0330; verify byte identity, exactly-one
+  registration, and refreshed baseline lock. PASS: generated patch 0331 SHA-256
+  `e16536160b52df0d0cdd13673ccc99af9337c1b2b862d58b0a9abcecb9ce11c7`; its
+  `From` is the source commit, its two files are only `model_system.cc` and
+  `model_system.h`, append registration count is one, and workspace
+  `initial_rev` is `7548f28…`.
+- [ ] Deliver the committed patch to the Mini and run authoritative `do_patch`
+  and `do_compile` before the full image build; do not compile through a
+  Mac-side Yocto provider graph.
 
 ## Task 3: Validate and deliver the layer change
 
@@ -119,8 +138,10 @@ recipe registration.
 `layers/meta-fluorite-trial/recipes-graphics/toyota/files/` and the existing
 `flutter-auto_2.0.bbappend` registration.
 
-- [ ] Confirm privacy, whitespace, canonical-repository, runtime-checkpoint,
-  patch-registration, and focused Markdown checks.
+- [x] Confirm privacy, whitespace, canonical-repository, runtime-checkpoint,
+  patch-registration, and focused Markdown checks. These passed; the full
+  repository link scan still reports only nine pre-existing missing evidence
+  links under FLR-0338/0339/0340, with no FLR-0383 link errors.
 - [ ] Commit only this ticket's patch/registration and required baseline-lock
   update, with generic role identity; record full commit and parent.
 - [ ] Create a bundle from the verified Mini receiver base, validate its
