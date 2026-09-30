@@ -142,8 +142,10 @@ recipe registration.
   patch-registration, and focused Markdown checks. These passed; the full
   repository link scan still reports only nine pre-existing missing evidence
   links under FLR-0338/0339/0340, with no FLR-0383 link errors.
-- [ ] Commit only this ticket's patch/registration and required baseline-lock
-  update, with generic role identity; record full commit and parent.
+- [x] Commit only this ticket's patch/registration, required baseline-lock
+  update, and evidence docs, with generic role identity; record full commit
+  and parent. PASS: commit `39301804ab6991384bfdc0580c1d6a3c08fe6424`, parent
+  `1c828a4647e6514024d4086727d48819b23bbd93`; no push.
 - [ ] Create a bundle from the verified Mini receiver base, validate its
   advertised commits and SHA-256, and transfer it to the fixed receiver.
 - [ ] Verify Mini checkout is exactly the local ticket tip and that effective

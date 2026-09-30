@@ -103,9 +103,11 @@ must remain unchanged.
   `e16536160b52df0d0cdd13673ccc99af9337c1b2b862d58b0a9abcecb9ce11c7`.
   Patch `From` matches source commit `4acaa4c`; its diff excludes 0330 and
   other source files. The existing bbappend registers 0331 exactly once after
-  0330; the baseline lock was refreshed from 423 to 424 layer files. These
-  generated layer changes are not yet locally committed; no Mini build, image,
-  or FLR-0383 runtime has run.
+  0330; the baseline lock was refreshed from 423 to 424 layer files. The layer
+  patch, registration, baseline lock, ticket, plan, working log, and dashboard
+  were committed locally as `39301804ab6991384bfdc0580c1d6a3c08fe6424`, parent
+  `1c828a4647e6514024d4086727d48819b23bbd93`; the branch is clean and was not
+  pushed. No Mini build, image, or FLR-0383 runtime has run.
 - Read-only Mini preflight resolved the active receiver from the QEMU build's
   effective `bblayers.conf`: it is clean at `f61566f1fe74110479152301b9c1cb86f950615b`.
   The documented fixed inbox bundle has SHA-256
@@ -192,9 +194,11 @@ must remain unchanged.
 - PASS: canonical guard, privacy checker, `runtime-checkpoint.sh verify`,
   and `git diff --check`. The full Markdown scan reports nine pre-existing
   missing FLR-0338/0339/0340 evidence links and no FLR-0383 link errors.
-- Pending: local layer commit, verified Mini bundle/checkout, Mini
-  `do_patch`/`do_compile`/image build, runtime binding markers, live blue
-  Sequoia ROI with simultaneous HUD, and exact teardown.
+- PASS: local commit `39301804ab6991384bfdc0580c1d6a3c08fe6424` with parent
+  `1c828a4647e6514024d4086727d48819b23bbd93`; branch clean, no push.
+- Pending: verified Mini bundle/checkout, Mini `do_patch`/`do_compile`/image
+  build, runtime binding markers, live blue Sequoia ROI with simultaneous HUD,
+  and exact teardown.
 
 ### Act
 
