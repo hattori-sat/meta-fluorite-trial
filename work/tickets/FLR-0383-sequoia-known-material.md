@@ -9,9 +9,11 @@
 - Branch: `feature-flr-0383-sequoia-known-material` (local; no push)
 - Starting commit: `35a7a28` (FLR-0382 evidence correction)
 - Candidate kernel SHA-256: `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`
-- Candidate rootfs SHA-256: `949921c8bed28c540bd06a593cf37bbb9d94591985a2e9c7e31aaa35af9b4086`
-- Candidate qemuboot SHA-256: `8582ac80d4c58fc9e852abed0e6fd6e6077bf6e5f0f7727341033fb405d0a17c`
+- Candidate rootfs SHA-256: `911c0c5b872c2e0b326ee77892f03f57e848cb3a469b0336497a2a03d3574303`
+- Candidate qemuboot SHA-256: `b52dbf2359e81e1bf4e3c7f53bba30df492abaec13f955eabba147611ad426ad`
+- Image-build layer tip: `748978266c9a9c66dd1a5301b56927896ae9cb2f`
 - Working log: [FLR-0383 working log](../logs/2026-09-30-flr0383.md)
+- QMP evidence manifest: [FLR-0383 run 0001](../evidence/FLR-0383-0001.md)
 
 ## Objective
 
@@ -42,9 +44,10 @@ must remain unchanged.
    lock before a local layer commit.
 4. The Mini receiver builds the exact committed bundle tip with the established
    Yocto build directory and caches.
-5. A live, PID-bracketed, QMP-only full-frame image/video proves or falsifies
-   recognizable blue Sequoia and the CPU/GPU HUD in the same frame. Teardown
-   and residual process/socket/port checks pass.
+5. A live, PID-bracketed, QMP-only full-frame image/video determines whether
+   recognizable blue Sequoia and the CPU/GPU HUD coexist. Teardown and
+   residual process/socket/port checks pass; the bounded test ran but did not
+   meet its Sequoia-visibility acceptance criterion.
 
 ## Facts
 
@@ -133,7 +136,31 @@ must remain unchanged.
   only report the intentional forced `do_patch`/`do_compile` tasks as tainted.
   Evidence summaries and the bounded full compile log are in the receiver's
   FLR-0383 evidence directory. After compile, no BitBake process remained and
-  64 GiB was free. No image build or FLR-0383 QEMU/runtime has run yet.
+  64 GiB was free.
+- The full `agl-ivi-image-flutter` build passed at layer tip
+  `748978266c9a9c66dd1a5301b56927896ae9cb2f`; all 11,898 tasks succeeded, 8
+  warnings were classified, and 63 GiB remained free. The exact rootfs and
+  qemuboot hashes are pinned above; kernel SHA-256 remains
+  `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`.
+- One invalid first capture attempt was rejected: its 45-second Flutter run
+  had ended, and the PID gate failed open because an empty PID reached `ps`.
+  Its image/video are not runtime evidence. A retry on the same QEMU used a
+  fail-closed, before/after PID+UID 1001 gate and a 120-second app bound.
+- On the valid retry, the Sequoia matcher selected 2 models; the blue UNLIT
+  material reported READY once and BOUND to 24 renderables, with 0 build
+  failures. One Vulkan present returned successfully; a later present begin
+  had no matching return before the bounded app timeout. The 1280×800 QMP
+  still/video showed CPU/GPU HUD and the Scenes button, but the central
+  400×360 3D ROI was uniformly black and unchanged from pre-Flutter. Thus
+  material construction/binding passed; visible Sequoia did not.
+- Guest evidence has two kernel Oops. `coredumpctl` recorded a SIGSEGV core
+  for PID 650 from the first, invalid-capture attempt; the second attempt
+  ended at its 120-second timeout (status 124), and core attribution for that
+  attempt is UNKNOWN. This does not establish the cause of the black 3D ROI.
+- The owned QMP quit and independent process/socket/port checks passed. No
+  QEMU image or raw PPM was copied to the Mac; raw captures and runtime evidence
+  remain on the Mini, while only QMP-derived review PNG/MP4 were generated
+  locally from streamed PPM bytes.
 - FLR-0382 runs 0003–0005 reached scene/draw and two successful present
   returns, but the third present was unmatched; run 0005's QMP still/video
   were captured after timeout and are not live render evidence. Its live
@@ -145,6 +172,11 @@ must remain unchanged.
   the highest-information next intervention: the blue native material itself
   is a known positive control, and this bypasses the production material/light
   path while preserving the production asset, scene, and camera.
+- Runtime READY/BOUND markers prove the new material reached 24 renderables,
+  but pixel evidence proves only HUD output in the captured frame. The failure
+  boundary is now downstream of (or independent from) material creation and
+  assignment; current data does not distinguish camera/visibility, draw
+  output, present, or composition.
 - FLR-0326 does not falsify this all-primitives test because it targeted only
   one primitive and used an older image; its negative result still requires
   care and must be recorded as relevant contrary evidence.
@@ -204,6 +236,10 @@ must remain unchanged.
   and baseline-lock refresh are independently verified. Record remaining
   commands/results in the dated working log; keep QMP originals and checksums
   on the Mini evidence store.
+- The exact committed layer tip `748978266c9a9c66dd1a5301b56927896ae9cb2f`
+  built successfully on Mini and was booted for a manually launched Example
+  Demo run. The first capture was invalidated by its fail-open PID gate; a
+  live-bracketed retry on the same image is the evidence used for the result.
 
 ### Check
 
@@ -220,25 +256,35 @@ must remain unchanged.
 - PASS: Mini `do_patch` and `do_compile`; no active BitBake process, 64 GiB
   free. The first gate invocation lacked the explicit AGL-root role and stopped
   before BitBake; resolving it from TEMPLATECONF made the same gate pass.
-- Pending: full image build, runtime binding markers, live blue Sequoia ROI
-  with simultaneous HUD, and exact teardown.
+- PASS: full image build at layer tip `748978266c9a9c66dd1a5301b56927896ae9cb2f`;
+  all 11,898 tasks succeeded and all 8 warnings were classified.
+- PASS: the valid retry was bracketed by live process checks and yielded a
+  QMP-only PNG/MP4. HUD was visible; Sequoia acceptance FAILED: center ROI
+  `(440,220,400,360)` was uniformly black (`0/144000` changed, 0 chromatic).
+  Material READY=1, BOUND=24, BUILD_FAILED=0.
+- PASS: exact app/QEMU teardown and independent residual process/socket/port
+  checks; 63 GiB remained free.
+- INVALID/EXCLUDED: first 45-second capture after the app had timed out; the
+  PID gate was fail-open. Retain it as a harness failure, not rendering proof.
 
 ### Act
 
-- If both regions are visible in one live frame, preserve that evidence and
-  open a separate ticket for restoring original material appearance / lights.
-- If all-primitive binding is proven but no visible model appears, open a new
-  ticket at the earliest runtime/image boundary proven by this run. Do not
-  attribute the result to texture, light, camera, or composition without
-  discriminating evidence.
+- Material construction and binding are proven, but the captured frame has no
+  visible Sequoia pixels. Keep the overall 2D+3D goal open and continue with a
+  same-image, same-live-execution Sequoia → control scene → Sequoia comparison
+  under the existing FLR-0373 production-scene ticket. Use scene-selection
+  markers, liveness-bracketed QMP frames, and HUD-excluded 3D ROI measurements;
+  route activation alone is not a visual pass.
+- Do not attribute the black ROI to texture, light, camera, or composition
+  until the comparison discriminates that boundary.
 - If build, launch, or live-capture gates fail, record the failed gate and stop
   at that boundary; do not reinterpret a stale or post-timeout frame.
 
 ## UNKNOWN
 
-- Whether runtime selects the production Sequoia and reaches the verified
-  `ModelSystem` setup path for every expected renderable.
-- Whether the newly built image's live QMP capture can be obtained before the
-  known third-present stall.
-- Whether successful UNLIT replacement restores the expected model outline or
-  only partial geometry due to camera framing/asset geometry.
+- Why selected Sequoia renderables bound successfully but produced no changed
+  pixels in the central 3D ROI.
+- Whether the unmatched later Vulkan present or guest Oops caused the absent
+  model pixels; current evidence establishes correlation only.
+- Whether the no-HUD Sequoia view, Planetarium/control scene, or scene-switch
+  state changes the common draw/present/composition result on this image.

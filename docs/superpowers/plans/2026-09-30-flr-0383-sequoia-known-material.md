@@ -160,31 +160,35 @@ recipe registration.
   `bblayers.conf` receiver, TOPDIR/TMPDIR gates PASS. A following evidence-only
   documentation commit will be rebundled so the image build uses the exact
   current tip.
-- [ ] Record available storage and build preconditions; notify the user before
-  a long image build. Run target `do_patch`, focused compile, then the image
-  build, stopping at first failure. Preserve caches and evidence.
+- [x] Record storage/build preconditions and notify before the long image
+  build. Target `do_patch`, focused compile, and full image build passed at
+  exact layer tip `748978266c9a9c66dd1a5301b56927896ae9cb2f`; all 11,898 tasks
+  succeeded, 8 warnings were classified, and 63 GiB remained free. Caches were
+  reused and preserved.
 
 ## Task 4: Prove the live visual result
 
 **Files:** ticket-scoped QMP full-frame PNG, short MP4, selected runtime log
 summary, hashes, and manifest; originals stay on the Mini evidence store.
 
-- [ ] Verify candidate kernel/rootfs/qemuboot hashes, exact Mini QEMU slot,
+- [x] Verify candidate kernel/rootfs/qemuboot hashes, exact Mini QEMU slot,
   strict guest SSH, Example Demo bundle, Wayland session, and zero stale
-  `flutter-auto` processes.
-- [ ] Boot one exact-image QEMU through the established Mini `runqemu`
+  `flutter-auto` processes. Exact candidate hashes and roles are in the ticket
+  and evidence manifest.
+- [x] Boot one exact-image QEMU through the established Mini `runqemu`
   procedure. Manually start exactly one Flutter process as `agl-driver` with
-  only the new opt-in override enabled.
-- [ ] Immediately capture a full 1280×800 QMP frame and short QMP video while
-  the same PID is live; bracket capture with process checks. Inspect the whole
-  image and separately report Sequoia and CPU/GPU HUD regions.
-- [ ] Require recognizable blue Sequoia geometry and the 2D CPU/GPU HUD in
-  the same live frame for the requested outcome. Record whether camera crop,
-  draw/present, or process failure remains, but do not broaden this ticket to
-  fix those separate causes.
-- [ ] Stop only the recorded app/QEMU processes, capture bounded fault/core
-  checks, and independently verify no QEMU/runqemu/app process, QMP socket, or
-  forwarded port remains.
-- [ ] If the all-primitives UNLIT override is still absent, preserve the
-  negative QMP evidence and create the next ticket at the newly proven
-  boundary. Do not claim production texture/light/root cause from this test.
+  only the new opt-in override enabled. First app attempt ended before capture;
+  its evidence was excluded and a fail-closed retry was performed.
+- [x] Capture a full 1280×800 QMP frame and short QMP video while the same PID
+  was live; before/after process checks passed. Full frame and separate HUD / 3D
+  ROI measurements are recorded in `work/evidence/FLR-0383-0001.md`.
+- [x] Visual acceptance was evaluated and **FAILED**: HUD is visible, but
+  central Sequoia ROI is uniformly black (`0/144000` changed/chromatic pixels).
+  Runtime material markers show READY=1, BOUND=24, BUILD_FAILED=0; this does
+  not prove visible geometry or identify camera/draw/present/composition cause.
+- [x] Stop only the recorded app/QEMU processes; bounded fault/core evidence
+  was retained. Independent checks found no QEMU/runqemu/flutter-auto process,
+  QMP socket, or forwarded port listener.
+- [x] Preserve the negative QMP result and keep texture/light/camera attribution
+  UNKNOWN. Continue the next scene discriminator under the existing FLR-0373
+  ticket; do not report the overall 3D goal as achieved.
