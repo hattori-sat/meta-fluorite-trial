@@ -6,7 +6,7 @@
 - Created: 2026-09-30
 - Predecessor: [FLR-0377 measured route-tap diagnostic](FLR-0377-tap-scenes-control-current-production-image.md)
 - Historical controls: [FLR-0285 production silhouette A/B](FLR-0285-trace-production-draw-command-boundary.md), [FLR-0371 current-image LIT/SUN fixture](FLR-0371-lit-parameter-rgb-assignment.md)
-- Branch: `feature-flr-0378-replay-sequoia-no-light-current-candidate` (to be created locally; no push)
+- Branch: `feature-flr-0378-replay-sequoia-no-light-current-candidate` (local, no push)
 - Working log: [FLR-0378 working log](../logs/2026-09-30-flr0378.md)
 - Candidate rootfs SHA-256: `949921c8bed28c540bd06a593cf37bbb9d94591985a2e9c7e31aaa35af9b4086`
 
