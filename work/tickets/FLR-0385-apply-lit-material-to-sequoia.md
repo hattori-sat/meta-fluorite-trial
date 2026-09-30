@@ -1,14 +1,15 @@
 # FLR-0385 — apply the proven LIT material to production Sequoia
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Owner: Mac Podman Devtool / meta-fluorite-trial / Mini BitBake / manual guest Flutter / QMP evidence roles
 - Created: 2026-09-30
+- Updated: 2026-10-01
 - Predecessors: [FLR-0371 LIT/SUN parameter fixture positive](FLR-0371-lit-parameter-rgb-assignment.md), [FLR-0383 Sequoia UNLIT override negative](FLR-0383-sequoia-known-material.md)
 - Implementation plan: [FLR-0385 plan](../../docs/superpowers/plans/2026-09-30-flr0385-lit-material-sequoia.md)
 - Branch: `feature-flr-0385-sequoia-lit-material` (local; no push)
 - Dev baseline: `dev-flr-0385-sequoia-lit-material-baseline` at `8f0b2267e781722cf85bf29b02565bf6d500ecc0`, including patch 0331; this is a development base, not a 3D-success claim.
-- Working log: [FLR-0385 working log](../logs/2026-09-30-flr0385.md)
+- Working log: [2026-10-01 FLR-0385 runtime log](../logs/2026-10-01-flr0385.md); [initial source/build log](../logs/2026-09-30-flr0385.md)
 
 ## Problem
 
@@ -40,6 +41,11 @@ the CPU/GPU HUD are visible together.
   `4acaa4c0194303227a2207bbbed9ea2249b72efb`. Patch 0331's `From` matches that
   HEAD and is registered once after 0330. Its all-primitive binding and
   teardown are intact.
+- Patch 0332 keeps the parameterized FLOAT3 color and, for each matching
+  `sequoia_ngp.glb` renderable, loops through `primitiveCount` and assigns the
+  material instance to every primitive slot. Runtime `BOUND=24` is a count of
+  binding log records/renderable entities, not a total primitive-slot count
+  and not proof of visible pixels.
 
 ### Inferences
 
@@ -72,16 +78,17 @@ the CPU/GPU HUD are visible together.
 | Material positive control | Fixture LIT/RGB path creates visible blue pixels with HUD | Proven on FLR-0371 candidate | FLR-0371-0004 screenshot/measurements |
 | Sequoia override | Same material binds all selected primitive slots | Profile A logs `READY=1`, `BOUND=24` in A1–A3; LIT source is in patch 0332 | A1–A3 app logs on Mini |
 | Scene lighting | A preserves production conditions; B adds only the existing SUN probe | A ran three times; B was correctly skipped because A reproduced an `FEngine::loop` kernel Oops and was not a healthy negative | A3 app log and bounded kernel journal window |
-| Visible output | Live QMP image contains identifiable Sequoia and HUD together | UNKNOWN: no live-PID-bracketed QMP frame was captured. A post-exit frame is all black and is invalid as render evidence. | A3 live-gate output and post-exit QMP PPM/PNG |
+| Visible output | Live QMP image contains identifiable Sequoia and HUD together | A4 live frame has HUD/Scenes but no visible Sequoia in the fixed 3D ROI; A4 is faulted, so material-specific visibility remains unclassified | A4 pre/mid/post PID gates and QMP PNG/MP4 |
 
 ### Problem point
 
-The first runtime divergence is after the first successful queue-present return:
-the next `FLR0026_VK_QUEUE_PRESENT_BEGIN` has no matching return, and the guest
-records an `FEngine::loop` kernel page fault. LIT material setup later reaches
-`READY=1`/`BOUND=24`, but there is no valid live QMP frame. The current evidence
-does not distinguish a render/present stall from a capture-timing failure, and
-does not establish whether the material itself emits visible pixels.
+The latest live run captured a full QMP frame with the same Flutter PID and
+start time verified immediately before and after capture. The frame contains
+the CPU/GPU HUD but a black native Sequoia region. Its bounded guest log shows
+one successful queue-present return followed by an unmatched second present
+and an `FEngine::loop` Oops before `FLUORITE_SEQUOIA_LIT_MATERIAL_READY`.
+Therefore the LIT material's assignment is proven, but the display result is
+not a healthy material-only negative and does not isolate the material.
 
 ### Ideal condition and success measure
 
@@ -228,6 +235,42 @@ HUD pixel measurements, and successful-present/liveness result.
 - QMP `quit` was accepted. The harness found zero QEMU/runqemu/flutter-auto
   residuals; QMP socket absent, ports 10930–10932 free, and no BitBake/pseudo/
   image-task residuals.
+- A4 retried profile A only, with capture prearranged; no image rebuild or
+  profile-B/SUN change occurred. Guest preflight passed: UID 1001
+  `agl-driver`, Wayland/compositor and Example Demo 3.32.5 present, no stale
+  Flutter process. LIT override remained enabled, production lighting
+  unchanged, and the selected model was Sequoia.
+- A4 Flutter identity was PID 648, UID 1001, start-time token 12658. The same
+  identity and unique app count passed before and after the still and eight
+  QMP frames. The bounded gate reported `READY=1`, `BOUND=24`, and two present
+  entries.
+- A4's bounded guest log records the first present result `0`, the second
+  `FLR0026_VK_QUEUE_PRESENT_BEGIN` without a captured return, and a kernel Oops
+  at 16:55:38 UTC in `FEngine::loop` (PID 694, kernel
+  `6.6.111-yocto-standard`). Material `READY` followed at 16:55:54 UTC. The
+  app wrapper later returned timeout status `124`; `coredumpctl` found no
+  coredumps. The full guest `/run` log was ephemeral; the bounded marker and
+  fault summary is retained on Mini. Its exit-status label has literal `n`
+  characters around the value because the one-run command used an unquoted
+  `printf` format; the numeric `124` is intact.
+- A4 QMP PPM SHA-256 is
+  `bb55289a04f1e3afcda72b8b21f4f6c89a54997f0f1866d0f4cf0e396e4f3fe0`.
+  The full frame is 1280×800. Center Sequoia ROI `(440,220,400,360)` is
+  uniformly black (`0/144000` changed, edge, and chromatic pixels); HUD ROI
+  `(1120,0,160,80)` contains 2,845 chromatic pixels. All eight video frames
+  have the same PPM SHA as the still. Local QMP-derived review media:
+  [A4 full QMP frame](../evidence/FLR-0385-0001/qmp-profile-a4-live.png), PNG
+  SHA-256 `69e691d93a59df2171a4f226b058468e81a778e42a60c4105ba72a4f18ce879f`;
+  [A4 eight-frame video](../evidence/FLR-0385-0001/qmp-profile-a4-live.mp4),
+  4 seconds, SHA-256
+  `3c28c2b64d0a7e4e8caf59a8e0811e21a7de2fb11a5b410566ab6683fceb5e7c`.
+- Raw PPM and frame sequence remain on Mini under
+  `$BUILD_EVIDENCE/flr0385-0001/qemu/`; only the QMP-derived PNG/MP4 were
+  streamed through FFmpeg to the local review directory. No disk image or raw
+  PPM was copied to Mac.
+- Exact QMP `quit` passed. Post-teardown harness preflight passed: zero
+  QEMU/runqemu/flutter-auto targets, absent QMP socket, free ports 10930–10932,
+  and unchanged candidate image hashes.
 
 ### Check
 
@@ -236,27 +279,44 @@ HUD pixel measurements, and successful-present/liveness result.
 | Canonical/branch/ticket | Canonical guard, one active ticket, clean feature base | PASS; feature branch clean at local layer commit | PASS |
 | Devtool baseline | Exact 0331 source baseline, clean and single component | PASS; one component, clean source, exact full revision | PASS |
 | Patch/build | Official 0332, Mini `do_patch`, compile and image pass | PASS at Mini receiver tip `fe92b77`; all three build gates passed, artifact hashes recorded | PASS |
-| Runtime A | Live QMP shows Sequoia+HUD | `READY=1`/`BOUND=24`, but A1–A3 did not produce a valid live capture; A3 exited `124` after an `FEngine::loop` Oops. Post-exit screen is black and invalid for acceptance. | UNKNOWN |
+| Runtime A | Live QMP shows Sequoia+HUD with a healthy render loop | A4 captured live with HUD, but Sequoia ROI is black; unmatched second present and `FEngine::loop` Oops occurred before material READY; timeout `124` | WAITING — faulted run cannot classify material visibility |
 | Runtime B | Add only existing SUN probe if A is healthy but visually negative | Skipped: A was faulted, so the precondition was not met | NOT RUN |
 | Teardown/evidence | QMP-only records and zero QEMU/app/socket/port residuals | PASS; post-exit still and eight frames retained on Mini; no raw PPM copied to Mac | PASS |
 
+### Visual evidence — A4 live QMP
+
+The complete frame was captured while PID 648 (UID 1001, start-time 12658)
+was confirmed alive before and after the still and eight-frame sequence. It
+shows the HUD and Scenes control, but no Sequoia pixels; the central 3D ROI is
+uniformly black. This is a real live frame from the run, but the renderer had
+already recorded the unmatched present/Oops, so it is not a healthy material
+comparison.
+
+![A4 live QMP full frame — HUD visible, Sequoia region black](../evidence/FLR-0385-0001/qmp-profile-a4-live.png)
+
+[A4 eight-frame QMP video](../evidence/FLR-0385-0001/qmp-profile-a4-live.mp4).
+
 ### Act
 
-- If A shows Sequoia and HUD, stop the experiment and preserve the simpler
-  profile; do not add SUN or touch the original material path.
-- Do not run B while the `FEngine::loop` Oops/unmatched present is present; the
-  lighting comparison would not be a clean discriminator.
-- Keep this ticket active until a live-PID-bracketed QMP frame is captured.
-  Prearrange a bounded capture at the known material-ready window before any
-  same-profile retry; do not rebuild or change light/camera/texture variables.
+- The live A4 visual gate is captured and negative for Sequoia, but the faulted
+  render loop means it is not a healthy material-only negative. Mark FLR-0385
+  Waiting rather than claiming success or repeating the same profile.
+- Do not run SUN profile B while the unmatched present/Oops is present; it
+  would not isolate lighting. Do not change the material, camera, texture, or
+  production scene based on A4.
+- The planned FLR-0386 one-variable control was attempted but did not select
+  the fixture because required behavior flags were missing. Its ordinary
+  startup Oops is not a valid material comparison. A new ticket must replay
+  the complete historical parameterized LIT fixture profile on this exact
+  rootfs before changing Sequoia material, camera, or textures.
 
 ## Unknowns
 
-- Whether profile A produces any visible Sequoia pixels while the app is live;
-  no valid live QMP capture exists yet.
-- Whether the recurring second-present/FEngine page-fault boundary is causal
-  for the absent frame, and its root cause; correlation is established, cause
-  is UNKNOWN.
+- Whether the bound LIT material produced any draw output before/after the
+  engine-loop fault; material binding is not a draw/present proof.
+- Whether the Oops causes the black live Sequoia ROI, shares a production
+  scene/load trigger, or is concurrent; exact causality and faulting access
+  remain UNKNOWN.
 - If B helps, whether the added SUN is causal by itself or interacts with
   other scene lights/material normals; this experiment does not replace
   unknown pre-existing scene lights.
