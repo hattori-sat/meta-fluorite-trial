@@ -11,8 +11,10 @@
 - Candidate kernel SHA-256: `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`
 - Candidate rootfs SHA-256: `949921c8bed28c540bd06a593cf37bbb9d94591985a2e9c7e31aaa35af9b4086`
 - Candidate qemuboot SHA-256: `8582ac80d4c58fc9e852abed0e6fd6e6077bf6e5f0f7727341033fb405d0a17c`
-- Run IDs: `flr0382-0001` (initial), `flr0382-0002` (launcher failure), and
-  `flr0382-0003` / `flr0382-0004` (runtime reached present; no live QMP capture)
+- Run IDs: `flr0382-0001` (initial), `flr0382-0002` (launcher failure),
+  `flr0382-0003` / `flr0382-0004` (runtime reached present; no live QMP
+  capture), and `flr0382-0005` (runtime reached draw/present; saved QMP media
+  was post-timeout and is not a live visual result)
 
 ## Purpose
 
@@ -85,6 +87,21 @@ camera, compositor, or general 3D investigation.
   the known baseline hash. The live visual result remains UNKNOWN.
 - The owned QEMU was quit through QMP; both recorded PIDs, the QMP socket, and
   forwarded ports were absent in the independent post-teardown check.
+- Run `flr0382-0005` passed image/helper/harness/guest checks and manually
+  launched Example Demo 3.32.5 as `agl-driver`. Its 3,431,801-byte log (SHA-256
+  `c18d9763b612b11908f1209a0ad3f321930c3f99353971d7ffba562cd45cea40`)
+  records 15,063 asset-ready lines, 2 model selections, 2 scene adds, 4 draw
+  submits, 4 draw ends, and 3 present enters with 2 successful returns. The
+  third present is unmatched; the 45-second app/SSH bound returned `124`.
+- In run 0005, the guest status/log timestamps are 18:50:16.910/18:50:16.802
+  +0900; QMP capture time is 18:50:38.205 +0900. The black 1280x800 still and
+  all eight identical video frames are therefore post-timeout, despite the
+  still filename containing `live`. Raw PPM SHA-256
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c` equals
+  the pre-Flutter frame. These media cannot classify live output. Kernel fault
+  scan had no matching lines, coredumpctl reported no dumps, and QMP teardown
+  plus independent no-process/socket/port checks passed. No build, image,
+  source, patch, or persistent helper changed.
 - The registered diagnostic patch `0279-diag-trace-current-production-scene-stages-devtool.patch`
   gates additional `spdlog::info` records on this environment variable. It
   logs draw boundaries and scene/model state; `ASSET_READY` is emitted from
@@ -103,7 +120,7 @@ camera, compositor, or general 3D investigation.
 | --- | --- | --- |
 | What | FLR-0378 silhouette; FLR-0381 live uniform gray | Whether adding only the stage trace changes QMP pixels or runtime sequence |
 | Where | Exact pinned Mini candidate; installed Example Demo 3.32.5 | Same image, bundle, Wayland session, and no-light Sequoia path |
-| When | Capture at first returned present while app is alive; bounded at 45 seconds | One QMP still plus eight-frame video, with liveness checked around capture |
+| When | Capture immediately after manual launch and before log/status queries; bounded at 45 seconds | One QMP still plus 12-frame video, bracketed by strict-SSH liveness checks |
 | Who | Guest app as `agl-driver`; compositor and QEMU roles | One manually launched `/usr/bin/flutter-auto` process |
 | How | Existing Mini `runqemu` path, strict guest SSH, QMP, bounded marker analysis | Add only `FLR0026_SCENE_STAGE_TRACE=1`; no other profile or script change |
 
@@ -123,7 +140,7 @@ camera, compositor, or general 3D investigation.
 
 - Reuse the exact candidate, existing Mini QEMU/runtime harness, bundle, and
   evidence roles. Use a unique run directory for each attempt
-  (`flr0382-0001` through `flr0382-0004`; next is `flr0382-0005`); do not
+  (`flr0382-0001` through `flr0382-0005`; next is `flr0382-0006`); do not
   create a second build/TMPDIR or copy a disk image to Mac.
 - Before launch, check canonical branch, one active ticket, no residual QEMU,
   QMP socket/ports, guest session/bundle, helper identity, candidate hashes,
@@ -135,7 +152,7 @@ camera, compositor, or general 3D investigation.
 - Preserve raw logs and PPMs on Mini in the persistent run evidence directory
   while the guest session is alive; do not copy high-volume logs to Mac.
   Bound log growth at 256 MiB and the app run at 45 seconds. Capture the QMP
-  full frame and eight-frame video while Flutter is confirmed alive. Transfer
+  full frame and 12-frame video while Flutter is confirmed alive. Transfer
   only those QMP-derived PNG/MP4 review artifacts.
 - Score the full 1280×800 frame, vehicle ROI `(0,100,320,310)`, and HUD ROI
   `(960,0,320,120)` for edges/chroma and compare to FLR-0378/0381 evidence.
@@ -238,6 +255,9 @@ camera, compositor, or general 3D investigation.
   liveness/capture result, so the QMP image remains UNKNOWN; the pre-Flutter
   black frame cannot substitute for it. OOM/core state for this run was not
   collected before teardown.
+- **Run `flr0382-0005`: LIVE-QMP GATE NOT MET.** Status/log timestamps prove
+  the saved QMP still/video were post-timeout. The scene/draw and two returned
+  presents are runtime evidence only; no current live-pixel verdict exists.
 
 ## Visual evidence
 
@@ -249,6 +269,13 @@ camera, compositor, or general 3D investigation.
   `work/evidence/FLR-0382-0001-post-timeout.mp4` (intentionally ignored by
   `.gitignore`); SHA-256
   `e1cd12d484871c53ac253c5ceb850c3f7448fe459317031354eae8b4fb56103f`.
+- Run `flr0382-0005` post-timeout QMP PNG review copy is
+  `work/evidence/FLR-0382-0005-post-timeout.png` (intentionally ignored),
+  SHA-256 `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`.
+  Its eight-frame 1280x800, 4-second MP4 is
+  `work/evidence/FLR-0382-0005-post-timeout.mp4` (intentionally ignored),
+  SHA-256 `eebfe19bd3d2064203c6cae0d1a5e377c2d3033f0c45c951f701f73634da71e3`.
+  Both are post-timeout only; raw source PPMs remain on Mini.
 - Authoritative raw PPMs and runtime log remain under the Mini role path
   `$BUILD_EVIDENCE/flr0382-0001/qemu`; raw media are not committed.
 - Run 0003/0004 runtime logs and pre-Flutter PPMs remain under their Mini run
@@ -260,13 +287,16 @@ camera, compositor, or general 3D investigation.
 ### Act
 
 - Keep this ticket In Progress: its live-QMP acceptance gate was not met. For
-  the same one-variable comparison, use a fresh run ID (`flr0382-0005`). Keep
-  the stdin-fed guest launch and use one foreground Python coordinator with
-  explicit try/finally status writes around each boundary. Poll the run-local
-  log for the first returned present, capture through QMP, and bracket the
-  capture with strict-SSH PID checks. Bound each SSH operation and emit the
-  exact failing stage instead of exiting silently. Do not change the trace
-  profile, source, or persistent scripts.
+  the same one-variable comparison, use fresh run ID `flr0382-0006`. Keep the
+  trace profile, source, image, and persistent scripts unchanged. Manually
+  launch Flutter through strict SSH and return immediately from the launch
+  command; start existing QMP video capture concurrently (12 frames at
+  2-second intervals), before log inspection or status queries. Capture a
+  still immediately afterward and bracket the short capture sequence with
+  strict-SSH PID checks. Then query only bounded present counts, fault/core
+  summary, and teardown state. This changes capture scheduling only. If the
+  app exits before capture, record the gate failure without assigning a visual
+  verdict.
 - Do not reopen the already completed texture inventory or broad camera/light
   sweeps. Use a valid live frame plus the present/stage sequence to choose the
   next boundary.
