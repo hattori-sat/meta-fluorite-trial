@@ -11,7 +11,7 @@
 - Candidate kernel SHA-256: `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`
 - Candidate rootfs SHA-256: `949921c8bed28c540bd06a593cf37bbb9d94591985a2e9c7e31aaa35af9b4086`
 - Candidate qemuboot SHA-256: `8582ac80d4c58fc9e852abed0e6fd6e6077bf6e5f0f7727341033fb405d0a17c`
-- Run ID: `flr0382-0001`
+- Run IDs: `flr0382-0001` (initial) and `flr0382-0002` (retry; no valid render capture)
 
 ## Purpose
 
@@ -44,6 +44,14 @@ camera, compositor, or general 3D investigation.
   (`d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`).
   This is not a live-render observation and does not decide whether trace
   changes the rendered scene.
+- Retry `flr0382-0002` passed candidate/helper/guest preflight and armed the
+  QMP observer, but did not reach a valid Flutter render observation. The
+  launch log records `FLR0382_PREEXEC_GATE=PASS` followed by
+  `sh: line 21: bundle: unbound variable`; the attempt status file is absent.
+  A follow-up launch invocation produced no attributable status or additional
+  runtime log, and the observer ended `NO_FIRST_PRESENT` with status `124`.
+  No `flutter-auto` process existed at teardown. This is a launch/evidence
+  failure, not a black/gray frame or renderer verdict.
 - The owned QEMU was quit through QMP; both recorded PIDs, the QMP socket, and
   forwarded ports were absent in the independent post-teardown check.
 - The registered diagnostic patch `0279-diag-trace-current-production-scene-stages-devtool.patch`
@@ -148,6 +156,12 @@ camera, compositor, or general 3D investigation.
   remain intentionally ignored by Git.
 - QMP-quit the exact run and independently verified zero recorded QEMU/runqemu
   PIDs, zero forwarded ports, and no residual QMP socket.
+- Retry `flr0382-0002`: exact candidate and guest checks passed and the observer
+  was armed. The first manual launcher stopped after its pre-exec gate because
+  `bundle` was unbound; a follow-up invocation left no status/log evidence and
+  the observer timed out without a first returned-present marker. No live QMP
+  image was captured, so this retry has no visual verdict. The exact QEMU was
+  then quit via QMP; both run-owned PIDs, socket, and ports were absent.
 
 ### Check
 
@@ -162,6 +176,11 @@ camera, compositor, or general 3D investigation.
   was absent or whether a live frame briefly differed.
 - **Teardown: PASS.** QMP quit was accepted; recorded PIDs, socket, and
   forwarded ports were absent afterward.
+- **Retry `flr0382-0002`: NOT A VALID RENDER RUN.** The pre-exec marker was
+  followed by a shell `bundle`-variable error; no attempt status file or live
+  Flutter process was present, and the observer recorded no first present.
+  No QMP render frame exists for this retry. Do not classify it as a graphics
+  regression or as black/gray output.
 
 ## Visual evidence
 
@@ -181,10 +200,11 @@ camera, compositor, or general 3D investigation.
 ### Act
 
 - Keep this ticket In Progress: its live-QMP acceptance gate was not met. For
-  the same one-variable comparison, use a fresh run ID (`flr0382-0002`) and
-  start the bounded QMP/liveness observer before manually invoking Flutter, so
-  capture is triggered during the process lifetime. Do not change the trace
-  profile, source, or persistent scripts in that retry.
+  the same one-variable comparison, use a fresh run ID (`flr0382-0003`). First
+  feed an explicit guest-shell command over strict SSH stdin, defining and
+  checking the bundle inside the guest shell; persist its exit status before
+  teardown. Arm the bounded QMP/liveness observer before manually invoking
+  Flutter. Do not change the trace profile, source, or persistent scripts.
 - Do not reopen the already completed texture inventory or broad camera/light
   sweeps. Use a valid live frame plus the present/stage sequence to choose the
   next boundary.
