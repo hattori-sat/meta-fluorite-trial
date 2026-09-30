@@ -1,6 +1,6 @@
 # FLR-0382 — isolate scene-stage tracing against the live gray baseline
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Owner: Mini QEMU / strict guest SSH / `agl-driver` / Flutter runtime / QMP evidence roles
 - Created: 2026-09-30
@@ -102,6 +102,11 @@ camera, compositor, or general 3D investigation.
   scan had no matching lines, coredumpctl reported no dumps, and QMP teardown
   plus independent no-process/socket/port checks passed. No build, image,
   source, patch, or persistent helper changed.
+- The read-only `flr0382-0006` preflight-controller attempt stopped at a remote
+  embedded-Python `SyntaxError` in an f-string before the remaining candidate,
+  storage, helper, and residual checks ran. A separate port-only scan found
+  10930–10932 free. No run directory, QEMU, Flutter, build, image, or source
+  mutation was made; run 0006 was not started.
 - The registered diagnostic patch `0279-diag-trace-current-production-scene-stages-devtool.patch`
   gates additional `spdlog::info` records on this environment variable. It
   logs draw boundaries and scene/model state; `ASSET_READY` is emitted from
@@ -286,17 +291,15 @@ camera, compositor, or general 3D investigation.
 
 ### Act
 
-- Keep this ticket In Progress: its live-QMP acceptance gate was not met. For
-  the same one-variable comparison, use fresh run ID `flr0382-0006`. Keep the
-  trace profile, source, image, and persistent scripts unchanged. Manually
-  launch Flutter through strict SSH and return immediately from the launch
-  command; start existing QMP video capture concurrently (12 frames at
-  2-second intervals), before log inspection or status queries. Capture a
-  still immediately afterward and bracket the short capture sequence with
-  strict-SSH PID checks. Then query only bounded present counts, fault/core
-  summary, and teardown state. This changes capture scheduling only. If the
-  app exits before capture, record the gate failure without assigning a visual
-  verdict.
+- Status changed to Waiting on 2026-09-30 when work was redirected to the
+  higher-priority all-primitives known-material intervention in FLR-0383. The
+  live trace-on/off comparison remains unresolved; it is not classified as a
+  renderer failure. Run `flr0382-0006` was not started: its read-only
+  preflight controller failed at embedded-Python syntax before completing
+  candidate/helper/storage/residual checks. If resumed later, first correct
+  and validate that controller without changing the runtime profile, then use
+  fresh run ID `flr0382-0006` and capture QMP immediately after manual launch.
+  Do not mix scene-stage tracing into FLR-0383.
 - Do not reopen the already completed texture inventory or broad camera/light
   sweeps. Use a valid live frame plus the present/stage sequence to choose the
   next boundary.
