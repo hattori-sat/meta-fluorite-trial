@@ -53,5 +53,5 @@
 - [x] **Step 1: Convert review media without copying raw PPM files.** QMP PPMs were streamed from Mini directly through local FFmpeg; only PNG/MP4 derivatives are local. The full image was visually inspected and uniformly black.
 - [x] **Step 2: Apply the exact interpretation gate.** The profile was incomplete, so the pixel result cannot classify fixture/material behavior. Only ordinary startup's present/Oops sequence is established.
 - [x] **Step 3: Tear down one exact run.** Exact QMP quit and independent harness postflight verified zero QEMU/runqemu/Flutter processes, absent socket, free ports, and unchanged image hashes.
-- [ ] **Step 4: Record and validate.** Documentation and independent repository/privacy/checkpoint/link/whitespace verification pending.
-- [ ] **Step 5: Open a separate ticket for the unresolved fixture verdict.** The corrected exact-profile replay must have its own ticket; no profile was retried in FLR-0386.
+- [x] **Step 4: Record and validate.** Canonical guard, repository privacy, file-size, FLR-0387 checkpoint contract, shell-command syntax, and whitespace checks passed. Repository-wide Markdown links still report 9 pre-existing missing FLR-0338/0339 evidence targets; no FLR-0385–0387 link errors remain. FLR-0386 stays Waiting because its runtime fixture verdict is UNKNOWN.
+- [x] **Step 5: Open a separate ticket for the unresolved fixture verdict.** [FLR-0387](../../../work/tickets/FLR-0387-replay-parameterized-lit-on-current-image.md) owns the corrected exact-profile parameterized replay; no profile was retried in FLR-0386.

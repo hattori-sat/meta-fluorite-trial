@@ -1,0 +1,15 @@
+KERNEL=6.6.111-yocto-standard expected=6.6.111-yocto-standard
+AGL_DRIVER_UID=1001
+WAYLAND_SOCKET=present
+COMPOSITOR=472:agl-compositor
+FLUTTER_EXAMPLE=present
+app_id = "fluorite"
+STALE_APP_TIMEOUT=none
+BASH=present
+GREP_LINE_BUFFERED=missing
+journalctl=present
+coredumpctl=present
+gdb=present
+
+rc=1
+__FLR_SERIAL_COMMAND_DONE_7B31__

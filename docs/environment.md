@@ -191,11 +191,19 @@ the exact harness-owned stale socket after all target processes disappear.
   removed; Docker is no longer a provider for this workflow.
 - Podman 6.1.1 is installed and the one rootful `fluorite-devtool` machine is
   running with the validated 8 GiB/2 CPU/4 GiB profile. The OCI image build
-  passed. The single `fluorite-mac-devtool` container passed readiness
-  and the bounded `status` probe twice, reusing the same project, AGL, and
-  state binds without adding a named volume. Earlier setup repaired stale
-  `self-install/meta-flutter` entries in the existing state; current status
-  checks defer the large ownership scan until a real Devtool operation.
+  passed. FLR-0390 found the fixed-name `fluorite-mac-devtool` container
+  mounted a separate older project clone, so the wrapper correctly failed
+  closed on its project-root label. The exact idle container was replaced once
+  through the Podman wrapper with the current canonical checkout mounted
+  read-write at `/workspace/project`; the same image, AGL bind, state bind,
+  machine, and container name were reused. Its old project clone was left
+  untouched. The prior `/workspace/tmp` contents were archived in the fixed
+  state bind, restored, and GNU-tar-compared before the archive was removed.
+  Two consecutive wrapper `status` probes and one read-only `devtool-status`
+  probe passed. No second machine, container, named volume, state root, or
+  TMPDIR was created. Earlier setup repaired stale `self-install/meta-flutter`
+  entries in the existing state; status checks defer the large ownership scan
+  until a real Devtool operation.
 - The active Yocto `TMPDIR` is the single fixed container-private path
   `/workspace/tmp` on a 3 GiB tmpfs. The host bind remains the source/build/
   downloads/sstate state path; the retired host `state/tmp` is not used because
@@ -210,6 +218,9 @@ the exact harness-owned stale socket after all target processes disappear.
   `/mnt/yocto/flourite-receivers/inbox`, adjacent to the fixed active receiver.
   Do not invent `/mnt/yocto/bundles` or another per-ticket inbox; the handoff
   helper must always send the single active bundle to this existing inbox.
+- `scripts/run-mac-devtool.sh` is a retained Docker-only legacy fallback and is
+  not part of the active workflow. Do not start Docker Desktop for Fluorite;
+  use `scripts/run-podman-devtool.sh` with the current canonical project root.
 - Default recipe-scoped extract reached source staging but failed at the
   cross-device move. Official `devtool modify --no-extract` then registered the
   resulting Git tree, and `devtool status` reports `filament-vk` at the fixed

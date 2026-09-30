@@ -304,11 +304,11 @@ comparison.
 - Do not run SUN profile B while the unmatched present/Oops is present; it
   would not isolate lighting. Do not change the material, camera, texture, or
   production scene based on A4.
-- The planned FLR-0386 one-variable control was attempted but did not select
-  the fixture because required behavior flags were missing. Its ordinary
-  startup Oops is not a valid material comparison. A new ticket must replay
-  the complete historical parameterized LIT fixture profile on this exact
-  rootfs before changing Sequoia material, camera, or textures.
+- FLR-0386 did not select the fixture because required behavior flags were
+  missing and it used the hardcoded-color branch. Its ordinary startup Oops is
+  not a valid material comparison. [FLR-0387](FLR-0387-replay-parameterized-lit-on-current-image.md)
+  now replays the complete historical parameterized LIT fixture profile on
+  this exact rootfs before any Sequoia material, camera, or texture change.
 
 ## Unknowns
 

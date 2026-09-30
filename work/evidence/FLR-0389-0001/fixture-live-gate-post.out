@@ -1,0 +1,5 @@
+FLR0389_LIVE_GATE=FAIL pid=697 uid=none start=none app_count=0 branch=1 pure=1 enabled=1 contract=1 geometry_ready=1 sun=1 enter=8 return=7 done=7 fault=
+
+rc=1
+__FLR_SERIAL_COMMAND_DONE_7B31__
+root@qemux86-64:~#

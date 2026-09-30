@@ -21,8 +21,8 @@ ticket as opened referred to FLR-0369's constant-color LIT fixture. Later plan
 text drifted to FLR-0371's parameterized material without reconciling the
 original objective; the attempted command also selected the hardcoded branch.
 The runtime attempt omitted fixture-selection flags, so it tested neither
-fixture. FLR-0387 is the valid follow-up for the parameterized LIT/RGB path
-that patch 0332 uses.
+fixture. [FLR-0387](FLR-0387-replay-parameterized-lit-on-current-image.md) is
+the valid follow-up for the parameterized LIT/RGB path that patch 0332 uses.
 
 This is a diagnostic control only. It does not prove production Sequoia or
 overall Fluorite acceptance.

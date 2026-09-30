@@ -1,0 +1,6 @@
+[1] 687
+FLR0389_LAUNCH=PASS pid=697 uid=1001 start=91950 wrapper=687 epoch=1790805258
+    697  1001 flutter-auto    /usr/bin/flutter-auto -b /usr/share/flutter/toyota
+
+rc=0
+__FLR_SERIAL_COMMAND_DONE_7B31__

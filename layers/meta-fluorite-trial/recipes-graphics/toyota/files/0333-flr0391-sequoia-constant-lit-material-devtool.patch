@@ -1,0 +1,45 @@
+From 6946d02d61e637dbaf1eb5cbc52bfe3b40b8882e Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Wed, 30 Sep 2026 22:55:20 +0000
+Subject: [PATCH] feat: apply constant LIT material to Sequoia
+
+---
+ .../core/systems/derived/model_system.cc             | 12 ++++--------
+ 1 file changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 9dab259..632df03 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -639,14 +639,13 @@ void ModelSystem::setupRenderable(
+       filamat::MaterialBuilder::init();
+       filamat::MaterialBuilder materialBuilder;
+       materialBuilder
+-        .name("fluorite_flr0385_sequoia_known_lit_blue")
++        .name("fluorite_flr0391_sequoia_constant_lit_blue")
+         .material(
+           "void material(inout MaterialInputs material) {"
+           "  prepareMaterial(material);"
+-          "  material.baseColor.rgb = materialParams.color;"
++          "  material.baseColor.rgb = vec3(0.05, 0.45, 1.0);"
+           "}"
+         )
+-        .parameter("color", filament::backend::UniformType::FLOAT3)
+         .shading(filamat::MaterialBuilder::Shading::LIT)
+         .targetApi(filamat::MaterialBuilder::TargetApi::ALL)
+         .platform(filamat::MaterialBuilder::Platform::ALL);
+@@ -659,12 +658,9 @@ void ModelSystem::setupRenderable(
+           sequoia_known_lit_material_instance_ =
+             sequoia_known_lit_material_->createInstance();
+           if (sequoia_known_lit_material_instance_ != nullptr) {
+-            sequoia_known_lit_material_instance_->setParameter(
+-              "color", filament::RgbType::LINEAR,
+-              filament::math::float3{0.05f, 0.45f, 1.0f}
+-            );
+             spdlog::info(
+-              "FLUORITE_SEQUOIA_LIT_MATERIAL_READY color=(0.05,0.45,1.0)"
++              "FLUORITE_SEQUOIA_LIT_MATERIAL_READY source=constant "
++              "color=(0.05,0.45,1.0)"
+             );
+           }
+         }
