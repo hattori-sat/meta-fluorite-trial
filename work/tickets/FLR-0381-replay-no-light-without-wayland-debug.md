@@ -1,6 +1,6 @@
 # FLR-0381 — replay no-light Sequoia without Wayland protocol logging
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Created: 2026-09-30
 - Predecessor: FLR-0378 current-image no-light baseline; FLR-0380 local diagnostic commit `fbed630` on `feature-flr-0380-current-wayland-surface-trace` (not pushed)
@@ -9,7 +9,7 @@
 - Candidate kernel SHA-256: `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`
 - Candidate rootfs SHA-256: `949921c8bed28c540bd06a593cf37bbb9d94591985a2e9c7e31aaa35af9b4086`
 - Candidate qemuboot SHA-256: `8582ac80d4c58fc9e852abed0e6fd6e6077bf6e5f0f7727341033fb405d0a17c`
-- Run ID: `flr0381-0001`
+- Run IDs: `flr0381-0001`, `flr0381-0002`
 
 ## Objective
 
@@ -54,19 +54,27 @@ camera, texture, SHM, or semaphore investigation.
 1. **Protocol logging changes timing or surface behavior.** Prediction: without
    `WAYLAND_DEBUG`, QMP returns to the gray field/achromatic Sequoia silhouette
    or the present/exit sequence changes. One run establishes correlation only,
-   not causality.
+   not causality. **Observed:** the one live capture was gray rather than
+   FLR-0380's black frame; this is consistent with a difference, not causal
+   proof.
 2. **The all-black result is independent of `WAYLAND_DEBUG`.** Prediction:
    QMP remains byte-identical black and the unmatched second present recurs.
+   **Observed:** the live frame was gray, so the all-black prediction did not
+   recur; the unmatched return moved to a third present call.
 3. **The result is run-variable or the measurement window is insufficient.**
    Prediction: QMP, present markers, and process state disagree without a
-   repeatable pattern. Preserve the exact status and do not infer a cause.
+   repeatable pattern. **Observed:** run 0001 still liveness is UNKNOWN, while
+   run 0002 produced a stable gray still/video with liveness bracketed; run
+   variability is not ruled out.
 
 ## Scope and success criteria
 
 - Reuse only the pinned kernel/rootfs/qemuboot, official Mini `runqemu`
   harness, existing 6144 MiB setting, installed bundle, and fixed evidence
-  root. Allocate only `$EVIDENCE_ROOT/flr0381-0001/qemu`; create no additional
-  temp/build/TMPDIR and copy no QEMU image to Mac.
+  root. Allocate only `$EVIDENCE_ROOT/flr0381-0001/qemu` and
+  `$EVIDENCE_ROOT/flr0381-0002/qemu`; the second run was allowed because the
+  first still's liveness was not bracketed. Create no additional temp/build/
+  TMPDIR and copy no QEMU image to Mac.
 - Preflight zero residual QEMU/runqemu/flutter-auto processes, QMP socket and
   forwarded ports, candidate hashes, guest compositor/session, and bundle.
 - Manually invoke `/usr/bin/flutter-auto` as `agl-driver` over strict guest
@@ -93,7 +101,8 @@ camera, texture, SHM, or semaphore investigation.
 ## Impact
 
 - **Build-time / packaging:** none.
-- **Runtime:** one bounded manual run on the unchanged candidate.
+- **Runtime:** two bounded manual runs on the unchanged candidate; the second
+  was a repeat because the first lacked capture-time liveness evidence.
 - **Integration risk:** no persistent software mutation. A changed result is
   initially timing correlation, not proof that protocol logging is causal.
 
@@ -112,23 +121,56 @@ camera, texture, SHM, or semaphore investigation.
 
 ### Do
 
-- Ticket opened on the dev-milestone-based feature branch. Runtime pending.
+- Both runs reused the official Mini QEMU harness, but Flutter itself was
+  launched manually as `agl-driver`; no persistent launch or capture script
+  was edited. The one-off observer for run 0002 captured at the first returned
+  present while strict guest SSH confirmed Flutter was alive.
+- Run 0001 reached the 45-second bound (status `124`). Its still was gray, but
+  capture-time liveness was not bracketed; the later video was black after the
+  app had exited. This run alone is not a valid live-render verdict.
+- Repeated as run 0002 with the same image/profile. Both live checks passed;
+  the QMP still and all eight video frames were uniformly gray. Two present
+  calls returned `0`; a third had no captured return. The bounded status was
+  `124`.
+- Captured complete QMP frames and videos; raw logs/PPMs remain on Mini. See
+  [runtime evidence](../evidence/FLR-0381-runtime.md).
 
 ### Check
 
-- Pending manual launch, QMP media, pixel analysis, exit-status capture, and
-  cleanup.
+- Run 0002 changed all 1,024,000 pixels from the black pre-Flutter frame, but
+  produced zero edges or chromatic pixels. Vehicle and HUD ROIs were uniform;
+  all eight live frames matched the still.
+- Both stills were gray, but only run 0002 passed the live-capture checks.
+  Removing `WAYLAND_DEBUG` therefore correlates with a gray live frame rather
+  than FLR-0380's black frame; it did not restore the Sequoia or HUD, and the
+  causal explanation remains unknown.
+- The live app reached model selection/load planning, 34 renderable records,
+  42 material records, and successful present returns. Those markers do not
+  prove visible geometry.
+- Both QMP sessions were quit through their owned sockets; independent process,
+  socket, and forwarded-port checks passed. Run 0001 had no selected Oops/OOM/
+  segfault or coredump in its bounded check. Run 0002 kernel/core status was
+  not separately collected.
 
 ### Act
 
-- Pending. Do not mark the production 2D+colored-Sequoia goal complete from a
-  silhouette-only or fixture-only frame.
+- Close this diagnostic ticket. Do not change a persistent launcher based on
+  a result that is gray and does not meet the visual target. Continue with a
+  separate one-variable ticket comparing the already observed scene-stage
+  trace condition against this low-volume baseline; keep raw high-volume logs
+  on Mini and summarize bounded markers only.
+- Do not repeat broad texture-file, camera, light, SHM, or present-wait probes
+  without new evidence. This no-light run cannot decide production lighting or
+  texture appearance.
+- Production colored Sequoia plus the 2D HUD in one QMP frame remains the
+  acceptance criterion and is not complete.
 
 ## UNKNOWN
 
 - Whether `WAYLAND_DEBUG` or another run-to-run/timing difference explains the
-  FLR-0380 all-black frame versus the FLR-0378 silhouette.
-- Whether the app's unmatched second present recurs on this run and what the
-  exact app/SSH exit statuses are.
+  FLR-0380 all-black frame versus the FLR-0381 live gray frame.
+- Why the third queue-present call entered without a captured return before
+  the bounded status `124`.
+- Run 0001 still-capture liveness; it was not bracketed and remains UNKNOWN.
 - Whether production Sequoia and the 2D HUD can appear together in one current
   QMP frame.
