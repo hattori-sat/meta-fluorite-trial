@@ -50,9 +50,9 @@
 - Modify in the fixed Devtool source: `plugins/filament_view/core/systems/derived/model_system.h`
 - Test seam: Mini `flutter-auto` compile and live QMP runtime; the C++ unit suite does not instantiate this scene-backed Filament path.
 
-- [ ] **Step 1: Preserve the proven fixture contract.** Use the exact fragment `material.baseColor.rgb = materialParams.color;`, a FLOAT3 `color` parameter, `filament::RgbType::LINEAR`, and `{0.05f, 0.45f, 1.0f}`. Set `MaterialBuilder::Shading::LIT` and give all new identifiers/log markers the `FLUORITE_SEQUOIA_LIT_MATERIAL_*` name. Do not change asset matching or the loop over every primitive slot.
-- [ ] **Step 2: Keep the override opt-in.** Replace the old UNLIT selector with `FLUORITE_SEQUOIA_LIT_MATERIAL_OVERRIDE`; with the variable absent, preserve normal GLB materials. Do not add or alter a light in this source patch; profile B will reuse `FLR0305_PRODUCTION_SCENE_LIGHT`.
-- [ ] **Step 3: Check the exact Devtool-source diff.** Require only the two `ModelSystem` files, no formatting noise, and no changes to camera/scene/HUD/light/texture. Commit the source change in the existing Devtool Git using the role identity.
+- [x] **Step 1: Preserve the proven fixture contract.** The source uses the exact fragment `material.baseColor.rgb = materialParams.color;`, FLOAT3 `color`, `filament::RgbType::LINEAR`, `{0.05f, 0.45f, 1.0f}`, and `MaterialBuilder::Shading::LIT`. The all-primitive loop remains unchanged.
+- [x] **Step 2: Keep the override opt-in.** The selector is `FLUORITE_SEQUOIA_LIT_MATERIAL_OVERRIDE`; with it absent, normal GLB materials remain untouched. No light was added or changed; profile B will reuse `FLR0305_PRODUCTION_SCENE_LIGHT`.
+- [x] **Step 3: Check the exact Devtool-source diff.** Exactly the two `ModelSystem` files changed; `git diff --check` passed. Camera/scene/HUD/light/texture are untouched. The Devtool source commit is `b9793ce70deb18081660679796d8288efe90a78a`.
 
 ### Task 4: Generate and locally commit canonical patch 0332
 
@@ -62,9 +62,9 @@
 - Refresh through the helper if required: `manifests/baseline-sources.lock`
 - Modify: `work/tickets/FLR-0385-apply-lit-material-to-sequoia.md`, `work/logs/2026-09-30-flr0385.md`, `TASKS.md`
 
-- [ ] **Step 1: Run the project split-component helper.** Use `scripts/rebase-fluorite-devtool-component.sh` for ticket `FLR-0385`, component recipe `fluorite-plugins`, fixed source path `/workspace/state/build/workspace/sources/fluorite-plugins`, baseline `4acaa4c0194303227a2207bbbed9ea2249b72efb`, the exact new full source commit, canonical patch 0332, and `flutter-auto_2.0.bbappend`. The helper must invoke official `devtool update-recipe --mode patch --append --no-remove` and refresh the project layer baseline.
-- [ ] **Step 2: Verify generated-patch provenance.** Require patch 0332 `From` equals the new source commit; its file list is exactly `model_system.cc` and `model_system.h`; its content does not duplicate patch 0331; registration exists once after 0331; no local-index file was added; baseline lock/tree count agrees.
-- [ ] **Step 3: Run focused local checks and commit layer/docs.** Run the canonical/privacy/checkpoint/staged-whitespace checks. Commit only patch 0332, its one registration, any helper-authorized baseline lock update, and FLR-0385 evidence/docs. Do not push.
+- [x] **Step 1: Run the project split-component helper.** `scripts/rebase-fluorite-devtool-component.sh` completed for ticket `FLR-0385`, source recipe `fluorite-plugins`, baseline `4acaa4c0194303227a2207bbbed9ea2249b72efb`, source commit `b9793ce70deb18081660679796d8288efe90a78a`, and canonical patch 0332. The helper ran the official Devtool patch update and refreshed the baseline lock.
+- [x] **Step 2: Verify generated-patch provenance.** Patch 0332 `From` equals the new source commit; its file list is exactly `model_system.cc` and `model_system.h`; it is the incremental rename/shading change from patch 0331; registration exists once after 0331; no local-index file was added; baseline lock count is 425 (one new patch file).
+- [ ] **Step 3: Run focused local checks and commit layer/docs.** Run canonical/privacy/checkpoint checks and staged whitespace validation excluding the nested unified-diff `.patch` file; verify that generated patch by reverse-applying it against its exact Devtool source HEAD. Mini `do_patch` remains the authoritative forward-application gate. Commit only patch 0332, its one registration, the helper-authorized baseline lock update, and FLR-0385 evidence/docs. Do not push.
 
 ### Task 5: Handoff and build on the fixed Mini PC
 

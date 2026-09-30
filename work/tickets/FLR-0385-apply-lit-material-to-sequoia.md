@@ -166,11 +166,18 @@ HUD pixel measurements, and successful-present/liveness result.
 
 ### Do
 
-- Record-only ticket/plan/log setup is locally committed on this feature branch
-  (no push).
-  Persistent Devtool source and exact 0331 baseline have now passed the
-  read-only identity checks. No FLR-0385 source edit, bundle transfer, BitBake
-  task, image build, or QEMU run has occurred yet.
+- The persistent Devtool source was clean at exact 0331 baseline `4acaa4c`.
+  Only `model_system.cc` and `.h` were edited: the Sequoia material is now LIT
+  with the same RGB parameter expression and linear blue value as FLR-0371;
+  the override remains opt-in and all-primitive binding/teardown remain intact.
+- Devtool source commit: `b9793ce70deb18081660679796d8288efe90a78a`.
+- Official component-rebase helper generated canonical patch 0332 from that
+  commit. Patch SHA-256 is
+  `395f3b86033c65786fc212a94356bc67d48bffe10156b9327ae82fc8a6f86339`; its
+  file list is exactly the two `ModelSystem` files. The recipe registers it
+  once after 0331, and the authorized baseline lock refresh records 425 files.
+- FLR-0385 layer patch commit, bundle transfer, Mini `do_patch`, compile, image
+  build, and QEMU runtime evidence are still pending.
 
 ### Check
 
@@ -178,7 +185,7 @@ HUD pixel measurements, and successful-present/liveness result.
 | --- | --- | --- | --- |
 | Canonical/branch/ticket | Canonical guard, one active ticket, clean feature base | Initial branch created; ticket/dashboard verification pending | PENDING |
 | Devtool baseline | Exact 0331 source baseline, clean and single component | Pending read-only verification | PENDING |
-| Patch/build | Official 0332, Mini `do_patch`, compile and image pass | Pending | PENDING |
+| Patch/build | Official 0332, Mini `do_patch`, compile and image pass | Official 0332 provenance and local registration PASS; Mini handoff/build pending | PENDING |
 | Runtime A/B | Live QMP shows Sequoia+HUD; profile B only if needed | Pending | PENDING |
 | Teardown/evidence | QMP-only, retained logs, zero QEMU/app/socket/port residuals | Pending | PENDING |
 
