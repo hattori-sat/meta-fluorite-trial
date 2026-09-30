@@ -12,7 +12,7 @@
 - Candidate rootfs SHA-256: `949921c8bed28c540bd06a593cf37bbb9d94591985a2e9c7e31aaa35af9b4086`
 - Candidate qemuboot SHA-256: `8582ac80d4c58fc9e852abed0e6fd6e6077bf6e5f0f7727341033fb405d0a17c`
 - Run IDs: `flr0382-0001` (initial), `flr0382-0002` (launcher failure), and
-  `flr0382-0003` (runtime reached present; no live QMP capture)
+  `flr0382-0003` / `flr0382-0004` (runtime reached present; no live QMP capture)
 
 ## Purpose
 
@@ -71,6 +71,18 @@ camera, compositor, or general 3D investigation.
   `coredumpctl` reported no coredumps. A broad case-insensitive `Oops`
   substring count was a false positive on `LOOPS` marker names; exact-token
   fault matching returned zero.
+- Run `flr0382-0004` used the verified stdin-fed guest launch and a foreground
+  Mini coordinator. Ticket-derived kernel/rootfs/qemuboot hashes passed the
+  harness; guest pre-exec passed. The coordinator detected the first successful
+  present on poll 53, but its result stopped at that marker: no liveness-gate
+  result, QMP application still/video, or outer-SSH status file was written.
+  The runtime log is 3,425,314 bytes / 31,102 lines, SHA-256
+  `883154f10996161e21114a996e66ee04b377ed4f58701eb6bcc736f5e01b7828`; it
+  records 15,063 `ASSET_READY`, 2 model selections, 2 scene-add completions, 4
+  draw submits, 4 draw ends, 3 present enters, 2 successful returns, and a
+  guest-app timeout status `124`. A separate probe saw Flutter alive once;
+  later it was absent. The only saved QMP image is pre-Flutter and black with
+  the known baseline hash. The live visual result remains UNKNOWN.
 - The owned QEMU was quit through QMP; both recorded PIDs, the QMP socket, and
   forwarded ports were absent in the independent post-teardown check.
 - The registered diagnostic patch `0279-diag-trace-current-production-scene-stages-devtool.patch`
@@ -110,9 +122,9 @@ camera, compositor, or general 3D investigation.
 ## Scope and success criteria
 
 - Reuse the exact candidate, existing Mini QEMU/runtime harness, bundle, and
-  evidence roles. Use unique run directories (`flr0382-0001` was the first
-  attempt; the planned retry uses `flr0382-0002`); do not create a second
-  build/TMPDIR or copy a disk image to Mac.
+  evidence roles. Use a unique run directory for each attempt
+  (`flr0382-0001` through `flr0382-0004`; next is `flr0382-0005`); do not
+  create a second build/TMPDIR or copy a disk image to Mac.
 - Before launch, check canonical branch, one active ticket, no residual QEMU,
   QMP socket/ports, guest session/bundle, helper identity, candidate hashes,
   and available Mini storage. Fail closed before Flutter if any check fails.
@@ -190,6 +202,12 @@ camera, compositor, or general 3D investigation.
   because Flutter had already reached status `124`. Collected bounded counters,
   filtered guest kernel/core state, then QMP-quit the exact QEMU and verified
   PIDs/socket/ports clear.
+- Run `flr0382-0004`: the first hand-entered rootfs digest was rejected by the
+  harness before QEMU start; deriving all digests from this ticket recovered
+  without a second run directory. Harness/guest/STDIN gates passed. The
+  foreground coordinator found a returned-present marker but stopped before
+  recording PID/capture/status results; the later capture attempt had no live
+  app and produced no QMP media. QMP teardown and port/socket checks passed.
 
 ### Check
 
@@ -214,6 +232,12 @@ camera, compositor, or general 3D investigation.
   status `124`; no screenshot was taken while Flutter was alive. This locates
   the observed execution at/after draw submission but does not prove visible
   pixels or distinguish a black renderer output from composition/occlusion.
+- **Run `flr0382-0004`: LIVE-QMP GATE NOT MET.** The local log poll detected a
+  successful present, and the final log again has two returned presents then
+  an unmatched third enter/status `124`. The coordinator did not persist its
+  liveness/capture result, so the QMP image remains UNKNOWN; the pre-Flutter
+  black frame cannot substitute for it. OOM/core state for this run was not
+  collected before teardown.
 
 ## Visual evidence
 
@@ -227,19 +251,22 @@ camera, compositor, or general 3D investigation.
   `e1cd12d484871c53ac253c5ceb850c3f7448fe459317031354eae8b4fb56103f`.
 - Authoritative raw PPMs and runtime log remain under the Mini role path
   `$BUILD_EVIDENCE/flr0382-0001/qemu`; raw media are not committed.
+- Run 0003/0004 runtime logs and pre-Flutter PPMs remain under their Mini run
+  directories. Neither run produced a liveness-bracketed QMP application frame
+  or video; no QEMU disk image was copied to Mac.
 - Both are explicitly post-timeout, not live Flutter acceptance evidence. All
   eight raw QMP PPM hashes equal the pre-Flutter frame hash above.
 
 ### Act
 
 - Keep this ticket In Progress: its live-QMP acceptance gate was not met. For
-  the same one-variable comparison, use a fresh run ID (`flr0382-0004`). Keep
-  the working stdin-fed guest launch, but replace the separate observer process
-  with one foreground Mini coordinator: launch Flutter in the background,
-  poll the already-opened bounded runtime log locally for the first returned
-  present, then perform strict-SSH PID checks immediately before/after QMP
-  still+video capture. Persist all statuses and fail visibly on any missing
-  step. Do not change the trace profile, source, or persistent scripts.
+  the same one-variable comparison, use a fresh run ID (`flr0382-0005`). Keep
+  the stdin-fed guest launch and use one foreground Python coordinator with
+  explicit try/finally status writes around each boundary. Poll the run-local
+  log for the first returned present, capture through QMP, and bracket the
+  capture with strict-SSH PID checks. Bound each SSH operation and emit the
+  exact failing stage instead of exiting silently. Do not change the trace
+  profile, source, or persistent scripts.
 - Do not reopen the already completed texture inventory or broad camera/light
   sweeps. Use a valid live frame plus the present/stage sequence to choose the
   next boundary.
@@ -251,3 +278,5 @@ camera, compositor, or general 3D investigation.
   silhouette and 0381 live gray frame.
 - Whether high-volume trace output alters the app's timing or process lifetime.
 - Whether the production Sequoia and 2D HUD can appear together on this image.
+- Why the 0003 observer and 0004 coordinator ended without writing their
+  capture/status result after app execution had reached a successful present.
