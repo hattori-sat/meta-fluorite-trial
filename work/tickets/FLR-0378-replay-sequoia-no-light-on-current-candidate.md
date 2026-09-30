@@ -1,6 +1,6 @@
 # FLR-0378 — replay the historical Sequoia no-light condition on the current candidate
 
-- Status: In Progress
+- Status: Done — bounded baseline; raw-log retention gap preserved
 - Priority: High
 - Owner: Mini QEMU / strict guest SSH / `agl-driver` / Flutter runtime / QMP evidence roles
 - Created: 2026-09-30
@@ -217,3 +217,12 @@ discriminator, not a patch or automation task.
   HUD claim.
 - Which individual setup control, if any, explains the difference between the
   0018 and 0019 frames; these trials changed several controls together.
+
+## Status correction
+
+This bounded replay met its own classification goal and is closed. The raw
+guest log was lost after the user session ended; this evidence-retention gap
+does not keep the completed baseline ticket active. Later local diagnostic
+commit `fbed630` (FLR-0380 branch, not pushed) found a different all-black QMP
+frame under `WAYLAND_DEBUG=client`; FLR-0381 owns the controlled no-debug
+replay.
