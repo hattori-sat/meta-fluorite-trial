@@ -19,7 +19,8 @@ Usage:
   qemu-runtime-harness.sh serial-login --serial-port PORT \
     --user USER --prompt PROMPT --command-file FILE
   qemu-runtime-harness.sh serial-exec --serial-port PORT \
-    --user USER --prompt PROMPT --command-file FILE --output FILE
+    --user USER --prompt PROMPT --command-file FILE --output FILE \
+    [--setup-output FILE] [--timeout-seconds SECONDS]
   qemu-runtime-harness.sh summary --log FILE
   qemu-runtime-harness.sh qmp-quit --qmp SOCKET
 
@@ -129,6 +130,7 @@ parse_options() {
     serial_prompt=
     command_file=
     output_file=
+    setup_output_file=
     log_file=
 
     while [ "$#" -gt 0 ]; do
@@ -152,6 +154,7 @@ parse_options() {
             --prompt) serial_prompt=${2:-}; shift 2 ;;
             --command-file) command_file=${2:-}; shift 2 ;;
             --output) output_file=${2:-}; shift 2 ;;
+            --setup-output) setup_output_file=${2:-}; shift 2 ;;
             --log) log_file=${2:-}; shift 2 ;;
             --help) usage; exit 0 ;;
             *) fail "unknown-option:$1" ;;
@@ -356,44 +359,98 @@ serial_exec() {
     need_command python3
     absolute_path "$command_file"
     absolute_path "$output_file"
+    [ -n "$setup_output_file" ] || setup_output_file=$output_file.setup
+    absolute_path "$setup_output_file"
+    [ "$setup_output_file" != "$output_file" ] || fail 'setup-output-must-differ-from-output'
     [ -r "$command_file" ] || fail "command-file-not-readable:$command_file"
     [ -n "$serial_user" ] || fail 'empty-serial-user'
     [ -n "$serial_prompt" ] || fail 'empty-serial-prompt'
     valid_port "$serial_port"
+    case "$timeout_seconds" in
+        ''|*[!0-9]*) fail "invalid-timeout-seconds:$timeout_seconds" ;;
+    esac
+    [ "$timeout_seconds" -ge 1 ] && [ "$timeout_seconds" -le 600 ] ||
+        fail "invalid-timeout-seconds:$timeout_seconds"
     command_text=$(awk 'NR == 1 { print; next } { bad=1 } END { exit bad ? 1 : 0 }' "$command_file") ||
         fail 'command-file-must-have-one-line'
     [ -n "$command_text" ] || fail 'empty-command-file'
     [ "${#command_text}" -le 4096 ] || fail 'command-file-too-large'
-    python3 - "$serial_port" "$serial_user" "$serial_prompt" "$command_text" "$output_file" <<'PY'
+    exec python3 - "$serial_port" "$serial_user" "$serial_prompt" "$command_text" "$output_file" "$setup_output_file" "$timeout_seconds" <<'PY'
 import re
 import socket
 import sys
 import time
 from pathlib import Path
 
-port, user, prompt, command, output = sys.argv[1:]
+port, user, prompt, command, output, setup_output, timeout_seconds = sys.argv[1:]
+timeout_seconds = int(timeout_seconds)
 marker = "__FLR_SERIAL_COMMAND_DONE_7B31__"
 if marker in command or "\n" in command or "\r" in command:
     print("serial-exec=FAIL reason=unsafe-command", file=sys.stderr)
     raise SystemExit(1)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.settimeout(1)
-sock.connect(("localhost", int(port)))
+Path(output).write_bytes(b"")
+Path(setup_output).write_bytes(b"")
+deadline = time.monotonic() + timeout_seconds
+setup_bytes = 0
+command_bytes = 0
+setup_truncated = False
+command_truncated = False
+setup_limit = 64 * 1024
+command_limit = 1024 * 1024
+truncation_marker = b"\n[serial transcript truncated at configured limit]\n"
+
+def append_bounded(path, data, current, limit, already_truncated):
+    remaining = max(0, limit - current)
+    if remaining:
+        with Path(path).open("ab") as transcript:
+            transcript.write(data[:remaining])
+            transcript.flush()
+    current += min(remaining, len(data))
+    truncated = already_truncated or len(data) > remaining
+    if truncated and not already_truncated:
+        with Path(path).open("ab") as transcript:
+            transcript.write(truncation_marker)
+            transcript.flush()
+    return current, truncated
+
+def require_remaining(stage):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        print(f"serial-exec=FAIL reason=deadline-expired stage={stage}", file=sys.stderr)
+        raise SystemExit(124)
+    sock.settimeout(min(1.0, remaining))
+    return remaining
+
+require_remaining("connect")
+try:
+    sock.connect(("localhost", int(port)))
+except socket.timeout:
+    print("serial-exec=FAIL reason=deadline-expired stage=connect", file=sys.stderr)
+    raise SystemExit(124)
+require_remaining("initial-newline")
 sock.sendall(b"\n")
 buf = bytearray()
 prompt_b = prompt.encode()
-deadline = time.monotonic() + 30
 login_sent = False
-while time.monotonic() < deadline:
+while True:
+    require_remaining("login-prompt")
     try:
         chunk = sock.recv(4096)
     except socket.timeout:
         continue
     if not chunk:
         break
+    setup_bytes, setup_truncated = append_bounded(
+        setup_output, chunk, setup_bytes, setup_limit, setup_truncated
+    )
     buf.extend(chunk)
+    if len(buf) > 65536:
+        del buf[:-65536]
+    require_remaining("login-response")
     if b"login:" in buf and not login_sent:
+        require_remaining("login-send")
         sock.sendall((user + "\n").encode())
         login_sent = True
     if prompt_b in buf:
@@ -405,16 +462,23 @@ if prompt_b not in buf:
 # Turn terminal echo off in a separate command. The actual command then has
 # no input echo that could be mistaken for its completion marker.
 buf.clear()
+require_remaining("echo-off-send")
 sock.sendall(b"stty -echo\n")
-deadline = time.monotonic() + 30
-while time.monotonic() < deadline:
+while True:
+    require_remaining("echo-off-prompt")
     try:
         chunk = sock.recv(4096)
     except socket.timeout:
         continue
     if not chunk:
         break
+    setup_bytes, setup_truncated = append_bounded(
+        setup_output, chunk, setup_bytes, setup_limit, setup_truncated
+    )
     buf.extend(chunk)
+    if len(buf) > 65536:
+        del buf[:-65536]
+    require_remaining("echo-off-response")
     if prompt_b in buf:
         break
 if prompt_b not in buf:
@@ -443,9 +507,10 @@ wrapped = (
     + marker
     + "\\n' \"$rc\"\n"
 )
+require_remaining("guest-command-send")
 sock.sendall(wrapped.encode())
-deadline = time.monotonic() + 30
-while time.monotonic() < deadline and marker.encode() not in buf:
+while marker.encode() not in buf:
+    require_remaining("guest-command-output")
     try:
         chunk = sock.recv(4096)
     except socket.timeout:
@@ -453,12 +518,19 @@ while time.monotonic() < deadline and marker.encode() not in buf:
     if not chunk:
         break
     buf.extend(chunk)
+    if len(buf) > 65536:
+        del buf[:-65536]
+    command_bytes, command_truncated = append_bounded(
+        output, chunk, command_bytes, command_limit, command_truncated
+    )
+    require_remaining("guest-command-response")
 if marker.encode() not in buf:
-    Path(output).write_bytes(bytes(buf))
     print("serial-exec=FAIL reason=completion-marker-not-observed", file=sys.stderr)
     raise SystemExit(1)
 
-Path(output).write_bytes(bytes(buf))
+if command_truncated:
+    print("serial-exec=FAIL reason=command-output-limit-exceeded", file=sys.stderr)
+    raise SystemExit(1)
 match = re.search(
     rb"rc=(\d+)\r?\n" + re.escape(marker.encode()),
     bytes(buf),

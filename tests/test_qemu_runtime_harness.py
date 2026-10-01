@@ -5,6 +5,7 @@ import socket
 import subprocess
 import tempfile
 import threading
+import time
 import unittest
 
 
@@ -176,6 +177,216 @@ ps() {
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('reason=echo-off-response-unexpected', result.stderr)
         self.assertFalse(state['requested_command'])
+
+    def test_serial_exec_timeout_preserves_incremental_runtime_transcript(self):
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            listener.settimeout(5)
+            listener.bind(('localhost', 0))
+            listener.listen(1)
+        except OSError:
+            listener.close()
+            raise
+        port = listener.getsockname()[1]
+        state = {'requested_command': None, 'errors': []}
+
+        def receive_line(connection):
+            data = bytearray()
+            while not data.endswith(b'\n'):
+                chunk = connection.recv(4096)
+                if not chunk:
+                    return bytes(data)
+                data.extend(chunk)
+            return bytes(data)
+
+        def serve_console():
+            try:
+                connection, _ = listener.accept()
+                with connection:
+                    connection.settimeout(5)
+                    if receive_line(connection) != b'\n':
+                        raise RuntimeError('serial helper did not request a prompt')
+                    connection.sendall(SERIAL_PROMPT)
+                    if receive_line(connection) != b'stty -echo\n':
+                        raise RuntimeError('unexpected echo-off command')
+                    connection.sendall(b'stty -echo\r\n' + SERIAL_PROMPT)
+                    state['requested_command'] = receive_line(connection)
+                    connection.sendall(b'partial runtime transcript\r\n')
+                    time.sleep(1.5)
+            except (OSError, RuntimeError) as exc:
+                state['errors'].append(str(exc))
+            finally:
+                listener.close()
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            command_file = root / 'observer.cmd'
+            output_file = root / 'observer.out'
+            command_file.write_text('true\n', encoding='utf-8')
+            thread = threading.Thread(target=serve_console, daemon=True)
+            thread.start()
+            try:
+                result = subprocess.run(
+                    [
+                        'bash', str(HARNESS), 'serial-exec',
+                        '--serial-port', str(port), '--user', 'root',
+                        '--prompt', SERIAL_PROMPT.decode(),
+                        '--command-file', str(command_file),
+                        '--output', str(output_file),
+                        '--timeout-seconds', '1',
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                output = output_file.read_bytes()
+            finally:
+                thread.join(timeout=3)
+                listener.close()
+
+        self.assertFalse(thread.is_alive(), 'fake serial console did not finish')
+        self.assertEqual([], state['errors'])
+        self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn('reason=deadline-expired', result.stderr)
+        self.assertIn(b'partial runtime transcript', output)
+
+    def test_serial_exec_never_sends_guest_command_after_global_deadline(self):
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            listener.settimeout(5)
+            listener.bind(('localhost', 0))
+            listener.listen(1)
+        except OSError:
+            listener.close()
+            raise
+        port = listener.getsockname()[1]
+        state = {'requested_command': None, 'errors': []}
+
+        def receive_line(connection):
+            data = bytearray()
+            while not data.endswith(b'\n'):
+                chunk = connection.recv(4096)
+                if not chunk:
+                    return bytes(data)
+                data.extend(chunk)
+            return bytes(data)
+
+        def serve_console():
+            try:
+                connection, _ = listener.accept()
+                with connection:
+                    connection.settimeout(4)
+                    if receive_line(connection) != b'\n':
+                        raise RuntimeError('serial helper did not request a prompt')
+                    time.sleep(1.2)
+                    connection.sendall(SERIAL_PROMPT)
+                    if receive_line(connection) != b'stty -echo\n':
+                        raise RuntimeError('unexpected echo-off command')
+                    time.sleep(0.9)
+                    connection.sendall(b'stty -echo\r\n' + SERIAL_PROMPT)
+                    requested = receive_line(connection)
+                    if requested:
+                        state['requested_command'] = requested
+                    else:
+                        state['connection_closed'] = True
+            except (ConnectionResetError, BrokenPipeError):
+                state['connection_closed'] = True
+            except (OSError, RuntimeError) as exc:
+                state['errors'].append(str(exc))
+            finally:
+                listener.close()
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            command_file = root / 'observer.cmd'
+            output_file = root / 'observer.out'
+            command_file.write_text('true\n', encoding='utf-8')
+            thread = threading.Thread(target=serve_console, daemon=True)
+            thread.start()
+            try:
+                result = subprocess.run(
+                    [
+                        'bash', str(HARNESS), 'serial-exec',
+                        '--serial-port', str(port), '--user', 'root',
+                        '--prompt', SERIAL_PROMPT.decode(),
+                        '--command-file', str(command_file),
+                        '--output', str(output_file),
+                        '--timeout-seconds', '2',
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+            finally:
+                thread.join(timeout=4)
+                listener.close()
+
+        self.assertFalse(thread.is_alive(), 'fake serial console did not finish')
+        self.assertEqual([], state['errors'])
+        self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIsNone(state['requested_command'])
+        self.assertTrue(state.get('connection_closed'))
+        self.assertIn('deadline-expired', result.stderr)
+
+    def test_serial_exec_persists_login_diagnostics_when_prompt_is_missing(self):
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            listener.settimeout(3)
+            listener.bind(('localhost', 0))
+            listener.listen(1)
+        except OSError:
+            listener.close()
+            raise
+        port = listener.getsockname()[1]
+        errors = []
+
+        def serve_console():
+            try:
+                connection, _ = listener.accept()
+                with connection:
+                    connection.settimeout(2)
+                    if connection.recv(4096) != b'\n':
+                        raise RuntimeError('serial helper did not request a prompt')
+                    connection.sendall(b'guest boot diagnostic: no login prompt\r\n')
+            except (OSError, RuntimeError) as exc:
+                errors.append(str(exc))
+            finally:
+                listener.close()
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            command_file = root / 'observer.cmd'
+            output_file = root / 'observer.out'
+            setup_output_file = root / 'observer.setup.out'
+            command_file.write_text('true\n', encoding='utf-8')
+            thread = threading.Thread(target=serve_console, daemon=True)
+            thread.start()
+            try:
+                result = subprocess.run(
+                    [
+                        'bash', str(HARNESS), 'serial-exec',
+                        '--serial-port', str(port), '--user', 'root',
+                        '--prompt', SERIAL_PROMPT.decode(),
+                        '--command-file', str(command_file),
+                        '--output', str(output_file),
+                        '--setup-output', str(setup_output_file),
+                        '--timeout-seconds', '2',
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=4,
+                )
+                setup_transcript = setup_output_file.read_bytes()
+            finally:
+                thread.join(timeout=2)
+                listener.close()
+
+        self.assertFalse(thread.is_alive(), 'fake serial console did not finish')
+        self.assertEqual([], errors)
+        self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn(
+            b'guest boot diagnostic', setup_transcript
+        )
 
 
 if __name__ == '__main__':

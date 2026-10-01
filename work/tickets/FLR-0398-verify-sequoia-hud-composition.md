@@ -29,10 +29,12 @@ frame. This is a composition gate, not a material-parity or original-PBR gate.
   one frame; its QEMU run, image identity, and launch profile are unavailable.
   Treat it as a historical visual reference, not the acceptance artifact.
 - The supplied frame shows `Shapes: On` and `Colliders: Off`. The large white
-  wireframe-like lines are likely the Example Demo's Shape visualization, not
-  collider outlines. Their exact implementation/source is UNKNOWN. Do not
-  count those lines as Sequoia pixels or accept a frame where they obscure
-  whether the car itself is visible.
+  wireframe-like lines are very likely the Example Demo's Shape visualization,
+  not collider outlines: a 2026-10-02 direct visual comparison with
+  `work/evidence/flr0027/shape-only-late.png` found matching polygon layout and
+  line geometry. Exact renderer/source remains UNKNOWN because the user image
+  has no run/image identity. Do not count those lines as Sequoia pixels or
+  accept a frame where they obscure whether the car itself is visible.
 
 ## Hypotheses
 

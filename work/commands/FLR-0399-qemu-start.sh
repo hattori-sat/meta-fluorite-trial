@@ -17,8 +17,14 @@ esac
 : "${FLR0399_RUN_ID:?FLR0399_RUN_ID-is-required}"
 [[ "$FLR0399_RUN_ID" =~ ^flr0399-[0-9]{4}$ ]] || fail invalid-run-id
 run_id=$FLR0399_RUN_ID
-build_dir=${BUILD_DIR:-/mnt/yocto/flourite-qemux86-64}
-evidence_root=${BUILD_EVIDENCE:-/mnt/yocto/evidence}
+: "${BUILD_DIR:?BUILD_DIR-role-required}"
+: "${BUILD_TMPDIR:?BUILD_TMPDIR-role-required}"
+: "${BUILD_EVIDENCE:?BUILD_EVIDENCE-role-required}"
+build_dir=$BUILD_DIR
+build_tmpdir=$BUILD_TMPDIR
+evidence_root=$BUILD_EVIDENCE
+[[ "$build_dir" = /* && "$build_tmpdir" = /* && "$evidence_root" = /* ]] ||
+    fail build-roles-must-be-absolute
 run_parent=$evidence_root/$run_id
 run_dir=$run_parent/qemu
 qmp=$run_dir/qmp-0399.sock
@@ -32,6 +38,7 @@ qemuboot_sha=2363530e2f39d4e57465cb89e724327f699b8ab6247d9e1bb75fdc2a60780c10
 
 for source in \
     scripts/flr0399_live_capture.py \
+    scripts/flr0399_process_cleanup.py \
     scripts/qemu-runtime-harness.sh \
     scripts/qemu-pixel-capture.py \
     work/commands/FLR-0399-qemu-start.sh; do
@@ -40,6 +47,10 @@ for source in \
         fail "source-not-committed:$source"
     [ "$current" = "$committed" ] || fail "source-differs-from-HEAD:$source"
 done
+
+pidfd_probe=$(python3 "$repo_root/scripts/flr0399_process_cleanup.py" --check-capability) ||
+    fail 'exact-cleanup-requires-linux-pidfd'
+printf '%s\n' "$pidfd_probe"
 
 [ -d "$evidence_root" ] || fail evidence-role-missing
 [ -r "$build_dir/conf/local.conf" ] || fail fixed-build-local-conf-missing
@@ -53,6 +64,9 @@ case "$tmpdir_setting" in
     *"$build_dir/tmp"*|*'${TOPDIR}/tmp'*|*'$TOPDIR/tmp'*) tmpdir=$build_dir/tmp ;;
     *) fail fixed-tmpdir-role-mismatch ;;
 esac
+resolved_tmpdir=$(readlink -f "$tmpdir") || fail fixed-tmpdir-unresolvable
+resolved_build_tmpdir=$(readlink -f "$build_tmpdir") || fail BUILD_TMPDIR-role-unresolvable
+[ "$resolved_tmpdir" = "$resolved_build_tmpdir" ] || fail BUILD_TMPDIR-role-mismatch
 deploy=$tmpdir/deploy/images/qemux86-64
 qemuboot=$deploy/agl-ivi-image-flutter-qemux86-64.rootfs-20261001044407.qemuboot.conf
 kernel=$deploy/bzImage
@@ -122,12 +136,40 @@ fi
 mkdir -- "$run_parent"
 mkdir -- "$run_dir"
 cp -- "$(readlink -f "${BASH_SOURCE[0]}")" "$run_dir/FLR-0399-qemu-start.sh"
+cp -- "$repo_root/scripts/flr0399_process_cleanup.py" "$run_dir/FLR-0399-process-cleanup.py"
 harness=$repo_root/scripts/qemu-runtime-harness.sh
-"$harness" start \
+if "$harness" start \
     --run-dir "$run_dir" --qmp "$qmp" \
     --oe-init "$oe_init" --build-dir "$build_dir" \
     --runqemu-bin "$runqemu_bin" --qemuboot "$qemuboot" \
     --kernel "$kernel" --rootfs "$rootfs" \
     --kernel-sha256 "$kernel_sha" --rootfs-sha256 "$rootfs_sha" \
     --serial-port "$serial_port" --ssh-port "$ssh_port" \
-    --telnet-port "$telnet_port" --memory-mb "$memory_mb"
+    --telnet-port "$telnet_port" --memory-mb "$memory_mb"; then
+    echo "FLR0399_QEMU_START=PASS run_id=$run_id memory_mb=$memory_mb image=0334"
+else
+    start_status=$?
+    cleanup_log=$run_dir/FLR-0399-start-failure-cleanup.log
+    {
+        echo "start=FAIL exit_status=$start_status"
+        if [ -S "$qmp" ]; then
+            if "$harness" qmp-quit --qmp "$qmp"; then
+                echo qmp-quit=PASS
+            else
+                qmp_status=$?
+                echo "qmp-quit=FAIL exit_status=$qmp_status"
+            fi
+        else
+            echo qmp-quit=SKIPPED_SOCKET_ABSENT
+        fi
+        if python3 "$repo_root/scripts/flr0399_process_cleanup.py" \
+            --qmp "$qmp" --timeout-seconds 3; then
+            echo exact-qmp-process-cleanup=PASS
+        else
+            cleanup_status=$?
+            echo "exact-qmp-process-cleanup=FAIL exit_status=$cleanup_status"
+        fi
+    } >"$cleanup_log" 2>&1
+    echo "FLR0399_QEMU_START=FAIL run_id=$run_id exit_status=$start_status cleanup_log=$cleanup_log" >&2
+    exit "$start_status"
+fi

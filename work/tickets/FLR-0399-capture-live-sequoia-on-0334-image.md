@@ -145,9 +145,14 @@ and classify the stop point first.
 
 1. The canonical guard passes and FLR-0399 is the only In Progress ticket.
 2. Focused tests prove missing log fails closed without numeric errors or
-   polling storm; READY/present capture is allowed only with a live matching
-   identity; post-exit capture is classified and cannot pass; teardown runs at
-   most once; the configured GDB/observer log source is singular.
+  polling storm; READY/present capture is allowed only with a live matching
+  identity; post-exit capture is classified and cannot pass; teardown runs at
+  most once; the configured GDB/observer log source is singular. Cleanup tests
+  must prove exact QMP-endpoint matching, PIDFD-bound signalling with an
+  identity recheck, and fail-closed behavior without PIDFD support. Serial and
+  QMP timeouts must preserve bounded partial evidence, and initial teardown
+  failures must remain recorded even if a later check passes. An empty matching
+  coredump query is a valid EMPTY result; actual journal/query failures fail.
 3. Before one Mini run, the exact kernel/rootfs/qemuboot hashes, free QEMU
    process/ports/socket state, and fresh unique evidence directory are checked.
 4. One QEMU run on the exact 0334 image produces a complete 1280×800 QMP frame
@@ -170,3 +175,32 @@ and classify the stop point first.
 - **Integration risk:** a second observer or capture command could perturb a
   short fault window. Keep one controller, fixed deadlines, minimal reads, and
   fail closed on stale identity or missing log.
+
+## 2026-10-02 observer reliability follow-up
+
+- The QEMU harness was changed only after a concrete serial-worker contract
+  defect was reproduced: parent timeout could terminate the Bash wrapper while
+  its Python serial reader remained alive. The worker now owns the harness PID,
+  uses one deadline, flushes command output incrementally, and the controller
+  terminates its owned process group on timeout.
+- Failed-start cleanup accepts only the launched QEMU or official `runqemu`
+  executable with the exact run QMP endpoint. It opens and revalidates a Linux
+  PIDFD before signalling, then signals through that PIDFD. Mini preflight must
+  prove the PIDFD API/kernel capability before QEMU is allowed to start.
+- QMP timeout output, pre-cleanup and final postflight reports, and empty vs
+  failed coredump queries are separately retained/classified.
+- A second red/green loop exposed and fixed a deadline hole: late serial
+  responses can no longer authorize the next command after the global deadline.
+  Login/echo-off bytes are stored in a separate bounded setup transcript, and
+  command output remains isolated for strict gate parsing. Failed kernel and
+  Flutter-coredump queries retain only the final eight diagnostic lines, each
+  clipped to 400 characters.
+- Check: 35/35 FLR-0399 tests and four localhost serial regressions pass. The
+  full runtime-harness suite is 7/8; the sole failure is the pre-existing,
+  separately-ticketed FLR-0397 stale test invocation. Full verification ran
+  186 tests with only that failure; all independent later gates passed except
+  the Markdown checker, which reports 11 historical missing targets outside
+  the new FLR-0399 files. Astra's read-only re-review found no actionable issue
+  in the repaired paths. No QEMU or image action has occurred.
+- This is observer/evidence/teardown hardening only. No QEMU, BitBake, image,
+  Flutter, material, camera, texture, light, or app-layout change has occurred.

@@ -5,15 +5,20 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import math
+import os
 import re
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
+
+from flr0399_process_cleanup import cleanup_exact_qmp_processes
 
 
 RUN_ID_RE = re.compile(r"flr0399-[0-9]{4}\Z")
@@ -73,6 +78,60 @@ class GuestCommands:
     identity: str
     collect: str
     stop: str
+
+
+def evidence_collect_command(log_path: str, run_id: str) -> str:
+    """Collect bounded GDB, kernel, and matching coredump evidence fail-closed."""
+    if not RUN_ID_RE.fullmatch(run_id):
+        raise ValueError("run id must be a fresh FLR-0399 id: flr0399-NNNN")
+    if not log_path or "\n" in log_path or "\r" in log_path:
+        raise ValueError("evidence log path must be a non-empty single line")
+    q = shlex.quote
+    return (
+        "set -eu; "
+        f"log={q(log_path)}; "
+        "if [ ! -r \"$log\" ]; then "
+        "echo FLR0399_GDB_LOG=UNAVAILABLE; "
+        "echo FLR0399_EVIDENCE_COLLECT=FAIL; exit 1; fi; "
+        "sha256sum \"$log\"; tail -n 160 \"$log\"; "
+        "if journal_output=$(journalctl -k -b -n 350 -o short-iso --no-pager 2>&1); "
+        "then :; else query_rc=$?; "
+        "printf 'FLR0399_KERNEL_QUERY=FAIL rc=%s\\n' \"$query_rc\"; "
+        "printf '%s\\n' \"$journal_output\" | tail -n 8 | cut -c1-400 | "
+        "sed 's/^/FLR0399_QUERY_DIAGNOSTIC: /'; "
+        "exit \"$query_rc\"; fi; "
+        "kernel_matches=$(printf '%s\\n' \"$journal_output\" | "
+        "grep -E -C 1 'Oops|FEngine::loop|page fault|BUG:|RIP:|Call Trace:' | "
+        "tail -n 40 || true); "
+        "if [ -n \"$kernel_matches\" ]; then "
+        "printf 'FLR0399_KERNEL_QUERY=PASS\\n%s\\n' \"$kernel_matches\"; "
+        "else echo FLR0399_KERNEL_QUERY=EMPTY; fi; "
+        "if ! command -v coredumpctl >/dev/null 2>&1; then "
+        "echo FLR0399_COREDUMP_QUERY=UNAVAILABLE; "
+        "echo FLR0399_EVIDENCE_COLLECT=FAIL; exit 127; fi; "
+        "if core_journal=$(journalctl -b COREDUMP_EXE=/usr/bin/flutter-auto "
+        "-n 20 -o json --no-pager 2>&1); then :; else query_rc=$?; "
+        "printf 'FLR0399_COREDUMP_QUERY=FAIL journal_rc=%s\\n' \"$query_rc\"; "
+        "printf '%s\\n' \"$core_journal\" | tail -n 8 | cut -c1-400 | "
+        "sed 's/^/FLR0399_QUERY_DIAGNOSTIC: /'; "
+        "exit \"$query_rc\"; fi; "
+        "if [ -z \"$core_journal\" ]; then "
+        "echo FLR0399_COREDUMP_QUERY=EMPTY; "
+        "else "
+        "if coredump_output=$(coredumpctl list --no-pager --no-legend "
+        "COREDUMP_EXE=/usr/bin/flutter-auto 2>&1); then :; else query_rc=$?; "
+        "printf 'FLR0399_COREDUMP_QUERY=FAIL rc=%s\\n' \"$query_rc\"; "
+        "printf '%s\\n' \"$coredump_output\" | tail -n 8 | cut -c1-400 | "
+        "sed 's/^/FLR0399_QUERY_DIAGNOSTIC: /'; "
+        "exit \"$query_rc\"; fi; "
+        "core_matches=$(printf '%s\\n' \"$coredump_output\" | "
+        "grep -E 'flutter-auto|FEngine' | tail -n 5 || true); "
+        "if [ -n \"$core_matches\" ]; then "
+        "printf 'FLR0399_COREDUMP_QUERY=PASS\\n%s\\n' \"$core_matches\"; "
+        "else echo FLR0399_COREDUMP_QUERY=FAIL journal-hit-without-coredump; "
+        "exit 1; fi; fi; "
+        "echo FLR0399_EVIDENCE_COLLECT=PASS"
+    )
 
 
 def guest_commands(run_id: str) -> GuestCommands:
@@ -185,18 +244,7 @@ def guest_commands(run_id: str) -> GuestCommands:
         "printf 'FLR0399_STATE=%s PID=%s UID=%s START=%s LOG_PATH=%s\\n' "
         "\"$state\" \"$pid\" \"$uid\" \"$start\" \"$log\""
     )
-    collect = (
-        "set -eu; "
-        f"log={q(log_path)}; "
-        "if [ -r \"$log\" ]; then "
-        "sha256sum \"$log\"; tail -n 160 \"$log\"; "
-        "else echo FLR0399_GDB_LOG=UNAVAILABLE; fi; "
-        "journalctl -k -b -n 350 -o short-iso --no-pager 2>/dev/null | "
-        "grep -E -C 1 'Oops|FEngine::loop|page fault|BUG:|RIP:|Call Trace:' | tail -n 40 || true; "
-        "coredumpctl list --no-pager --no-legend 2>/dev/null | "
-        "grep -E 'flutter-auto|FEngine' | tail -n 5 || true; "
-        "echo FLR0399_EVIDENCE_COLLECT=PASS"
-    )
+    collect = evidence_collect_command(log_path, run_id)
     stop = (
         "set -eu; "
         f"identity={q(identity_path)}; "
@@ -289,13 +337,14 @@ def parse_state_output(output: str, *, stage: str) -> Sample:
 def run_once(
     *,
     read_state: Callable[[str, float], Sample],
-    capture_frame: Callable[[str, Identity], None],
+    capture_frame: Callable[[str, Identity, float], None],
     preserve_evidence: Callable[[], None],
     teardown: Callable[[], None],
     expected_log_path: str,
     timeout_seconds: float,
     expected_uid: int = 1001,
     monotonic: Callable[[], float] = time.monotonic,
+    deadline: float | None = None,
 ) -> Outcome:
     """Observe READY/present once; capture only with a stable live identity.
 
@@ -306,15 +355,29 @@ def run_once(
     if timeout_seconds <= 0:
         raise ValueError("timeout_seconds must be positive")
 
-    deadline = monotonic() + timeout_seconds
+    deadline_at = deadline if deadline is not None else monotonic() + timeout_seconds
     captures: list[CaptureRecord] = []
     errors: list[str] = []
     status = "OBSERVER_FAILED"
 
     def read(stage: str) -> Sample:
         nonlocal status
-        remaining = max(0.0, deadline - monotonic())
+        remaining = deadline_at - monotonic()
+        if remaining <= 0:
+            status = (
+                "IDENTITY_DEADLINE_EXPIRED"
+                if stage.startswith("identity-after-")
+                else f"{stage.upper()}_DEADLINE_EXPIRED"
+            )
+            raise TimeoutError(status)
         sample = read_state(stage, remaining)
+        if deadline_at - monotonic() <= 0:
+            status = (
+                "IDENTITY_DEADLINE_EXPIRED"
+                if stage.startswith("identity-after-")
+                else f"{stage.upper()}_DEADLINE_EXPIRED"
+            )
+            raise TimeoutError(status)
         if sample.log_path != expected_log_path:
             status = "LOG_SOURCE_MISMATCH"
             raise RuntimeError("observer log path differs from configured GDB log")
@@ -331,14 +394,22 @@ def run_once(
         if before.identity.uid != expected_uid:
             status = "IDENTITY_UID_MISMATCH"
             return False
+        remaining = deadline_at - monotonic()
+        if remaining <= 0:
+            status = "CAPTURE_DEADLINE_EXPIRED"
+            return False
         try:
-            capture_frame(stage, before.identity)
+            capture_frame(stage, before.identity, remaining)
         except Exception as exc:  # keep the evidence/teardown path alive
             errors.append(f"capture:{type(exc).__name__}:{exc}")
             status = "CAPTURE_FAILED"
             return False
+        if deadline_at - monotonic() <= 0:
+            captures.append(CaptureRecord(stage=stage, identity=before.identity, live=False))
+            status = "CAPTURE_DEADLINE_EXPIRED"
+            return False
         captures.append(CaptureRecord(stage=stage, identity=before.identity, live=False))
-        after = read("identity")
+        after = read(f"identity-after-{stage.lower()}")
         if after.state != "LIVE" or after.identity != before.identity:
             status = "POST_EXIT" if after.state == "EXITED" else "IDENTITY_CHANGED"
             return False
@@ -409,22 +480,36 @@ def run_once(
     return Outcome(status, tuple(captures), tuple(errors))
 
 
+def wrap_serial_child_command(command: str) -> str:
+    """Run guest logic in a child shell so `exit` cannot kill serial-exec."""
+    if "\n" in command or "\r" in command:
+        raise ValueError("serial child command must be one line")
+    wrapped = f"/bin/sh -c {shlex.quote(command)}"
+    if len(wrapped) > 4096:
+        raise ValueError("wrapped serial child command exceeds 4096 bytes")
+    return wrapped
+
+
 def _serial_exec(
     *,
     run_dir: Path,
     label: str,
     command: str,
     serial_port: int,
+    timeout_seconds: float = 40.0,
 ) -> str:
+    if timeout_seconds <= 0:
+        raise TimeoutError("serial-exec deadline expired")
     command_file = run_dir / f"FLR-0399-{label}.cmd"
     output_file = run_dir / f"FLR-0399-{label}.serial.log"
+    setup_output_file = run_dir / f"FLR-0399-{label}.setup.serial.log"
     harness_log = run_dir / f"FLR-0399-{label}.harness.log"
-    for path in (command_file, output_file, harness_log):
+    for path in (command_file, output_file, setup_output_file, harness_log):
         if path.exists():
             raise FileExistsError(f"evidence path already exists: {path.name}")
-    command_file.write_text(command + "\n", encoding="utf-8")
+    command_file.write_text(wrap_serial_child_command(command) + "\n", encoding="utf-8")
     command_file.chmod(0o600)
-    result = subprocess.run(
+    process = subprocess.Popen(
         [
             str(HARNESS),
             "serial-exec",
@@ -438,21 +523,108 @@ def _serial_exec(
             str(command_file),
             "--output",
             str(output_file),
+            "--setup-output",
+            str(setup_output_file),
+            "--timeout-seconds",
+            str(max(1, math.ceil(timeout_seconds))),
         ],
-        check=False,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        timeout=40,
+        start_new_session=(os.name == "posix"),
     )
-    harness_log.write_text(result.stdout + result.stderr, encoding="utf-8")
-    if result.returncode != 0:
+    try:
+        stdout, stderr = process.communicate(timeout=timeout_seconds)
+    except subprocess.TimeoutExpired as exc:
+        try:
+            if os.name == "posix":
+                os.killpg(process.pid, signal.SIGTERM)
+            else:
+                process.terminate()
+        except ProcessLookupError:
+            pass
+        try:
+            stdout, stderr = process.communicate(timeout=1.0)
+        except subprocess.TimeoutExpired:
+            try:
+                if os.name == "posix":
+                    os.killpg(process.pid, signal.SIGKILL)
+                else:
+                    process.kill()
+            except ProcessLookupError:
+                pass
+            stdout, stderr = process.communicate()
+        harness_log.write_text(
+            (stdout or "")
+            + (stderr or "")
+            + f"\nserial-exec=TIMEOUT seconds={timeout_seconds:g}\n",
+            encoding="utf-8",
+        )
+        if not output_file.exists():
+            output_file.write_text(
+                "serial-exec=TIMEOUT partial-serial-output=UNAVAILABLE\n",
+                encoding="utf-8",
+            )
+        raise TimeoutError(f"serial-exec timed out at {label}; see {harness_log.name}") from exc
+
+    harness_log.write_text((stdout or "") + (stderr or ""), encoding="utf-8")
+    if process.returncode != 0:
         raise RuntimeError(f"serial-exec failed at {label}; see {harness_log.name}")
     if not output_file.is_file():
         raise RuntimeError(f"serial-exec produced no output at {label}")
     return output_file.read_text(encoding="utf-8", errors="replace")
 
 
-def _capture_qmp(run_dir: Path, qmp: Path, label: str, *, video: bool) -> None:
+def _capture_output(output: str | bytes | None) -> str:
+    if output is None:
+        return ""
+    if isinstance(output, bytes):
+        return output.decode("utf-8", errors="replace")
+    return output
+
+
+def _run_qmp_capture_command(
+    command: list[str], log_path: Path, timeout: float, label: str
+) -> None:
+    try:
+        result = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        log_path.write_text(
+            f"capture=TIMEOUT stage={label} seconds={timeout:g}\n"
+            + _capture_output(exc.stdout)
+            + _capture_output(exc.stderr),
+            encoding="utf-8",
+        )
+        raise TimeoutError(f"QMP capture timed out at {label}; see {log_path.name}") from exc
+    log_path.write_text(result.stdout + result.stderr, encoding="utf-8")
+    if result.returncode != 0:
+        raise RuntimeError(f"QMP capture failed at {label}; see {log_path.name}")
+
+
+def _capture_qmp(
+    run_dir: Path,
+    qmp: Path,
+    label: str,
+    *,
+    video: bool,
+    timeout_seconds: float = 35.0,
+) -> None:
+    if timeout_seconds <= 0:
+        raise TimeoutError("QMP capture deadline expired")
+    capture_deadline = time.monotonic() + timeout_seconds
+
+    def remaining_timeout() -> float:
+        remaining = capture_deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("QMP capture deadline expired")
+        return min(35.0, remaining)
+
     still = run_dir / f"FLR-0399-{label}.ppm"
     still_log = run_dir / f"FLR-0399-{label}.capture.log"
     if still.exists() or still_log.exists():
@@ -461,18 +633,14 @@ def _capture_qmp(run_dir: Path, qmp: Path, label: str, *, video: bool) -> None:
     video_log = run_dir / f"FLR-0399-{label}-video.log"
     if video and (frames.exists() or video_log.exists()):
         raise FileExistsError(f"QMP video evidence already exists for {label}")
-    result = subprocess.run(
+    _run_qmp_capture_command(
         [sys.executable, str(PIXEL_CAPTURE), "capture", "--socket", str(qmp), "--output", str(still)],
-        check=False,
-        capture_output=True,
-        text=True,
-        timeout=35,
+        still_log,
+        remaining_timeout(),
+        f"{label}-still",
     )
-    still_log.write_text(result.stdout + result.stderr, encoding="utf-8")
-    if result.returncode != 0:
-        raise RuntimeError(f"QMP still capture failed at {label}")
     if video:
-        result = subprocess.run(
+        _run_qmp_capture_command(
             [
                 sys.executable,
                 str(PIXEL_CAPTURE),
@@ -486,14 +654,143 @@ def _capture_qmp(run_dir: Path, qmp: Path, label: str, *, video: bool) -> None:
                 "--interval",
                 "0.25",
             ],
+            video_log,
+            remaining_timeout(),
+            f"{label}-video",
+        )
+
+
+def _read_runtime_processes() -> list[str]:
+    result = subprocess.run(
+        ["ps", "-axo", "pid=,comm=,args="],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"ps exited {result.returncode}")
+    targets: list[str] = []
+    for line in result.stdout.splitlines():
+        fields = line.strip().split(None, 2)
+        if len(fields) < 2:
+            continue
+        pid, comm = fields[:2]
+        args = fields[2] if len(fields) == 3 else ""
+        executable_names = [Path(token.strip("'\";," )).name for token in args.split()]
+        is_target = (
+            comm.startswith("qemu-system-")
+            or comm in {"runqemu", "flutter-auto"}
+            or any(
+                name == "runqemu"
+                or name == "flutter-auto"
+                or name.startswith("qemu-system-")
+                for name in executable_names
+            )
+        )
+        if is_target:
+            targets.append(f"pid={pid} comm={comm} args={args[:300]}")
+    return targets
+
+
+def _read_listening_ports() -> set[int]:
+    ss = shutil.which("ss")
+    if ss is not None:
+        result = subprocess.run(
+            [ss, "-H", "-ltn"],
             check=False,
             capture_output=True,
             text=True,
-            timeout=35,
+            timeout=5,
         )
-        video_log.write_text(result.stdout + result.stderr, encoding="utf-8")
         if result.returncode != 0:
-            raise RuntimeError(f"QMP video-frame capture failed at {label}")
+            raise RuntimeError(f"ss exited {result.returncode}")
+        listening: set[int] = set()
+        for line in result.stdout.splitlines():
+            fields = line.split()
+            if len(fields) < 4:
+                continue
+            port = fields[3].rsplit(":", 1)[-1]
+            if port.isdigit():
+                listening.add(int(port))
+        return listening
+
+    lsof = shutil.which("lsof")
+    if lsof is None:
+        raise RuntimeError("neither ss nor lsof is available")
+    listening = set()
+    for port in (10930, 10931, 10932):
+        result = subprocess.run(
+            [lsof, "-nP", f"-iTCP:{port}", "-sTCP:LISTEN"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0 and len(result.stdout.splitlines()) > 1:
+            listening.add(port)
+        elif result.returncode not in (0, 1):
+            raise RuntimeError(f"lsof exited {result.returncode} for port {port}")
+    return listening
+
+
+def verify_postflight(
+    *,
+    run_dir: Path,
+    qmp: Path,
+    ports: tuple[int, ...] = (10930, 10931, 10932),
+    process_reader: Callable[[], list[str]] = _read_runtime_processes,
+    listening_ports_reader: Callable[[], set[int]] = _read_listening_ports,
+    report_name: str = "FLR-0399-postflight.log",
+) -> tuple[str, ...]:
+    """Verify runtime residue independently of whether QMP is still present."""
+    errors: list[str] = []
+    lines = ["FLR0399_POSTFLIGHT=START"]
+    try:
+        processes = process_reader()
+    except Exception as exc:
+        processes = []
+        errors.append(f"process-scan-unavailable:{type(exc).__name__}")
+    if processes:
+        errors.append("runtime-process-residual")
+        lines.append(f"processes={len(processes)}:RESIDUAL")
+        lines.extend(processes)
+    else:
+        lines.append("processes=0")
+
+    try:
+        qmp_present = qmp.exists() or qmp.is_symlink()
+    except OSError as exc:
+        qmp_present = True
+        errors.append(f"qmp-state-unavailable:{type(exc).__name__}")
+    lines.append(f"qmp={'RESIDUAL' if qmp_present else 'ABSENT'}")
+    if qmp_present:
+        errors.append("qmp-socket-residual")
+
+    try:
+        listening = listening_ports_reader()
+    except Exception as exc:
+        listening = set()
+        errors.append(f"port-scan-unavailable:{type(exc).__name__}")
+        lines.append("ports=UNKNOWN")
+    else:
+        busy = [port for port in ports if port in listening]
+        if busy:
+            errors.extend(f"port-listener:{port}" for port in busy)
+            lines.append("ports=" + ",".join(str(port) for port in busy) + ":LISTENING")
+        else:
+            lines.append("ports=" + ",".join(str(port) for port in ports) + ":FREE")
+
+    lines.append(f"FLR0399_POSTFLIGHT={'FAIL' if errors else 'PASS'}")
+    try:
+        if Path(report_name).name != report_name:
+            raise ValueError("postflight report name must be a basename")
+        (run_dir / report_name).write_text(
+            "\n".join(lines) + "\n", encoding="utf-8"
+        )
+    except OSError as exc:
+        errors.append(f"postflight-evidence-write-failed:{type(exc).__name__}")
+    return tuple(errors)
 
 
 def _analyze_capture(run_dir: Path, image: Path) -> None:
@@ -580,13 +877,22 @@ def observe(args: argparse.Namespace) -> int:
 
     state = {"preserved": False, "teardown": False}
     teardown_errors: list[str] = []
+    teardown_notes: list[str] = []
+    deadline = time.monotonic() + args.timeout_seconds
 
-    def serial(label: str, command: str) -> str:
+    def remaining_budget() -> float:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("FLR-0399 observer deadline expired")
+        return remaining
+
+    def serial(label: str, command: str, timeout_seconds: float = 40.0) -> str:
         return _serial_exec(
             run_dir=run_dir,
             label=label,
             command=command,
             serial_port=args.serial_port,
+            timeout_seconds=min(40.0, timeout_seconds),
         )
 
     def preserve_evidence() -> None:
@@ -601,45 +907,108 @@ def observe(args: argparse.Namespace) -> int:
         if state["teardown"]:
             return
         state["teardown"] = True
+        try:
+            output = serial("stop", commands.stop)
+            if "FLR0399_APP_STOP=" not in output:
+                teardown_notes.append("guest-stop=UNCONFIRMED")
+        except Exception as exc:
+            teardown_notes.append(f"guest-stop=UNAVAILABLE:{type(exc).__name__}")
         if qmp.is_socket():
             try:
-                output = serial("stop", commands.stop)
-                if "FLR0399_APP_STOP=" not in output:
-                    teardown_errors.append("guest stop marker missing")
+                result = subprocess.run(
+                    [str(HARNESS), "qmp-quit", "--qmp", str(qmp)],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    timeout=35,
+                )
+                (run_dir / "FLR-0399-qmp-quit.log").write_text(
+                    result.stdout + result.stderr, encoding="utf-8"
+                )
+                if result.returncode != 0:
+                    teardown_notes.append(f"qmp-quit=UNCONFIRMED rc={result.returncode}")
             except Exception as exc:
-                teardown_errors.append(f"guest stop: {type(exc).__name__}")
-            result = subprocess.run(
-                [str(HARNESS), "qmp-quit", "--qmp", str(qmp)],
-                check=False,
-                capture_output=True,
-                text=True,
-                timeout=35,
+                teardown_notes.append(f"qmp-quit=UNAVAILABLE:{type(exc).__name__}")
+        else:
+            teardown_notes.append("qmp-quit=SKIPPED_SOCKET_ABSENT")
+
+        pre_cleanup_errors = verify_postflight(
+            run_dir=run_dir,
+            qmp=qmp,
+            report_name="FLR-0399-postflight-before-cleanup.log",
+        )
+        if pre_cleanup_errors:
+            cleanup = cleanup_exact_qmp_processes(qmp, timeout_seconds=3.0)
+            cleanup_lines = [
+                f"residual={process.description}" for process in cleanup.remaining
+            ]
+            cleanup_lines.extend(f"error={error}" for error in cleanup.errors)
+            cleanup_lines.append(
+                "FLR0399_EXACT_CLEANUP="
+                f"{'PASS' if not cleanup.remaining and not cleanup.errors else 'FAIL'} "
+                f"residual={len(cleanup.remaining)} "
+                f"qmp_socket_removed={str(cleanup.qmp_socket_removed).lower()}"
             )
-            (run_dir / "FLR-0399-qmp-quit.log").write_text(
-                result.stdout + result.stderr, encoding="utf-8"
+            (run_dir / "FLR-0399-exact-qmp-cleanup.log").write_text(
+                "\n".join(cleanup_lines) + "\n", encoding="utf-8"
             )
-            if result.returncode != 0:
-                teardown_errors.append("QMP quit failed")
+            if cleanup.remaining or cleanup.errors:
+                teardown_errors.append("exact-qmp-cleanup-failed")
+            else:
+                teardown_notes.append("exact-qmp-cleanup=PASS")
+        final_postflight_errors = verify_postflight(
+            run_dir=run_dir,
+            qmp=qmp,
+            report_name="FLR-0399-postflight-final.log",
+        )
+        teardown_errors.extend(final_postflight_errors)
+        teardown_log = [*teardown_notes, *teardown_errors]
+        try:
+            (run_dir / "FLR-0399-teardown.log").write_text(
+                "\n".join(teardown_log) + "\n", encoding="utf-8"
+            )
+        except OSError as exc:
+            teardown_errors.append(f"teardown-evidence-write-failed:{type(exc).__name__}")
         if teardown_errors:
             raise RuntimeError("; ".join(teardown_errors))
 
     outcome: Outcome | None = None
     setup_error: str | None = None
     try:
-        _capture_qmp(run_dir, qmp, "pre-launch", video=True)
-        preflight = serial("preflight", commands.preflight)
+        _capture_qmp(
+            run_dir,
+            qmp,
+            "pre-launch",
+            video=True,
+            timeout_seconds=remaining_budget(),
+        )
+        preflight = serial(
+            "preflight",
+            commands.preflight,
+            timeout_seconds=remaining_budget(),
+        )
         if "FLR0399_GUEST_PREFLIGHT=PASS" not in preflight:
             raise RuntimeError("guest preflight marker missing")
-        launch = serial("launch", commands.launch)
+        launch = serial("launch", commands.launch, timeout_seconds=remaining_budget())
         if "FLR0399_LAUNCH=PASS" not in launch:
             raise RuntimeError("guest launch marker missing")
 
-        def read_state(stage: str, _remaining: float) -> Sample:
-            command = getattr(commands, stage)
-            return parse_state_output(serial(stage, command), stage=stage)
+        def read_state(stage: str, remaining: float) -> Sample:
+            command_stage = "identity" if stage.startswith("identity-after-") else stage
+            command = getattr(commands, command_stage)
+            return parse_state_output(
+                serial(stage, command, timeout_seconds=remaining),
+                stage=command_stage,
+            )
 
-        def capture_frame(stage: str, _identity: Identity) -> None:
-            _capture_qmp(run_dir, qmp, f"{run_id}-{stage.lower()}", video=stage == "READY")
+        def capture_frame(stage: str, _identity: Identity, remaining: float) -> None:
+            _capture_qmp(
+                run_dir,
+                qmp,
+                f"{run_id}-{stage.lower()}",
+                video=stage == "READY",
+                timeout_seconds=remaining,
+            )
 
         outcome = run_once(
             read_state=read_state,
@@ -648,6 +1017,7 @@ def observe(args: argparse.Namespace) -> int:
             teardown=teardown,
             expected_log_path=commands.log_path,
             timeout_seconds=args.timeout_seconds,
+            deadline=deadline,
         )
     except Exception as exc:
         setup_error = f"{type(exc).__name__}:{exc}"

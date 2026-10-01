@@ -108,7 +108,11 @@ AGL image / packagegroup
   `work/evidence/FLR-0398-user-provided-composition-reference.jpg`, SHA-256
   `df30ba433b979f631c552328c0db29ef95a8a6dfefe795e3d5976ddd4b4cd3d3`. It
   shows `Shapes: On` and `Colliders: Off`; the white wireframe-like lines are
-  likely Shape visualization, while their exact source remains UNKNOWN.
+  very likely Shape visualization. A 2026-10-02 visual comparison with
+  `work/evidence/flr0027/shape-only-late.png` found a strong match in polygon
+  layout and line geometry. Exact renderer/source attribution remains UNKNOWN
+  without an attributable run, so neither those lines nor their overlap with
+  the red vehicle pixels counts as Sequoia geometry.
 
 ### Inferences
 

@@ -55,7 +55,26 @@ Compared two options:
   unless a focused test proves their contract blocks this one-run path.
 - [x] Correct the evidence-root role contract and add the FLR-0399-only
   exact-image starter. Focused tests cover the path mapping and shell syntax;
-  no general harness or image change was required.
+  no image change was required; the general serial harness was changed only
+  after a focused test proved worker ownership and partial-evidence loss.
+- [x] Reproduce and eliminate a false-positive exact-cleanup match: the old
+  matcher accepted QMP-path substrings and QEMU names anywhere in argv. The
+  cleanup now parses exact `-qmp`/QMP-chardev/runqemu endpoints and uses a
+  PIDFD opened and identity-rechecked before signalling. Mini start preflight
+  checks PIDFD capability before creating or starting the run.
+- [x] Reproduce the serial timeout ownership gap. The existing harness worker
+  now `exec`s into its bounded Python reader, all login/command phases share
+  one deadline, each blocking receive uses only the remaining time, and every
+  phase transition/send rechecks the deadline. Setup bytes persist separately
+  (64-KiB cap) from command output (1-MiB cap); command output overflow fails
+  closed. The controller terminates/reaps its process group and preserves
+  partial logs on timeout.
+- [x] Preserve QMP timeout stdout/stderr, retain distinct pre-cleanup/final
+  postflight reports, and distinguish an empty coredump journal query from a
+  coredumpctl failure.
+- [x] Emit bounded final-eight-line diagnostics for failed kernel journal,
+  focused Flutter coredump journal, and coredumpctl queries. Regression tests
+  cover each error path without dumping full logs.
 
 ### 3. Run once on Mini, with no rebuild
 
@@ -79,11 +98,13 @@ Compared two options:
 
 - [x] Run focused tests, canonical/privacy/checkpoint/diff checks, and
   `make verify`; report the known FLR-0397 test contract independently. The
-  15 focused tests and independent MCP/QEMU/Devtool/bundle/file-size gates
-  pass. `make verify` reaches 163 tests but fails one existing FLR-0397 test
-  invocation missing its required run ID; global Markdown validation also
-  reports 11 pre-existing missing FLR-0338/0339/0391/0395 targets. Both are
-  kept separate from this ticket.
+  FLR-0399 controller suite passes 35/35, the four localhost serial regressions
+  pass, and the 186-test full unit suite has one already-tracked FLR-0397 stale
+  invocation failure. `make verify` stops at that test gate; all later targets
+  were run independently. MCP (52), QEMU/runtime, runtime-log, Devtool, Mini
+  recipe/bundle, and file-size gates pass. Markdown still reports 11 historical
+  missing targets and none in the new FLR-0399 files. Astra read-only re-review
+  found no actionable issues in the repaired observer paths.
 - [ ] Commit ticket, controller/tests, Mini evidence manifest, and dashboard
   locally. Do not push.
 - [ ] If Gate A passes, leave Gate B for FLR-0398 with image/material/camera/
