@@ -1,12 +1,13 @@
 # FLR-0396 — match the known-positive LIT material interface on Sequoia
 
-- Status: In Progress
+- Status: Done (bounded negative/UNKNOWN experiment; visual gate not passed)
 - Priority: High
 - Created: 2026-10-01
 - Owner: Mac Podman Devtool / meta-fluorite-trial / Mini BitBake / guest Flutter / QMP evidence roles
 - Branch: `feature-flr-0396-match-working-lit-material`
 - Plan: [FLR-0396 implementation plan](../../docs/superpowers/plans/2026-10-01-flr0396-match-working-lit-material.md)
 - Working log: [FLR-0396 working log](../logs/2026-10-01-flr0396.md)
+- Runtime evidence: [FLR-0396-0001 QMP and fault record](../evidence/FLR-0396-0001.md)
 - Positive runtime control: [FLR-0394 exact-image fixture + HUD](FLR-0394-capture-live-fixture-over-ssh.md)
 - Previous Sequoia result: [FLR-0391](FLR-0391-apply-constant-lit-material-to-sequoia.md)
 - Candidate lineage: rootfs `54da69d06c4a5d38c027453f7af4bec7e52b762fa732935766c04bebf533b690`, containing patch 0333
@@ -201,6 +202,23 @@ composition changes to this ticket.
 - Post-update `devtool-status` reports one `fluorite-plugins` component in the
   existing source tree.
 
+- The verified bundle reached Mini revision
+  `58ff985594b88f12d7acf5f082f3289a96e7a375`; `do_patch`, `do_compile`, and
+  the full `agl-ivi-image-flutter` build passed in the existing build/TMPDIR.
+- New rootfs SHA-256 is
+  `80935c3f9fa81da66f068821637f512749602c701baa37e91bf777b8cf15c44c`;
+  kernel and qemuboot identities are recorded in the runtime manifest.
+- One Mini QEMU attempt launched Example Demo under pre-armed GDB 14.2. The
+  Sequoia READY marker reported `parameter=linear-float3`; 24 binding records
+  and SUN setup were observed. Present reached 2 begins/1 return, then the
+  guest kernel recorded an `FEngine::loop` page-fault Oops.
+- The live QMP window was missed because the readiness observer watched a
+  different guest log path than the GDB launch wrote. The only QMP still/video
+  were captured after Flutter exited and show a uniformly black screen; they
+  do not prove that the live Sequoia ROI was black.
+- The guest's raw GDB/inferior log was not persisted to Mini before QEMU quit;
+  this evidence-retention failure is explicit in the linked manifest.
+
 ### Check
 
 | Gate | Result |
@@ -211,14 +229,22 @@ composition changes to this ticket.
 | Recipe order/uniqueness | PASS: 0334 appears once after 0333 |
 | Post-update Devtool registration | PASS: one component/source pair |
 | Repository verifier | NOT PASS: 147/148; one stale serial-exec fixture/invocation tracked separately in FLR-0397 |
-| Mini bundle/build, live QMP, and teardown | Pending |
+| Mini bundle and progressive image build | PASS: exact bundle tip; `do_patch`, compile, and full image succeeded |
+| Material path | PASS: READY/PARAM, 24 binding records, and SUN marker observed |
+| Live native-only Sequoia QMP acceptance | UNKNOWN/not passed: observer mismatch and renderer Oops prevented a live frame; post-exit black frame is not a live render verdict |
+| First-fault GDB stack | UNKNOWN: GDB was armed, but no userspace SIGSEGV/backtrace was captured; the kernel Oops evidence is summarized, while the raw guest log was lost at shutdown |
+| QEMU teardown | PASS: QMP quit, PID/socket gone, target scan empty, ports free |
+| Same-frame HUD+Sequoia composition | Not tested; separate FLR-0398 gate |
 
 ### Act
 
-- Run privacy, baseline metadata, canonical, checkpoint, and whitespace gates;
-  commit the generated layer patch/registration/lock and ticket records locally.
-- Send one verified bundle to the fixed Mini receiver and use its existing
-  BitBake build/TMPDIR. No Mac image build or VM-image copy.
-- If the visual result is negative/faulted, FLR-0395 resumes; no unrelated
-  changes are bundled. If it passes, FLR-0398 separately tests whether the
-  Sequoia native surface and real Flutter HUD compose in one QMP frame.
+- Close FLR-0396 as a bounded material-parity experiment, not as proof of
+  colored Sequoia. Preserve patch 0334; do not add camera, texture, light, or
+  composition changes here.
+- Keep FLR-0395 scoped to its exact 0333/rootfs baseline. Create a separate
+  FLR-0399 unit for a fresh first-fault/live-QMP capture on this exact 0334
+  image; stream debugger/inferior output to Mini evidence and trigger QMP
+  capture from the live READY boundary so the same log-path miss is not
+  repeated.
+- Keep FLR-0398 Inbox until gate A produces attributable live colored-Sequoia
+  evidence. Gate B must independently prove same-frame HUD+Sequoia.

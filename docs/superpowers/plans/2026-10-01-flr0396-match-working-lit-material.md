@@ -75,57 +75,57 @@
 
 ## Task 3 — commit, bundle, and build on the Mini
 
-- [ ] Run privacy, canonical, baseline-lock, and `git diff --check` gates.
-- [ ] Commit the patch/registration/lock/ticket/log/dashboard locally on this
+- [x] Run privacy, canonical, baseline-lock, and `git diff --check` gates.
+- [x] Commit the patch/registration/lock locally on this
   feature branch. Do not push.
-- [ ] Create and verify one bundle from the current Mini receiver tip through
+- [x] Create and verify one bundle from the current Mini receiver tip through
   the existing handoff helper; transfer to the fixed inbox/receiver only.
-- [ ] Verify the Mini receiver's exact bundle tip and clean layer state, then
+- [x] Verify the Mini receiver's exact bundle tip and clean layer state, then
   run progressive `flutter-auto:do_patch`, component compile, and the full
   `agl-ivi-image-flutter` image build. Reuse the fixed build/TMPDIR/caches; do
   not copy the VM image to Mac.
-- [ ] Record exact new rootfs/kernel/qemuboot hashes and the focused task
+- [x] Record exact new rootfs/kernel/qemuboot hashes and the focused task
   results before QEMU.
 
 ## Task 4 — run Sequoia, capture QMP, and clean up
 
-- [ ] Check Mini QEMU/process/port/socket state and the exact image hashes.
+- [x] Check Mini QEMU/process/port/socket state and the exact image hashes.
   Use one fresh QEMU through the existing harness; no Mac QEMU.
 - [ ] Verify the registered patch-0198 default-above-parent presentation and
   preserve it; do not set the legacy below-parent override or invent a HUD-off
   flag. Keep Shape/Collider visualization controls fixed and record their
   effective state. Confirm from the live QMP ROI whether the HUD is actually
-  absent before calling the frame native-only.
-- [ ] Manually launch the existing Example Demo as the established guest user
+  absent before calling the frame native-only. The missing live QMP frame means
+  this was not verified for FLR-0396.
+- [x] Manually launch the existing Example Demo as the established guest user
   with the saved Sequoia LIT/SUN profile. Keep fixture-specific controls off.
   Confirm the marker reports the constant shader plus linear FLOAT3 parameter
   before treating the new branch as selected.
-- [ ] If GDB exists in the guest, arm it before Flutter starts for a userspace
-  SIGSEGV; retain a bounded kernel Oops/journal window independently. Do not
-  assume ptrace can catch a kernel Oops.
+- [x] GDB existed and was armed before Flutter. The raw log was not persisted;
+  preserve this as an evidence gap. Retain a bounded kernel Oops/journal window
+  independently. Do not assume ptrace can catch a kernel Oops.
 - [ ] Capture a complete live 1280×800 QMP frame and short QMP video. Bracket
   capture with exact Flutter PID/UID/start identity. Capture at first
   successful present, or while the process is live at the first useful READY
-  point if the renderer faults first.
-- [ ] Compute fixed Sequoia and HUD ROI metrics and full-frame hashes; visually
-  inspect the complete screenshot. This gate requires recognizable blue
-  production-Sequoia geometry under native-only presentation. The HUD is
-  expected to be masked; this result cannot pass 2D+3D composition.
-- [ ] Stop the exact Flutter process and QEMU. Independently verify no
+  point if the renderer faults first. The observer mismatch prevented this.
+- [x] Compute ROI counts and hashes for the available post-exit frame and
+  visually inspect it. It is uniformly black, but is not live evidence and
+  cannot satisfy colored-Sequoia acceptance or classify the presentation.
+- [x] Stop the exact Flutter process and QEMU. Independently verify no
   QEMU/runqemu/flutter-auto process, QMP socket, or forwarded-port residue.
-- [ ] Save ignored media outside Git and add a tracked manifest with exact
+- [x] Save ignored media outside Git and add a tracked manifest with exact
   checksums, runtime counters, faults, and cleanup results. Update PDCA and
-  `TASKS.md`.
+  `TASKS.md`; the final ticket close-out is committed locally.
 
 ## Close-out
 
 - [x] Run canonical guard, checkpoint verifier, privacy check, diff check, and
-  full `make verify`. Keep FLR-0397's known stale test distinct; do not claim
-  the verifier passed unless its actual result is all green.
-- [ ] Commit local ticket/evidence updates. No push.
-- [ ] If QMP remains black or the known fault recurs, close this as a bounded
-  negative/UNKNOWN material-parity experiment and resume FLR-0395's GDB-first
-  procedure in its own ticket. Do not add texture/camera/light/composition
-  changes here.
+  full `make verify`. The actual verifier result is 147/148, NOT PASS; keep
+  FLR-0397's stale test separate.
+- [x] Commit local ticket/evidence updates. No push.
+- [x] Close this as a bounded material-parity experiment with live visual
+  outcome UNKNOWN. The post-exit black frame is not a negative live render
+  result. FLR-0399 owns a new exact-0334 live-capture/first-fault observation;
+  no texture/camera/light/composition changes are justified here.
 - [ ] If the native-only Sequoia gate passes, FLR-0398 owns a separate same-image
   test with the Flutter HUD visible and composition active.

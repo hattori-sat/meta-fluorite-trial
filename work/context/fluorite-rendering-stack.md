@@ -90,12 +90,18 @@ AGL image / packagegroup
 - Source comparison found one concrete material-interface mismatch: the
   fixture declares FLOAT3 `color` and sets the instance to the same linear RGB
   even on its constant-source branch; Sequoia patch 0333 omits both operations.
-- FLR-0396 tests that exact difference only, using a new Devtool-generated
-  patch and a fresh Mini image. Astra judged it the best next controlled
-  experiment, while explicitly leaving its causal effect UNKNOWN.
+- FLR-0396 applied that exact difference with Devtool patch 0334 and built a
+  fresh Mini image. Runtime reached READY/PARAM and SUN, then logged two
+  present-begin records, one return, and an `FEngine::loop` kernel Oops. The
+  readiness observer watched a different file from the GDB launch, so no live
+  QMP frame was captured. The post-exit black QMP still is not a live-render
+  result; whether colored Sequoia appeared is UNKNOWN. See
+  `work/evidence/FLR-0396-0001.md`.
 - The visual gates are intentionally separate: FLR-0396 tests colored
-  production Sequoia with the HUD masked by a verified native-only diagnostic
-  presentation; FLR-0398 will test same-frame Sequoia+HUD composition. The
+  production Sequoia pixels in a current-image live frame; FLR-0396's missing
+  observer window means it did not pass. FLR-0399 will correct evidence capture
+  using the same 0334 image. FLR-0398 will test same-frame Sequoia+HUD
+  composition only after Gate A passes. The
   historical native-only FLR-0049 frame and the user's un-attributed
   HUD+vehicle-fragment photo are not substitutes for current-image acceptance.
 - The user's photo is retained as
@@ -120,12 +126,16 @@ AGL image / packagegroup
 
 ### Next bounded discriminator
 
-FLR-0396 restores the fixture's FLOAT3 parameter declaration and linear
-instance setter on Sequoia while retaining the constant shader, then builds
-and captures live QMP evidence in a verified native-only presentation. It
-does not test HUD composition. If colored Sequoia passes, FLR-0398 separately
-tests same-frame Sequoia+HUD composition. FLR-0395 remains Waiting to capture
-the first fault with GDB if the parity test stays black or faults.
+FLR-0396's bounded result is recorded above. FLR-0399 is the next distinct
+ticket: reuse the exact 0334 image, align the guest app/GDB output path with the
+observer, persist GDB output to Mini evidence before teardown, and capture a
+live PID-bracketed QMP frame at READY/first present/fault. No image rebuild or
+material/camera/light edit is in scope. The live full frame must separately
+classify Sequoia color and whether HUD pixels are present; a native-above-parent
+presentation masks HUD but does not disable Flutter 2D. Gate A (colored
+production Sequoia) and Gate B (same-frame HUD+Sequoia composition) remain
+independent. FLR-0398 owns Gate B after Gate A is established; FLR-0395 keeps
+its older 0333 baseline.
 
 ## Evidence needed
 
