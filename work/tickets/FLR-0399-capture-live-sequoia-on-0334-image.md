@@ -1,0 +1,172 @@
+# FLR-0399 — capture live Sequoia state on the exact 0334 image
+
+- Status: In Progress
+- Priority: High
+- Created: 2026-10-01
+- Owner: Mini QEMU / guest Flutter+GDB / QMP capture / runtime-evidence roles
+- Branch: `feature-flr-0399-live-qmp-capture` (local only; no push)
+- Plan: [FLR-0399 implementation plan](../../docs/superpowers/plans/2026-10-01-flr0399-live-qmp-capture.md)
+- Working log: [FLR-0399 working log](../logs/2026-10-01-flr0399.md)
+- Prior attempt: [FLR-0396 runtime manifest](../evidence/FLR-0396-0001.md)
+- Reused candidate: patch 0334; rootfs SHA-256 `80935c3f9fa81da66f068821637f512749602c701baa37e91bf777b8cf15c44c`
+
+## Objective
+
+On the exact already-built 0334 candidate, make one bounded Mini QEMU run that
+captures a complete QMP frame while the recorded Example Demo process is live,
+and preserves the bounded GDB/inferior and kernel-fault evidence on Mini before
+teardown. Classify the colored-Sequoia result without conflating it with the
+separate HUD-composition question.
+
+No source/material, camera, texture, light, widget-tree, recipe, or image-build
+change is in scope. Do not rebuild or copy a VM image to Mac.
+
+## Independent visual gates
+
+1. **Gate A — colored production Sequoia:** recognizable colored Sequoia pixels
+   in a full-frame, identity-bracketed live QMP capture under the existing
+   native-above-parent visual-isolation presentation. The HUD ROI must be
+   measured and reported. Native-above-parent can mask the Flutter parent; it
+   does **not** mean Flutter 2D was disabled.
+2. **Gate B — HUD + real Sequoia composition:** recognizable Sequoia and the
+   actual Flutter HUD in the same live full-frame QMP image. This is a distinct
+   task owned by FLR-0398 after Gate A is established; FLR-0399 must not claim
+   Gate B based on the fixture+HUD control or a historical photo.
+
+The supplied historical image proves only that HUD pixels and red
+vehicle-like pixels once co-occurred in a frame with no attributable run/image
+identity. Its white lines are likely Shape visualization, exact source
+UNKNOWN. It is not a current-image pass for either gate.
+
+## Facts, hypotheses, and unknowns
+
+### Facts
+
+- FLR-0396 applied Devtool patch 0334 and passed Mini `do_patch`, compile, and
+  the full `agl-ivi-image-flutter` build. The exact rootfs hash is recorded
+  above; kernel/qemuboot hashes are in the linked manifest.
+- One run reached Sequoia `READY parameter=linear-float3`, 24 binding log
+  records, and SUN setup; it then recorded 2 present begins, 1 return, and an
+  `FEngine::loop` kernel Oops.
+- The FLR-0396 readiness observer read the `app.log` path while GDB wrote
+  combined inferior/debugger output to a different `gdb.log` path. The missing
+  file produced repeated numeric-parse errors and the live capture window was
+  missed.
+- The only FLR-0396 QMP still/video were captured after Flutter exited. The
+  black frame is not evidence that the live Sequoia ROI was black. The raw GDB
+  output was not persisted before QEMU shutdown, so the userspace backtrace is
+  UNKNOWN.
+- FLR-0396 QEMU teardown passed; no Mini QEMU/Flutter/QMP residue remained at
+  the last read-only check.
+- FLR-0394 is a positive same-image LIT fixture+HUD control; it is not a
+  production Sequoia result.
+- Read-only Mini preflight on 2026-10-02 found no saved FLR-0396 runqemu
+  command/evidence directory under the fixed evidence role. The immutable 0334
+  image is still present: rootfs, kernel, and qemuboot were independently
+  rehashed from the fixed qemux86-64 deploy role and all three match the
+  ticket's hashes. The matching build template resolves to exactly one
+  existing `oe-init-build-env`/`runqemu` pair. No image was copied or rebuilt.
+- The Mini evidence role is `$BUILD_EVIDENCE/$run_id/qemu` (lowercase run id),
+  not a repository-local `evidence/FLR-...` directory. The observer now
+  requires `--evidence-root`; its exact path contract is unit-tested.
+
+### Inferences
+
+- The immediate process defect was an observer/source-of-truth mismatch. It
+  explains why the capture was missed, not why Sequoia may or may not render.
+- Reusing the exact 0334 image isolates runtime evidence collection from
+  material source and build changes.
+- A valid live frame can settle whether the forced known-visible material
+  renders production Sequoia geometry; it cannot establish original GLB
+  material/texture/light correctness.
+
+### Hypotheses
+
+1. Sequoia produces colored pixels before the present/Oops fault; FLR-0396
+   missed them solely because capture was not tied to the log actually written.
+2. The same present/Oops sequence occurs before visible Sequoia output; a
+   live READY-time capture will show no colored vehicle pixels.
+3. The guest faults or exits before any valid live QMP frame; Gate A remains
+   UNKNOWN, but the preserved first-fault evidence narrows the next ticket.
+
+### UNKNOWN
+
+- Whether colored Sequoia pixels exist while Flutter is live on the 0334 image.
+- Whether the full current frame masks HUD pixels in the native-above-parent
+  presentation; no such FLR-0396 live frame exists.
+- The exact userspace stack/registers at the kernel Oops and whether the
+  unmatched present causes, or merely precedes, it.
+- Whether a forced-color Sequoia render says anything about original
+  production texture or lighting behavior beyond geometry/material override.
+
+## Scope and guardrails
+
+- Reuse the existing Mini runqemu/QMP/serial-exec workflow and exact FLR-0396
+  artifacts. One QEMU run, one evidence directory, one run ID.
+- Add only a narrow FLR-0399 one-run observer/controller and its deterministic
+  tests, plus ticket evidence. Do not change the general-purpose QEMU harness
+  unless the test demonstrates a contract defect that blocks this scoped path.
+- Use one configured guest log path for GDB output and readiness/present
+  observation. Missing/unreadable log must fail once with a clear reason before
+  numeric parsing or polling.
+- Capture at the first useful READY point and again at the first present
+  return if the same process is still live; record the actual return value.
+  Bracket each QMP capture with matching PID/UID/start identity. A post-exit
+  screenshot is labelled `POST_EXIT` and can never pass Gate A.
+- Copy a bounded GDB/inferior excerpt and focused kernel Oops/coredump query to
+  Mini evidence before QMP teardown. Do not dump unbounded logs.
+- Do not retry after a first fatal Oops, process exit, observer failure, or
+  deadline. Preserve evidence, teardown the exact QEMU, and decide the next
+  discriminator from the result.
+- No Docker, new Podman machine/container, new cache/TMPDIR, cache cleanup,
+  `cleanall`, `cleansstate`, broad process kill, image transfer, push, or
+  unrelated FLR-0397 repair.
+
+## Mini run procedure
+
+The ticket-specific starter pins the existing build, 0334 image hashes,
+6144-MiB headless runqemu profile, standard serial/SSH/telnet ports, and one
+fresh evidence directory. It does not run BitBake or modify the image:
+
+```sh
+FLR0399_RUN_ID=flr0399-0001 bash work/commands/FLR-0399-qemu-start.sh preflight
+FLR0399_RUN_ID=flr0399-0001 bash work/commands/FLR-0399-qemu-start.sh start
+python3 scripts/flr0399_live_capture.py observe \
+  --run-id flr0399-0001 --evidence-root "$BUILD_EVIDENCE" \
+  --run-dir "$BUILD_EVIDENCE/flr0399-0001/qemu" \
+  --qmp "$BUILD_EVIDENCE/flr0399-0001/qemu/qmp-0399.sock"
+```
+
+Run these in the existing Mini receiver. Do not retry or reuse the run ID if
+the start/observer reports a failure; preserve the single evidence directory
+and classify the stop point first.
+
+## Success criteria
+
+1. The canonical guard passes and FLR-0399 is the only In Progress ticket.
+2. Focused tests prove missing log fails closed without numeric errors or
+   polling storm; READY/present capture is allowed only with a live matching
+   identity; post-exit capture is classified and cannot pass; teardown runs at
+   most once; the configured GDB/observer log source is singular.
+3. Before one Mini run, the exact kernel/rootfs/qemuboot hashes, free QEMU
+   process/ports/socket state, and fresh unique evidence directory are checked.
+4. One QEMU run on the exact 0334 image produces a complete 1280×800 QMP frame
+   and bounded video while Flutter identity is bracketed, or a precisely
+   recorded fail-closed outcome if the process faults before capture.
+5. Bounded GDB/inferior output and focused kernel evidence are present in Mini
+   evidence before teardown; postflight finds no QEMU/runqemu/flutter-auto,
+   QMP socket, or forwarded-port residue.
+6. The full frame is visually inspected; fixed Sequoia and HUD ROIs, hashes,
+   present counters, and process/fault state are recorded. Gate A is PASS only
+   when production Sequoia is visibly colored in an attributable live frame.
+   Gate B remains a separate FLR-0398 task.
+
+## Impact
+
+- **Build-time:** none; reuse the exact Mini-built image and existing caches.
+- **Packaging:** none; no layer, recipe, package, or dependency edit.
+- **Runtime:** diagnostic-only capture timing around the existing Example Demo;
+  no product behavior is changed.
+- **Integration risk:** a second observer or capture command could perturb a
+  short fault window. Keep one controller, fixed deadlines, minimal reads, and
+  fail closed on stale identity or missing log.
