@@ -36,9 +36,9 @@ frame. This is a composition gate, not a material-parity or original-PBR gate.
 
 ## Hypotheses
 
-1. **Composition succeeds:** with the intended Flutter/native stacking and
-   transparent-buffer contract, one QMP frame contains recognizable Sequoia
-   geometry and the CPU/GPU/FPS HUD.
+1. **Composition succeeds:** the existing above-parent native-surface path and
+   transparent-buffer contract allow one QMP frame to contain recognizable
+   Sequoia geometry and the CPU/GPU/FPS HUD.
 2. **Native output exists but is occluded:** FLR-0396's native-only pass
    remains positive, while the HUD-visible layout hides the Sequoia pixels.
 3. **The apparent historical positive depended on debug geometry or a distinct
@@ -53,7 +53,7 @@ frame. This is a composition gate, not a material-parity or original-PBR gate.
 | Where | Exact image accepted by FLR-0396; Example Demo; Filament native surface and Flutter/Wayland composition |
 | When | One controlled QMP run after the predecessor gate passes |
 | Who | Mini image/runtime, guest Flutter, compositor, and QMP evidence roles |
-| How | Reuse the exact Sequoia material, camera, light, model selector, and image; change only the verified presentation/stacking condition needed to show the HUD with native 3D |
+| How | Reuse the exact Sequoia material, camera, light, model selector, image, and registered default-above-parent surface order; verify the transparent composition state and turn off Shape visualization using its observable UI control |
 
 **Problem point:** historical proof exists for the two paths separately and a
 user-supplied same-frame visual candidate exists, but no attributable,
@@ -64,8 +64,9 @@ repeatable current-image Sequoia+HUD QMP run is established.
 - Do not start until FLR-0396 has a valid colored-Sequoia native-only result and
   its exact image hashes/profile are recorded.
 - Reuse that exact image and diagnostic Sequoia material. Keep model, camera,
-  light, render scale, and Flutter app identity fixed while changing only the
-  already-supported composition/presentation condition.
+  light, render scale, Flutter app identity, and existing native-above-parent
+  stacking fixed. Verify the existing transparent-buffer composition state;
+  do not use the historical below-parent mode, which hid native 3D under HUD.
 - Verify and disable Shape visualization and Colliders through an existing,
   observable control before judging vehicle pixels. Do not invent flags or
   infer effective state from an intended command.

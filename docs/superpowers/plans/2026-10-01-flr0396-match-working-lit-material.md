@@ -22,6 +22,10 @@
 - FLR-0049 Iteration 23 is a historical production-Sequoia native-only visual
   reference: the native surface was above the Flutter parent, so the HUD was
   masked. Its image is not a matched current-image run.
+- The current recipe registers patch 0198 before 0333/0334. Its default
+  stacking branch places native above the Flutter parent; the below-parent
+  path is opt-in. Keep that existing default and do not set a legacy stacking
+  override for FLR-0396.
 - The user supplied a 1280x800 same-frame HUD/vehicle-fragment image. It is
   stored as `work/evidence/FLR-0398-user-provided-composition-reference.jpg`
   (SHA-256 `df30ba433b979f631c552328c0db29ef95a8a6dfefe795e3d5976ddd4b4cd3d3`);
@@ -87,10 +91,11 @@
 
 - [ ] Check Mini QEMU/process/port/socket state and the exact image hashes.
   Use one fresh QEMU through the existing harness; no Mac QEMU.
-- [ ] Verify the exact existing FLR-0049 native-above-parent/model-only
-  presentation control against current source/configuration. Do not infer a
-  HUD-off capability from the screenshot or invent a new flag. Keep existing
-  Shape/Collider visualization controls fixed and record their effective state.
+- [ ] Verify the registered patch-0198 default-above-parent presentation and
+  preserve it; do not set the legacy below-parent override or invent a HUD-off
+  flag. Keep Shape/Collider visualization controls fixed and record their
+  effective state. Confirm from the live QMP ROI whether the HUD is actually
+  absent before calling the frame native-only.
 - [ ] Manually launch the existing Example Demo as the established guest user
   with the saved Sequoia LIT/SUN profile. Keep fixture-specific controls off.
   Confirm the marker reports the constant shader plus linear FLOAT3 parameter

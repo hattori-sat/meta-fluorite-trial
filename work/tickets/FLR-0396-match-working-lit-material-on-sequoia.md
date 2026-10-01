@@ -47,6 +47,11 @@ original PBR materials or embedded textures are fixed.
   QMP with the native surface above the Flutter parent; the HUD was not visible
   in that frame. This is a historical 3D-only visual reference, not a matched
   run on the current candidate image.
+- The current recipe registers the historical native-subsurface stacking
+  patch 0198 before patches 0333/0334. Its default path places the native
+  surface above the Flutter parent; the below-parent path is opt-in. Patches
+  0333/0334 alter only Sequoia material setup, not this stack. FLR-0396 will
+  retain the default path and will not add or set a legacy stacking flag.
 - The user supplied a separate 1280x800 historical frame showing the Flutter
   HUD/Scenes control and red vehicle-like pixels together. Its run/image
   identity is unavailable. The frame also shows `Shapes: On` and
@@ -124,10 +129,10 @@ difference affects output is the test, not a presumed root cause.
 3. The verified bundle reaches the fixed Mini receiver at the exact commit;
    Mini `do_patch`, `do_compile`, and full `agl-ivi-image-flutter` build pass.
 4. Before launch, verify the exact existing native-above-parent/model-only
-   presentation control against FLR-0049 and current source/configuration. Do
-   not invent a new HUD-off switch or substitute a different profile silently.
-   If the historical control cannot be identified on this image, record
-   UNKNOWN and stop before claiming a 3D-only pass.
+   presentation control against FLR-0049 and current source/configuration. The
+   registered 0198 default-above path is the intended control; do not set its
+   legacy below-parent override or invent a new HUD-off switch. Confirm the
+   actual HUD ROI is absent in QMP before calling this gate native-only.
 5. On the resulting exact image, one manual Example Demo run selects Sequoia
    and the LIT/SUN override. QMP captures a complete 1280×800 frame and short
    video while the same Flutter identity is live before and after capture.
