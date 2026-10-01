@@ -1,6 +1,6 @@
 # FLR-0393 — replay the known-positive constant LIT/SUN fixture on the FLR-0391 image
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Created: 2026-10-01
 - Work unit: One bounded runtime control; no source, patch, or image change
@@ -56,7 +56,7 @@ root cause of the Sequoia path.
 | --- | --- |
 | What | Known-positive constant LIT/SUN diagnostic geometry and CPU/GPU HUD |
 | Where | Exact FLR-0391 Mini image, Example Demo 3.32.5, existing runqemu/QMP path |
-| When | One manual app launch, bounded to 60 seconds; QMP capture at the first successful present |
+| When | One manual app launch; observer failed at its 30-second deadline before the roughly 52-second first present |
 | Who | Mini BitBake/image role (no rebuild), guest Flutter role, QMP evidence role |
 | How | Historical fixture flags, no Sequoia selector/override, full-frame QMP plus fixed native/HUD ROIs |
 
@@ -104,32 +104,46 @@ showed Sequoia READY/BOUND but black output.
 
 ### Do
 
-- Working-log links only; see [FLR-0393 working log](../logs/2026-10-01-flr0393.md).
+- The guest used `/usr/bin/timeout 60`; the constant LIT branch marker
+  appeared. The standard `serial-exec` live gate failed with
+  `completion-marker-not-observed`; its implementation has a fixed 30-second
+  command deadline. Focused final counts were 7 present begins, 6 successful
+  returns, and 0 present-boundary completions. The wrapper recorded exit status
+  124 at its 60-second limit; no coredump was found.
+- The guest BusyBox `dmesg` rejected `--ctime`, so no kernel-fault verdict is
+  claimed. QMP still/eight frames were captured only after the app exited;
+  the black frame is forensic-only, not a live-render verdict. The official
+  QMP quit and postflight passed.
+- Focused app output was not persisted outside the guest snapshot before
+  teardown. This retention gap is explicit in the evidence manifest.
 
 ### Check
 
 | Criterion | Expected | Actual | Result |
 | --- | --- | --- | --- |
-| Image and process preflight | Exact hashes; zero stale QEMU/app; guest session ready | Pending | PENDING |
-| Fixture contract | Constant LIT material, SUN, 8 vertices/36 indices, local camera | Pending | PENDING |
-| Native 3D + HUD | Full QMP frame shows both, with separate ROI metrics | Pending | PENDING |
-| Present health | At least eight successful returns; no unmatched present/Oops | Pending | PENDING |
-| Capture liveness | Same PID/UID/start before and after QMP still/video | Pending | PENDING |
-| Teardown | Owned QMP quit; zero processes/socket/ports | Pending | PENDING |
+| Image and process preflight | Exact hashes; zero stale QEMU/app; guest session ready | PASS | PASS |
+| Fixture contract | Constant LIT branch reached; geometry marker contract not independently verified | Partial / UNKNOWN | PARTIAL |
+| Native 3D + HUD | Full live QMP frame shows both, with separate ROI metrics | No live capture; post-exit frame black | UNKNOWN |
+| Present health | At least eight successful returns; no unmatched present/Oops | 7 begins / 6 returns / 0 done; timeout 124 | FAIL |
+| Capture liveness | Same PID/UID/start before and after QMP still/video | App had exited before QMP capture | FAIL |
+| Teardown | Owned QMP quit; zero processes/socket/ports | Official harness and forwarded-port checks passed | PASS |
 
 ### Act
 
-- If fixture+HUD succeeds, keep FLR-0391 Waiting and create a new Sequoia-only
-  follow-up using the exact same image/control profile; do not call the
-  fixture result production acceptance.
-- If the fixture fails or Oopses, prioritize the shared draw/present boundary
-  using existing FLR-0339/0366 evidence and only the first newly observed
-  divergence; do not re-scan textures or alter camera/light.
+- FLR-0393 is Waiting because its 30-second serial observer cannot observe the
+  roughly 52-second first present under the 60-second app cap. This is an
+  observer/process-window mismatch, not a valid visual negative. FLR-0394 owns
+  one direct-SSH live capture with a 180-second app cap, appended-log waiting,
+  QMP still/video while the exact PID is live, and focused evidence persisted
+  to the Mini host before teardown.
+- Do not repeat the same serial-exec gate, rescan textures, or change camera or
+  light. FLR-0391 remains Waiting until a valid live QMP frame narrows the
+  production Sequoia boundary.
 
 ## Visual evidence
 
-- QMP-only screenshot/video and pixel metrics: pending; see the evidence
-  manifest after execution.
+- See [FLR-0393 evidence manifest](../evidence/FLR-0393-0001.md). Its
+  post-exit black frame is explicitly not a fixture-render verdict.
 
 ## Unknowns
 

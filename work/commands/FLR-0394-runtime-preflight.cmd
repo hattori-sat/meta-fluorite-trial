@@ -1,0 +1,16 @@
+set -eu
+test "$(id -u agl-driver)" = 1001
+test -S /run/user/1001/wayland-0
+test -x /usr/bin/flutter-auto
+test -d /usr/share/flutter/toyota-connected-tcna-packages-filament-scene-fluorite-examples-demo/3.32.5/release
+test -x /usr/bin/gdb
+command -v coredumpctl >/dev/null
+command -v journalctl >/dev/null
+command -v timeout >/dev/null
+apps=$(pgrep -u 1001 -x flutter-auto || true)
+set -- $apps
+echo preexisting_flutter_count=$#
+test "$#" -eq 0
+test ! -e /run/user/1001/flr0394-0001-app.log
+test ! -e /run/user/1001/flr0394-0001-app.identity
+echo FLR0394_GUEST_PREFLIGHT=PASS
