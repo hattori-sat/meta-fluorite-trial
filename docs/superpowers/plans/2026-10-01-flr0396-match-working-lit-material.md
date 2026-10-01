@@ -1,8 +1,9 @@
 # FLR-0396 — match the known-positive LIT material on Sequoia
 
 > **Goal:** Make Sequoia use the exact material definition proven by the
-> self-created constant-LIT fixture, then prove or reject Sequoia+HUD visibility
-> from a live QMP frame.
+> self-created constant-LIT fixture, then prove or reject colored Sequoia output
+> in a native-only visual-isolation QMP frame. The separate same-frame
+> Sequoia+HUD composition gate is FLR-0398.
 
 **Ticket:** `work/tickets/FLR-0396-match-working-lit-material-on-sequoia.md`
 **Branch:** `feature-flr-0396-match-working-lit-material` (local only; no push)
@@ -18,8 +19,18 @@
 - Patch 0333 copied the constant LIT source to Sequoia but omitted those two
   material-interface operations. Restoring them is a narrow parity experiment;
   it is not yet a root-cause claim.
-- Keep camera, geometry, model selector, SUN, HUD, composition, and renderer
-  configuration fixed.
+- FLR-0049 Iteration 23 is a historical production-Sequoia native-only visual
+  reference: the native surface was above the Flutter parent, so the HUD was
+  masked. Its image is not a matched current-image run.
+- The user supplied a 1280x800 same-frame HUD/vehicle-fragment image. It is
+  stored as `work/evidence/FLR-0398-user-provided-composition-reference.jpg`
+  (SHA-256 `df30ba433b979f631c552328c0db29ef95a8a6dfefe795e3d5976ddd4b4cd3d3`);
+  run identity is unavailable. `Shapes: On` and `Colliders: Off` are visible;
+  Shape-visualization origin is likely but not proven.
+- Keep camera, geometry, model selector, SUN, Flutter widget tree, and renderer
+  settings fixed. For FLR-0396 only, use the documented native-above-parent
+  presentation so HUD visibility/composition is explicitly not the success
+  criterion.
 
 ## Task 1 — verify the one active ticket and the fixed Devtool source
 
@@ -76,6 +87,10 @@
 
 - [ ] Check Mini QEMU/process/port/socket state and the exact image hashes.
   Use one fresh QEMU through the existing harness; no Mac QEMU.
+- [ ] Verify the exact existing FLR-0049 native-above-parent/model-only
+  presentation control against current source/configuration. Do not infer a
+  HUD-off capability from the screenshot or invent a new flag. Keep existing
+  Shape/Collider visualization controls fixed and record their effective state.
 - [ ] Manually launch the existing Example Demo as the established guest user
   with the saved Sequoia LIT/SUN profile. Keep fixture-specific controls off.
   Confirm the marker reports the constant shader plus linear FLOAT3 parameter
@@ -88,8 +103,9 @@
   successful present, or while the process is live at the first useful READY
   point if the renderer faults first.
 - [ ] Compute fixed Sequoia and HUD ROI metrics and full-frame hashes; visually
-  inspect the complete screenshot. Product pass requires recognizable blue
-  Sequoia and CPU/GPU HUD together—not READY/BOUND alone.
+  inspect the complete screenshot. This gate requires recognizable blue
+  production-Sequoia geometry under native-only presentation. The HUD is
+  expected to be masked; this result cannot pass 2D+3D composition.
 - [ ] Stop the exact Flutter process and QEMU. Independently verify no
   QEMU/runqemu/flutter-auto process, QMP socket, or forwarded-port residue.
 - [ ] Save ignored media outside Git and add a tracked manifest with exact
@@ -106,3 +122,5 @@
   negative/UNKNOWN material-parity experiment and resume FLR-0395's GDB-first
   procedure in its own ticket. Do not add texture/camera/light/composition
   changes here.
+- [ ] If the native-only Sequoia gate passes, FLR-0398 owns a separate same-image
+  test with the Flutter HUD visible and composition active.

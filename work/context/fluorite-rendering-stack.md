@@ -93,6 +93,16 @@ AGL image / packagegroup
 - FLR-0396 tests that exact difference only, using a new Devtool-generated
   patch and a fresh Mini image. Astra judged it the best next controlled
   experiment, while explicitly leaving its causal effect UNKNOWN.
+- The visual gates are intentionally separate: FLR-0396 tests colored
+  production Sequoia with the HUD masked by a verified native-only diagnostic
+  presentation; FLR-0398 will test same-frame Sequoia+HUD composition. The
+  historical native-only FLR-0049 frame and the user's un-attributed
+  HUD+vehicle-fragment photo are not substitutes for current-image acceptance.
+- The user's photo is retained as
+  `work/evidence/FLR-0398-user-provided-composition-reference.jpg`, SHA-256
+  `df30ba433b979f631c552328c0db29ef95a8a6dfefe795e3d5976ddd4b4cd3d3`. It
+  shows `Shapes: On` and `Colliders: Off`; the white wireframe-like lines are
+  likely Shape visualization, while their exact source remains UNKNOWN.
 
 ### Inferences
 
@@ -112,8 +122,10 @@ AGL image / packagegroup
 
 FLR-0396 restores the fixture's FLOAT3 parameter declaration and linear
 instance setter on Sequoia while retaining the constant shader, then builds
-and captures live QMP evidence. FLR-0395 remains Waiting to capture the first
-fault with GDB if the parity test stays black or faults.
+and captures live QMP evidence in a verified native-only presentation. It
+does not test HUD composition. If colored Sequoia passes, FLR-0398 separately
+tests same-frame Sequoia+HUD composition. FLR-0395 remains Waiting to capture
+the first fault with GDB if the parity test stays black or faults.
 
 ## Evidence needed
 
