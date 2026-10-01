@@ -87,6 +87,12 @@ AGL image / packagegroup
   primitives and built it through the Mini. Its live QMP Sequoia ROI was
   black during an unmatched present and FEngine Oops. The binding marker count
   is not a primitive count.
+- Source comparison found one concrete material-interface mismatch: the
+  fixture declares FLOAT3 `color` and sets the instance to the same linear RGB
+  even on its constant-source branch; Sequoia patch 0333 omits both operations.
+- FLR-0396 tests that exact difference only, using a new Devtool-generated
+  patch and a fresh Mini image. Astra judged it the best next controlled
+  experiment, while explicitly leaving its causal effect UNKNOWN.
 
 ### Inferences
 
@@ -104,9 +110,10 @@ AGL image / packagegroup
 
 ### Next bounded discriminator
 
-FLR-0395 captures the first Sequoia fault with GDB armed before Flutter starts
-and records a live QMP frame. It reuses the exact built image and does not
-change material, texture, light, camera, composition, or build state.
+FLR-0396 restores the fixture's FLOAT3 parameter declaration and linear
+instance setter on Sequoia while retaining the constant shader, then builds
+and captures live QMP evidence. FLR-0395 remains Waiting to capture the first
+fault with GDB if the parity test stays black or faults.
 
 ## Evidence needed
 

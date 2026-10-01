@@ -1,6 +1,6 @@
 # FLR-0395 — capture the first fault in the Sequoia known-material run
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Owner: Mini QEMU / guest debugger / QMP evidence roles
 - Created: 2026-10-01
@@ -11,6 +11,14 @@
 - Working log: [FLR-0395 working log](../logs/2026-10-01-flr0395.md)
 - Rootfs SHA-256: 54da69d06c4a5d38c027453f7af4bec7e52b762fa732935766c04bebf533b690
 - Material: existing patch 0333, constant blue LIT expression vec3(0.05, 0.45, 1.0); no new source patch/build in this unit
+
+## Handoff
+
+The user directed a focused material change before the planned GDB run. FLR-0396
+now aligns Sequoia with the exact same-image positive fixture's material
+parameter declaration and instance setter while retaining the constant shader
+source. No FLR-0395 QEMU/GDB attempt has occurred. Resume this ticket only if
+FLR-0396 remains visually negative or faulted.
 
 ## Problem
 

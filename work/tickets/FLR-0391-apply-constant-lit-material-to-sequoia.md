@@ -264,9 +264,10 @@ current-image positive.
   outstanding at both endpoints, and the configured 180-second timeout ended
   with status 124. This proves the fixture path, not Sequoia or full lifecycle
   health. See its evidence manifest.
-- FLR-0395 now captures the first Sequoia fault with GDB armed before launch.
-  Keep this ticket Waiting: patch/build are complete, but the visible
-  Sequoia+HUD acceptance condition remains unmet.
+- FLR-0396 next matches the full constant-LIT fixture material interface by
+  restoring its FLOAT3 parameter declaration and linear instance setter.
+  FLR-0395's GDB-first-fault capture is deferred until that single-variable
+  material-parity test is complete.
 
 ## UNKNOWN
 

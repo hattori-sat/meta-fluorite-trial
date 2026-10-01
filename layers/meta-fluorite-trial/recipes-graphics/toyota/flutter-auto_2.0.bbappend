@@ -234,3 +234,5 @@ SRC_URI:append = " file://0331-flr0383-sequoia-known-unlit-material-devtool.patc
 SRC_URI:append = " file://0332-flr0385-sequoia-known-lit-material-devtool.patch;patchdir=ivi-homescreen-plugins"
 
 SRC_URI:append = " file://0333-flr0391-sequoia-constant-lit-material-devtool.patch;patchdir=ivi-homescreen-plugins"
+
+SRC_URI:append = " file://0334-flr0396-match-working-lit-material-interface-devtool.patch;patchdir=ivi-homescreen-plugins"

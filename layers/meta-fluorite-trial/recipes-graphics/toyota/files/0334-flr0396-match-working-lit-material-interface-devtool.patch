@@ -1,0 +1,36 @@
+From c9ffc87dee884af62099a18f95d7c72642997708 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Thu, 1 Oct 2026 03:40:37 +0000
+Subject: [PATCH] feat: match fixture LIT material interface on Sequoia
+
+---
+ plugins/filament_view/core/systems/derived/model_system.cc | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/plugins/filament_view/core/systems/derived/model_system.cc b/plugins/filament_view/core/systems/derived/model_system.cc
+index 632df03..354369b 100644
+--- a/plugins/filament_view/core/systems/derived/model_system.cc
++++ b/plugins/filament_view/core/systems/derived/model_system.cc
+@@ -646,6 +646,7 @@ void ModelSystem::setupRenderable(
+           "  material.baseColor.rgb = vec3(0.05, 0.45, 1.0);"
+           "}"
+         )
++        .parameter("color", filament::backend::UniformType::FLOAT3)
+         .shading(filamat::MaterialBuilder::Shading::LIT)
+         .targetApi(filamat::MaterialBuilder::TargetApi::ALL)
+         .platform(filamat::MaterialBuilder::Platform::ALL);
+@@ -658,9 +659,13 @@ void ModelSystem::setupRenderable(
+           sequoia_known_lit_material_instance_ =
+             sequoia_known_lit_material_->createInstance();
+           if (sequoia_known_lit_material_instance_ != nullptr) {
++            sequoia_known_lit_material_instance_->setParameter(
++              "color", filament::RgbType::LINEAR,
++              filament::math::float3{0.05f, 0.45f, 1.0f}
++            );
+             spdlog::info(
+               "FLUORITE_SEQUOIA_LIT_MATERIAL_READY source=constant "
+-              "color=(0.05,0.45,1.0)"
++              "parameter=linear-float3 color=(0.05,0.45,1.0)"
+             );
+           }
+         }
