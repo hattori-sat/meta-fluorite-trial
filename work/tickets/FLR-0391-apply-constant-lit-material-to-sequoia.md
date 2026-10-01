@@ -7,7 +7,7 @@
 - Branch: `feature-flr-0391-sequoia-constant-lit`
 - Plan: [FLR-0391 implementation plan](../../docs/superpowers/plans/2026-10-01-flr0391-sequoia-constant-lit.md)
 - Working log: [FLR-0391 working log](../logs/2026-10-01-flr0391.md)
-- Evidence directory: `work/evidence/FLR-0391-0001/`; raw QMP/log evidence remains on the Mini PC.
+- Evidence manifest: [FLR-0391 QMP evidence](../evidence/FLR-0391-0001.md); raw PPMs and logs remain on the Mini PC.
 
 ## Objective
 
@@ -80,22 +80,23 @@ behavior when the override is absent.
   `6946d02d61e637dbaf1eb5cbc52bfe3b40b8882e`. It generated patch 0333 with
   SHA-256 `3df6ff90232a3456e47f9a6d5147f2ac704f8eefe324ddc13c427fdb3c14b079`,
   registered it once after 0332 in the `flutter-auto` bbappend, and refreshed
-  the explicitly authorized project-layer baseline lock. No Mini transfer,
-  image build, or QEMU run has occurred.
+  the explicitly authorized project-layer baseline lock. Layer commit
+  `2c531a8ddce315ab958629d082586ffe85e69c21` was transferred to Mini in one
+  verified bundle; Mini `do_patch`, component compile, and full image build
+  passed. The resulting rootfs SHA-256 is
+  `54da69d06c4a5d38c027453f7af4bec7e52b762fa732935766c04bebf533b690`.
 
 ## Competing hypotheses
 
-1. **Dynamic LIT color input is the relevant difference.** Replacing it with
-   the proven constant blue source while retaining LIT, Sequoia, all-primitive
-   binding, and the known SUN makes the car visible in a live frame with HUD.
-2. **The failure is beyond the material expression.** The constant material
-   binds but the app still has no live visible Sequoia, or its frame/present
-   loop faults before a valid capture; then preserve the GDB/journal evidence
-   and do not claim a material verdict.
-3. **Geometry/camera/placement or composition is the next boundary.** The
-   complete live frame may show the constant-blue geometry outside the
-   historical center ROI or not at all. Only then open a separate ticket for
-   camera/visibility/composition, based on the full QMP image.
+1. **Constant-source LIT can render Sequoia when the present loop is healthy.**
+   The current run reached READY/BOUND but had only one successful present and
+   a repeated FEngine Oops, so this remains UNKNOWN.
+2. **A shared renderer/present fault blocks native pixels despite successful
+   material binding.** The repeated unmatched present/Oops supports this as the
+   leading boundary, but does not prove causality.
+3. **The failure is Sequoia-specific.** A same-image known-positive native
+   fixture control is needed to distinguish it from a general render/present
+   failure.
 
 The alternative to the one-line constant-source discriminator would be to
 change texture loading, camera, or original PBR lighting now. Those alter
@@ -202,30 +203,73 @@ current-image positive.
   baseline lock is refreshed.
 - Repository privacy scan passed; source tree remains clean at the source
   commit, and `git diff --check` plus reverse-apply check passed.
-- **Next:** run checkpoint gate, commit only this ticket's patch,
-  bbappend, lock, and records; bundle to Mini, build there, then run the manual
-  Sequoia/HUD QMP trial. The permanent helper correction is FLR-0392 Inbox.
+- Layer commit `2c531a8ddce315ab958629d082586ffe85e69c21` was transferred in
+  one verified bundle. Mini recipe `do_patch`, `flutter-auto do_compile`,
+  and full `agl-ivi-image-flutter` build passed; all 11,898 image tasks
+  succeeded. Rootfs SHA-256:
+  `54da69d06c4a5d38c027453f7af4bec7e52b762fa732935766c04bebf533b690`.
+- Two manual attempts ran under one 6144-MiB Mini QEMU. Attempt 0001 captured
+  before material READY and is not a material-output verdict. Attempt 0002
+  reached `READY=1 BOUND=24 SUN=1` with `source=constant`, then was captured
+  while the exact Flutter PID/UID/start identity remained unchanged before
+  and after QMP.
+- Attempt 0002 full-frame QMP showed the CPU/GPU HUD and Scenes control over
+  a black native scene. Sequoia ROI `(440,220,400,360)` was 0/144000 changed,
+  edge, or chromatic pixels. The 8-frame QMP review video is identical in all
+  frames. See the linked evidence manifest and screenshot.
+- Runtime health failed: two present begins, one successful return, zero
+  present-done markers; the second call was unmatched. The guest recorded
+  `FEngine::loop` Oops #2 with the same `ff <cf>` instruction bytes seen in
+  prior fault records; the bounded app exited with status 124.
+- The GDB step was attempted only after the bounded app had exited, so the
+  evidence says `GDB=SKIP_no_unmatched_live_process`; no new backtrace was
+  captured. Earlier FLR-0366/0339 results remain the prior knowledge, not a
+  root-cause proof.
+- A remote evidence query first used `rg`, unavailable on Mini, then recovered
+  with focused `grep`. The first postflight call exceeded the wait window
+  without a retained session handle; the same read-only official preflight was
+  rerun and passed.
+- QMP quit and official postflight passed: zero target processes, absent QMP
+  socket, and ports 10930–10932 free. Only QMP screenshot/video media were
+  transferred to the Mac workspace; no rootfs, kernel, or VM disk image was
+  copied.
 
 ### Check
 
 - Patch provenance: PASS (`From` equals source commit; canonical output is
   byte-identical; reverse apply checks against source HEAD; 0333 is registered
   once after 0332; baseline lock refreshed; repository privacy scan passed).
-- Mini `do_patch`/compile/image gates, live Sequoia pixels, HUD coexistence,
-  present health, and teardown: PENDING. No candidate image/runtime result is
-  available to evaluate yet.
+- Mini `do_patch`, compile, and full image build: PASS.
+- Runtime material construction/binding and SUN setup: PASS
+  (`READY=1`, `BOUND=24`, `SUN=1`, `source=constant`).
+- Live PID-bracketed full QMP capture: PASS. The HUD and Scenes control are
+  visible; Sequoia ROI is uniformly black (0/144000 changed, edge, or chromatic
+  pixels), so visible-Sequoia criterion FAILS.
+- Present loop: FAIL (`PRESENT_BEGIN=2`, `PRESENT_RETURN=1`,
+  `PRESENT_DONE=0`, second present unmatched; `FEngine::loop` Oops #2;
+  app status 124).
+- Teardown and image identity: PASS (QMP harness quit, zero residual targets/
+  socket/ports, exact rootfs hash verified).
 
 ### Act
 
-- Pending measured QMP/runtime outcome. If constant LIT is visible, next
-  ticket will remove the diagnostic override only after comparing original
-  Sequoia materials; if it is not visible, use the first live failing boundary
-  to select the next ticket.
+- Keep this ticket Waiting: material patch and runtime test are complete, but
+  its visible Sequoia+HUD acceptance condition did not pass.
+- Do not modify camera, texture path, light, or composition based on this
+  faulted frame. The material marker followed the Oops, while the second
+  present remained unmatched.
+- FLR-0393 now replays the known-positive constant LIT/SUN fixture on this
+  exact image with the HUD. Its result distinguishes a shared current-image
+  render/present regression from a Sequoia-specific path without another
+  build or material change.
 
 ## UNKNOWN
 
-- Whether the constant-source LIT material produces visible Sequoia on the
-  exact current candidate image.
-- Whether the same run's present loop remains healthy through the capture.
+- Whether constant-source LIT produces Sequoia pixels during a healthy present
+  loop on the exact image.
+- Whether the recurring Oops causes the missing native pixels or is only
+  correlated with them.
+- Whether the general constant LIT/SUN fixture still renders with HUD on the
+  exact FLR-0391 image; FLR-0393 owns that control.
 - Whether original Sequoia PBR materials/textures render correctly after this
   diagnostic material is removed.
