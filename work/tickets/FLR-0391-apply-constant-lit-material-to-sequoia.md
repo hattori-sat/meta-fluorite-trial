@@ -1,6 +1,6 @@
 # FLR-0391 — apply the known-positive constant LIT material to Sequoia
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Created: 2026-10-01
 - Predecessors: [FLR-0369 current-image LIT constant-color positive](FLR-0369-lit-hardcoded-material-control.md), [FLR-0385 Sequoia LIT parameter override](FLR-0385-apply-lit-material-to-sequoia.md), [FLR-0389 same-image fixture control](FLR-0389-replay-lit-fixture-correct-marker-current-image.md)
