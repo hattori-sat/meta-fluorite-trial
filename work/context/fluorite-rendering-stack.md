@@ -74,6 +74,40 @@ AGL image / packagegroup
 - assetまたはmaterialがFilament versionにどの程度固定されるか。
 - `$LEGACY_ROOT`のcustom layer snapshotとcurrent build host版の差分。
 
+## Current runtime checkpoint (2026-10-01)
+
+### Facts
+
+- FLR-0394 used the exact rootfs built with Sequoia patch 0333. QMP showed the
+  self-created blue LIT/SUN fixture and CPU/GPU/FPS HUD together. The native
+  ROI contained 119,716 changed/chromatic pixels; the full-frame screenshot,
+  video, checksums, present counters, timeout, and cleanup are indexed in
+  work/evidence/FLR-0394-0001.md.
+- FLR-0391 applied the same constant-blue LIT expression to Sequoia renderable
+  primitives and built it through the Mini. Its live QMP Sequoia ROI was
+  black during an unmatched present and FEngine Oops. The binding marker count
+  is not a primitive count.
+
+### Inferences
+
+- The exact image can render the simple native fixture and HUD; a universal
+  native 3D-output failure is falsified for that fixture path.
+- Production Sequoia remains the unresolved boundary. Matching color
+  expressions do not prove identical material variants or assignment behavior.
+
+### Unknowns
+
+- Whether the Sequoia Oops causes the missing pixels or is correlated.
+- Whether the simple fixture and Sequoia use equivalent generated shader
+  variants.
+- Whether Sequoia becomes visible before the first runtime fault.
+
+### Next bounded discriminator
+
+FLR-0395 captures the first Sequoia fault with GDB armed before Flutter starts
+and records a live QMP frame. It reuses the exact built image and does not
+change material, texture, light, camera, composition, or build state.
+
 ## Evidence needed
 
 - exact Yocto recipeとSRCREVからnative plugin sourceを取得。

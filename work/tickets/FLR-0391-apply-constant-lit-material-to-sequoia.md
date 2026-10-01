@@ -258,10 +258,15 @@ current-image positive.
 - Do not modify camera, texture path, light, or composition based on this
   faulted frame. The material marker followed the Oops, while the second
   present remained unmatched.
-- FLR-0393 now replays the known-positive constant LIT/SUN fixture on this
-  exact image with the HUD. Its result distinguishes a shared current-image
-  render/present regression from a Sequoia-specific path without another
-  build or material change.
+- FLR-0394 completed the exact-image fixture control: a live QMP frame shows
+  the blue self-created LIT/SUN geometry and HUD together. The capture interval
+  advanced 115 present begins and 115 successful returns; one call remained
+  outstanding at both endpoints, and the configured 180-second timeout ended
+  with status 124. This proves the fixture path, not Sequoia or full lifecycle
+  health. See its evidence manifest.
+- FLR-0395 now captures the first Sequoia fault with GDB armed before launch.
+  Keep this ticket Waiting: patch/build are complete, but the visible
+  Sequoia+HUD acceptance condition remains unmet.
 
 ## UNKNOWN
 
@@ -269,7 +274,8 @@ current-image positive.
   loop on the exact image.
 - Whether the recurring Oops causes the missing native pixels or is only
   correlated with them.
-- Whether the general constant LIT/SUN fixture still renders with HUD on the
-  exact FLR-0391 image; FLR-0393 owns that control.
+- FLR-0394 now confirms that the simple constant LIT/SUN fixture and HUD render
+  on the exact FLR-0391 image. Full lifecycle health remains conditional, and
+  Sequoia visibility/fault causality remain UNKNOWN.
 - Whether original Sequoia PBR materials/textures render correctly after this
   diagnostic material is removed.

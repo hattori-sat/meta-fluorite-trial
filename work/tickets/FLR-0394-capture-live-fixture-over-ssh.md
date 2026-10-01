@@ -1,6 +1,6 @@
 # FLR-0394 — capture the current-image LIT fixture while Flutter is live
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Created: 2026-10-01
 - Work unit: One runtime-only live-capture attempt; no source, layer patch, or BitBake build
@@ -12,7 +12,7 @@
 - Qemuboot SHA-256: `58ef9a59af7df24be48b221f252fd7b604e5d968e61766af83b7cf7b8ae5b5f7`
 - Branch: `feature-flr-0394-direct-ssh-live-fixture-capture`
 - Working log: [FLR-0394 working log](../logs/2026-10-01-flr0394.md)
-- Evidence manifest: [FLR-0394 QMP evidence](../evidence/FLR-0394-0001.md) (filled after the bounded run)
+- Evidence manifest: [FLR-0394 QMP evidence](../evidence/FLR-0394-0001.md)
 
 ## Objective
 
@@ -39,8 +39,20 @@ capture/present points to a shared path. Neither result alone proves root cause.
 - **Hypotheses:** (1) the current image's generic fixture still renders and
   Sequoia setup/material is the narrowed boundary; (2) a shared draw/present
   issue also blocks the fixture.
-- **UNKNOWN:** live fixture pixels and healthy repeated presents on the exact
-  `54da69d…` rootfs.
+- **Facts:** run `flr0394-0001` on the exact rootfs captured a blue
+  self-created native fixture and the CPU/GPU HUD in the same live 1280×800
+  QMP frame. The first-present gate and before/after Flutter PID/UID/start
+  bracket passed.
+- **Facts:** during the eight-frame capture interval, present begins and
+  successful returns each advanced by 115. The final focused sample was 433
+  begins / 432 returns (one outstanding); the configured 180-second app
+  timeout ended with status 124. No Oops or coredump appeared in the bounded
+  fault scan.
+- **Inference:** generic native fixture rendering plus HUD works on the exact
+  image containing patch 0333. This narrows, but does not prove, a
+  Sequoia-specific path.
+- **UNKNOWN:** exact capture monotonic timestamp; meaning of the one
+  outstanding present; whether the Sequoia fault causes its black ROI.
 
 ## 4W1H (excluding Why)
 
@@ -89,19 +101,27 @@ it does not change Flutter, material, camera, texture, light, or image contents.
 
 ### Do
 
-- Pending one bounded direct-SSH run; results go in the
-  [working log](../logs/2026-10-01-flr0394.md).
+- Completed one direct-SSH run on the exact image. The live QMP frame shows a
+  centered blue square, CPU/GPU/FPS HUD, and Scenes control; it is not a
+  Sequoia frame. See the [working log](../logs/2026-10-01-flr0394.md) and
+  [evidence manifest](../evidence/FLR-0394-0001.md).
 
 ### Check
 
-- Pending live QMP still/video, fixed ROI metrics, present counts, identity
-  bracket, and teardown.
+| Criterion | Expected | Actual | Evidence | Result |
+| --- | --- | --- | --- | --- |
+| Image/process gate | Exact hashes and one attributable live app | Rootfs/kernel/qemuboot matched; Flutter PID 679, UID 1001, start token 9086, wrapper 674 | Manifest and Mini focused outputs | PASS |
+| Live fixture | QMP frame captured with same app identity before/after | 1280×800 still and eight-frame video captured while identity remained stable | PNG/video hashes in manifest | PASS |
+| Visual outcome | Fixture and CPU/GPU HUD visible together | Blue fixture bbox [467,227,346,346]; HUD and Scenes control visible; no Sequoia | QMP image and fixed ROI metrics | PASS for fixture control only |
+| Runtime health | At least 8 successful presents; no new unmatched present/Oops during capture | Capture interval +115/+115, no Oops; one outstanding remained at both endpoints; bounded app ended by configured timeout 124 | Focused app/present evidence | PASS WITH CONDITIONS |
+| Evidence and cleanup | Raw evidence retained and exact QEMU teardown | PPM/PNG/video retained; QMP quit accepted; no QEMU/Flutter/runqemu, socket, or forwarded-port residue | Manifest and postflight outputs | PASS |
 
 ### Act
 
-- If fixture+HUD is visible with healthy present, create a separate
-  Sequoia-only run on this exact image; no rebuild.
-- If a valid live fixture frame is black, use the existing draw/present history
-  to choose one narrow shared boundary.
-- If the first-present gate fails again, preserve the stop point; never label a
-  post-exit screen a render verdict.
+- Close this ticket as the exact-image fixture discriminator: fixture plus HUD
+  is visibly positive. Do not describe this as Sequoia success or proof that
+  the complete app lifecycle is healthy.
+- [FLR-0395](FLR-0395-capture-first-sequoia-fault.md) runs the already-built
+  Sequoia constant-blue LIT override with GDB armed before Flutter starts,
+  capturing the first fault and a live QMP frame. No new source patch or build
+  is justified until that boundary is observed.
