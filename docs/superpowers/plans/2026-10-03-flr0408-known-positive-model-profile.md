@@ -49,7 +49,7 @@
 - [x] **Step 1: Write the six run-scoped POSIX guest command files.** Built from the already validated FLR-0405 direct-launch/identity/stop contracts; only run-local paths and the explicit historical 0049 model-only profile differ. `scene-gate` is bounded and checks identity/kernel faults; `stop` targets only the saved PID/UID/start token.
 - [x] **Step 2: Add a focused profile regression test.** It checks one-line POSIX syntax, run namespace, the exact historical profile, the required `env -i` allowlist, and exclusion of broad environment/material/camera/readback/input overrides.
 - [x] **Step 3: Run the focused static gates.** Focused test 4/4; all six command files pass `/bin/sh -n`; privacy, file sizes (2,096 files), shell syntax (59 files), canonical guard, `git diff --check`, and runtime checkpoint pass. `make check-markdown` has 11 known historical missing targets outside FLR-0408; no current link fails.
-- [ ] **Step 4: Commit the ticket-scoped profile and records locally.** Stage only the six commands, focused test, this plan, ticket, working log, and TASKS row; use integration-role metadata; do not push.
+- [x] **Step 4: Commit the ticket-scoped profile and records locally.** Initial ticket/plan/profile checkpoint committed as `3e8727d` with integration-role metadata and no push. Follow-up commits remain limited to this FLR-0408 ticket/log/dashboard and evidence manifest.
 
 ### Task 2: Recheck Mini ownership and immutable image before one QEMU
 

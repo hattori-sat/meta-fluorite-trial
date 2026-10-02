@@ -47,6 +47,9 @@ product objective.
   `/run/user/1001/fluorite-0408-0001.*` namespace. Existing `FLR0026_*`
   controls and emitted markers are reused only to reproduce FLR-0049; no new
   legacy path, marker, or control is introduced.
+- Local checkpoint `3e8727d` committed the ticket, plan, six guest commands,
+  focused test, TASKS entry, and initial working log with integration-role
+  metadata; it was not pushed.
 
 ## Inferences
 
@@ -139,6 +142,24 @@ product objective.
   `feature-flr-0408-replay-sequoia-0334` at checkpoint
   `ffafe4394a73d44db2644438338d11c6de089ba3`. No FLR-0408 QEMU or build has
   started; revalidate remote ownership and artifact facts before runtime.
+- The latest read-only Mini preflight confirms one configured
+  `meta-fluorite-trial` layer, qemux86-64, fixed build TMPDIR, active source
+  clean at `6e9878ba7993`, and separate fixed receiver clean at `969d93c331be`.
+  The fixed inbox bundle SHA-256 is
+  `28d6a01916504fb665269b6b3155e3ebbc5b0af35b82a80674a54b3faa4af62e` and
+  advertises the active source commit. No bundle handoff or build is needed.
+- Recomputed rootfs/kernel/qemuboot hashes exactly match the expected 0334
+  values above. QEMU harness and pixel-capture helper hashes match Mac and
+  Mini; the Mini capture helper exposes `capture` and `video`. The qemuboot
+  profile is qemux86-64/ext4 and includes the USB-tablet device.
+- Read-only runtime preflight found no QEMU/runqemu/flutter-auto/BitBake
+  owners, no listener on 10930–10932, no existing 0408 evidence path, about
+  28 GB available RAM, and about 64 GB free under `/mnt/yocto` (92% used).
+- One helper lookup first targeted the configured layer subdirectory rather
+  than the containing Git project root; `sha256sum` stopped on the missing
+  sibling path before any other command ran. `git rev-parse --show-toplevel`
+  resolved the existing repository root, and the corrected read-only helper
+  hash/CLI check passed. No Mini state changed.
 
 ### Check
 
