@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import math
 import os
@@ -32,6 +33,16 @@ PIXEL_CAPTURE = REPO_ROOT / "scripts" / "qemu-pixel-capture.py"
 SERIAL_PORT = 10930
 SERIAL_USER = "root"
 SERIAL_PROMPT = "root@qemux86-64:~# "
+PRESENT_STACK_TIMEOUT_TOKEN = "__FLR0401_GDB_TIMEOUT__"
+PRESENT_STACK_MIN_GDB_SECONDS = 5
+PRESENT_STACK_MAX_GDB_SECONDS = 18
+PRESENT_STACK_KILL_GRACE_SECONDS = 2
+PRESENT_STACK_SERIAL_RETURN_RESERVE_SECONDS = 4
+PRESENT_STACK_IDENTITY_RESERVE_SECONDS = 15
+
+
+class InsufficientPresentStackBudget(RuntimeError):
+    """No GDB attach was started because the fixed run deadline is too near."""
 
 
 @dataclass(frozen=True)
@@ -75,6 +86,7 @@ class Outcome:
 class GuestCommands:
     log_path: str
     identity_path: str
+    present_stack_script_path: str
     preflight: str
     launch: str
     ready: str
@@ -82,7 +94,43 @@ class GuestCommands:
     identity: str
     collect: str
     stop: str
+    present_stack_script: str
+    prepare_present_stack: str
+    cleanup_present_stack: str
     capture_present_stack: str
+
+
+def present_stack_timeouts(remaining_seconds: float) -> tuple[int, float] | None:
+    """Bound guest GDB and host serial waits while reserving a post-attach identity read."""
+    if not math.isfinite(remaining_seconds) or remaining_seconds <= 0:
+        return None
+    guest_seconds = min(
+        PRESENT_STACK_MAX_GDB_SECONDS,
+        math.floor(
+            remaining_seconds
+            - PRESENT_STACK_KILL_GRACE_SECONDS
+            - PRESENT_STACK_SERIAL_RETURN_RESERVE_SECONDS
+            - PRESENT_STACK_IDENTITY_RESERVE_SECONDS
+        ),
+    )
+    if guest_seconds < PRESENT_STACK_MIN_GDB_SECONDS:
+        return None
+    host_seconds = min(
+        24.0,
+        guest_seconds
+        + PRESENT_STACK_KILL_GRACE_SECONDS
+        + PRESENT_STACK_SERIAL_RETURN_RESERVE_SECONDS,
+    )
+    return guest_seconds, host_seconds
+
+
+def render_present_stack_command(command: str, timeout_seconds: int) -> str:
+    """Fill the one bounded GDB timeout in a generated guest command."""
+    if not PRESENT_STACK_MIN_GDB_SECONDS <= timeout_seconds <= PRESENT_STACK_MAX_GDB_SECONDS:
+        raise ValueError("GDB timeout is outside the supported 5..18 second range")
+    if command.count(PRESENT_STACK_TIMEOUT_TOKEN) != 1:
+        raise ValueError("generated GDB command must contain exactly one timeout token")
+    return command.replace(PRESENT_STACK_TIMEOUT_TOKEN, str(timeout_seconds))
 
 
 def evidence_collect_command(log_path: str, run_id: str) -> str:
@@ -149,6 +197,7 @@ def guest_commands(run_id: str, *, launch_mode: str = "gdb-run") -> GuestCommand
     prefix = f"/run/user/1001/{run_id}"
     log_path = f"{prefix}-gdb.log"
     identity_path = f"{prefix}-app.identity"
+    present_stack_script_path = f"{prefix}-present-stack.gdb"
     q = shlex.quote
 
     preflight = (
@@ -161,6 +210,13 @@ def guest_commands(run_id: str, *, launch_mode: str = "gdb-run") -> GuestCommand
         f"test ! -e {q(log_path)}; test ! -e {q(identity_path)}; "
         "echo FLR0399_GUEST_PREFLIGHT=PASS"
     )
+    if launch_mode == "direct":
+        preflight = preflight.replace(
+            "echo FLR0399_GUEST_PREFLIGHT=PASS",
+            "command -v base64 >/dev/null; command -v sha256sum >/dev/null; "
+            f"test ! -e {q(present_stack_script_path)}; "
+            "echo FLR0399_GUEST_PREFLIGHT=PASS",
+        )
 
     inner = (
         f"log={q(log_path)}; "
@@ -181,13 +237,14 @@ def guest_commands(run_id: str, *, launch_mode: str = "gdb-run") -> GuestCommand
     if launch_mode == "direct":
         inner = (
             f"log={q(log_path)}; "
+            "test ! -e \"$log\" && : >\"$log\" || exit 1; "
             "env XDG_RUNTIME_DIR=/run/user/1001 WAYLAND_DISPLAY=wayland-0 "
             "FLR0026_NATIVE_MODEL_MATCH=sequoia FLR0026_NATIVE_MODEL_LIMIT=2 "
             "FLUORITE_SEQUOIA_LIT_MATERIAL_OVERRIDE=1 "
             "FLR0305_PRODUCTION_SCENE_LIGHT=1 "
             "/usr/bin/timeout --signal=TERM --kill-after=2s 150 "
             f"/usr/bin/flutter-auto -b {q(DEMO_BUNDLE)} "
-            ">\"$log\" 2>&1; rc=$?; "
+            ">>\"$log\" 2>&1; rc=$?; "
             "printf '\\nFLR0399_APP_EXIT_STATUS=%s\\n' \"$rc\" >>\"$log\"; "
             "exit \"$rc\""
         )
@@ -276,36 +333,87 @@ def guest_commands(run_id: str, *, launch_mode: str = "gdb-run") -> GuestCommand
         "echo FLR0399_APP_STOP=REQUESTED"
     )
 
-    gdb_program = (
-        "import gdb\n"
-        "threads=[t for t in gdb.selected_inferior().threads() if t.name == 'FEngine::loop']\n"
-        "print('FLR0401_FENGINE_THREAD_COUNT=%d' % len(threads))\n"
-        "expanded=0\n"
-        "for t in threads:\n"
-        " t.switch()\n"
-        " try:\n"
-        "  stack=gdb.execute('bt 8', to_string=True)\n"
-        " except Exception as e:\n"
-        "  print('FLR0401_STACK_ERROR thread=%s error=%s' % (t.num, e))\n"
-        "  continue\n"
-        " print('FLR0401_THREAD=%s name=%s' % (t.num, t.name))\n"
-        " print(stack)\n"
-        " if 'lvp_pipe_sync_wait' in stack and expanded == 0:\n"
-        "  print('FLR0401_EXPANDED_WAIT_THREAD=%s' % t.num)\n"
-        "  print(gdb.execute('bt 24', to_string=True))\n"
-        "  expanded=1"
+    present_stack_script = "\n".join(
+        (
+            "python",
+            "import gdb, os",
+            "pid=gdb.selected_inferior().pid",
+            "expected=(int(os.environ['FLR0401_EXPECTED_PID']),int(os.environ['FLR0401_EXPECTED_UID']),int(os.environ['FLR0401_EXPECTED_START']))",
+            "try:",
+            " status=open('/proc/%d/status'%pid).read()",
+            " uid=int(next(x.split()[1] for x in status.splitlines() if x.startswith('Uid:'))) ",
+            " stat=open('/proc/%d/stat'%pid).read().rsplit(')',1)[1].split()",
+            " comm=open('/proc/%d/comm'%pid).read().strip()",
+            "except Exception as e:",
+            " print('FLR0401_GDB_CAPTURE_RESULT=IDENTITY_UNAVAILABLE error=%s'%e)",
+            " gdb.execute('detach')",
+            " gdb.execute('quit 4')",
+            "if (pid,uid,int(stat[19]))!=expected or comm!='flutter-auto':",
+            " print('FLR0401_GDB_CAPTURE_RESULT=IDENTITY_CHANGED pid=%s uid=%s start=%s comm=%s'%(pid,uid,int(stat[19]),comm))",
+            " gdb.execute('detach')",
+            " gdb.execute('quit 4')",
+            "print('FLR0401_GDB_IDENTITY=PASS pid=%s uid=%s start=%s'%(pid,uid,int(stat[19])))",
+            "end",
+            "sharedlibrary libvulkan_lvp[.]so",
+            "python",
+            "import gdb, re",
+            "threads=[t for t in gdb.selected_inferior().threads() if t.name=='FEngine::loop']",
+            "print('FLR0401_FENGINE_THREAD_COUNT=%d'%len(threads))",
+            "if not threads:",
+            " print('FLR0401_STACK_COLLECTION=NO_MATCHING_THREAD')",
+            " gdb.execute('detach')",
+            " gdb.execute('quit 5')",
+            "good=0; bad=0; expanded=0",
+            "for t in threads:",
+            " t.switch()",
+            " try: stack=gdb.execute('bt 8',to_string=True)",
+            " except Exception as e:",
+            "  print('FLR0401_STACK_ERROR thread=%s error=%s'%(t.num,e)); bad+=1; continue",
+            " if not re.search(r'(?m)^#\\d+',stack):",
+            "  print('FLR0401_STACK_ERROR thread=%s error=no-frames'%t.num); bad+=1; continue",
+            " good+=1; print('FLR0401_THREAD=%s name=%s'%(t.num,t.name)); print(stack)",
+            " if 'lvp_pipe_sync_wait' in stack and not expanded:",
+            "  expanded=1",
+            "  try:",
+            "   more=gdb.execute('bt 24',to_string=True)",
+            "   if not re.search(r'(?m)^#\\d+',more): raise RuntimeError('no frames')",
+            "   print('FLR0401_EXPANDED_WAIT_THREAD=%s'%t.num); print(more)",
+            "  except Exception as e: print('FLR0401_EXPANDED_STACK_ERROR thread=%s error=%s'%(t.num,e)); bad+=1",
+            "if not good:",
+            " print('FLR0401_STACK_COLLECTION=NO_STACK'); gdb.execute('detach'); gdb.execute('quit 6')",
+            "if bad:",
+            " print('FLR0401_STACK_COLLECTION=PARTIAL count=%d errors=%d'%(good,bad)); gdb.execute('detach'); gdb.execute('quit 6')",
+            "print('FLR0401_STACK_COLLECTION=COMPLETE count=%d'%good)",
+            "end",
+            "detach",
+        )
+    ) + "\n"
+    script_sha256 = hashlib.sha256(present_stack_script.encode()).hexdigest()
+    encoded_script = base64.b64encode(present_stack_script.encode()).decode("ascii")
+    prepare_present_stack = (
+        "set -eu; "
+        f"script={q(present_stack_script_path)}; "
+        "test ! -e \"$script\"; "
+        "set -C; "
+        f"printf '%s' {q(encoded_script)} | base64 -d >\"$script\"; "
+        "chmod 600 \"$script\"; "
+        "actual=$(sha256sum \"$script\" | awk '{print $1}'); "
+        f"test \"$actual\" = {script_sha256}; "
+        "printf 'FLR0401_GDB_SCRIPT=READY sha256=%s\\n' \"$actual\""
     )
-    escaped_gdb_program = (
-        gdb_program.replace("\\", "\\\\")
-        .replace('"', '\\"')
-        .replace("\n", "\\n")
+    cleanup_present_stack = (
+        "set -eu; "
+        f"script={q(present_stack_script_path)}; "
+        "if [ -e \"$script\" ]; then rm -f \"$script\"; fi; "
+        "test ! -e \"$script\"; echo FLR0401_GDB_SCRIPT=CLEANED"
     )
-    gdb_python = f'python exec("{escaped_gdb_program}")'
     capture_present_stack = (
         "set -eu; "
-        f"log={q(log_path)}; identity={q(identity_path)}; "
+        f"log={q(log_path)}; identity={q(identity_path)}; script={q(present_stack_script_path)}; "
+        "trap 'rm -f \"$script\"' EXIT; "
         "if [ ! -r \"$log\" ]; then echo FLR0401_GDB_CAPTURE_RESULT=SKIP_LOG; exit 1; fi; "
         "if [ ! -r \"$identity\" ]; then echo FLR0401_GDB_CAPTURE_RESULT=SKIP_IDENTITY; exit 1; fi; "
+        "if [ ! -r \"$script\" ]; then echo FLR0401_GDB_CAPTURE_RESULT=SKIP_SCRIPT; exit 1; fi; "
         "read pid saved_uid saved_start wrapper saved_wrapper_start < \"$identity\"; "
         "case \"$pid:$saved_uid:$saved_start\" in *[!0-9:]*) "
         "echo FLR0401_GDB_CAPTURE_RESULT=INVALID_IDENTITY; exit 1;; esac; "
@@ -322,29 +430,33 @@ def guest_commands(run_id: str, *, launch_mode: str = "gdb-run") -> GuestCommand
         "case \"$begins:$returns\" in *[!0-9:]*) "
         "echo FLR0401_GDB_CAPTURE_RESULT=INVALID_COUNTERS; exit 1;; esac; "
         "if [ \"$begins\" -le \"$returns\" ]; then "
-        "echo FLR0401_GDB_CAPTURE_RESULT=PRESENT_MATCHED; exit 1; fi; "
+        "echo FLR0401_GDB_CAPTURE_RESULT=PRESENT_MATCHED | tee -a \"$log\"; exit 0; fi; "
         "printf 'FLR0401_GDB_CAPTURE_BEGIN pid=%s present_begin=%s present_return=%s\\n' "
         "\"$pid\" \"$begins\" \"$returns\" | tee -a \"$log\"; "
-        "if /usr/bin/timeout --signal=TERM --kill-after=2s 18 "
+        "if FLR0401_EXPECTED_PID=\"$pid\" FLR0401_EXPECTED_UID=\"$saved_uid\" "
+        "FLR0401_EXPECTED_START=\"$saved_start\" "
+        f"/usr/bin/timeout --signal=TERM --kill-after=2s {PRESENT_STACK_TIMEOUT_TOKEN} "
         "/usr/bin/gdb -q --batch --nx "
         "-iex 'set pagination off' -iex 'set confirm off' "
         "-iex 'set print thread-events off' -iex 'set sysroot /' "
         "-iex 'set solib-absolute-prefix /' "
         "-iex 'set solib-search-path /usr/lib:/lib' "
-        "-iex 'set auto-solib-add off' -p \"$pid\" "
-        "-ex 'sharedlibrary libvulkan_lvp[.]so' "
-        f"-ex {q(gdb_python)} -ex 'detach' >>\"$log\" 2>&1; "
+        "-iex 'set auto-solib-add off' -p \"$pid\" -x \"$script\" >>\"$log\" 2>&1; "
         "then rc=0; else rc=$?; fi; "
         "if [ \"$rc\" -eq 0 ]; then result=COMPLETE; "
+        "elif [ \"$rc\" -eq 4 ]; then result=IDENTITY_CHANGED; "
+        "elif [ \"$rc\" -eq 5 ]; then result=NO_MATCHING_THREAD; "
+        "elif [ \"$rc\" -eq 6 ]; then result=STACK_INCOMPLETE; "
         "elif [ \"$rc\" -eq 124 ]; then result=TIMEOUT; "
         "else result=GDB_FAILED; fi; "
         "printf 'FLR0401_GDB_CAPTURE_RESULT=%s rc=%s pid=%s\\n' "
-        "\"$result\" \"$rc\" \"$pid\" | tee -a \"$log\"; exit \"$rc\""
+        "\"$result\" \"$rc\" \"$pid\" | tee -a \"$log\"; exit 0"
     )
 
     commands = GuestCommands(
         log_path=log_path,
         identity_path=identity_path,
+        present_stack_script_path=present_stack_script_path,
         preflight=preflight,
         launch=launch,
         ready=ready,
@@ -352,10 +464,22 @@ def guest_commands(run_id: str, *, launch_mode: str = "gdb-run") -> GuestCommand
         identity=identity,
         collect=collect,
         stop=stop,
+        present_stack_script=present_stack_script,
+        prepare_present_stack=prepare_present_stack,
+        cleanup_present_stack=cleanup_present_stack,
         capture_present_stack=capture_present_stack,
     )
-    if any("\n" in command or len(command) > 4096 for command in commands.__dict__.values() if isinstance(command, str)):
-        raise ValueError("generated guest command exceeds serial-exec contract")
+    oversized_commands = [
+        (name, len(command))
+        for name, command in commands.__dict__.items()
+        if name != "present_stack_script"
+        and isinstance(command, str)
+        and ("\n" in command or len(command) > 4096)
+    ]
+    if oversized_commands:
+        raise ValueError(
+            f"generated guest command exceeds serial-exec contract: {oversized_commands}"
+        )
     return commands
 
 
@@ -457,7 +581,7 @@ def make_state_reader(
             poll_numbers[stage] += 1
             serial_label = state_poll_label(stage, poll_numbers[stage])
             command_stage = stage
-        elif stage.startswith("identity-after-"):
+        elif stage.startswith(("identity-before-", "identity-after-")):
             serial_label = stage
             command_stage = "identity"
         else:
@@ -498,6 +622,7 @@ def run_once(
     *,
     read_state: Callable[[str, float], Sample],
     capture_frame: Callable[[str, Identity, float], None],
+    capture_present_stack: Callable[[Sample, float], None] | None = None,
     preserve_evidence: Callable[[], None],
     teardown: Callable[[], None],
     expected_log_path: str,
@@ -512,7 +637,9 @@ def run_once(
 
     The adapter for each guest-state read is responsible for a bounded,
     single serial-exec request. WAITING never extends the absolute deadline;
-    its first live sample gets one diagnostic capture. Evidence preservation
+    its first live sample gets one diagnostic capture. An optional stack
+    callback runs once after the first live unmatched-Present sample, with
+    identity checks around its QMP still and GDB attach. Evidence preservation
     always precedes the single teardown callback.
     """
     if timeout_seconds <= 0:
@@ -525,23 +652,18 @@ def run_once(
     errors: list[str] = []
     status = "OBSERVER_FAILED"
 
+    def is_identity_stage(stage: str) -> bool:
+        return stage.startswith(("identity-before-", "identity-after-"))
+
     def read(stage: str) -> Sample:
         nonlocal status
         remaining = deadline_at - monotonic()
         if remaining <= 0:
-            status = (
-                "IDENTITY_DEADLINE_EXPIRED"
-                if stage.startswith("identity-after-")
-                else f"{stage.upper()}_DEADLINE_EXPIRED"
-            )
+            status = "IDENTITY_DEADLINE_EXPIRED" if is_identity_stage(stage) else f"{stage.upper()}_DEADLINE_EXPIRED"
             raise TimeoutError(status)
         sample = read_state(stage, remaining)
         if deadline_at - monotonic() <= 0:
-            status = (
-                "IDENTITY_DEADLINE_EXPIRED"
-                if stage.startswith("identity-after-")
-                else f"{stage.upper()}_DEADLINE_EXPIRED"
-            )
+            status = "IDENTITY_DEADLINE_EXPIRED" if is_identity_stage(stage) else f"{stage.upper()}_DEADLINE_EXPIRED"
             raise TimeoutError(status)
         if sample.log_path != expected_log_path:
             status = "LOG_SOURCE_MISMATCH"
@@ -581,6 +703,92 @@ def run_once(
         captures[-1] = CaptureRecord(stage=stage, identity=before.identity, live=True)
         return True
 
+    stack_capture_attempted = False
+
+    def capture_unmatched_present_stack(sample: Sample) -> bool:
+        nonlocal status, stack_capture_attempted
+        if capture_present_stack is None or stack_capture_attempted:
+            return True
+        if sample.state not in {"READY", "WAITING", "PRESENT", "FAULT"}:
+            return True
+        if sample.present_begin <= sample.present_return:
+            return True
+        if sample.identity is None:
+            status = "IDENTITY_MISSING"
+            return False
+        if sample.identity.uid != expected_uid:
+            status = "IDENTITY_UID_MISMATCH"
+            return False
+
+        # Consume the one-shot before any I/O so errors cannot cause a retry.
+        stack_capture_attempted = True
+        try:
+            before = read("identity-before-present-stack")
+        except Exception as exc:
+            if status not in ("LOG_SOURCE_MISMATCH", "LOG_MISSING", "LOG_UNREADABLE"):
+                errors.append(f"present-stack-identity-before:{type(exc).__name__}:{exc}")
+            return False
+        if before.state != "LIVE" or before.identity != sample.identity:
+            status = "POST_EXIT" if before.state == "EXITED" else "IDENTITY_CHANGED"
+            return False
+
+        remaining = deadline_at - monotonic()
+        if remaining <= 0:
+            status = "CAPTURE_DEADLINE_EXPIRED"
+            return False
+        try:
+            capture_frame("PRESENT_UNMATCHED", sample.identity, remaining)
+        except Exception as exc:
+            errors.append(f"present-stack-still:{type(exc).__name__}:{exc}")
+            status = "CAPTURE_FAILED"
+            return False
+        captures.append(
+            CaptureRecord(stage="PRESENT_UNMATCHED", identity=sample.identity, live=False)
+        )
+        if deadline_at - monotonic() <= 0:
+            status = "CAPTURE_DEADLINE_EXPIRED"
+            return False
+        try:
+            after_still = read("identity-after-present-still")
+        except Exception as exc:
+            if status not in ("LOG_SOURCE_MISMATCH", "LOG_MISSING", "LOG_UNREADABLE"):
+                errors.append(f"present-stack-identity-after-still:{type(exc).__name__}:{exc}")
+            return False
+        if after_still.state != "LIVE" or after_still.identity != sample.identity:
+            status = "POST_EXIT" if after_still.state == "EXITED" else "IDENTITY_CHANGED"
+            return False
+        captures[-1] = CaptureRecord(
+            stage="PRESENT_UNMATCHED", identity=sample.identity, live=True
+        )
+
+        remaining = deadline_at - monotonic()
+        if remaining <= 0:
+            status = "PRESENT_STACK_DEADLINE_EXPIRED"
+            return False
+        try:
+            capture_present_stack(sample, remaining)
+        except InsufficientPresentStackBudget as exc:
+            # No guest debugger was launched; preserve a final identity bracket
+            # around the still and continue the observer if time remains.
+            errors.append(f"present-stack-skipped:{type(exc).__name__}:{exc}")
+        except Exception as exc:
+            errors.append(f"present-stack:{type(exc).__name__}:{exc}")
+            # Without the guest's completion marker, a serial operation may
+            # still be running GDB and holding Flutter stopped. Do not issue
+            # another guest read; the outer teardown will quit only this QEMU.
+            status = "PRESENT_STACK_COMPLETION_UNCONFIRMED"
+            return False
+        try:
+            after_stack = read("identity-after-present-stack")
+        except Exception as exc:
+            if status not in ("LOG_SOURCE_MISMATCH", "LOG_MISSING", "LOG_UNREADABLE"):
+                errors.append(f"present-stack-identity-after:{type(exc).__name__}:{exc}")
+            return False
+        if after_stack.state != "LIVE" or after_stack.identity != sample.identity:
+            status = "POST_EXIT" if after_stack.state == "EXITED" else "IDENTITY_CHANGED"
+            return False
+        return True
+
     def observe() -> str:
         nonlocal status
         waiting_captured = False
@@ -592,6 +800,8 @@ def run_once(
                     if not capture_live("WAITING", sample):
                         return None
                     waiting_captured = True
+                if not capture_unmatched_present_stack(sample):
+                    return None
                 remaining = deadline_at - monotonic()
                 if remaining <= 0:
                     status = f"{stage.upper()}_DEADLINE_EXPIRED"
@@ -624,11 +834,15 @@ def run_once(
             return "APP_EXITED_BEFORE_READY"
         if ready.state == "FAULT":
             if capture_live("FAULT", ready):
+                if not capture_unmatched_present_stack(ready):
+                    return status
                 return "FAULT_BEFORE_READY"
             return status
         if ready.state != "READY":
             return "INVALID_READY_SAMPLE"
         if not capture_live("READY", ready):
+            return status
+        if not capture_unmatched_present_stack(ready):
             return status
 
         try:
@@ -646,11 +860,15 @@ def run_once(
             return "APP_EXITED_AFTER_READY"
         if present.state == "FAULT":
             if capture_live("FAULT", present):
+                if not capture_unmatched_present_stack(present):
+                    return status
                 return "FAULT_AFTER_READY"
             return status
         if present.state != "PRESENT":
             return "INVALID_PRESENT_SAMPLE"
         if not capture_live("PRESENT", present):
+            return status
+        if not capture_unmatched_present_stack(present):
             return status
         return "OBSERVED"
 
@@ -1070,7 +1288,14 @@ def observe(args: argparse.Namespace) -> int:
     if not HARNESS.is_file() or not PIXEL_CAPTURE.is_file():
         raise FileNotFoundError("committed runtime harness or QMP capture helper is missing")
 
-    state = {"preserved": False, "teardown": False}
+    state = {
+        "preserved": False,
+        "teardown": False,
+        "present_stack_script_prepare_attempted": False,
+        "present_stack_script_ready": False,
+        "gdb_capture_started": False,
+        "gdb_capture_confirmed": False,
+    }
     teardown_errors: list[str] = []
     teardown_notes: list[str] = []
     deadline = time.monotonic() + args.timeout_seconds
@@ -1094,6 +1319,15 @@ def observe(args: argparse.Namespace) -> int:
         if state["preserved"]:
             return
         state["preserved"] = True
+        if state["gdb_capture_started"] and not state["gdb_capture_confirmed"]:
+            (run_dir / "FLR-0399-guest-serial-safety.log").write_text(
+                "FLR0399_GUEST_SERIAL=SKIPPED_GDB_COMPLETION_UNCONFIRMED\n"
+                "guest evidence collection skipped: GDB completion was not "
+                "confirmed on serial; no further guest serial command will be "
+                "issued, and exact-run QMP quit is the cleanup boundary.\n",
+                encoding="utf-8",
+            )
+            return
         output = serial("collect", commands.collect)
         if "FLR0399_EVIDENCE_COLLECT=PASS" not in output:
             raise RuntimeError("bounded guest evidence marker missing")
@@ -1102,12 +1336,40 @@ def observe(args: argparse.Namespace) -> int:
         if state["teardown"]:
             return
         state["teardown"] = True
-        try:
-            output = serial("stop", commands.stop)
-            if "FLR0399_APP_STOP=" not in output:
-                teardown_notes.append("guest-stop=UNCONFIRMED")
-        except Exception as exc:
-            teardown_notes.append(f"guest-stop=UNAVAILABLE:{type(exc).__name__}")
+        guest_serial_unsafe = (
+            state["gdb_capture_started"] and not state["gdb_capture_confirmed"]
+        )
+        if guest_serial_unsafe:
+            teardown_notes.append("guest-serial=SKIPPED_GDB_COMPLETION_UNCONFIRMED")
+        else:
+            try:
+                output = serial("stop", commands.stop)
+                if "FLR0399_APP_STOP=" not in output:
+                    teardown_notes.append("guest-stop=UNCONFIRMED")
+            except Exception as exc:
+                teardown_notes.append(f"guest-stop=UNAVAILABLE:{type(exc).__name__}")
+        if args.launch_mode == "direct" and state["present_stack_script_ready"]:
+            if guest_serial_unsafe:
+                teardown_notes.append(
+                    "present-stack-script-cleanup=SKIPPED_GDB_COMPLETION_UNCONFIRMED"
+                )
+            else:
+                try:
+                    output = serial(
+                        "present-stack-cleanup",
+                        commands.cleanup_present_stack,
+                        timeout_seconds=15,
+                    )
+                    if "FLR0401_GDB_SCRIPT=CLEANED" not in output:
+                        teardown_notes.append("present-stack-script-cleanup=UNCONFIRMED")
+                except Exception as exc:
+                    teardown_notes.append(
+                        f"present-stack-script-cleanup=UNAVAILABLE:{type(exc).__name__}"
+                    )
+        elif args.launch_mode == "direct" and state["present_stack_script_prepare_attempted"]:
+            teardown_notes.append(
+                "present-stack-script-cleanup=SKIPPED_OWNERSHIP_UNCONFIRMED"
+            )
         if qmp.is_socket():
             try:
                 result = subprocess.run(
@@ -1187,14 +1449,48 @@ def observe(args: argparse.Namespace) -> int:
         launch = serial("launch", commands.launch, timeout_seconds=remaining_budget())
         if "FLR0399_LAUNCH=PASS" not in launch:
             raise RuntimeError("guest launch marker missing")
+        if args.launch_mode == "direct":
+            state["present_stack_script_prepare_attempted"] = True
+            script = serial(
+                "present-stack-script",
+                commands.prepare_present_stack,
+                timeout_seconds=remaining_budget(),
+            )
+            if "FLR0401_GDB_SCRIPT=READY sha256=" not in script:
+                raise RuntimeError("bounded GDB script preparation marker missing")
+            state["present_stack_script_ready"] = True
 
         read_state = make_state_reader(commands, serial)
 
         capture_frame = make_frame_capture(run_dir, qmp, run_id)
 
+        def capture_present_stack(_sample: Sample, remaining: float) -> None:
+            timeouts = present_stack_timeouts(remaining)
+            if timeouts is None:
+                raise InsufficientPresentStackBudget(
+                    "need at least 26 seconds for bounded GDB, serial return, "
+                    "and post-attach identity verification"
+                )
+            guest_timeout, host_timeout = timeouts
+            command = render_present_stack_command(
+                commands.capture_present_stack, guest_timeout
+            )
+            state["gdb_capture_started"] = True
+            output = serial(
+                "present-stack",
+                command,
+                timeout_seconds=min(host_timeout, remaining - PRESENT_STACK_IDENTITY_RESERVE_SECONDS),
+            )
+            if "FLR0401_GDB_CAPTURE_RESULT=" not in output:
+                raise RuntimeError("bounded GDB capture result marker missing")
+            state["gdb_capture_confirmed"] = True
+
         outcome = run_once(
             read_state=read_state,
             capture_frame=capture_frame,
+            capture_present_stack=(
+                capture_present_stack if args.launch_mode == "direct" else None
+            ),
             preserve_evidence=preserve_evidence,
             teardown=teardown,
             expected_log_path=commands.log_path,

@@ -1,12 +1,15 @@
-import ast
+import base64
 import hashlib
+import io
 import os
+import re
 import signal
 import shlex
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -323,7 +326,7 @@ class LiveCaptureControllerTests(unittest.TestCase):
             poll_interval_seconds=2,
         )
 
-        self.assertEqual("PRESENT_DEADLINE_EXPIRED", result.status)
+        self.assertEqual("PRESENT_DEADLINE_EXPIRED", result.status, events)
         self.assertEqual(2, sum(event[0] == "read" and event[1] == "present" for event in events))
         self.assertEqual(
             [("sleep", 2), ("sleep", 1)],
@@ -510,6 +513,306 @@ class LiveCaptureControllerTests(unittest.TestCase):
         self.assertEqual("EVIDENCE_PRESERVE_FAILED", result.status)
         self.assertEqual([("save",), ("teardown",)], events[-2:])
         self.assertEqual(1, sum(event[0] == "teardown" for event in events))
+
+    def test_unmatched_present_stack_is_bracketed_and_still_precedes_gdb(self):
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0401-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("READY", identity, log_path, present_begin=1, present_return=0),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("PRESENT", identity, log_path, present_begin=1, present_return=1),
+                Sample("LIVE", identity, log_path),
+            ]
+        )
+        events = []
+
+        def read_state(stage, remaining):
+            events.append(("read", stage, remaining))
+            return next(samples)
+
+        def capture_frame(stage, _identity, _remaining):
+            events.append(("still", stage))
+
+        def capture_stack(sample, remaining):
+            events.append(("gdb", sample.present_begin, sample.present_return, remaining))
+
+        result = run_once(
+            read_state=read_state,
+            capture_frame=capture_frame,
+            capture_present_stack=capture_stack,
+            preserve_evidence=lambda: events.append(("preserve",)),
+            teardown=lambda: events.append(("teardown",)),
+            expected_log_path=log_path,
+            timeout_seconds=10,
+            monotonic=lambda: 0.0,
+        )
+
+        self.assertEqual("OBSERVED", result.status)
+        self.assertEqual(
+            ["READY", "PRESENT_UNMATCHED", "PRESENT"],
+            [item.stage for item in result.captures],
+        )
+        self.assertTrue(all(item.live for item in result.captures))
+        self.assertEqual(1, sum(event[0] == "gdb" for event in events))
+        self.assertLess(events.index(("still", "PRESENT_UNMATCHED")), next(
+            index for index, event in enumerate(events) if event[0] == "gdb"
+        ))
+        self.assertEqual(
+            [
+                "ready",
+                "identity-after-ready",
+                "identity-before-present-stack",
+                "identity-after-present-still",
+                "identity-after-present-stack",
+                "present",
+                "identity-after-present",
+            ],
+            [event[1] for event in events if event[0] == "read"],
+        )
+        self.assertLess(events.index(("preserve",)), events.index(("teardown",)))
+
+    def test_matched_present_counters_do_not_trigger_stack_capture(self):
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0401-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("READY", identity, log_path, present_begin=1, present_return=1),
+                Sample("LIVE", identity, log_path),
+                Sample("TIMEOUT", None, log_path),
+            ]
+        )
+        callbacks = []
+
+        result = run_once(
+            read_state=lambda _stage, _remaining: next(samples),
+            capture_frame=lambda _stage, _identity, _remaining: None,
+            capture_present_stack=lambda sample, _remaining: callbacks.append(sample),
+            preserve_evidence=lambda: None,
+            teardown=lambda: None,
+            expected_log_path=log_path,
+            timeout_seconds=10,
+            monotonic=lambda: 0.0,
+        )
+
+        self.assertEqual("PRESENT_TIMEOUT", result.status)
+        self.assertEqual([], callbacks)
+
+    def test_missing_or_wrong_uid_identity_never_authorizes_stack_capture(self):
+        log_path = "/run/user/1001/flr0401-0001-gdb.log"
+        cases = (("missing", None), ("wrong uid", Identity(694, 1000, 23470)))
+        for label, identity in cases:
+            with self.subTest(identity=label):
+                callbacks = []
+                result = run_once(
+                    read_state=lambda _stage, _remaining: Sample(
+                        "READY", identity, log_path, present_begin=1, present_return=0
+                    ),
+                    capture_frame=lambda _stage, _identity, _remaining: None,
+                    capture_present_stack=lambda sample, _remaining: callbacks.append(sample),
+                    preserve_evidence=lambda: None,
+                    teardown=lambda: None,
+                    expected_log_path=log_path,
+                    timeout_seconds=10,
+                    monotonic=lambda: 0.0,
+                )
+
+                self.assertEqual([], callbacks)
+                self.assertIn(result.status, {"IDENTITY_MISSING", "IDENTITY_UID_MISMATCH"})
+
+    def test_repeated_unmatched_waiting_samples_trigger_stack_only_once(self):
+        now = [0.0]
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0401-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("READY", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("WAITING", identity, log_path, present_begin=1, present_return=0),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("WAITING", identity, log_path, present_begin=2, present_return=0),
+                Sample("WAITING", identity, log_path, present_begin=3, present_return=0),
+            ]
+        )
+        events = []
+
+        def read_state(stage, _remaining):
+            events.append(("read", stage))
+            return next(samples)
+
+        def sleep(seconds):
+            events.append(("sleep", seconds))
+            now[0] += seconds
+
+        result = run_once(
+            read_state=read_state,
+            capture_frame=lambda stage, _identity, _remaining: events.append(("still", stage)),
+            capture_present_stack=lambda sample, _remaining: events.append(
+                ("gdb", sample.present_begin, sample.present_return)
+            ),
+            preserve_evidence=lambda: events.append(("preserve",)),
+            teardown=lambda: events.append(("teardown",)),
+            expected_log_path=log_path,
+            timeout_seconds=3,
+            monotonic=lambda: now[0],
+            sleep=sleep,
+            poll_interval_seconds=1,
+        )
+
+        self.assertEqual("PRESENT_DEADLINE_EXPIRED", result.status, events)
+        self.assertEqual(1, sum(event[0] == "gdb" for event in events))
+        self.assertEqual(3, sum(event[0] == "read" and event[1] == "present" for event in events))
+        self.assertEqual(1, sum(event[0] == "teardown" for event in events))
+        self.assertLess(events.index(("preserve",)), events.index(("teardown",)))
+
+    def test_deadline_expiry_before_stack_identity_check_prevents_gdb_work(self):
+        now = [0.0]
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0401-0001-gdb.log"
+        callbacks = []
+        reads = []
+
+        def read_state(stage, _remaining):
+            reads.append(stage)
+            return Sample("READY", identity, log_path, present_begin=1, present_return=0)
+
+        def capture_frame(_stage, _identity, _remaining):
+            now[0] = 10.0
+
+        result = run_once(
+            read_state=read_state,
+            capture_frame=capture_frame,
+            capture_present_stack=lambda sample, _remaining: callbacks.append(sample),
+            preserve_evidence=lambda: None,
+            teardown=lambda: None,
+            expected_log_path=log_path,
+            timeout_seconds=10,
+            monotonic=lambda: now[0],
+        )
+
+        self.assertEqual("CAPTURE_DEADLINE_EXPIRED", result.status)
+        self.assertEqual(["ready"], reads)
+        self.assertEqual([], callbacks)
+
+    def test_expired_attach_deadline_does_not_issue_post_attach_guest_read(self):
+        now = [0.0]
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0401-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("READY", identity, log_path, present_begin=1, present_return=0),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+            ]
+        )
+        reads = []
+        callbacks = []
+        events = []
+
+        def read_state(stage, _remaining):
+            reads.append(stage)
+            return next(samples)
+
+        def capture_stack(_sample, _remaining):
+            callbacks.append("started")
+            now[0] = 10.0
+
+        result = run_once(
+            read_state=read_state,
+            capture_frame=lambda _stage, _identity, _remaining: None,
+            capture_present_stack=capture_stack,
+            preserve_evidence=lambda: events.append("preserve"),
+            teardown=lambda: events.append("teardown"),
+            expected_log_path=log_path,
+            timeout_seconds=10,
+            monotonic=lambda: now[0],
+        )
+
+        self.assertEqual("IDENTITY_DEADLINE_EXPIRED", result.status)
+        self.assertEqual(["started"], callbacks)
+        self.assertNotIn("identity-after-present-stack", reads)
+        self.assertEqual(["preserve", "teardown"], events)
+
+    def test_stack_callback_timeout_is_recorded_and_evidence_precedes_teardown(self):
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0401-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("READY", identity, log_path, present_begin=1, present_return=0),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("TIMEOUT", None, log_path),
+            ]
+        )
+        events = []
+
+        def capture_stack(_sample, _remaining):
+            events.append(("gdb",))
+            raise TimeoutError("bounded attach timed out")
+
+        result = run_once(
+            read_state=lambda stage, _remaining: (events.append(("read", stage)), next(samples))[1],
+            capture_frame=lambda stage, _identity, _remaining: events.append(("still", stage)),
+            capture_present_stack=capture_stack,
+            preserve_evidence=lambda: events.append(("preserve",)),
+            teardown=lambda: events.append(("teardown",)),
+            expected_log_path=log_path,
+            timeout_seconds=10,
+            monotonic=lambda: 0.0,
+        )
+
+        self.assertEqual("PRESENT_STACK_COMPLETION_UNCONFIRMED", result.status)
+        self.assertIn("present-stack:TimeoutError:bounded attach timed out", result.errors)
+        self.assertNotIn(("read", "identity-after-present-stack"), events)
+        self.assertEqual(1, sum(event[0] == "teardown" for event in events))
+        self.assertLess(events.index(("preserve",)), events.index(("teardown",)))
+
+    def test_present_stack_deadline_budget_stops_guest_gdb_before_identity_reserve(self):
+        self.assertEqual((18, 24.0), live_capture.present_stack_timeouts(120.0))
+        self.assertEqual((5, 11.0), live_capture.present_stack_timeouts(26.0))
+        self.assertIsNone(live_capture.present_stack_timeouts(25.9))
+        self.assertIsNone(live_capture.present_stack_timeouts(float("inf")))
+
+    def test_unconfirmed_gdb_result_stops_all_later_guest_serial_reads(self):
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0401-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("READY", identity, log_path, present_begin=1, present_return=0),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("LIVE", identity, log_path),
+            ]
+        )
+        events = []
+
+        def capture_stack(_sample, _remaining):
+            events.append(("gdb-started",))
+            raise TimeoutError("serial did not confirm guest GDB completion")
+
+        result = run_once(
+            read_state=lambda stage, _remaining: (events.append(("read", stage)), next(samples))[1],
+            capture_frame=lambda stage, _identity, _remaining: events.append(("still", stage)),
+            capture_present_stack=capture_stack,
+            preserve_evidence=lambda: events.append(("preserve",)),
+            teardown=lambda: events.append(("teardown",)),
+            expected_log_path=log_path,
+            timeout_seconds=10,
+            monotonic=lambda: 0.0,
+        )
+
+        self.assertEqual("PRESENT_STACK_COMPLETION_UNCONFIRMED", result.status)
+        self.assertNotIn(("read", "identity-after-present-stack"), events)
+        self.assertEqual([("preserve",), ("teardown",)], events[-2:])
 
 
 class GuestCommandContractTests(unittest.TestCase):
@@ -1078,7 +1381,11 @@ class GuestCommandContractTests(unittest.TestCase):
                 commands = guest_commands(run_id, launch_mode=launch_mode)
                 for shell in ("bash", "sh"):
                     for name, command in commands.__dict__.items():
-                        if not isinstance(command, str) or name.endswith("_path"):
+                        if (
+                            not isinstance(command, str)
+                            or name.endswith("_path")
+                            or name == "present_stack_script"
+                        ):
                             continue
                         with self.subTest(
                             run_id=run_id,
@@ -1121,12 +1428,17 @@ class GuestCommandContractTests(unittest.TestCase):
             "fluorite-examples-demo/3.32.5/release",
             launch,
         )
-        self.assertIn('>"$log" 2>&1', launch)
+        self.assertIn('test ! -e "$log" && : >"$log" || exit 1;', launch)
+        self.assertIn('>>"$log" 2>&1', launch)
+        self.assertNotIn('>"$log" 2>&1', launch.replace('>>"$log" 2>&1', ""))
         self.assertIn("printf '%s %s %s %s %s\\n'", launch)
         self.assertIn('"$pid" "$uid" "$start"', launch)
         self.assertNotIn("/usr/bin/gdb -q --batch", launch)
         self.assertNotIn("--args", launch)
         self.assertIn(commands.log_path, commands.ready)
+        self.assertIn("command -v base64", commands.preflight)
+        self.assertIn("command -v sha256sum", commands.preflight)
+        self.assertIn(commands.present_stack_script_path, commands.preflight)
 
     def test_present_stack_command_is_identity_and_unmatched_gated_and_bounded(self):
         commands = guest_commands("flr0401-0001", launch_mode="direct")
@@ -1134,6 +1446,25 @@ class GuestCommandContractTests(unittest.TestCase):
 
         self.assertIn(commands.log_path, command)
         self.assertIn(commands.identity_path, command)
+        self.assertIn(commands.present_stack_script_path, command)
+        self.assertIn('trap \'rm -f "$script"\' EXIT', command)
+        self.assertIn(commands.present_stack_script_path, commands.prepare_present_stack)
+        self.assertIn(commands.present_stack_script_path, commands.cleanup_present_stack)
+        encoded = re.search(
+            r"printf '%s' ([A-Za-z0-9+/=]+) \| base64 -d",
+            commands.prepare_present_stack,
+        )
+        self.assertIsNotNone(encoded)
+        self.assertEqual(
+            commands.present_stack_script.encode(),
+            base64.b64decode(encoded.group(1)),
+        )
+        self.assertIn("FLR0401_GDB_SCRIPT=READY sha256=", commands.prepare_present_stack)
+        self.assertIn(
+            hashlib.sha256(commands.present_stack_script.encode()).hexdigest(),
+            commands.prepare_present_stack,
+        )
+        self.assertIn("FLR0401_GDB_SCRIPT=CLEANED", commands.cleanup_present_stack)
         self.assertIn('read pid saved_uid saved_start wrapper saved_wrapper_start', command)
         self.assertIn('uid=$(awk', command)
         self.assertIn('start=$(awk', command)
@@ -1145,7 +1476,19 @@ class GuestCommandContractTests(unittest.TestCase):
             command.index('if [ "$begins" -le "$returns" ]'),
             command.index("/usr/bin/gdb"),
         )
-        self.assertIn('timeout --signal=TERM --kill-after=2s 18', command)
+        self.assertIn(
+            'timeout --signal=TERM --kill-after=2s __FLR0401_GDB_TIMEOUT__',
+            command,
+        )
+        rendered_short = live_capture.render_present_stack_command(command, 5)
+        rendered_max = live_capture.render_present_stack_command(command, 18)
+        self.assertIn('timeout --signal=TERM --kill-after=2s 5', rendered_short)
+        self.assertIn('timeout --signal=TERM --kill-after=2s 18', rendered_max)
+        for rendered in (rendered_short, rendered_max):
+            self.assertEqual(0, subprocess.run(["sh", "-n"], input=rendered, text=True).returncode)
+        self.assertIn('FLR0401_EXPECTED_PID="$pid"', command)
+        self.assertIn('FLR0401_EXPECTED_UID="$saved_uid"', command)
+        self.assertIn('FLR0401_EXPECTED_START="$saved_start"', command)
         gdb_begin = command.index("/usr/bin/gdb ")
         gdb_end = command.index(' >>"$log" 2>&1', gdb_begin)
         gdb_argv = shlex.split(command[gdb_begin:gdb_end])
@@ -1157,27 +1500,277 @@ class GuestCommandContractTests(unittest.TestCase):
         self.assertIn("set solib-absolute-prefix /", gdb_argv)
         self.assertIn("set solib-search-path /usr/lib:/lib", gdb_argv)
         self.assertIn("set auto-solib-add off", gdb_argv)
-        gdb_commands = [
-            gdb_argv[index + 1]
-            for index, token in enumerate(gdb_argv[:-1])
-            if token == "-ex"
-        ]
-        self.assertEqual("sharedlibrary libvulkan_lvp[.]so", gdb_commands[0])
-        self.assertEqual("detach", gdb_commands[-1])
-        python_command = gdb_commands[1]
-        self.assertTrue(python_command.startswith("python exec(\""))
-        self.assertTrue(python_command.endswith("\")"))
-        stack_source = ast.literal_eval(python_command[len("python exec(") : -1])
-        self.assertIn("t.name == 'FEngine::loop'", stack_source)
+        self.assertEqual("$pid", gdb_argv[gdb_argv.index("-p") + 1])
+        self.assertEqual("$script", gdb_argv[gdb_argv.index("-x") + 1])
+        self.assertGreater(gdb_argv.index("-x"), gdb_argv.index("-p"))
+        python_blocks = []
+        active_block = None
+        for line in commands.present_stack_script.splitlines():
+            if active_block is None and line == "python":
+                active_block = []
+            elif active_block is not None and line == "end":
+                python_blocks.append("\n".join(active_block))
+                active_block = None
+            elif active_block is not None:
+                active_block.append(line)
+        self.assertIsNone(active_block)
+        self.assertEqual(2, len(python_blocks))
+        for block in python_blocks:
+            compile(block, "<generated-gdb-python>", "exec")
+        identity_source, stack_source = python_blocks
+        self.assertIn("gdb.selected_inferior().pid", identity_source)
+        self.assertIn("FLR0401_EXPECTED_PID", identity_source)
+        self.assertIn("/proc/%d/stat", identity_source)
+        self.assertIn("FLR0401_EXPECTED_START", identity_source)
+        self.assertIn("comm", identity_source)
+        self.assertIn("gdb.execute('quit 4')", identity_source)
+        self.assertLess(
+            commands.present_stack_script.index("gdb.selected_inferior().pid"),
+            commands.present_stack_script.index("sharedlibrary libvulkan_lvp[.]so"),
+        )
+        self.assertIn("t.name=='FEngine::loop'", stack_source)
         self.assertIn("gdb.execute('bt 8'", stack_source)
         self.assertIn("'lvp_pipe_sync_wait' in stack", stack_source)
         self.assertIn("gdb.execute('bt 24'", stack_source)
+        self.assertIn("FLR0401_STACK_COLLECTION=NO_MATCHING_THREAD", stack_source)
+        self.assertIn("FLR0401_STACK_COLLECTION=PARTIAL", stack_source)
+        self.assertIn("FLR0401_STACK_COLLECTION=COMPLETE", stack_source)
         self.assertNotIn("thread apply all", stack_source)
         self.assertIn('>>"$log" 2>&1', command)
+        self.assertIn('elif [ "$rc" -eq 4 ]; then result=IDENTITY_CHANGED;', command)
+        self.assertIn('elif [ "$rc" -eq 5 ]; then result=NO_MATCHING_THREAD;', command)
+        self.assertIn('elif [ "$rc" -eq 6 ]; then result=STACK_INCOMPLETE;', command)
         self.assertIn("FLR0401_GDB_CAPTURE_RESULT=", command)
         self.assertNotIn("\n", command)
         self.assertLessEqual(len(command), 4096)
         self.assertLessEqual(len(wrap_serial_child_command(command)), 4096)
+        self.assertLessEqual(len(commands.prepare_present_stack), 4096)
+        self.assertLessEqual(
+            len(wrap_serial_child_command(commands.prepare_present_stack)), 4096
+        )
+
+    def test_nonzero_gdb_diagnostic_returns_completed_serial_command_with_marker(self):
+        run_id = "flr0401-0099"
+        commands = guest_commands(run_id, launch_mode="direct")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            guest_root = root / "guest"
+            guest_run = guest_root / "run/user/1001"
+            proc_root = root / "proc"
+            tools = root / "bin"
+            guest_run.mkdir(parents=True)
+            proc = proc_root / "694"
+            proc.mkdir(parents=True)
+            tools.mkdir()
+            (guest_run / f"{run_id}-gdb.log").write_text(
+                "FLR0026_VK_QUEUE_PRESENT_BEGIN\n", encoding="utf-8"
+            )
+            (guest_run / f"{run_id}-app.identity").write_text(
+                "694 1001 23470 0 0\n", encoding="utf-8"
+            )
+            (guest_run / f"{run_id}-present-stack.gdb").write_text(
+                "prepared gdb script\n", encoding="utf-8"
+            )
+            (proc / "comm").write_text("flutter-auto\n", encoding="utf-8")
+            (proc / "status").write_text(
+                "Name:\tflutter-auto\nUid:\t1001\t1001\t1001\t1001\n",
+                encoding="utf-8",
+            )
+            stat_fields = ["S", *(["0"] * 18), "23470"]
+            (proc / "stat").write_text(
+                f"694 (flutter-auto) {' '.join(stat_fields)}\n", encoding="utf-8"
+            )
+            timeout = tools / "timeout"
+            timeout.write_text(
+                "#!/bin/sh\n"
+                "[ \"$1\" = --signal=TERM ] && shift\n"
+                "[ \"$1\" = --kill-after=2s ] && shift\n"
+                "shift\n"
+                "exec \"$@\"\n",
+                encoding="utf-8",
+            )
+            timeout.chmod(0o755)
+            gdb = tools / "gdb"
+            gdb_called = root / "gdb-called"
+            gdb.write_text(
+                f"#!/bin/sh\nprintf called >{shlex.quote(str(gdb_called))}\nexit 5\n",
+                encoding="utf-8",
+            )
+            gdb.chmod(0o755)
+
+            command = live_capture.render_present_stack_command(
+                commands.capture_present_stack, 5
+            )
+            command = command.replace("/run/user/1001", str(guest_run))
+            command = command.replace("/proc/", f"{proc_root}/")
+            command = command.replace("/usr/bin/timeout", str(timeout))
+            command = command.replace("/usr/bin/gdb", str(gdb))
+            result = subprocess.run(
+                ["sh", "-c", command], capture_output=True, text=True, check=False
+            )
+
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn(
+                "FLR0401_GDB_CAPTURE_RESULT=NO_MATCHING_THREAD rc=5 pid=694",
+                result.stdout,
+            )
+            self.assertIn(
+                "FLR0401_GDB_CAPTURE_RESULT=NO_MATCHING_THREAD rc=5 pid=694",
+                (guest_run / f"{run_id}-gdb.log").read_text(),
+            )
+            self.assertTrue(gdb_called.exists())
+            self.assertFalse((guest_run / f"{run_id}-present-stack.gdb").exists())
+
+            (guest_run / f"{run_id}-gdb.log").write_text(
+                "FLR0026_VK_QUEUE_PRESENT_BEGIN\nFLR0026_VK_QUEUE_PRESENT result=0\n",
+                encoding="utf-8",
+            )
+            (guest_run / f"{run_id}-present-stack.gdb").write_text(
+                "prepared gdb script\n", encoding="utf-8"
+            )
+            gdb_called.unlink()
+            matched = subprocess.run(
+                ["sh", "-c", command], capture_output=True, text=True, check=False
+            )
+
+            self.assertEqual(0, matched.returncode, matched.stderr)
+            self.assertIn("FLR0401_GDB_CAPTURE_RESULT=PRESENT_MATCHED", matched.stdout)
+            self.assertIn(
+                "FLR0401_GDB_CAPTURE_RESULT=PRESENT_MATCHED",
+                (guest_run / f"{run_id}-gdb.log").read_text(),
+            )
+            self.assertFalse(gdb_called.exists())
+            self.assertFalse((guest_run / f"{run_id}-present-stack.gdb").exists())
+
+    def test_stack_script_never_reports_complete_without_a_collected_frame(self):
+        commands = guest_commands("flr0401-0001", launch_mode="direct")
+        blocks = []
+        active = None
+        for line in commands.present_stack_script.splitlines():
+            if active is None and line == "python":
+                active = []
+            elif active is not None and line == "end":
+                blocks.append("\n".join(active))
+                active = None
+            elif active is not None:
+                active.append(line)
+        stack_source = blocks[1]
+
+        class GdbQuit(Exception):
+            pass
+
+        class Thread:
+            num = 1
+            name = "FEngine::loop"
+
+            def switch(self):
+                return None
+
+        def evaluate(threads, stack_output):
+            def execute(command, to_string=False):
+                if command == "bt 8":
+                    if isinstance(stack_output, Exception):
+                        raise stack_output
+                    return stack_output
+                if command.startswith("quit "):
+                    raise GdbQuit(command)
+                return ""
+
+            fake_gdb = SimpleNamespace(
+                selected_inferior=lambda: SimpleNamespace(threads=lambda: threads),
+                execute=execute,
+            )
+            output = io.StringIO()
+            with mock.patch.dict(sys.modules, {"gdb": fake_gdb}):
+                with redirect_stdout(output):
+                    try:
+                        exec(stack_source, {})
+                    except GdbQuit as exc:
+                        return str(exc), output.getvalue()
+            return "returned", output.getvalue()
+
+        no_threads_exit, no_threads_output = evaluate([], "#0 unused\n")
+        no_frame_exit, no_frame_output = evaluate([Thread()], "No stack.\n")
+        command_error_exit, command_error_output = evaluate(
+            [Thread()], RuntimeError("backtrace unavailable")
+        )
+        complete_exit, complete_output = evaluate([Thread()], "#0 0x1234 in frame\n")
+
+        self.assertEqual("quit 5", no_threads_exit)
+        self.assertIn("FLR0401_STACK_COLLECTION=NO_MATCHING_THREAD", no_threads_output)
+        self.assertEqual("quit 6", no_frame_exit)
+        self.assertIn("FLR0401_STACK_COLLECTION=NO_STACK", no_frame_output)
+        self.assertEqual("quit 6", command_error_exit)
+        self.assertIn("FLR0401_STACK_COLLECTION=NO_STACK", command_error_output)
+        self.assertNotIn("FLR0401_STACK_COLLECTION=COMPLETE", no_threads_output)
+        self.assertNotIn("FLR0401_STACK_COLLECTION=COMPLETE", no_frame_output)
+        self.assertNotIn("FLR0401_STACK_COLLECTION=COMPLETE", command_error_output)
+        self.assertEqual("returned", complete_exit)
+        self.assertIn("FLR0401_STACK_COLLECTION=COMPLETE count=1", complete_output)
+
+    def test_gdb_identity_script_rejects_a_reused_pid_before_stack_inspection(self):
+        commands = guest_commands("flr0401-0001", launch_mode="direct")
+        identity_source = []
+        active = False
+        for line in commands.present_stack_script.splitlines():
+            if not active and line == "python":
+                active = True
+                continue
+            if active and line == "end":
+                break
+            if active:
+                identity_source.append(line)
+        source = "\n".join(identity_source)
+
+        class GdbQuit(Exception):
+            pass
+
+        def run(saved_start, actual_start):
+            calls = []
+            fake_gdb = SimpleNamespace(
+                selected_inferior=lambda: SimpleNamespace(pid=694),
+                execute=lambda command, **_kwargs: (
+                    calls.append(command),
+                    (_ for _ in ()).throw(GdbQuit(command))
+                    if command.startswith("quit ")
+                    else "",
+                )[1],
+            )
+            stat_fields = ["S", *("0" for _ in range(18)), str(actual_start)]
+            proc_files = {
+                "/proc/694/status": "Name:\tflutter-auto\nUid:\t1001\t1001\t1001\t1001\n",
+                "/proc/694/stat": f"694 (flutter-auto) {' '.join(stat_fields)}\n",
+                "/proc/694/comm": "flutter-auto\n",
+            }
+
+            def open_proc(path, *_args, **_kwargs):
+                return io.StringIO(proc_files[path])
+
+            output = io.StringIO()
+            environment = {
+                "FLR0401_EXPECTED_PID": "694",
+                "FLR0401_EXPECTED_UID": "1001",
+                "FLR0401_EXPECTED_START": str(saved_start),
+            }
+            with mock.patch.dict(sys.modules, {"gdb": fake_gdb}):
+                with mock.patch.dict(os.environ, environment):
+                    with mock.patch("builtins.open", side_effect=open_proc):
+                        with redirect_stdout(output):
+                            try:
+                                exec(source, {})
+                            except GdbQuit as exc:
+                                return str(exc), output.getvalue(), calls
+            return "returned", output.getvalue(), calls
+
+        same_exit, same_output, same_calls = run(23470, 23470)
+        reused_exit, reused_output, reused_calls = run(23470, 23471)
+
+        self.assertEqual("returned", same_exit)
+        self.assertIn("FLR0401_GDB_IDENTITY=PASS", same_output)
+        self.assertEqual("quit 4", reused_exit)
+        self.assertIn("FLR0401_GDB_CAPTURE_RESULT=IDENTITY_CHANGED", reused_output)
+        self.assertEqual(["detach", "quit 4"], reused_calls)
+        self.assertNotIn("detach", same_calls)
 
     def test_observe_cli_accepts_and_passes_the_direct_launch_mode(self):
         with mock.patch.object(live_capture, "observe", return_value=0) as observer:
@@ -1219,6 +1812,258 @@ class GuestCommandContractTests(unittest.TestCase):
         command_builder.assert_called_once_with(
             "flr0401-0001", launch_mode="direct"
         )
+
+    def test_direct_observer_prepares_and_cleans_the_run_scoped_gdb_script(self):
+        run_id = "flr0401-0002"
+        with tempfile.TemporaryDirectory() as evidence_root:
+            run_dir = Path(evidence_root) / run_id / "qemu"
+            run_dir.mkdir(parents=True)
+            qmp = run_dir / "qmp.sock"
+            commands = guest_commands(run_id, launch_mode="direct")
+            args = SimpleNamespace(
+                run_id=run_id,
+                launch_mode="direct",
+                evidence_root=Path(evidence_root),
+                run_dir=run_dir,
+                qmp=qmp,
+                serial_port=5555,
+                timeout_seconds=30.0,
+            )
+            serial_calls = []
+            responses = {
+                "preflight": "FLR0399_GUEST_PREFLIGHT=PASS\n",
+                "launch": "FLR0399_LAUNCH=PASS\n",
+                "present-stack-script": "FLR0401_GDB_SCRIPT=READY sha256=test\n",
+                "ready-001": f"FLR0399_STATE=TIMEOUT LOG_PATH={commands.log_path}\n",
+                "collect": "FLR0399_EVIDENCE_COLLECT=PASS\n",
+                "stop": "FLR0399_APP_STOP=NOT_LAUNCHED\n",
+                "present-stack-cleanup": "FLR0401_GDB_SCRIPT=CLEANED\n",
+            }
+
+            def serial_exec(*, label, command, **_kwargs):
+                serial_calls.append((label, command))
+                return responses[label]
+
+            with mock.patch.object(Path, "is_socket", return_value=True):
+                with mock.patch.object(live_capture, "_serial_exec", side_effect=serial_exec):
+                    with mock.patch.object(live_capture, "_capture_qmp"):
+                        with mock.patch.object(live_capture, "verify_postflight", return_value=()):
+                            with mock.patch.object(
+                                live_capture.subprocess,
+                                "run",
+                                return_value=SimpleNamespace(returncode=0, stdout="", stderr=""),
+                            ):
+                                with redirect_stdout(io.StringIO()):
+                                    result = live_capture.observe(args)
+        labels = [label for label, _command in serial_calls]
+        self.assertEqual(1, result)
+        self.assertLess(labels.index("launch"), labels.index("present-stack-script"))
+        self.assertLess(labels.index("present-stack-script"), labels.index("ready-001"))
+        self.assertLess(labels.index("stop"), labels.index("present-stack-cleanup"))
+        self.assertIn(commands.prepare_present_stack, [command for _, command in serial_calls])
+        self.assertIn(commands.cleanup_present_stack, [command for _, command in serial_calls])
+
+    def test_direct_observer_never_cleans_a_script_when_preflight_rejects_it(self):
+        run_id = "flr0401-0003"
+        with tempfile.TemporaryDirectory() as evidence_root:
+            run_dir = Path(evidence_root) / run_id / "qemu"
+            run_dir.mkdir(parents=True)
+            args = SimpleNamespace(
+                run_id=run_id,
+                launch_mode="direct",
+                evidence_root=Path(evidence_root),
+                run_dir=run_dir,
+                qmp=run_dir / "qmp.sock",
+                serial_port=5555,
+                timeout_seconds=30.0,
+            )
+            serial_calls = []
+
+            def serial_exec(*, label, **_kwargs):
+                serial_calls.append(label)
+                if label == "preflight":
+                    return "FLR0399_GUEST_PREFLIGHT=FAIL existing-script\n"
+                if label == "collect":
+                    return "FLR0399_EVIDENCE_COLLECT=PASS\n"
+                if label == "stop":
+                    return "FLR0399_APP_STOP=NOT_LAUNCHED\n"
+                if label == "present-stack-cleanup":
+                    return "FLR0401_GDB_SCRIPT=CLEANED\n"
+                raise AssertionError(f"unexpected serial command: {label}")
+
+            with mock.patch.object(Path, "is_socket", return_value=True):
+                with mock.patch.object(live_capture, "_serial_exec", side_effect=serial_exec):
+                    with mock.patch.object(live_capture, "_capture_qmp"):
+                        with mock.patch.object(live_capture, "verify_postflight", return_value=()):
+                            with mock.patch.object(
+                                live_capture.subprocess,
+                                "run",
+                                return_value=SimpleNamespace(returncode=0, stdout="", stderr=""),
+                            ):
+                                with redirect_stdout(io.StringIO()):
+                                    result = live_capture.observe(args)
+
+        self.assertEqual(1, result)
+        self.assertEqual(["preflight", "collect", "stop"], serial_calls)
+        self.assertNotIn("present-stack-script", serial_calls)
+        self.assertNotIn("present-stack-cleanup", serial_calls)
+
+    def test_unconfirmed_guest_gdb_completion_skips_guest_serial_and_quits_owned_qemu(self):
+        run_id = "flr0401-0004"
+        with tempfile.TemporaryDirectory() as evidence_root:
+            run_dir = Path(evidence_root) / run_id / "qemu"
+            run_dir.mkdir(parents=True)
+            commands = guest_commands(run_id, launch_mode="direct")
+            args = SimpleNamespace(
+                run_id=run_id,
+                launch_mode="direct",
+                evidence_root=Path(evidence_root),
+                run_dir=run_dir,
+                qmp=run_dir / "qmp.sock",
+                serial_port=5555,
+                timeout_seconds=120.0,
+            )
+            live = (
+                f"FLR0399_STATE=LIVE PID=694 UID=1001 START=23470 "
+                f"LOG_PATH={commands.log_path}\n"
+            )
+            ready = (
+                f"FLR0399_STATE=READY PID=694 UID=1001 START=23470 READY=1 "
+                f"PRESENT_BEGIN=1 PRESENT_RETURN=0 SUN=1 LOG_PATH={commands.log_path}\n"
+            )
+            serial_calls = []
+
+            def serial_exec(*, label, **_kwargs):
+                serial_calls.append(label)
+                if label == "preflight":
+                    return "FLR0399_GUEST_PREFLIGHT=PASS\n"
+                if label == "launch":
+                    return "FLR0399_LAUNCH=PASS\n"
+                if label == "present-stack-script":
+                    return "FLR0401_GDB_SCRIPT=READY sha256=fixture\n"
+                if label == "ready-001":
+                    return ready
+                if label in {
+                    "identity-after-ready",
+                    "identity-before-present-stack",
+                    "identity-after-present-still",
+                }:
+                    return live
+                if label == "present-stack":
+                    raise TimeoutError("serial GDB completion marker unavailable")
+                raise AssertionError(f"guest serial command continued after GDB uncertainty: {label}")
+
+            with mock.patch.object(Path, "is_socket", return_value=True):
+                with mock.patch.object(live_capture, "_serial_exec", side_effect=serial_exec):
+                    with mock.patch.object(live_capture, "_capture_qmp"):
+                        with mock.patch.object(live_capture, "verify_postflight", return_value=()):
+                            with mock.patch.object(
+                                live_capture.subprocess,
+                                "run",
+                                return_value=SimpleNamespace(returncode=0, stdout="", stderr=""),
+                            ) as qmp_quit:
+                                with redirect_stdout(io.StringIO()):
+                                    result = live_capture.observe(args)
+            safety_log = (run_dir / "FLR-0399-guest-serial-safety.log").read_text()
+
+        self.assertEqual(1, result)
+        self.assertEqual(
+            [
+                "preflight",
+                "launch",
+                "present-stack-script",
+                "ready-001",
+                "identity-after-ready",
+                "identity-before-present-stack",
+                "identity-after-present-still",
+                "present-stack",
+            ],
+            serial_calls,
+        )
+        self.assertEqual(1, qmp_quit.call_count)
+        self.assertIn("GDB_COMPLETION_UNCONFIRMED", safety_log)
+
+    def test_present_matched_marker_is_confirmed_and_guest_evidence_is_collected(self):
+        run_id = "flr0401-0005"
+        with tempfile.TemporaryDirectory() as evidence_root:
+            run_dir = Path(evidence_root) / run_id / "qemu"
+            run_dir.mkdir(parents=True)
+            commands = guest_commands(run_id, launch_mode="direct")
+            args = SimpleNamespace(
+                run_id=run_id,
+                launch_mode="direct",
+                evidence_root=Path(evidence_root),
+                run_dir=run_dir,
+                qmp=run_dir / "qmp.sock",
+                serial_port=5555,
+                timeout_seconds=120.0,
+            )
+            live = (
+                f"FLR0399_STATE=LIVE PID=694 UID=1001 START=23470 "
+                f"LOG_PATH={commands.log_path}\n"
+            )
+            ready = (
+                f"FLR0399_STATE=READY PID=694 UID=1001 START=23470 READY=1 "
+                f"PRESENT_BEGIN=1 PRESENT_RETURN=0 SUN=1 LOG_PATH={commands.log_path}\n"
+            )
+            presented = (
+                f"FLR0399_STATE=PRESENT PID=694 UID=1001 START=23470 READY=1 "
+                f"PRESENT_BEGIN=1 PRESENT_RETURN=1 SUN=1 LOG_PATH={commands.log_path}\n"
+            )
+            serial_calls = []
+
+            def serial_exec(*, label, command, **_kwargs):
+                serial_calls.append((label, command))
+                if label == "preflight":
+                    return "FLR0399_GUEST_PREFLIGHT=PASS\n"
+                if label == "launch":
+                    return "FLR0399_LAUNCH=PASS\n"
+                if label == "present-stack-script":
+                    return "FLR0401_GDB_SCRIPT=READY sha256=fixture\n"
+                if label == "ready-001":
+                    return ready
+                if label in {
+                    "identity-after-ready",
+                    "identity-before-present-stack",
+                    "identity-after-present-still",
+                    "identity-after-present-stack",
+                    "identity-after-present",
+                }:
+                    return live
+                if label == "present-stack":
+                    return "FLR0401_GDB_CAPTURE_RESULT=PRESENT_MATCHED\n"
+                if label == "present-001":
+                    return presented
+                if label == "collect":
+                    return "FLR0399_EVIDENCE_COLLECT=PASS\n"
+                if label == "stop":
+                    return "FLR0399_APP_STOP=REQUESTED\n"
+                if label == "present-stack-cleanup":
+                    return "FLR0401_GDB_SCRIPT=CLEANED\n"
+                raise AssertionError(f"unexpected serial command: {label}")
+
+            with mock.patch.object(Path, "is_socket", return_value=True):
+                with mock.patch.object(live_capture, "_serial_exec", side_effect=serial_exec):
+                    with mock.patch.object(live_capture, "_capture_qmp"):
+                        with mock.patch.object(live_capture, "verify_postflight", return_value=()):
+                            with mock.patch.object(
+                                live_capture.subprocess,
+                                "run",
+                                return_value=SimpleNamespace(returncode=0, stdout="", stderr=""),
+                            ) as qmp_quit:
+                                with redirect_stdout(io.StringIO()):
+                                    result = live_capture.observe(args)
+
+        labels = [label for label, _command in serial_calls]
+        self.assertEqual(0, result)
+        self.assertIn("identity-after-present-stack", labels)
+        self.assertLess(labels.index("present-stack"), labels.index("collect"))
+        self.assertIn("collect", labels)
+        self.assertIn("stop", labels)
+        self.assertIn("present-stack-cleanup", labels)
+        gdb_command = dict(serial_calls)["present-stack"]
+        self.assertNotIn(live_capture.PRESENT_STACK_TIMEOUT_TOKEN, gdb_command)
+        self.assertEqual(1, qmp_quit.call_count)
 
     def test_guest_command_builder_rejects_unknown_launch_mode(self):
         with self.assertRaisesRegex(ValueError, "launch mode must be gdb-run or direct"):
@@ -1390,6 +2235,32 @@ class GuestCommandContractTests(unittest.TestCase):
         self.assertEqual(["WAITING", "PRESENT"], [first.state, second.state])
         self.assertEqual(["present-001", "present-002"], [call[0] for call in calls])
         self.assertEqual([15.0, 15.0], [call[2] for call in calls])
+
+    def test_state_reader_routes_stack_identity_brackets_to_the_identity_command(self):
+        commands = guest_commands("flr0401-0001", launch_mode="direct")
+        log_path = commands.log_path
+        identity_output = (
+            f"FLR0399_STATE=LIVE PID=694 UID=1001 START=23470 "
+            f"LOG_PATH={log_path}\n"
+        )
+        calls = []
+
+        def serial(label, command, timeout_seconds):
+            calls.append((label, command, timeout_seconds))
+            return identity_output
+
+        reader = make_state_reader(commands, serial)
+        stages = (
+            "identity-before-present-stack",
+            "identity-after-present-still",
+            "identity-after-present-stack",
+        )
+        samples = [reader(stage, 30) for stage in stages]
+
+        self.assertTrue(all(sample.state == "LIVE" for sample in samples))
+        self.assertEqual(list(stages), [call[0] for call in calls])
+        self.assertTrue(all(call[1] == commands.identity for call in calls))
+        self.assertEqual([15.0, 15.0, 15.0], [call[2] for call in calls])
 
     def test_first_live_frame_gets_one_video_and_later_frames_stay_stills(self):
         capture = make_frame_capture(

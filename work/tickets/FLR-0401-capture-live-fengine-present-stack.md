@@ -49,6 +49,29 @@ fix or product-acceptance pass.
 - FLR-0366 and FLR-0391 document a similar `FEngine::loop` Oops / `ff <cf>`
   signature. FLR-0366 explicitly shows that opcode/RIP symbol resemblance
   alone does not establish the faulting operation or root cause.
+- The local implementation now covers the counter/run-ID contract, opt-in
+  direct app launch, bounded selected-thread GDB script, one-shot
+  unmatched-Present trigger, and bounded failure-safe teardown. The focused
+  observer suite most recently passes 69/69. These
+  are host-side contract/mock tests only; no Mini transfer, QEMU runtime, or
+  product-image result has occurred for FLR-0401.
+- Initial read-only reviews identified five pre-fix observer hazards: app/GDB
+  writes used independent file offsets; GDB did not recheck inferior identity
+  before thread inspection; empty/failed stack collection could be reported as
+  complete; fixed guest-GDB timeouts could outlive the host serial wait; and
+  teardown could delete a script not created by this invocation. One reviewer
+  explicitly said its response was not model-certified as GPT-6.1 Sol. The
+  requested model-certified GPT-6.1 Sol review then found two serial transport
+  races: a nonzero GDB diagnostic status made an already-completed guest
+  command look like serial failure, and a Present return between the sampled
+  unmatched counters and the guest-side recheck emitted `PRESENT_MATCHED` but
+  also exited nonzero. Both caused the observer to skip guest evidence as
+  unconfirmed. The code now preserves the diagnostic/expected-skip marker in
+  the shared guest log and returns transport success after the command itself
+  completes; regressions exercise fake GDB exit 5 and the balanced-counter
+  race, then assert observer evidence collection and cleanup. The latest
+  The latest GPT-6.1 Sol re-review found no further issues and confirmed both
+  P2 transport gaps are closed; actual guest runtime remains unverified.
 
 ### Inferences
 
@@ -98,7 +121,7 @@ fix or product-acceptance pass.
 | Where | Exact 0334 Mini QEMU guest, existing Example Demo and Lavapipe/WSI path |
 | When | First identity-stable `PRESENT_BEGIN > PRESENT_RETURN` sample; attach once |
 | Who | Flutter PID/UID/start identity, selected FEngine thread, guest graphics stack |
-| How | Bounded host polling, one 20-second GDB attach, QMP still/video, focused journal |
+| How | Bounded host polling, one deadline-derived 5–18-second GDB attach plus 2-second kill grace, QMP still/video, focused journal |
 
 ## Scope and controls
 
@@ -121,8 +144,12 @@ fix or product-acceptance pass.
   from the first identity-bracketed live state; label it WAITING if that was
   the first sample. GDB selects only threads
   named `FEngine::loop`, records at most eight frames per candidate, and
-  expands only a stack containing `lvp_pipe_sync_wait` to 24 frames. Bound the
-  attach to 20 seconds and detach.
+  expands only a stack containing `lvp_pipe_sync_wait` to 24 frames. Guest GDB
+  is bounded to 5–18 seconds plus 2 seconds of kill grace, derived from the
+  remaining deadline; the host wait reserves serial-return and post-attach
+  identity-read time. If fewer than 26 seconds remain after the QMP still, skip
+  the attach explicitly. If serial does not confirm GDB completion, issue no
+  further guest serial commands and quit only this run's QMP-owned QEMU.
 - Preserve the marker slice, bounded GDB/inferior log, focused kernel Oops and
   coredump query before exact app/QMP teardown. One run ID, one QEMU, one GDB
   attach; no retry after any result.
@@ -175,7 +202,28 @@ fix or product-acceptance pass.
   FLR-0110 low-memory settings via `-iex` before attach. It loads only Lavapipe
   symbols, selects `FEngine::loop`, and caps collection at `bt 8` plus
   conditional `bt 24` for `lvp_pipe_sync_wait`; its timeout and kill grace total
-  20 seconds.
+  at most 20 seconds.
+- Direct mode creates the fresh run-scoped app log once; app and GDB output
+  append to that same file. The run-scoped GDB command file is base64-transferred,
+  SHA-256 verified, removed by exact path in normal and EXIT-trap cleanup, and
+  checks selected-inferior PID/UID/starttime/comm before symbol loading or
+  thread enumeration. Empty, partial, identity-changed, no-thread, and
+  no-stack outcomes are distinct; `COMPLETE` requires an actual stack frame.
+- The controller consumes its one-shot before I/O, captures the dedicated
+  `PRESENT_UNMATCHED` QMP still before GDB attach, checks identity around the
+  still and attach, caps attach by the remaining global deadline, and retains
+  callback errors without retry. The legacy default `gdb-run` command remains
+  pinned by its byte-for-byte digest test.
+- GDB timeout is derived from remaining wall-clock budget (5–18 seconds), with
+  2 seconds for guest timeout kill grace, 4 seconds for serial return, and 15
+  seconds reserved for post-attach identity verification. With less than 26
+  seconds available after the still, the attach is skipped without launching
+  guest GDB. Missing completion marker is treated as an unsafe unknown: local
+  partial evidence is retained, guest serial collection/stop/script cleanup are
+  skipped, and cleanup proceeds through QMP only.
+- Script cleanup is issued only after this invocation receives the
+  `FLR0401_GDB_SCRIPT=READY` marker from its preparation command. Creation uses
+  shell noclobber to avoid overwriting a path that appears after preflight.
 - No product source, image, recipe, build input, cache, or Mini runtime has been
   changed or touched in this ticket.
 
@@ -192,22 +240,62 @@ fix or product-acceptance pass.
   all supported IDs and both launch modes parse as bash and POSIX sh; the
   default launch digest is unchanged; the CLI mode reaches the guest command
   builder.
-- `make verify`: canonical, privacy, and shell checks passed; 203 Python tests
-  had 202 PASS and one known unrelated FLR-0397 stale-run-ID failure in
+- First local read-only review (not model-certified as GPT-6.1 Sol): exact
+  range `7ad86a0..f7b1222` was reviewed. Findings were the app/GDB shared-log
+  overwrite race, missing in-GDB identity recheck, and false `COMPLETE` on
+  empty/failed stack collection. The current diff adds append-only shared
+  logging, inferior identity validation, and explicit failure/partial outcomes.
+  The specifically requested model-certified GPT-6.1 Sol re-review is pending.
+- Task 3 red: six new controller cases initially errored because `run_once`
+  did not yet accept the one-shot callback. Two additional review findings
+  reproduced in tests: fixed guest timeout could outlive the host deadline and
+  preflight rejection still led to script cleanup. After the fixes, the full
+  focused suite passes 67/67. Coverage includes deadline-derived GDB timeout
+  and identity reserve, no further guest serial commands after unconfirmed GDB
+  completion, QMP-only teardown of that exact run, no cleanup after failed
+  preflight, one-shot callback behavior, QMP-still-before-GDB ordering, and
+  generated guest-script preparation/cleanup. GDB simulations reject PID
+  reuse, missing threads/frames, and stack collection errors rather than
+  returning `COMPLETE`.
+- GPT-6.1 Sol review follow-up: first identified that GDB exit 5 (and other
+  completed diagnostic outcomes) propagated as a serial command failure, so
+  the observer dropped post-attach identity and guest kernel/coredump evidence.
+  The capture command now records `FLR0401_GDB_CAPTURE_RESULT=<outcome> rc=<n>`
+  and exits 0 once GDB has returned; a generated-shell test executes fake GDB
+  exit 5 and verifies marker/log persistence and script cleanup. The next Sol
+  pass found the race where guest counters become balanced after the host
+  selected an unmatched sample; `PRESENT_MATCHED` now likewise goes to the
+  shared log and exits 0 without launching GDB. Regression checks first failed
+  at the nonzero shell status, then passed after the fix; observer integration
+  confirms this completed skip is followed by identity recheck, guest evidence
+  collection, app stop, script cleanup, and exact QMP teardown. The focused
+  suite is now 69/69 PASS. The latest GPT-6.1 Sol review reported no further
+  findings and confirmed both P2 gaps are closed.
+- `make verify`: canonical, privacy, and shell checks passed; an earlier 203-test
+  run had 202 PASS and one known unrelated FLR-0397 stale-run-ID failure in
   `test_serial_exec_capture_passes_strict_gate_without_setup_preamble`. The
   fixture invokes `flr0350_launch_gate.py --validate` without its now-required
-  run ID. `make verify` stopped at that Python gate.
+  run ID. The latest default-sandbox attempt was blocked by five pre-existing
+  localhost socket-bind `PermissionError`s. The same `make verify` with host
+  permission ran 218 tests: 217 PASS and the same one unrelated FLR-0397 stale-
+  run-ID failure; `make verify` stops at that Python gate.
 - Remaining gates run separately: MCP smoke PASS; Markdown links FAIL on the
   same 11 historical missing targets (0391/0395 ticket links and 0338/0339
   QMP media links); file-size, QEMU/runtime harness, runtime-log-slice, Devtool
   finish/component-rebase, Mini recipe-patch, and Podman/bundle-handoff gates
-  all PASS. No FLR-0401 link is missing.
+  all PASS. No FLR-0401 link is missing. These checks do not include a Mini
+  handoff, BitBake, QEMU, or runtime validation.
 
 ### Act
 
-- Commit the green Task 2 command slice locally after staging checks. Then add
-  the one-shot trigger/controller tests as a separate slice before any Mini
-  runtime action.
+- FLR-0400 evidence is committed and the dependent feature branch is created;
+  FLR-0401 is the sole active ticket. Tasks 1–3 are green in local contract and
+  mock tests, but all live/runtime criteria remain unverified. Finish the
+  post-fix GPT-6.1 Sol review, commit the scoped observer/tests/records locally
+  without pushing, then use the official bundle handoff. Repeat the Mini
+  owner/process/ports/socket/evidence-path preflight immediately before the
+  single reserved run; do not build or start a second QEMU. The stack result
+  will select a separate next discriminator, not complete the product goal.
 - Do not use this diagnostic ticket as product completion; keep Gate A/B and
   all final acceptance conditions open.
 

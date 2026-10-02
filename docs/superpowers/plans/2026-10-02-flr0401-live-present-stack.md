@@ -27,8 +27,8 @@
 - Modify `work/commands/FLR-0399-qemu-start.sh` to accept the fresh `flr0401-NNNN` run-ID namespace while preserving its existing profile guards.
 - Modify `tests/test_flr0399_live_capture.py` for state-counter parsing, direct-launch command shape, selected-stack bounds, one-shot trigger behavior, identity checks, and compatibility of the default launch mode.
 - Reuse `work/commands/FLR-0399-qemu-start.sh`, `scripts/qemu-runtime-harness.sh`, and `scripts/qemu-pixel-capture.py` unchanged for the exact 0334 image/run profile.
-- Update `TASKS.md`, the FLR-0400 ticket/log, and `work/evidence/FLR-0400-0001.md` with the completed observer run and its QMP evidence.
-- Add `work/tickets/FLR-0401-capture-live-fengine-present-stack.md`, `work/logs/2026-10-02-flr0401.md`, and the FLR-0401 runtime evidence manifest after the run.
+- Update `TASKS.md`, the FLR-0401 ticket, implementation plan, and working log as local observer work and runtime evidence accrue.
+- Add `work/evidence/FLR-0401-0001.md` only after a Mini runtime run produces evidence; never create a success-shaped empty manifest.
 
 ## Interfaces
 
@@ -147,7 +147,7 @@ PASS. Generated commands for all supported IDs and both launch modes parse with
 `sh -n` and `bash -n`; the legacy FLR-0400 launch digest is unchanged. The CLI
 argument reaches `guest_commands(..., launch_mode="direct")`.
 
-- [ ] **Step 5: Commit the direct-launch slice locally**
+- [x] **Step 5: Commit the direct-launch slice locally**
 
 Commit the direct-launch/command-generation slice locally; do not push.
 
@@ -161,7 +161,7 @@ Commit the direct-launch/command-generation slice locally; do not push.
 - Consumes: parsed counter fields, `capture_present_stack` command, existing `read_state`, QMP capture, and exact teardown adapters.
 - Produces: at most one selected GDB capture after a live unmatched sample and a post-attach identity verification.
 
-- [ ] **Step 1: Add failing callback tests for matched/unmatched and identity boundaries**
+- [x] **Step 1: Add failing callback tests for matched/unmatched and identity boundaries**
 
 Test one trigger on the first live unmatched sample, no trigger when counters
 match or identity is missing/wrong-UID, no second trigger on repeated unmatched
@@ -170,26 +170,41 @@ teardown on callback timeout. Test stable-identity verification before and
 after the trigger still and after GDB; assert still capture precedes the GDB
 callback.
 
-- [ ] **Step 2: Run focused tests and record expected red results**
+- [x] **Step 2: Run focused tests and record expected red results**
 
 Run: `python3 -m unittest tests.test_flr0399_live_capture -v`.
-Expected: the new callback and ordering cases fail while existing observer
-behavior remains unchanged.
+Result: six new callback/controller cases errored while `run_once` lacked the
+optional capture callback; existing observer behavior remained unchanged.
 
-- [ ] **Step 3: Implement the one-shot trigger inside the fixed deadline**
+- [x] **Step 3: Implement the one-shot trigger inside the fixed deadline**
 
 Check `present_begin > present_return` after each live sample and before the
 next poll sleep. At most once, verify identity, capture the distinct full QMP
-still, verify identity again before GDB, execute the 20-second-bounded attach,
-and verify identity after GDB. Stop if identity changes; otherwise retain
-callback/timeouts in `Outcome.errors` and continue polling within the original
-deadline. Always preserve evidence before exactly-once teardown.
+still, verify identity again before GDB, and derive the guest timeout from the
+remaining absolute deadline. Guest GDB is 5–18 seconds with a 2-second kill
+grace; the host wait also accounts for serial return and reserves 15 seconds
+for the post-attach identity read. Skip the attach if fewer than 26 seconds
+remain after the still. If serial cannot confirm GDB completion, issue no more
+guest serial commands; preserve local partial evidence and quit only the
+run-owned QEMU over QMP. Clean the generated script only after this invocation
+receives its preparation marker. Stop if identity changes; otherwise retain
+bounded skip/errors and continue only within the original deadline. Always
+preserve evidence before exactly-once teardown.
 
-- [ ] **Step 4: Run focused observer and serial regressions**
+- [x] **Step 4: Run focused observer and serial regressions**
 
 Run: `python3 -m unittest tests.test_flr0399_live_capture -v`
 
-Expected: all focused observer tests pass; the existing localhost serial tests remain unchanged and pass.
+Result: `python3 -B -m unittest tests.test_flr0399_live_capture -v` — 69/69
+PASS. The generated direct-mode commands and GDB argv parse under bash and
+POSIX sh; the default `gdb-run` digest is unchanged. Generated-script setup,
+hash verification, deadline-derived timeout, owned cleanup, unconfirmed-GDB
+fail-closed path, nonzero GDB-result transport completion, and the
+guest-side-Present-return race all pass. The Present-race regression ran red
+before the exit-status/log-marker fix, then green; observer integration proves
+identity recheck and guest evidence collection continue after the expected
+`PRESENT_MATCHED` skip. Actual guest GDB symbol/unwind and runtime behavior
+remain UNKNOWN.
 
 - [ ] **Step 5: Commit the one-shot controller change locally**
 
@@ -198,16 +213,24 @@ Commit the controller slice locally only; do not push.
 ### Task 4: Verify locally and transfer the committed observer to Mini
 
 **Files:**
-- Modify: `TASKS.md`, FLR-0400 ticket/log, FLR-0401 ticket/log, and evidence manifests.
+- Modify: `TASKS.md`, FLR-0401 ticket/plan/log; add the evidence manifest only after runtime.
 - Test: repository verification targets and the official Mini bundle receiver.
 
 **Interfaces:**
 - Consumes: the clean committed FLR-0401 branch and the official bundle helpers.
 - Produces: receiver at the exact FLR-0401 tip; no build or QEMU process yet.
 
-- [ ] **Step 1: Run focused and repository checks**
+- [x] **Step 1: Run focused and repository checks**
 
-Run the focused suite, `make verify`, canonical/privacy/runtime-checkpoint checks, shell syntax checks for generated commands, Markdown links, file-size limits, and the independent QEMU/runtime-log/Mini-bundle gates. Record the known unrelated FLR-0397 stale-run-ID failure separately; do not fix it here.
+Run result: focused suite 69/69 PASS. Latest full `make verify` ran 220 Python
+tests: 219 PASS and only the known unrelated FLR-0397 stale-run-ID fixture
+failed; canonical/privacy/shell passed. Markdown validation has 11 historical
+missing references and no FLR-0401 missing reference. MCP smoke 52/52, file
+size, QEMU/runtime harness, runtime-log slice, Devtool finish/component-rebase,
+Mini recipe-patch, bundle-handoff contracts, runtime checkpoint, whitespace,
+and privacy checks pass. GPT-6.1 Sol's latest review confirms both P2 serial
+transport races are closed with no further findings. No build, bundle handoff,
+or QEMU occurred.
 
 - [ ] **Step 2: Commit scoped ticket, plan, log, tests, and observer changes locally**
 
