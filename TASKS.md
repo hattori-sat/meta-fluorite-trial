@@ -1,6 +1,6 @@
 # Task dashboard
 
-Last updated: 2026-10-02
+Last updated: 2026-10-03
 
 ## Current focus
 
@@ -30,7 +30,7 @@ Last updated: 2026-10-02
 
 **FLR-0391 result:** Patch 0333 applied the proven constant blue LIT source to Sequoia; Mini `do_patch`, compile, and full image build passed. Runtime reached `READY=1/BOUND=24/SUN=1`, but live QMP showed the HUD/Scenes over a fully black Sequoia ROI (0/144000). Present was 2 begins/1 return, then `FEngine::loop` Oops #2 and app status 124. Full screenshot/video and metrics: [FLR-0391 manifest](work/evidence/FLR-0391-0001.md). The material was applied, but visible Sequoia is NOT established.
 
-**Active task:** [FLR-0405](work/tickets/FLR-0405-capture-first-fengine-fault-present-order.md) is resumed after the serial-exec prerequisite closed. FLR-0406 is Done for the harness scope only: the exact transferred version passed 16/16 focused tests on Mini and all 0405-0002 serial commands completed without timeout. The 0334 run had no recorded Oops and at least one later `queuePresent result=0`, but all four full QMP captures preceded the first present; there are no post-present pixels, so rendering remains UNKNOWN. Next discriminator: with 0334 unchanged, wait for at least two successful present returns and balanced begin/return counts for the same PID/UID/start identity, then take a full-screen QMP still and short sequence. `make check-markdown` retains 11 historical broken links outside these tickets. Production materials/texture/lighting, HUD composition, depth/view, input/repaint, five-minute stability, and two independent boots remain NOT MET.
+**Active task:** [FLR-0405](work/tickets/FLR-0405-capture-first-fengine-fault-present-order.md) is resumed after the serial-exec prerequisite closed. FLR-0406 is Done for harness reliability only: exact Mini focused tests passed 16/16 and all 0405-0002 serial commands returned without timeout. That 0334 run's four QMP captures preceded its first successful present, so those black pixels do not classify the rendered frame. FLR-0405-0003 is being prepared with an emitter-format-aware present gate, explicit post-capture baseline, identity checks, and QMP-only evidence. No product source/image changes are in scope. Production Sequoia, same-frame HUD, depth/view, input/repaint, five-minute stability, and two-boot acceptance remain NOT MET.
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 

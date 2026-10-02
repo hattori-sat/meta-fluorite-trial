@@ -1,12 +1,12 @@
 # FLR-0405 — capture ordinary-profile FEngine fault and present order
 
-- Status: Waiting
+- Status: In Progress
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mini QEMU / guest Example Demo+GDB / shared app log / QMP and kernel evidence
-- Branch: `feature-flr-0405-first-fault-present-order` (from local `dev-flr-0404-ordinary-profile` transition checkpoint)
+- Branch: `feature-flr-0405-post-present-qmp` (from local `dev-flr-0404-ordinary-profile` transition checkpoint)
 - Depends on: [FLR-0404](FLR-0404-run-default-sequoia-on-0334.md); exact rootfs SHA-256 `80935c3f9fa81da66f068821637f512749602c701baa37e91bf777b8cf15c44c`
-- Plan: bounded runtime discriminator; no product-source edit or build
+- Plan: [post-present QMP observation plan](../../docs/superpowers/plans/2026-10-03-flr0405-post-present-qmp.md); no product-source edit or build
 - Working log: [FLR-0405 working log](../logs/2026-10-02-flr0405.md)
 
 ## Objective
@@ -326,4 +326,144 @@ diagnostic result.
   MP4 SHA-256 `4a9b9e835156b8cb73f493cd8a0c3d96c4c8f3d32b94e0ba42a8409277dc527f`
   (1280x800, 8 frames at 2 fps, 4.0 seconds). The repeated identical pixels
   show no visual change during this short sample; they do not prove a healthy
-  five-minute present stream.
+five-minute present stream.
+
+## Iteration 2 — FLR-0405-0002 (2026-10-03)
+
+### Facts
+
+- The committed serial-exec helper passed the focused Mini suite (16/16) and
+  every serial command in this run returned `rc=0`; the former echo/prompt
+  setup failure did not recur.
+- The exact 0334 image hashes were revalidated. One 6144-MiB QEMU boot used
+  the ordinary Example Demo launch as `agl-driver` UID 1001 with no diagnostic
+  overrides. Guest preflight confirmed the run-scoped `/run` log and identity
+  files were absent before launch.
+- Bounded GDB completed with zero stopped threads. No kernel Oops was recorded
+  in the returned run summary. The first live-gate sample showed one present
+  begin and zero returns; a later `queuePresent result=0` arrived. Exact final
+  totals and Oops/present ordering were not recovered by the bounded closeout
+  review and remain UNKNOWN.
+- Four full-screen identity-bracketed QMP captures were black. The run evidence
+  order places all four before the first successful present return; no
+  post-present pixel capture exists. Therefore these frames do not establish
+  that the application presented black pixels or that Sequoia/HUD rendering
+  failed.
+- The reviewed still is 1280x800 RGB, SHA-256
+  `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`.
+  Raw QMP frame set SHA-256:
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`.
+  Guest app-log export SHA-256:
+  `9a493d04d671185299c99213694916d05d5bfff9e834a445d34e7d806ee094b6`.
+  Raw evidence manifest SHA-256:
+  `e3fded46041c2895207f04bb937199dbbfc16c6711c67400625326fe13bb547e`.
+- The remote MP4 encoder failed; exact stderr was not retained. PNG previews
+  and raw QMP frames remain available under the Mini evidence run directory.
+  Some observer markers returned by individual commands were missing from the
+  final shared app-log export; the cause is UNKNOWN. Do not infer success or
+  failure from command `rc=0` alone.
+- App stop, own-QEMU QMP quit, process/wrapper cleanup, free ports, and
+  unchanged image hashes passed.
+
+### Inferences and competing explanations
+
+1. **Capture preceded the first real present.** Support: each black frame is
+   ordered before the first successful queue-present return. Refute: a
+   same-identity QMP frame taken after balanced successful returns is still
+   black or lacks HUD/scene pixels.
+2. **The first successfully returned present carried a black/incomplete
+   buffer.** Support: a post-present QMP capture after two balanced successful
+   returns is black. Refute: the same capture shows Flutter HUD or Sequoia.
+
+Current evidence cannot choose between these explanations. A successful
+`queuePresent result=0` alone is not pixel evidence.
+
+### Plan / next action
+
+- Keep the 0334 image, ordinary profile, app UID, and all product variables
+  fixed. On a fresh run ID `flr0405-0003`, keep the early GDB/present/fault
+  observation bounded, then require at least two `result=0` returns with
+  `present_begin == successful_present_return` for the same PID/UID/start
+  identity before taking the decisive full-screen QMP capture.
+- If the two-return gate reaches its bound without readiness, capture only as
+  a clearly labeled no-present boundary if the same app identity still exists;
+  do not call it a post-present render result. If identity changes, fail
+  closed and do not capture against a different process.
+- Save QMP-only stills and a short frame sequence; use the local Mac FFmpeg
+  installation to encode the review PNG sequence if the Mini encoder fails.
+  Do not change Filament, material, texture, light, camera, surface order, or
+  image in this discriminator.
+- FLR-0406 is Done for serial-harness reliability only. This FLR-0405 run did
+  not meet any production 3D/HUD acceptance criterion.
+
+## Iteration 3 — post-present gate hardening (2026-10-03)
+
+### Facts
+
+- The pinned patch source encodes the `FLR0026_VK_QUEUE_PRESENT_BEGIN`
+  trailing `\\n` as a literal backslash+n in its C format string, then emits
+  the return record with `result`, `surface`, `swapchain`, and `index` fields.
+  The previous whole-physical-line matcher would have missed that serialized
+  form. The current exact ERE accepts the literal delimiter or a normal line
+  boundary and counts only `result=0` as success.
+- Launch keeps the four-field identity contract and creates one fresh shared
+  app log. Flutter, launch context, GDB, and observer use append mode. The live
+  gate requires an explicit post-check baseline, bounds the app log to 900,000
+  bytes, bounds each `dmesg` read to two seconds, bounds wait to 60 samples / 45
+  seconds, and performs UID/state/start/comm/unique-process checks after log
+  and kernel sampling. Mini guest preflight checks `/usr/bin/timeout`.
+- The gate compares aggregate begin/result counts; it does not pair individual
+  queue/swapchain/index calls. Kernel count equality cannot exclude a
+  simultaneous old-entry eviction/new-entry addition. These remain UNKNOWN,
+  not product-health proof.
+- A source-level review identified missing-baseline, stale process-state,
+  marker-format, and kernel-ring edge cases. The requested model override did
+  not return a confirmable GPT-6.1 Sol identity, so its output is not treated
+  as that model's sign-off; concrete findings were addressed or retained as
+  explicit UNKNOWN limits.
+- No product source, image, build directory, cache, or QEMU was changed or run
+  in this iteration.
+
+### Inferences / hypotheses
+
+1. Run 0002's black frames preceded the first successful return, so they do
+   not distinguish a late capture from a black returned buffer.
+2. A gate that does not recognize the source's escaped delimiter can itself
+   create a false no-present timeout; emitter-compatible matching removes
+   that observation-path defect, but does not establish scene pixels.
+3. Run 0003 will discriminate only after its post-QMP `PROGRESS_READY` bracket
+   and full-frame pixels agree. A ready marker alone is non-visual evidence.
+
+### UNKNOWN
+
+- Whether image 0334's live app log uses exactly the pinned source format for
+  every relevant marker; the next run will preserve the actual raw line.
+- Individual swapchain/index pairing, same-count dmesg ring replacement,
+  Sequoia pixels, and HUD composition remain UNKNOWN.
+
+### Plan / Do / Check / Act
+
+- **Plan:** preserve exact 0334/ordinary profile and change only observation
+  commands/records; capture after two balanced successful returns, then
+  require a new successful return after capture.
+- **Do:** updated only FLR-0405 observation commands, plan, ticket, and log.
+  No product patch or build.
+- **Check:** canonical guard, `make check-privacy`, `make check-file-sizes`
+  (2,083 files), `make check-shell` (59 files), `/bin/sh -n`, one-line limit,
+  emitter fixtures, wrapped size, `git diff --check`, and FLR-0405 checkpoint
+  (`active=1`) passed. Exact wrapper lengths: launch 2,720 bytes, default gate
+  3,863, post-check gate 3,921 (limit 4,096). Escaped successful fixture
+  counted 1 begin / 1 return / 1 success; a `result=-4` fixture counted 1
+  return / 0 successes. `make check-markdown` still fails on 11 historical
+  missing targets in FLR-0338/0339/0340/0391/0395; none is a FLR-0405 link.
+  Prior attempts recorded: import without `PYTHONPATH=scripts` failed to
+  locate the helper; an oversized candidate wrapped to 4,112 bytes; an
+  initial fixture used two literal slashes and matched 0/0/0. Each was
+  corrected before runtime use. A direct `VAR=value ( ... )` post-gate
+  invocation was rejected by `/bin/sh` as invalid syntax; semicolon
+  assignments in the disposable serial-child command passed and wrap to 3,921
+  bytes. No invalid variant was sent to the guest.
+- **Act:** after all local gates pass, commit only FLR-0405 plan/commands/
+  ticket/log, transfer through the canonical bundle helper, verify the exact
+  Mini receiver and focused suite, then recheck QEMU/build/process/port/resource
+  ownership before one fresh 0334 runtime run. Do not run QEMU on conflict.
