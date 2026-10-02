@@ -1,6 +1,6 @@
 # FLR-0400 — bounded live-observer polling
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mini QEMU / guest Flutter+GDB / serial-exec / QMP evidence roles
