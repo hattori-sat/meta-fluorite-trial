@@ -1,11 +1,12 @@
 # FLR-0406 — make the serial-exec echo-off gate deterministic
 
-- Status: Inbox
+- Status: In Progress
 - Priority: High
 - Created: 2026-10-02
 - Owner: QEMU runtime harness / bounded mock serial server / regression-test roles
 - Trigger: FLR-0405 same-boot wall-clock query was blocked before guest dispatch
 - Work unit: diagnose and make the existing serial-exec setup gate deterministic; no product/image change
+- Plan: [saved implementation plan](../../docs/superpowers/plans/2026-10-02-flr-0406-serial-exec-gate.md)
 
 ## Problem
 
@@ -67,13 +68,16 @@ evidence about Fluorite rendering.
 
 ### Plan
 
-- Reproduce the two observed transcript shapes locally with a deterministic
-  mock, identify the exact rejecting condition, then make the smallest
-  fail-closed change and add regression coverage.
+- Compare tolerant prompt parsing with a per-session setup marker; prefer a
+  unique marker and final prompt if the failing regression demonstrates the
+  stream-boundary ambiguity.
+- Record one focused failure before changing the harness; then implement the
+  smallest fail-closed correction and add regression coverage.
 
 ### Do
 
-- Not started. No source or test files have been changed.
+- Started as the sole active work unit. No harness source or test file has
+  been changed yet; only ticket-state/working-log transition is being recorded.
 
 ### Check
 
@@ -82,5 +86,6 @@ evidence about Fluorite rendering.
 
 ### Act
 
-- Keep in Inbox until it becomes the single active work unit. FLR-0405 remains
-  In Progress and resumes only after this gate is understood.
+- Keep FLR-0405 Waiting until the mock-backed gate is verified and the exact
+  harness is transferred through the documented Mini handoff. This ticket is
+  not a rendering test and cannot establish any 3D acceptance criterion.

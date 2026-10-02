@@ -1,6 +1,6 @@
 # FLR-0405 — capture ordinary-profile FEngine fault and present order
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mini QEMU / guest Example Demo+GDB / shared app log / QMP and kernel evidence
@@ -76,6 +76,17 @@ cause claim.
 - Whether the original Sequoia material/texture/light path is reached or
   sampled, and whether a supported viewpoint control exists.
 - Whether a debugger changes or suppresses the fault.
+
+## Current status (2026-10-02)
+
+- Waiting only on the bounded serial-exec gate work in FLR-0406. No product
+  source, image, or cache change is a dependency of FLR-0406.
+- The ordinary-profile frame/present/Oops evidence remains as recorded above;
+  the Oops-versus-present event order and guest SIGTERM completion remain
+  UNKNOWN. Do not restart QEMU or reuse the consumed run ID until the exact
+  harness is verified through the documented Mini handoff.
+- Product rendering, 2D+3D composition, interaction/repaint stability,
+  five-minute present health, and two-boot acceptance remain NOT MET.
 
 ## 4W1H (Why excluded)
 
