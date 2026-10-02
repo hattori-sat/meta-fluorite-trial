@@ -170,8 +170,10 @@ evidence about Fluorite rendering.
 - Local commit `b1a9948` is clean, local-only, and not pushed. Post-commit
   canonical, privacy, and FLR-0406 checkpoint checks passed.
 - All required `BUILD_*` role variables are unset in the current shell, and
-  the documented ignored local role file is absent. No SSH/SCP or receiver
-  command was attempted; remote receiver/QEMU ownership is therefore UNKNOWN.
+  no role declarations were found in the standard shell startup files, the
+  user environment.d directory, or either documented role-file location. No
+  SSH/SCP or receiver command was attempted; remote receiver/QEMU ownership is
+  therefore UNKNOWN.
 - The default local bundle is valid but contains the older FLR-0401 branch tip,
   not `b1a9948`. It was not overwritten. Do not infer a Mini state from that
   stale local bundle.
