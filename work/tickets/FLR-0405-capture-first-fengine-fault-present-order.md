@@ -100,6 +100,9 @@ cause claim.
   `work/commands/FLR-0405-guest-*.cmd` for preflight, direct launch, identity
   gates, early GDB, first-boundary monitoring, log export, and scoped stop.
   Validate one-line framing, `sh -n`, and the 4096-byte limit before transfer.
+- Use `FLR-0405-guest-wall-clock-context.cmd` once to retain same-boot
+  `journalctl -o short-iso-precise` fault lines with the identity-verified app
+  log when correlating present wall time to kernel monotonic time.
 - Use the Mini receiver's pinned pixel helper only for QMP capture/video; its
   analyzer differs from the current local copy, so do not pass local-only
   `--region full`. Analyze transferred review frames locally with explicit
@@ -163,8 +166,10 @@ diagnostic result.
 
 ### Do
 
-- FLR-0405 QEMU/app runtime has not started, and its run directory has not been
-  created. Read-only Mini inspection recovered the authoritative receiver from
+- One QEMU (6144 MiB) and the ordinary Example Demo ran on the exact 0334
+  image; guest-ready/preflight passed and launch recorded PID 645, UID 1001,
+  start token 12499, with the allow-listed environment. No build or product
+  source change occurred. Read-only Mini inspection recovered the receiver from
   FLR-0404 evidence: HEAD `54c02bdcddbf80be579c4fd7d493f5bd24f6df6c`, clean
   outside ignored `evidence/`. The recorded 0404 runqemu command resolves the
   same fixed qemux86-64 build/TMPDIR; local.conf selects qemux86-64 and exactly
@@ -172,12 +177,13 @@ diagnostic result.
 - Fresh read-only preflight passed: 0404 evidence exists, 0405 run ID/QMP path
   is unused, exact kernel/rootfs/qemuboot hashes match the 0334 baseline,
   generic QEMU harness and exact process-cleanup helper match local hashes,
-  zero target processes and listeners on ports 10930-10932, and the QMP path
-  is 88 bytes. The final pre-create recheck passed with receiver HEAD unchanged
+  zero target processes and listeners on ports 10930-10932; the first
+  `qmp.sock` candidate was 88 bytes. The final pre-create recheck passed with receiver HEAD unchanged
   and clean, exact image/helper hashes, zero target owners, free ports,
   qemux86-64/one configured Fluorite layer, and 28,195,316 KiB available RAM,
   8,331,456 KiB swap, and 15,353,132 KiB free evidence space. The Mini pixel-capture
-  helper differs from the local version; its `capture` interface was checked.
+  helper differs from the local version; its `capture`/`video` interfaces were
+  checked.
 - Procedure corrections (no runtime or file state changed): initial nested
   SSH/find quoting attempts were rejected before the remote read-only query;
   local command-template interpolation also failed before SSH. One early
@@ -196,26 +202,52 @@ diagnostic result.
   observer is explicitly excluded because it would change that profile.
 - Guest-command review found and corrected one serial-shell hazard: an
   unscoped `set -e`/early `exit` could close the persistent shell before the
-  harness completion marker. All seven commands now isolate their state and
+  harness completion marker. All eight commands now isolate their state and
   exits in a subshell. `/bin/sh -n`, one-line, and 4096-byte checks pass; the
   largest command is 4001 bytes.
-- Validation: canonical, privacy, checkpoint (`active=1`), shell syntax, and
-  file-size gates pass. The loopback-enabled Python rerun reports 222/223
-  passing; one unrelated serial-exec validator fixture fails with CLI usage
-  output and remains unresolved. Markdown checking reports 11 historical
-  missing links outside FLR-0405. No 0405 runtime has started.
+- The initial static contract check on the added wall-clock query failed
+  because the final subshell close lacked a separating semicolon. `sh -n` alone
+  did not catch this serial-wrapper formatting rule. The terminator was fixed;
+  all eight commands then passed syntax, one-line, and size checks. The new
+  wall-clock command SHA-256 is
+  `789c9838e394cbc386b3a8b0f1eaa156dd3f39c3da340149b58fdf19ec5e0ed4`.
+- The actual ticket-standard `qmp-0405.sock` path is 93 bytes and was unused
+  before startup; no shorter candidate socket was created.
+- Initial and post-boundary full QMP PPMs are both 1280x800 and byte-identical
+  (SHA-256 `f686a3c2769cb2bc59b362bdc1d956c2d1d128cbcbfa6ea45ffe2eb92b4a5265`),
+  matching FLR-0404's initial white/black-polygon frame. Eight 0.5-second
+  post-boundary frames were captured; manifest SHA-256 is
+  `34d85614a75b4e3df1232284dc3fdaf586034c5d90177293c43695b7f30bea19`.
+- Present remained at 2 begins/1 successful return. GDB completed rc=0 at
+  uptime 252.14 with zero stopped threads and Build-ID
+  `359c1108040bc6bc1af64bb639d0b25385858051`. The launch-fault baseline was 0;
+  two later dmesg lines matched the pattern, but are not proven independent
+  faults. One Oops record is timestamped kernel monotonic 160.228273, PID/TID
+  691 `FEngine::loop`, RIP `0x7ff601633541`—earlier than the first live gate at
+  uptime 182.35 and GDB at 231.04. Launch uptime is missing, so Oops-vs-launch
+  and Oops-vs-present order are UNKNOWN. The first monitor detected an already
+  existing fault at its initial sample; it did not observe the event live.
+- The same identity remained alive through QMP capture at uptime 447.76. The
+  guest app/GDB/observer log export passed (164,507 guest-log bytes). A bounded
+  same-boot ISO journal query is pending because app logs use wall time while
+  the kernel record currently uses monotonic time. Do not infer causality from
+  the event count, address, or LLVM symbol.
+- Validation: canonical/privacy/checkpoint/shell/file-size gates pass. The
+  loopback-enabled Python suite remains 222/223 with one unrelated serial-exec
+  validator fixture failure; Markdown has 11 historical missing links outside
+  FLR-0405. Runtime is negative/unhealthy; product acceptance remains
+  NOT MET/UNKNOWN. App/QEMU teardown is pending.
 - Local checkpoint `5d8d4f2` committed TASKS, this ticket, its working log, and
   the seven guest commands on the FLR-0405 feature branch; no push was made.
-- Next: repeat the exact read-only Mini ownership/image/process/resource gates.
-  Only if they pass, transfer the committed small command files into one fresh
-  evidence directory and start generic QEMU once.
+- Next: commit and transfer the bounded wall-clock context command, run it once,
+  then stop the exact guest app/QEMU and verify postflight. Preserve raw PPMs and
+  logs on Mini; only small reviewed PNG/MP4 files may be copied to Mac.
 
 ### Check
 
-- Fresh read-only Mini preflight: PASS. Local artifact checks pass except the
-  noted unrelated serial-exec test and historical Markdown targets. No FLR-0405
-  QEMU, app, GDB, or build has started. Product rendering status remains
-  NOT MET/UNKNOWN.
+- The runtime reproduced the prior negative frame and present/Oops symptoms.
+  Product gates, five-minute stability, second boot, teardown, and postflight
+  are NOT MET/pending; do not mark the overall goal complete.
 
 ### Act
 
