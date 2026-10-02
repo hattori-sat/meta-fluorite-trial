@@ -21,6 +21,24 @@ not prove the independent second boot required by the overall goal.
 
 ## Facts, inferences, hypotheses, and UNKNOWN
 
+### Latest execution gate (2026-10-02)
+
+- A read-only SSH inventory reached a Mini PC checkout candidate, but it is
+  not proven to be the fixed receiver from the local `BUILD_*` role
+  configuration. That candidate is on
+  `feature-flr-0019-qemu-build-iteration-final` at `6e4ccf125`; its TASKS
+  marks FLR-0019 In Progress and its worktree has 18 dirty/untracked files
+  affecting recipes/patches and task records.
+- The expected FLR-0403 raw evidence directory is absent under that candidate,
+  and the exact 0334 image hashes were not verified there.
+- A prior point-in-time process/port inventory found no QEMU, Flutter, or
+  BitBake owner and free reserved ports. This does not establish ownership or
+  handoff for the dirty in-progress checkout.
+- The fixed local `BUILD_*` variables are unset in this executor. Therefore
+  neither the authoritative receiver nor build/evidence paths are established.
+- No source, build, cache, image, receiver, or evidence directory was changed;
+  no QEMU, BitBake, or transfer was started.
+
 ### Facts
 
 - FLR-0049 iterations 8/10/23 show production Sequoia pixels and red lamps,
@@ -172,18 +190,39 @@ not prove the independent second boot required by the overall goal.
 
 ### Do
 
-- Pending read-only Mini preflight and one ordinary-profile QEMU run.
+- Read-only Mini probe through the default sandbox failed with an OS network
+  denial; the authorized read-only SSH retry succeeded.
+- The guessed receiver-role path was absent. A read-only query of the standard
+  checkout candidate found FLR-0019 In Progress and 18 dirty/untracked files.
+- A bounded Mini ticket query used `rg`, which is unavailable there; the
+  ticket itself was then read with `sed` and confirmed FLR-0019 In Progress.
+- `BUILD_HOST`, `BUILD_RECEIVER`, `BUILD_DIR`, `BUILD_TMPDIR`, and
+  `BUILD_BUNDLE_INBOX` are unset in this executor. The candidate's expected
+  prior evidence directory was absent; image hashes were not verified.
+- No build, transfer, run directory creation, or QEMU launch occurred.
 
 ### Check
 
-- Pending. Do not accept build readiness, asset markers, fixture pixels, or a
-  non-identity-bracketed frame as the requested product rendering.
+- **Execution gate: FAIL-CLOSED / WAITING.** The Mini checkout candidate is
+  not established as the configured fixed receiver, has another In Progress
+  ticket and dirty source/task files, and does not provide the expected prior
+  evidence path. Free processes/ports do not clear the ownership ambiguity.
+- Exact 0334 image identity on the configured build/evidence role: UNKNOWN.
+- Ordinary-profile runtime, full-screen QMP still/video, input/repaint, and
+  five-minute present: NOT RUN. Product rendering remains UNKNOWN.
 
 ### Act
 
-- Use the first evidenced failed boundary to select the smallest next runtime
-  or source/API ticket. Keep original material/light, same-frame composition,
-  viewpoint/depth, interaction, five-minute, and second-boot gates separate.
+- Keep this as the single In Progress ticket while continuing only independent
+  read-only provenance checks. Resume runtime execution only after the
+  configured fixed receiver, build/evidence paths, image hashes, and
+  ownership/handoff are resolved by the documented role configuration or an
+  explicit handoff. Do not use, clean, update, build from, or start QEMU
+  against the dirty candidate.
+- After the execution gate is safe, use the first evidenced rendering failure
+  boundary to select the smallest next runtime or source/API ticket. Keep
+  original material/light, same-frame composition, viewpoint/depth,
+  interaction, five-minute, and second-boot gates separate.
 
 ## Impact
 
