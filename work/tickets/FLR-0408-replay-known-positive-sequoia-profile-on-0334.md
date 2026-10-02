@@ -50,6 +50,27 @@ product objective.
 - Local checkpoint `3e8727d` committed the ticket, plan, six guest commands,
   focused test, TASKS entry, and initial working log with integration-role
   metadata; it was not pushed.
+- The later guest-SSH launch succeeded on the same exact image:
+  `FLUORITE0408_LAUNCH=PASS pid=765 uid=1001 start=239895`, with the six
+  documented FLR-0049 controls applied and readback unset. A fresh SSH identity
+  check initially passed at `2026-10-02T22:12:27+0000`.
+- The original scene-gate returned
+  `status=LOG_INVALID ... samples=1` at `2026-10-02T22:13:40+0000` because it
+  rejected the growing log before searching for the exact secondary marker.
+  A later bounded full-log snapshot at `2026-10-02T22:15:38+0000` found
+  `secondary_scene_add=0`, with PID/UID/start unchanged, app log 4,495,376
+  bytes, present begin/return/success `76/75/75`, and kernel faults `0`
+  against baseline `0`. This establishes marker absence in that snapshot, not
+  a black or failed visual result.
+- The bounded export completed at 925,232 bytes, SHA-256
+  `80d4ba92f5591a5455d74867f70f4ff1c41c7dcfbe365288e6d67f0aec887a7e`;
+  it retained the configured head/tail and explicit truncation metadata.
+- A read-only host recheck at `2026-10-02T22:29:44Z` found the same sole
+  runqemu/QEMU pair and QMP socket. Rootfs, kernel, and qemuboot hashes still
+  match the exact 0334 values above. The active Mini source checkout is clean
+  at `6e9878ba7993acf20c33ba68d9b25db9b5df5d95`; its pixel-capture helper
+  matches the Mac SHA-256
+  `df826ef28df367d4de42225004f74ce3d2f016a8c2aea42275a8b13b5b233ef1`.
 
 ## Inferences
 
@@ -129,8 +150,14 @@ product objective.
   `SCENE_ADD_DONE` and an eight-frame QMP sequence, bracketed by the same
   guest PID/UID/start token. Record exact hashes, resolution, visible content,
   and evidence-manifest link here after capture.
-- Current state: pending. The first serial-exec attempt stopped before guest
-  command dispatch; it produced no Flutter frame and is not visual evidence.
+- Current state: no QMP image has been captured for this run yet. The serial
+  setup failure was followed by a successful guest-SSH launch. The committed
+  marker gate then failed `LOG_INVALID` at the oversized-log check, and a
+  later full-log summary found no secondary marker. The marker-gated QMP
+  still/eight-frame criterion remains pending. A separately labelled
+  `diagnostic-no-scene-add` still/eight-frame sequence may be captured only
+  after a fresh manual read-only identity/fault/present bracket; it cannot
+  satisfy Gate A's marker-gated success criterion.
 
 ## Plan / Do / Check / Act
 
@@ -177,8 +204,16 @@ product objective.
   `mode=secondary`, reject fault-count increases, preserve a bounded log
   head/tail on overflow, and use the historical detached
   `/usr/bin/nohup ... </dev/null` contract. Focused verification passed 6/6;
-  the changes were locally committed as `58d8d3e` without push. The app has not
-  launched.
+  the changes were locally committed as `58d8d3e` without push. A later guest-
+  SSH launch did succeed; its result and the first observer failure are
+  recorded under Facts above.
+- After the `LOG_INVALID` result, a candidate marker-first/overflow-tolerant
+  change to the guest gate and identity check passed the focused suite 6/6.
+  Sol reviewed the ticket's explicit ban on observer changes during a running
+  attempt and advised not to deploy it. Those local candidate command/test
+  edits were restored to the committed versions; no observer change was sent
+  to the Mini or used for this runtime. The next capture will use manual
+  read-only identity/fault/present snapshots and the unchanged QMP helper.
 - The latest read-only Mini preflight confirms one configured
   `meta-fluorite-trial` layer, qemux86-64, fixed build TMPDIR, active source
   clean at `6e9878ba7993`, and separate fixed receiver clean at `969d93c331be`.
@@ -200,28 +235,31 @@ product objective.
 
 ### Check
 
-- Focused test 6/6, all six guest shell/one-line/size checks, canonical,
-  privacy, 2,096-file size, 59-file shell syntax, runtime checkpoint
-  (`active=1`), and `git diff --check` pass after launch, scene, fault, and
-  bounded-export changes. `make check-markdown` still reports only the same 11 historical
-  missing targets outside FLR-0408; no new 0408 link fails.
-- The launch command returns before the next SSH call; the first identity or
-  scene-gate check must use a fresh SSH connection to prove the UID-1001 app
-  survives launch-session termination.
-- Runtime remains pre-app: one exact-image QEMU is live; guest SSH and the
-  read-only preflight passed. Serial-exec failed before dispatch, so it is not
-  a product/rendering failure. No visual result or product acceptance is
-  claimed.
+- The candidate observer correction passed 6/6 focused tests before it was
+  restored; it was not deployed or used. On the unchanged committed commands,
+  `python3 -B tests/test_flr0408_profile.py -v` passes 6/6, and canonical,
+  privacy, file-size (2,096 files), shell syntax (59 files), runtime
+  checkpoint (`active=1`), and `git diff --check` all pass.
+- `make check-markdown` fails only on the same 11 historical missing targets
+  outside FLR-0408; no current FLR-0408 link fails. The pending change set is
+  limited to TASKS, this ticket, its plan, and its working log.
+- Runtime is no longer pre-app: guest-SSH launch and the first fresh identity
+  passed. The old scene-gate `LOG_INVALID` is an observer failure. The
+  independent full-log snapshot found no secondary Sequoia scene-add marker,
+  but showed continued present returns and no new kernel fault at that
+  snapshot. No visual result or Gate-A/product acceptance is claimed yet.
 
 ### Act
 
-- If Gate A passes, create a separate ticket to restore original lights and
-  environment one factor at a time, then separately validate same-frame HUD
-  composition and final input/repaint/five-minute/two-boot criteria.
-- If scene-add is reached but vehicle pixels fail, use the same run's first-
-  fault/log/QMP evidence to choose one smaller render-versus-present
-  discriminator; do not repeat this profile without new evidence.
-- Refresh only the updated committed guest commands in the existing Mini
-  evidence directory. Launch once over guest SSH; if launch or
-  the Sequoia-specific scene-add fails, record UNKNOWN and choose the next
-  test from that exact boundary.
+- Preserve the committed observer/gate commands for this run. Take a fresh
+  manual read-only guest snapshot of PID/UID/start, unique app PID, kernel
+  faults, and present counters. If identity matches and faults have not
+  increased, capture exactly one diagnostic QMP still and eight frames, then
+  take the same snapshot again. Label these `diagnostic-no-scene-add`; they do
+  not satisfy Gate A. If identity changes or faults increase, preserve bounded
+  evidence and stop the capture.
+- Review pixels, save the evidence manifest, and stop only this recorded
+  app/QEMU after the bounded diagnostic. Do not repeat the same failing gate
+  without new evidence.
+- Do not claim original lighting, HUD composition, interaction/repaint
+  stability, five-minute health, or two-boot acceptance from this ticket.

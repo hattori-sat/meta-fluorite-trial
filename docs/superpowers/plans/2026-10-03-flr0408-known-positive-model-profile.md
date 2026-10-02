@@ -21,6 +21,7 @@
 - Keep app/QEMU identity, bounded logs, raw QMP PPMs, serial stream, and the exact runqemu command under the single Mini evidence directory `/mnt/yocto/evidence/flr0408-0001/qemu/`. Do not put raw runtime evidence in Git or under the receiver/build/TMPDIR.
 - Transfer only compact QMP review PNG/video to the Mac by streaming from Mini; never copy the rootfs or other deploy image to the Mac. Keep one temporary working area at most; prefer direct streaming without a staging directory.
 - Stop on the first abnormal boundary. A scene-add marker, a live process, or a returned present alone is not a pixel pass. Do not run the five-minute monitor because this model-only surface is above the Flutter parent and is expected to hide the HUD.
+- The marker-gated capture remains the only path to a Gate-A pass. If the committed scene gate fails on its documented log-size cap and the exact scene-add marker is absent in the preserved summary, an explicitly supplemental diagnostic may use unchanged QMP capture tooling plus manual, read-only PID/UID/start/fault/present checks immediately before and after one full-screen still and exactly eight frames. Label it `diagnostic-no-scene-add`; it cannot satisfy scene-add or Gate-A. Do not modify or deploy the observer/gate commands during this running attempt.
 - Make only push-free local commits for this ticket's commands, plan, evidence, ticket, log, and TASKS row. No push.
 
 ---
@@ -80,13 +81,19 @@
 
 **Interfaces:**
 - The guest app is a single UID-1001 `flutter-auto` whose PID/UID/start token remain constant before the still, across all video frames, and after capture.
-- QMP `capture` saves one full-screen PPM after scene gate READY. QMP `video` saves exactly 8 more PPM frames at 0.5-second intervals in the same run evidence directory.
+- The Gate-A path uses QMP `capture` after scene-gate READY and `video` for exactly 8 more PPM frames at 0.5-second intervals. Supplemental diagnostics use distinct filenames and remain outside the marker-gated verdict.
 
-- [ ] **Step 1: Run guest preflight and launch.** Serial-exec first failed at the setup gate before dispatch, so preserve its transcript and use the documented SSH guest path for the remaining one-line commands. Require guest preflight PASS and `FLUORITE0408_LAUNCH=PASS`; the launch uses the existing `nohup` plus `/dev/null` stdin detach contract. After the launch SSH call returns, use a fresh SSH call for identity/scene gating to verify the app survived session teardown. Save bounded output in the Mini run directory; do not enable GDB or additional profile variables.
-- [ ] **Step 2: Wait for the one bounded scene gate.** Run `scene-gate` for no more than 45 seconds. Proceed only on `status=READY` with the secondary `assets/models/sequoia_ngp.glb` scene-add marker and matching identity. On fault/exit/identity change, export bounded evidence immediately and stop.
+- [x] **Step 1: Run guest preflight and launch.** Serial-exec first failed at the setup gate before dispatch, so its transcript was preserved and the documented SSH guest path was used. Guest preflight and `FLUORITE0408_LAUNCH=PASS` succeeded with the existing `nohup` plus `/dev/null` detach contract; a fresh SSH confirmed the launch survived session teardown. No GDB or additional profile variables were enabled.
+- [x] **Step 2: Run the bounded scene gate once.** The original committed gate returned `LOG_INVALID` at its first sample because the app log exceeded 900,000 bytes; a bounded full-log snapshot then counted zero exact secondary Sequoia scene-add markers. Preserve this as an observer failure plus scene-marker absence at that snapshot; do not interpret it as a product pixel failure or repeat the same gate.
 - [ ] **Step 3: Bracket and capture the first full QMP still.** Run the guest identity check, QMP `capture` to `post-scene-add.ppm`, then run the guest identity check again. Require identical PID/UID/start token. Record dimensions and SHA-256 before any image review.
 - [ ] **Step 4: Capture the short QMP sequence without user input.** Recheck identity, capture exactly eight QMP frames at 0.5-second intervals with the pinned helper, and recheck identity immediately after. Stop early if an app exit, kernel Oops, or present failure is reported.
 - [ ] **Step 5: Save bounded runtime logs before stop.** Run guest `export` once to save the shared app log in full when at most 900,000 bytes; above that cap, preserve the first 250,000 and last 650,000 bytes with an explicit truncation marker. Include `dmesg`/`journalctl` tails, app identity, present begin/return/success counts, scene-add/asset/material markers, and the QMP capture bracket. Use Mini-side output files; do not dump full logs into the assistant transcript.
+
+### Supplemental diagnostic branch (not Gate-A)
+
+- [ ] With the observer/gate implementation unchanged, take a fresh manual read-only guest snapshot of PID, UID, start token, unique `flutter-auto` PID, kernel-fault count, and present begin/return/success counts; save the bounded output under the existing Mini run directory.
+- [ ] Only if that snapshot shows the original PID/UID/start and no new kernel fault, capture one full-screen QMP PPM named `diagnostic-no-scene-add.ppm` plus exactly eight frames at 0.5-second intervals into a distinct `diagnostic-no-scene-add-frames/` path.
+- [ ] Immediately take the same read-only guest snapshot again. Record timestamps and counter deltas. If identity changes or faults increase, retain the captures, classify as interrupted, and stop. In every case, profile reproduction remains UNKNOWN and this branch cannot satisfy the marker-gated capture steps above.
 
 ### Task 4: Classify Gate A, display review media, and close the runtime
 
@@ -96,7 +103,7 @@
 - Modify: `TASKS.md`
 - Create: `work/evidence/FLR-0408-0001.md`
 
-- [ ] **Step 1: Review only full-screen QMP evidence.** Stream the Mini PPM still to Mac FFmpeg as a PNG and stream the eight-frame PPM sequence as an MP4; do not persist raw PPM on Mac or copy any rootfs. Verify the PNG is 1280x800 and MP4 is 4 seconds, 8 frames, 2 fps. Visually classify recognizable production vehicle geometry, texture/material appearance, and red lamps separately from HUD presence.
+- [ ] **Step 1: Review only full-screen QMP evidence.** Stream any marker-gated still/video or supplemental diagnostic still/video from Mini to Mac FFmpeg; do not persist raw PPM on Mac or copy any rootfs. Verify the still is 1280x800 and the eight-frame sequence is 4 seconds, 8 frames, 2 fps. For supplemental evidence, preserve its diagnostic-only label and classify recognizable production vehicle geometry, texture/material appearance, and red lamps separately from HUD presence.
 - [ ] **Step 2: Separate pixel and health verdicts.** Record `GATE_A_PIXELS=PASS|FAIL|UNKNOWN`, `SCENE_ADD=PASS|FAIL|UNKNOWN`, `PRESENT_HEALTH=PASS|FAIL|UNKNOWN`, and `RUNTIME_FAULT=YES|NO|UNKNOWN`. A live Sequoia frame is only an intermediate asset-pixel pass; skipped environment/light stages mean original lighting is untested. A process/scene marker without visible pixels is not a pass.
 - [ ] **Step 3: Stop only this app/QEMU and prove cleanup.** Run `guest-stop` only for the saved matching identity, issue negotiated QMP `quit` to the exact run socket, and require zero residual QEMU/runqemu/flutter-auto, zero QMP socket, ports free, and unchanged artifact hashes. Do not stop unrelated containers or processes.
 - [ ] **Step 4: Record outcome, all failed steps, and evidence hashes.** Update the ticket, working log, evidence manifest, and TASKS. If Gate A passes, create a later, separate ticket for restoring the lighting stages one condition at a time and then same-frame HUD composition. If Gate A fails after exact scene-add, choose an immediate first-fault capture on that smaller profile. If the profile or scene-add is not reproduced, mark UNKNOWN and do not claim a product regression.
