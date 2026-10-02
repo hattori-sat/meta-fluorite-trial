@@ -21,7 +21,7 @@ from typing import Callable
 from flr0399_process_cleanup import cleanup_exact_qmp_processes
 
 
-RUN_ID_RE = re.compile(r"flr(?:0399|0400)-[0-9]{4}\Z")
+RUN_ID_RE = re.compile(r"flr(?:0399|0400|0401)-[0-9]{4}\Z")
 DEMO_BUNDLE = (
     "/usr/share/flutter/toyota-connected-tcna-packages-filament-scene-"
     "fluorite-examples-demo/3.32.5/release"
@@ -51,6 +51,10 @@ class Sample:
     identity: Identity | None
     log_path: str
     detail: str = ""
+    ready_count: int = 0
+    present_begin: int = 0
+    present_return: int = 0
+    sun_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -83,7 +87,7 @@ class GuestCommands:
 def evidence_collect_command(log_path: str, run_id: str) -> str:
     """Collect bounded GDB, kernel, and matching coredump evidence fail-closed."""
     if not RUN_ID_RE.fullmatch(run_id):
-        raise ValueError("run id must be a fresh FLR-0399/0400 id")
+        raise ValueError("run id must be a fresh FLR-0399/0400/0401 id")
     if not log_path or "\n" in log_path or "\r" in log_path:
         raise ValueError("evidence log path must be a non-empty single line")
     q = shlex.quote
@@ -137,7 +141,7 @@ def evidence_collect_command(log_path: str, run_id: str) -> str:
 def guest_commands(run_id: str) -> GuestCommands:
     """Build one-line serial-exec commands from one run-scoped log path."""
     if not RUN_ID_RE.fullmatch(run_id):
-        raise ValueError("run id must be a fresh FLR-0399/0400 id")
+        raise ValueError("run id must be a fresh FLR-0399/0400/0401 id")
 
     prefix = f"/run/user/1001/{run_id}"
     log_path = f"{prefix}-gdb.log"
@@ -275,7 +279,7 @@ def guest_commands(run_id: str) -> GuestCommands:
 def expected_run_dir(evidence_root: Path, run_id: str) -> Path:
     """Return the fixed Mini evidence path for a supported observer run id."""
     if not RUN_ID_RE.fullmatch(run_id):
-        raise ValueError("run id must be a fresh FLR-0399/0400 id")
+        raise ValueError("run id must be a fresh FLR-0399/0400/0401 id")
     root = evidence_root.resolve(strict=True)
     if not root.is_dir():
         raise ValueError("evidence root must be an existing directory")
@@ -329,11 +333,32 @@ def parse_state_output(output: str, *, stage: str) -> Sample:
 
     if state in {"READY", "PRESENT", "WAITING", "LIVE", "FAULT"} and identity is None:
         raise ValueError("live FLR-0399 state lacks process identity")
+    counter_fields = {
+        "READY": "ready_count",
+        "PRESENT_BEGIN": "present_begin",
+        "PRESENT_RETURN": "present_return",
+        "SUN": "sun_count",
+    }
+    require_counters = state in {"READY", "PRESENT", "WAITING", "FAULT"} or any(
+        key in fields for key in counter_fields
+    )
+    counters: dict[str, int] = {}
+    for field_name, attribute in counter_fields.items():
+        value = fields.get(field_name)
+        if value is None:
+            if require_counters:
+                raise ValueError(f"FLR-0399 live state lacks {field_name} counter")
+            counters[attribute] = 0
+            continue
+        if re.fullmatch(r"[0-9]+", value) is None:
+            raise ValueError(f"FLR-0399 state has malformed {field_name} counter")
+        counters[attribute] = int(value)
     return Sample(
         state=state,
         identity=identity,
         log_path=log_path,
         detail=fields.get("DETAIL", ""),
+        **counters,
     )
 
 

@@ -152,6 +152,42 @@ fix or product-acceptance pass.
    HUD composition, interaction stability, five-minute present, or two-boot
    acceptance is complete.
 
+## Plan / Do / Check / Act
+
+### Plan
+
+- Freeze the 0334 image, Demo launch, environment, QEMU profile, and one-run
+  evidence roles. Change observer/debugger supervision only.
+- Use separate red/green slices for counters/run IDs, direct launch/GDB command,
+  and the one-shot identity-checked trigger. No build; one fresh QEMU run only
+  after committed bundle transfer and a clean Mini preflight.
+
+### Do
+
+- Task 1 adds strict READY/PRESENT/SUN counter preservation and accepts the
+  fresh `flr0401-NNNN` run namespace in the Python and shell validators.
+- No product source, image, recipe, build input, cache, or Mini runtime has been
+  changed or touched in this ticket.
+
+### Check
+
+- Task 1 red: 46 focused tests ran with 4 failures and 3 errors at the missing
+  counter/run-ID contracts.
+- Task 1 green: focused suite 46/46 PASS; QEMU start-helper `bash -n` and
+  no-write Python syntax parse PASS.
+- Full Python suite: 197 tests, 196 PASS and one known unrelated FLR-0397 stale
+  run-ID fixture failure. Sandbox initially denied five localhost socket tests;
+  the same suite completed with explicit local socket access and exposed only
+  that known failure.
+
+### Act
+
+- Commit the green Task 1 slice locally. Next add direct-launch and selected
+  GDB command contracts before implementing the command builder. Then add the
+  trigger/controller tests as a separate slice.
+- Do not use this diagnostic ticket as product completion; keep Gate A/B and
+  all final acceptance conditions open.
+
 ## Impact
 
 - **Build-time / packaging:** none; reuse the existing exact image and cache.

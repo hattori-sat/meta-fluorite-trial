@@ -15,7 +15,7 @@ case "$mode" in
 esac
 
 : "${FLR0399_RUN_ID:?FLR0399_RUN_ID-is-required}"
-[[ "$FLR0399_RUN_ID" =~ ^flr(0399|0400)-[0-9]{4}$ ]] || fail invalid-run-id
+[[ "$FLR0399_RUN_ID" =~ ^flr(0399|0400|0401)-[0-9]{4}$ ]] || fail invalid-run-id
 run_id=$FLR0399_RUN_ID
 run_ticket=${run_id%%-*}
 ticket_number=${run_ticket#flr}

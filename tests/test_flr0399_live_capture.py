@@ -1059,11 +1059,17 @@ class GuestCommandContractTests(unittest.TestCase):
             )
 
         with tempfile.TemporaryDirectory() as evidence_root:
+            expected = expected_run_dir(Path(evidence_root), "flr0401-0001")
+            self.assertEqual(
+                Path(evidence_root).resolve() / "flr0401-0001" / "qemu", expected
+            )
+
+        with tempfile.TemporaryDirectory() as evidence_root:
             with self.assertRaises(ValueError):
                 expected_run_dir(Path(evidence_root), "../flr0399-0001")
 
     def test_generated_commands_parse_as_bash_and_posix_sh(self):
-        for run_id in ("flr0399-0001", "flr0400-0001"):
+        for run_id in ("flr0399-0001", "flr0400-0001", "flr0401-0001"):
             commands = guest_commands(run_id)
             for shell in ("bash", "sh"):
                 for name, command in commands.__dict__.items():
@@ -1093,7 +1099,7 @@ class GuestCommandContractTests(unittest.TestCase):
         environment = os.environ.copy()
         for name in ("BUILD_DIR", "BUILD_TMPDIR", "BUILD_EVIDENCE"):
             environment.pop(name, None)
-        environment["FLR0399_RUN_ID"] = "flr0400-0001"
+        environment["FLR0399_RUN_ID"] = "flr0401-0001"
 
         result = subprocess.run(
             ["bash", str(start_helper), "preflight"],
@@ -1161,6 +1167,38 @@ class GuestCommandContractTests(unittest.TestCase):
                 stage="ready",
             )
 
+    def test_state_parser_preserves_present_counters_for_live_gate_samples(self):
+        sample = parse_state_output(
+            "FLR0399_STATE=READY PID=694 UID=1001 START=23470 "
+            "READY=1 PRESENT_BEGIN=3 PRESENT_RETURN=2 SUN=1 "
+            "LOG_PATH=/run/user/1001/flr0401-0001-gdb.log\n",
+            stage="ready",
+        )
+
+        self.assertEqual(1, sample.ready_count)
+        self.assertEqual(3, sample.present_begin)
+        self.assertEqual(2, sample.present_return)
+        self.assertEqual(1, sample.sun_count)
+
+    def test_state_parser_rejects_missing_duplicate_and_malformed_counters(self):
+        valid = (
+            "FLR0399_STATE=READY PID=694 UID=1001 START=23470 READY=1 "
+            "PRESENT_BEGIN=3 PRESENT_RETURN=2 SUN=1 "
+            "LOG_PATH=/run/user/1001/flr0401-0001-gdb.log\n"
+        )
+        malformed = {
+            "missing-present-begin": valid.replace("PRESENT_BEGIN=3 ", ""),
+            "duplicate-ready": valid.replace("READY=1 ", "READY=1 READY=2 "),
+            "negative-sun": valid.replace("SUN=1", "SUN=-1"),
+            "nonnumeric-present-return": valid.replace(
+                "PRESENT_RETURN=2", "PRESENT_RETURN=two"
+            ),
+        }
+        for label, marker in malformed.items():
+            with self.subTest(label=label):
+                with self.assertRaises(ValueError):
+                    parse_state_output(marker, stage="ready")
+
     def test_waiting_marker_remains_a_pollable_state(self):
         for stage in ("ready", "present"):
             sample = parse_state_output(
@@ -1193,8 +1231,10 @@ class GuestCommandContractTests(unittest.TestCase):
         identity = "PID=694 UID=1001 START=23470"
         outputs = iter(
             [
-                f"FLR0399_STATE=WAITING {identity} LOG_PATH={log_path}\n",
-                f"FLR0399_STATE=PRESENT {identity} LOG_PATH={log_path}\n",
+                f"FLR0399_STATE=WAITING {identity} READY=0 PRESENT_BEGIN=0 "
+                f"PRESENT_RETURN=0 SUN=0 LOG_PATH={log_path}\n",
+                f"FLR0399_STATE=PRESENT {identity} READY=1 PRESENT_BEGIN=1 "
+                f"PRESENT_RETURN=1 SUN=1 LOG_PATH={log_path}\n",
             ]
         )
         calls = []

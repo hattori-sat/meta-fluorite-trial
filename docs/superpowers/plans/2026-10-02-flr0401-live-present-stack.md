@@ -38,17 +38,18 @@
 
 ---
 
-### Task 1: Add failing tests for the current Present boundary and debugger contract
+### Task 1: Add failing tests for state counters and the FLR-0401 run identity
 
 **Files:**
 - Modify: `tests/test_flr0399_live_capture.py`
-- Test: `tests/test_flr0399_live_capture.py`
+- Modify: `scripts/flr0399_live_capture.py`
+- Modify: `work/commands/FLR-0399-qemu-start.sh`
 
 **Interfaces:**
 - Consumes: current `parse_state_output`, `guest_commands`, and `run_once` APIs.
-- Produces: regression tests for the new `Sample` counters, opt-in direct launch, selected-stack command, and one-shot callback.
+- Produces: regression tests only for the new `Sample` counters and accepted FLR-0401 run identity.
 
-- [ ] **Step 1: Test counter preservation on an unmatched state**
+- [x] **Step 1: Test counter preservation on an unmatched state**
 
 ```python
 def test_state_parser_preserves_unmatched_present_counters():
@@ -64,82 +65,34 @@ def test_state_parser_preserves_unmatched_present_counters():
     assert sample.sun_count == 1
 ```
 
-- [ ] **Step 2: Test direct launch, strict counter rejection, and bounded selected-stack command**
+Also require `expected_run_dir(..., "flr0401-0001")` to resolve within its
+evidence role, and exercise the start helper with that ID until it reaches the
+expected missing-build-role gate (before any runtime action).
 
-```python
-def test_direct_launch_keeps_profile_and_defers_one_selected_stack_attach():
-    commands = guest_commands("flr0401-0001", launch_mode="direct")
-    assert "/usr/bin/flutter-auto" in commands.launch
-    assert "FLUORITE_SEQUOIA_LIT_MATERIAL_OVERRIDE=1" in commands.launch
-    assert "FLR0305_PRODUCTION_SCENE_LIGHT=1" in commands.launch
-    assert "/usr/bin/gdb -q --batch -p" not in commands.launch
-    assert "PRESENT_BEGIN" in commands.capture_present_stack
-    assert "PRESENT_RETURN" in commands.capture_present_stack
-    assert "FEngine::loop" in commands.capture_present_stack
-    assert "lvp_pipe_sync_wait" in commands.capture_present_stack
-    assert "bt 8" in commands.capture_present_stack
-    assert "bt 24" in commands.capture_present_stack
-    assert "thread apply all" not in commands.capture_present_stack
-    assert ">>\"$log\" 2>&1" in commands.capture_present_stack
-```
+- [x] **Step 2: Test rejection of malformed state counters**
 
-Also assert that missing, duplicate, negative, and non-decimal counter fields
-are rejected, and that the default `guest_commands("flr0400-0001")` remains
-the existing GDB-owned launch.
+Add table-driven parser cases for a missing `PRESENT_BEGIN`, duplicate
+`READY`, negative `SUN`, and non-decimal `PRESENT_RETURN`; each must raise
+`ValueError`.
 
-- [ ] **Step 3: Test the callback runs once only for a stable live unmatched sample**
-
-```python
-def test_unmatched_present_requests_one_live_stack_capture():
-    identity = Identity(pid=694, uid=1001, start_time=23470)
-    log_path = "/run/user/1001/flr0401-0001-gdb.log"
-    samples = iter(
-        [
-            Sample("READY", identity, log_path, present_begin=1, present_return=0),
-            Sample("LIVE", identity, log_path),
-            Sample("LIVE", identity, log_path),
-            Sample("PRESENT", identity, log_path, present_begin=1, present_return=1),
-            Sample("LIVE", identity, log_path),
-        ]
-    )
-    events = []
-
-    def read_state(stage, _remaining):
-        events.append(("read", stage))
-        return next(samples)
-
-    result = run_once(
-        read_state=read_state,
-        capture_frame=lambda stage, seen, _remaining: events.append(
-            ("frame", stage, seen)
-        ),
-        capture_present_stack=lambda seen, remaining: events.append(
-            ("gdb", seen, remaining)
-        ),
-        preserve_evidence=lambda: events.append(("preserve",)),
-        teardown=lambda: events.append(("teardown",)),
-        expected_log_path="/run/user/1001/flr0401-0001-gdb.log",
-        timeout_seconds=10,
-        monotonic=lambda: 0.0,
-    )
-    assert sum(event[0] == "gdb" for event in events) == 1
-    assert [event[1] for event in events if event[0] == "gdb"] == [identity]
-    assert result.status == "OBSERVED"
-    assert events[-2:] == [("preserve",), ("teardown",)]
-```
-
-- [ ] **Step 4: Run the focused suite and confirm the new tests fail for missing behavior**
+- [x] **Step 3: Run the focused suite and confirm the new tests fail for missing behavior**
 
 Run: `python3 -m unittest tests.test_flr0399_live_capture -v`
 
-Expected: failures are limited to the new counter fields, direct launch/GDB command, and unmatched-stack callback; existing 44 FLR-0400 tests continue passing.
+Result: 46 tests ran; 4 failures and 3 errors reproduce the missing counter/run-ID behavior. Existing unrelated observer cases pass. The exact failure list is in the FLR-0401 working log.
 
-- [ ] **Step 5: Commit the red tests locally**
+- [x] **Step 4: Implement only the counter and run-ID slice**
 
-```sh
-git add tests/test_flr0399_live_capture.py
-git commit -m "test(observer): cover live unmatched present stack capture"
-```
+Add four zero-default `Sample` counter fields. Require exactly one unsigned
+decimal value for each READY/PRESENT_BEGIN/PRESENT_RETURN/SUN field and reject
+missing or malformed values. Accept `flr0401-NNNN` in the Python and shell
+validators and update their validation messages. Keep launch behavior and
+state classification unchanged.
+
+- [x] **Step 5: Re-run the focused suite and commit this green slice locally**
+
+Run the focused suite and `bash -n work/commands/FLR-0399-qemu-start.sh`, then
+commit only this parser/run-ID slice. Do not push.
 
 ### Task 2: Add the opt-in direct launch and identity-checked GDB command
 
@@ -151,32 +104,40 @@ git commit -m "test(observer): cover live unmatched present stack capture"
 - Consumes: `guest_commands(run_id, launch_mode=...)` and the run-scoped `LOG_PATH`/identity file.
 - Produces: unchanged default `gdb-run` commands; `direct` launch plus `GuestCommands.capture_present_stack`.
 
-- [ ] **Step 1: Accept FLR-0401 run IDs and add strict state-counter parsing**
+- [ ] **Step 1: Add failing direct-launch and selected-stack command tests**
 
-Extend the Python run-ID regex and `work/commands/FLR-0399-qemu-start.sh` case regex to accept `flr0401-NNNN`; retain the 0399 and 0400 cases and reject all others. Update the associated validation messages. Add an assertion that `expected_run_dir("flr0401-0001")` and `guest_commands("flr0401-0001", launch_mode="direct")` are accepted.
+Assert that direct mode preserves the pinned Demo bundle, UID, XDG/Wayland
+variables, four diagnostic environment values, timeout, shared log, and
+PID/UID/start recording, but does not invoke GDB during app launch. Assert the
+default `guest_commands("flr0400-0001")` command shape remains unchanged.
+Assert the attach command checks saved identity and unmatched counters,
+attaches only to that PID, appends to the same log, selects exact
+`FEngine::loop` threads, records at most eight frames and expands to 24 only
+after `lvp_pipe_sync_wait`, detaches, and prints a bounded result marker.
+Assert one-line/4096-byte framing and that the `observe` CLI accepts
+`--launch-mode direct`.
 
-Parse one non-negative decimal value for each `READY`, `PRESENT_BEGIN`, `PRESENT_RETURN`, and `SUN` field. Reject missing, duplicate, negative, or non-decimal counter fields. Populate the four `Sample` fields without changing state classification or process identity parsing.
+- [ ] **Step 2: Run the focused tests and record the expected red result**
 
-- [ ] **Step 2: Generate the direct app command with the exact pinned profile**
+Run: `python3 -m unittest tests.test_flr0399_live_capture -v`.
+Expected: only the new direct-mode/attach/CLI contracts fail.
 
-Keep `XDG_RUNTIME_DIR=/run/user/1001`, `WAYLAND_DISPLAY=wayland-0`, the same four environment assignments, Demo bundle, `/usr/bin/timeout` bound, stdout/stderr path, and PID/UID/start recording. Do not invoke GDB in the direct launch command. Add `--launch-mode {gdb-run,direct}` to the CLI; default to `gdb-run` so FLR-0399/0400 behavior is unchanged.
+- [ ] **Step 3: Implement launch selection and command generation**
 
-- [ ] **Step 3: Generate a single bounded selected-thread attach command**
+Keep `gdb-run` as the default. Direct mode retains the exact profile and
+`/usr/bin/timeout --signal=TERM --kill-after=2s 150` and shared log, but runs
+`/usr/bin/flutter-auto` without a GDB parent. Generate one selected-thread
+attach command with a 20-second timeout and detach. Add the explicit CLI mode
+and pass it to `guest_commands`.
 
-Reuse the selected-thread logic from `work/commands/FLR-0341-capture-present-stack.cmd`: require `PRESENT_BEGIN > PRESENT_RETURN`, verify the saved app PID/UID/start token, run GDB with a 20-second timeout, print at most eight frames for each exact `FEngine::loop` thread, expand to 24 only when the eight-frame stack contains `lvp_pipe_sync_wait`, and detach. Append GDB stdout/stderr to the configured combined app log. Print a unique result marker for attach success, timeout, or no selected thread. Extend `make_state_reader` to route `present-stack` to `GuestCommands.capture_present_stack`. Recheck process identity after GDB in the controller and fail closed if it changed.
+- [ ] **Step 4: Run focused tests and shell-parse generated commands**
 
-- [ ] **Step 4: Validate both launch modes and command framing**
+Run the focused observer suite; parse every generated guest command with `sh`
+and `bash -n`; verify the default mode remains compatible.
 
-Run: `python3 -m unittest tests.test_flr0399_live_capture.LiveCaptureControllerTests -v`
+- [ ] **Step 5: Commit the direct-launch slice locally**
 
-Expected: direct mode is explicit; the default `guest_commands("flr0400-0001")` still generates the old GDB-owned launch; every generated serial command remains single-line and at most 4096 bytes.
-
-- [ ] **Step 5: Commit the command-generation change locally**
-
-```sh
-git add scripts/flr0399_live_capture.py tests/test_flr0399_live_capture.py
-git commit -m "feat(observer): attach to live unmatched present"
-```
+Commit the direct-launch/command-generation slice locally; do not push.
 
 ### Task 3: Trigger the attach once within the existing absolute deadline
 
@@ -188,17 +149,29 @@ git commit -m "feat(observer): attach to live unmatched present"
 - Consumes: parsed counter fields, `capture_present_stack` command, existing `read_state`, QMP capture, and exact teardown adapters.
 - Produces: at most one selected GDB capture after a live unmatched sample and a post-attach identity verification.
 
-- [ ] **Step 1: Call the injected stack-capture callback at the first live unmatched sample**
+- [ ] **Step 1: Add failing callback tests for matched/unmatched and identity boundaries**
 
-Check `sample.present_begin > sample.present_return` after each identity-stable live state sample and before sleeping for another poll. Do not call when the counters match, the identity is absent/wrong UID, or the callback has already been attempted. The callback writes a separately named QMP still before the GDB serial request. Use the remaining portion of the same 120-second monotonic deadline; cap the GDB sub-operation at 20 seconds.
+Test one trigger on the first live unmatched sample, no trigger when counters
+match or identity is missing/wrong-UID, no second trigger on repeated unmatched
+polls, no work after the absolute deadline, and preservation before exactly-once
+teardown on callback timeout. Test stable-identity verification before and
+after the trigger still and after GDB; assert still capture precedes the GDB
+callback.
 
-- [ ] **Step 2: Verify process identity after the attach and preserve failures**
+- [ ] **Step 2: Run focused tests and record expected red results**
 
-Request one identity snapshot after the attach. If PID/UID/start changed, classify the stack as non-live evidence and stop further polling. Record timeout/attach errors in `Outcome.errors`; if the process identity remains stable after a bounded GDB timeout, continue polling under the original absolute deadline. In all cases use the existing evidence-preservation-then-exactly-once-teardown path; do not retry GDB.
+Run: `python3 -m unittest tests.test_flr0399_live_capture -v`.
+Expected: the new callback and ordering cases fail while existing observer
+behavior remains unchanged.
 
-- [ ] **Step 3: Add deterministic tests for trigger/no-trigger/identity-change/deadline cases**
+- [ ] **Step 3: Implement the one-shot trigger inside the fixed deadline**
 
-Assert one trigger still/attach on repeated unmatched polls, zero attach when `present_begin <= present_return`, no attach for missing/wrong identity, no read or attach after the absolute deadline, stable identity after attach, and evidence preservation before exactly-once teardown after attach timeout. Assert the trigger still occurs before the GDB serial call.
+Check `present_begin > present_return` after each live sample and before the
+next poll sleep. At most once, verify identity, capture the distinct full QMP
+still, verify identity again before GDB, execute the 20-second-bounded attach,
+and verify identity after GDB. Stop if identity changes; otherwise retain
+callback/timeouts in `Outcome.errors` and continue polling within the original
+deadline. Always preserve evidence before exactly-once teardown.
 
 - [ ] **Step 4: Run focused observer and serial regressions**
 
@@ -208,10 +181,7 @@ Expected: all focused observer tests pass; the existing localhost serial tests r
 
 - [ ] **Step 5: Commit the one-shot controller change locally**
 
-```sh
-git add scripts/flr0399_live_capture.py tests/test_flr0399_live_capture.py
-git commit -m "fix(observer): bound live stack capture and teardown"
-```
+Commit the controller slice locally only; do not push.
 
 ### Task 4: Verify locally and transfer the committed observer to Mini
 
