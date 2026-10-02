@@ -97,20 +97,17 @@ remains separately owned by FLR-0398 after Gate A is established.
 - Capped each state snapshot at 15 seconds and gave repeated READY and PRESENT
   requests unique immutable evidence labels. Strict echo/marker checks and
   evidence overwrite rejection remain unchanged.
-- The first identity-bracketed live frame now gets a full still and one
-  four-frame/one-second QMP video. Later READY/PRESENT captures remain stills;
-  no more than one live video is produced per run.
-- Allowed fresh run `flr0400-0001` through the shared FLR-0399 observer/start
-  implementation. Its run directory and QMP socket are ticket-scoped
-  (`flr0400-0001/qemu/qmp-0400.sock`); FLR-0399 module/protocol markers remain
-  implementation names only. No product source, image, or build input changed.
-- TDD red/green covered WAITING preservation, one-shot guest commands, unique
-  READY/PRESENT serial labels, WAITING→READY→PRESENT, the same deadline across
-  both gates, one early video, no post-deadline read/capture, and evidence
-  preservation before exactly-once teardown. Current focused result: 44/44.
-- GPT-6.1 Sol's read-only review caught the repeated-PRESENT evidence-label
-  collision; numbered labels and an adapter-level WAITING→PRESENT regression
-  were added before continuing.
+- Captured the first identity-bracketed live QMP frame as a full still plus
+  four-frame/one-second video; later READY/PRESENT frames are stills. No more
+  than one live video is produced per run.
+- Transferred the committed observer by the official bundle helper. Fresh Mini
+  preflight verified the exact 0334 image and run inputs, clean ownership,
+  free ports/socket, and unused `flr0400-0001`; no build was run.
+- Ran exactly one Mini QEMU observation on the existing image. The observer
+  reached a PID/UID/start-bracketed READY frame, then stopped at its one
+  120-second deadline when Present had not returned. No retry or second QEMU
+  was started.
+- No product source, image, build input, or Mini cache changed.
 
 ### Check
 
@@ -128,19 +125,42 @@ remains separately owned by FLR-0398 after Gate A is established.
   corrected, and the checkpoint now passes with exactly one active ticket.
   After the final documentation update, checkpoint, privacy, canonical, and
   staged-whitespace checks all PASS.
-- Mac read-only process scan found no QEMU/runqemu/BitBake; the existing
-  Podman machine and Docker helper were not touched. Mini ownership and
-  process/port state still require a fresh preflight before any QEMU run.
-- Official bundle handoff, fresh Mini preflight, one QEMU run, full-frame still
-  and video review, runtime-evidence preservation, and independent cleanup
-  checks remain pending.
+- Fresh Mini preflight and official bundle receiver validation passed. One
+  QEMU run produced `PRESENT_DEADLINE_EXPIRED`; `READY=1`,
+  `PRESENT_BEGIN=1`, `PRESENT_RETURN=0`, and `SUN=1` were sampled against the
+  same live PID/UID/start identity.
+- The WAITING full frame is black and byte-identical to the pre-launch frame.
+  The READY full frame shows the CPU/GPU/FPS HUD and Scenes control, while the
+  fixed Sequoia ROI `(440,220,400,360)` is uniformly black (0 changed, edge,
+  or chromatic pixels). This run therefore does not pass the colored-Sequoia
+  visual gate; it does establish visible Flutter HUD output on this image and
+  profile. See [FLR-0400 evidence](../evidence/FLR-0400-0001.md).
+- The bounded kernel journal contains an `FEngine::loop` page-fault/Oops at
+  `02:44:30 UTC`; the focused coredump query is `EMPTY`. The instruction bytes
+  include `ff <cf>` and low RSP bits match CR2, but these signatures do not
+  identify the faulting operation or cause. Do not infer LLVM/WSI causality.
+- The GDB log has no selected stack: `/usr/bin/gdb --batch -ex run` was still
+  executing the inferior when the observer collected evidence, so the queued
+  `thread apply all bt 8` did not execute. This is the next debugger-supervision
+  discriminator, not evidence against WSI or another FEngine path.
+- QMP quit, exact target cleanup, and independent postflight passed: no target
+  process, QMP socket, or forwarded-port residue. The existing Mac Podman
+  machine and Docker helper were not touched. No image was copied to Mac.
+- The QMP still/video derivatives are small local review artifacts; the raw
+  Mini PPMs and runtime logs remain under the fixed `$BUILD_EVIDENCE` role.
 
 ### Act
 
-- If a live frame is captured, classify its full-frame and Sequoia/HUD regions
-  without promoting READY or a diagnostic fixture to product success.
-- If still UNKNOWN, use the preserved first boundary to open the next focused
-  ticket; never retry `flr0399-0001` or weaken the serial protocol.
+- The observer repair is demonstrated on one exact-image run: WAITING/READY
+  polling, full-frame QMP still/video, pre-teardown evidence collection, and
+  exact cleanup all completed or ended at the declared deadline. The product
+  renderer did not pass: the Sequoia ROI is black, Present is unmatched, and
+  an Oops is recorded. These are separate results, not one established cause.
+- Do not retry `flr0400-0001` or weaken the serial protocol. Open the separate
+  FLR-0401 task to change only debugger supervision and capture one selected
+  live `FEngine::loop` stack at the first identity-stable unmatched Present.
+- Keep Gate A (original-material colored Sequoia) and Gate B (same-frame HUD +
+  Sequoia) unproven. The overall user goal remains open.
 
 ## Fresh-run procedure
 
@@ -157,7 +177,9 @@ python3 scripts/flr0399_live_capture.py observe \
 ```
 
 The helper variable retains its FLR-0399 name for compatibility; only the new
-FLR-0400 run ID is used. Never retry this ID after any start/observer attempt.
+FLR-0400 run ID is used. This procedure has already consumed
+`flr0400-0001`; never run it again or retry that ID. Use a new ticket/run ID
+for every later observation.
 
 ## Impact and acceptance
 
