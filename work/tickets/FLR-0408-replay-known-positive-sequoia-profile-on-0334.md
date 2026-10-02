@@ -1,6 +1,6 @@
 # FLR-0408 — replay known-positive Sequoia model-only profile on exact 0334
 
-- Status: In Progress
+- Status: Waiting — no live QMP frame before SIGSEGV; Gate-A pixels UNKNOWN
 - Priority: High
 - Created: 2026-10-03
 - Owner: Mini QEMU / UID-1001 Example Demo / shared app log / QMP and kernel evidence
@@ -338,11 +338,11 @@ product objective.
   target, QMP socket, or forwarded port. Classify `RUNTIME_FAULT=YES`,
   `SCENE_ADD=UNKNOWN`, `PRESENT_HEALTH=FAIL at process termination`, and
   `GATE_A_PIXELS=UNKNOWN`.
-- A separate follow-up ticket should resolve the core against the exact
-  unstripped executable/debug symbols and caller chain. The immediate fault
-  site is inside `flutter-auto`, but do not attribute pointer origin to
+- FLR-0409 owns the bounded read-only search for the exact Build-ID symbols
+  and caller chain. This replay is Waiting because its live visual gate was
+  missed and cannot be recovered from the preserved core; do not call the
+  missing frame black or visible. Do not attribute pointer origin to
   Flutter/Filament/Mesa or causality to present/scene loading without symbols
-  and further evidence. This bounded replay remains In Progress; the user goal
-  is not complete.
+  and further evidence. The user goal is not complete.
 - Do not claim original lighting, HUD composition, interaction/repaint
   stability, five-minute health, or two-boot acceptance from this ticket.

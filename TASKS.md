@@ -4,7 +4,7 @@ Last updated: 2026-10-03
 
 ## Current focus
 
-**Active as of 2026-10-03:** FLR-0408 remains the sole In Progress ticket. Its exact-0334 model-only launch ended in a userspace SIGSEGV before any QMP frame was captured; Sequoia/HUD pixels remain UNKNOWN, not black. The preserved core points to an unmapped-pointer dereference in stripped `flutter-auto`; pointer origin and responsible function are unresolved. Overall product acceptance remains open.
+**Active as of 2026-10-03:** FLR-0409 is the sole In Progress ticket: perform a bounded read-only search for exact Build-ID-matched `flutter-auto` symbols and resolve the saved LWP 812 crash boundary if possible. FLR-0408 is Waiting because its exact-0334 model-only replay ended in SIGSEGV before any QMP frame; Sequoia/HUD pixels are UNKNOWN, not black. The stripped executable proves an unmapped-pointer dereference, but caller, pointer origin, rendering relation, and overall product acceptance remain unresolved.
 
 **Current user-visible target (2026-10-03):** display production Sequoia with original material/texture/lighting, composed with the Flutter HUD, stable through input/repaint, five minutes of progressing present, and two independent boots on one final candidate image. Keep visual gates separate: production Sequoia pixels (Gate A), then same-frame HUD+Sequoia composition (Gate B). FLR-0394 proves only a self-created LIT fixture plus HUD. FLR-0049 proves historical production Sequoia pixels/red lamps on another run, but not HUD composition or current-image acceptance. FLR-0404 is a negative ordinary-profile run on exact 0334. FLR-0405-0003 also failed to show the production car/HUD; event ordering remains UNKNOWN. FLR-0408 replayed the known-positive 0049 model-only controls on exact 0334, but its delayed live capture missed the app's 22:35:52Z SIGSEGV; the run has no QMP image and no pixel verdict. The next independent task is exact-Build-ID symbol resolution, not a rendering or black-screen conclusion. FLR-0398 remains gated until a valid current-image production visual gate is established.
 
@@ -32,7 +32,7 @@ Last updated: 2026-10-03
 
 **FLR-0391 result:** Patch 0333 applied the proven constant blue LIT source to Sequoia; Mini `do_patch`, compile, and full image build passed. Runtime reached `READY=1/BOUND=24/SUN=1`, but live QMP showed the HUD/Scenes over a fully black Sequoia ROI (0/144000). Present was 2 begins/1 return, then `FEngine::loop` Oops #2 and app status 124. Full screenshot/video and metrics: [FLR-0391 manifest](work/evidence/FLR-0391-0001.md). The material was applied, but visible Sequoia is NOT established.
 
-**Active task:** FLR-0408 is the sole In Progress ticket; the historical profile ran on exact 0334 but yielded no visual verdict and the app later SIGSEGV'd. The exact core is preserved and QEMU cleanup passed. Before a fresh visual replay, open a separate FLR-0409 ticket to resolve the exact executable Build-ID/debug symbols and faulting caller; do not expand FLR-0408 into crash root-cause work or repeat the delayed-capture sequence. Production lighting, same-frame HUD, depth/view, input/repaint stability, five-minute health, and two-boot acceptance remain NOT MET.
+**Active task:** FLR-0409 is the sole In Progress ticket for read-only exact-Build-ID symbol recovery from already-existing package/debug/link artifacts. FLR-0408 is Waiting: the model-only profile launched on exact 0334 but SIGSEGV'd before a live QMP capture; the core was preserved and QEMU cleanup passed. Do not repeat the delayed-capture sequence, start BitBake, or infer a rendering/present cause. After this bounded symbol search, create a separate fresh-run ticket with QMP capture immediately after live identity confirmation. Production lighting, same-frame HUD, depth/view, input/repaint stability, five-minute health, and two-boot acceptance remain NOT MET.
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -48,7 +48,8 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| [FLR-0408](work/tickets/FLR-0408-replay-known-positive-sequoia-profile-on-0334.md) | replay FLR-0049's production Sequoia model-only profile on exact 0334 as a bounded Gate-A pixel discriminator | Mini QEMU / UID-1001 Example Demo / shared app log / QMP and kernel evidence | In Progress; no visual pass. Launch PID 765/UID 1001/start 239895 passed; the old scene gate returned `LOG_INVALID`; the 22:15Z snapshot had marker=0 and present `76/75/75`, kernel faults=0. App SIGSEGV at 22:35:52Z; delayed 22:46Z pre-capture identity failed, so no QMP still/video and pixels remain UNKNOWN. The saved core proves an unmapped-pointer dereference in stripped `flutter-auto`; caller/origin UNKNOWN. Core and GDB output hashes are in [the evidence manifest](work/evidence/FLR-0408-0001.md). QMP teardown and ports passed; exact 0334 hashes unchanged. | Do not repeat the delayed capture. Open separate FLR-0409 to resolve exact Build-ID `529c5d321d81192f82f146d9d23736722aec2208` symbols/caller; then return to an immediate live QMP capture. Keep original-light, HUD composition, interaction, five-minute and two-boot gates open. |
+| [FLR-0409](work/tickets/FLR-0409-symbolize-flutter-auto-sigsegv.md) | locate exact Build-ID-matched symbols for the saved `flutter-auto` SIGSEGV and resolve its defensible caller boundary | Existing 0334 image/package/debug/link outputs and preserved Mini core; read-only | In Progress: LWP 812 SIGSEGV at executable offset `0xd5198d`, with unmapped `RAX=si_addr=0x7f0a79cbc1c4`; exact symbols unavailable so far. Sol recommends searching existing packaged debug artifacts first, then existing link/install outputs, and stopping rather than rebuilding if absent. | Verify Build-ID, architecture, ELF mapping/load bias and caller chain using existing artifacts only. No BitBake, QEMU, cache mutation, guest package install, or root-cause claim from the instruction address alone. |
+| [FLR-0408](work/tickets/FLR-0408-replay-known-positive-sequoia-profile-on-0334.md) | replay FLR-0049's production Sequoia model-only profile on exact 0334 as a bounded Gate-A pixel discriminator | Mini QEMU / UID-1001 Example Demo / shared app log / QMP and kernel evidence | Waiting; visual result UNKNOWN. Launch PID 765/UID 1001/start 239895 passed; old scene gate returned `LOG_INVALID`; the 22:15Z snapshot had marker=0 and present `76/75/75`, kernel faults=0. App SIGSEGV at 22:35:52Z; delayed 22:46Z identity check failed, so no QMP still/video was captured. The preserved core proves an unmapped-pointer dereference in stripped `flutter-auto`; caller/origin UNKNOWN. Core/GDB hashes and exact 0334 identities are recorded; QMP teardown/ports passed. | Resume the product visual gate only with a fresh run and immediate identity-bracketed QMP capture. Do not interpret the missing frame as black or visible. Keep lighting, HUD composition, interaction, five-minute, and two-boot gates open. |
 | [FLR-0405](work/tickets/FLR-0405-capture-first-fengine-fault-present-order.md) | correlate the first ordinary-profile FEngine fault with the unmatched present before the faulting LWP disappears | Mini QEMU / guest Example Demo+GDB / shared app log / QMP and kernel evidence | Waiting: FLR-0405-0003 ran exact 0334. Oops uptime 166.449 precedes the later unhealthy gate at 223.77, but present markers have no timestamps; event order and causality are UNKNOWN. The live identity-bracketed QMP frame is white/black polygon with no HUD or recognizable Sequoia; eight frames are identical. Late GDB missed TID 705. Teardown passed; raw Mini evidence retention is UNKNOWN. | Do not repeat the same ordinary-profile run. Revisit only if FLR-0408 shows the positive profile also fails; then capture the earliest fault in the minimal reproducible condition. |
 | [FLR-0403](work/tickets/FLR-0403-correlate-fengine-oops-to-lwp.md) | correlate same-run FEngine Oops TID with GDB LWP, ELF Build-ID, and present | Mini QEMU / manual guest Flutter+GDB / QMP and kernel evidence | Waiting: one exact-0334 run completed; diagnostic-profile QMP shows HUD and black Sequoia ROI; Oops logged; capture not identity-bracketed; process exited before GDB/maps/Build-ID; no coredump; exact teardown passed | Preserve UNKNOWN and do not infer Oops causality. FLR-0404 compares the ordinary profile on this same image |
 | [FLR-0402](work/tickets/FLR-0402-dimension-aware-qmp-analysis.md) | make QMP pixel analysis follow actual PPM dimensions; skip only named fixed ROIs outside the image | Mac observer/test source / QMP pixel analyzer / evidence roles | Done as analyzer-only: red reproduced; 78/78 focused tests PASS; exact 720x400 and 1280x800 FLR-0401 PPM hashes replayed; Sequoia remains 144,000/144,000 black; no product/build/QEMU changes | Reuse the dimension-aware analyzer; this tooling pass is not a rendering pass |
@@ -346,15 +347,13 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 ## Next
 
-**Current next gate (2026-10-03):** The FLR-0408 exact-0334 replay ended in
-`flutter-auto` SIGSEGV before a live QMP frame. The preserved core locates an
-unmapped-pointer read in the stripped executable, but caller symbols and
-pointer origin remain UNKNOWN. Open separate FLR-0409 to find the exact
-Build-ID-matched unstripped executable/debug symbols and resolve LWP 812; do
-not infer a render/present cause or repeat the delayed capture. Then resume
-the product gate with an immediate identity-bracketed full-screen QMP capture.
-Original lighting, same-frame HUD, interaction/repaint stability, five-minute
-present, and two-boot acceptance remain unmet.
+**Current next gate (2026-10-03):** FLR-0409 is active: read only the existing
+image/package/debug/link outputs for exact Build-ID-matched symbols and resolve
+the saved LWP 812 caller if possible. Do not infer a render/present cause or
+start a rebuild when symbols are absent; record the bounded search and stop.
+Then create a separate runtime ticket with QMP capture immediately after live
+identity confirmation. Original lighting, same-frame HUD, interaction/repaint
+stability, five-minute present, and two-boot acceptance remain unmet.
 
 **Historical FLR-0370 next-gate rationale (2026-09-30):** Current-image controls form three cells: UNLIT+parameter is visible (FLR-0368), LIT/SUN+parameter is black (FLR-0367), and LIT/SUN+constant is visible (FLR-0369). Thus global color assignment failure was not supported; the remaining candidate was the LIT/SUN × dynamic-expression interaction. That comparison motivated FLR-0371 and remains its historical basis; it is not the current active-ticket status.
 
@@ -775,6 +774,8 @@ FLR-0026は、0197/0198/0199の証拠済み範囲を固定した履歴ticketと�
 | [FLR-0023](work/tickets/FLR-0023-flutter-engine-3d-fixture.md) | fixtureのnative crash boundaryからentity/renderable/frame/child surfaceの未達を切り分ける | FLR-0019, FLR-0021 |
 
 ## Waiting
+
+- [FLR-0408](work/tickets/FLR-0408-replay-known-positive-sequoia-profile-on-0334.md): Waiting. The historical model-only launch on exact 0334 ended in SIGSEGV before a QMP frame; pixels remain UNKNOWN. Core/GDB evidence is preserved and the recorded QEMU was cleanly stopped. FLR-0409 owns bounded symbol recovery; a later fresh runtime ticket must take QMP pixels immediately after identity confirmation.
 
 - [FLR-0399](work/tickets/FLR-0399-capture-live-sequoia-on-0334-image.md): Waiting. One exact-image QEMU run launched Flutter and sampled it live (`READY=0`, `PRESENT_BEGIN=0`, `PRESENT_RETURN=0`, `SUN=1`), but the guest's 100-pass READY loop exceeded the 40-second serial deadline; a late WAITING reply was correctly rejected on the next request. Evidence collection failed and no live Flutter QMP frame exists. Exact cleanup/postflight passed. Gate A remains UNKNOWN; preserve consumed run `flr0399-0001` and do not retry. FLR-0400 owns a fresh one-shot-snapshot/host-poll attempt.
 
