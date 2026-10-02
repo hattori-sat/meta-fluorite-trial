@@ -228,26 +228,35 @@ diagnostic result.
   and Oops-vs-present order are UNKNOWN. The first monitor detected an already
   existing fault at its initial sample; it did not observe the event live.
 - The same identity remained alive through QMP capture at uptime 447.76. The
-  guest app/GDB/observer log export passed (164,507 guest-log bytes). A bounded
-  same-boot ISO journal query is pending because app logs use wall time while
-  the kernel record currently uses monotonic time. Do not infer causality from
-  the event count, address, or LLVM symbol.
+  guest app/GDB/observer log export passed (164,507 guest-log bytes). The
+  bounded same-boot ISO journal query was attempted twice, but both serial-exec
+  sessions stopped at `echo-off-response-unexpected` before the guest command
+  was dispatched. Event order remains UNKNOWN because app markers use wall
+  time while the Oops currently has only monotonic time. Do not infer causality
+  from the event count, address, or LLVM symbol.
 - Validation: canonical/privacy/checkpoint/shell/file-size gates pass. The
   loopback-enabled Python suite remains 222/223 with one unrelated serial-exec
   validator fixture failure; Markdown has 11 historical missing links outside
   FLR-0405. Runtime is negative/unhealthy; product acceptance remains
-  NOT MET/UNKNOWN. App/QEMU teardown is pending.
+  NOT MET/UNKNOWN. QMP teardown and host postflight passed; guest SIGTERM
+  completion is unverified because serial-login confirmed only prompt
+  synchronization and no stop-result marker was captured.
 - Local checkpoint `5d8d4f2` committed TASKS, this ticket, its working log, and
   the seven guest commands on the FLR-0405 feature branch; no push was made.
-- Next: commit and transfer the bounded wall-clock context command, run it once,
-  then stop the exact guest app/QEMU and verify postflight. Preserve raw PPMs and
-  logs on Mini; only small reviewed PNG/MP4 files may be copied to Mac.
+- Local-only commit `88928b1` added the bounded wall-clock guest command and
+  pre-run evidence; the post-run closeout is being checked before its own
+  local-only commit. No push occurred.
+- Next: keep FLR-0405 In Progress and resolve the serial-exec observation gate
+  under the separate Inbox FLR-0406 before another fresh-ID runtime attempt.
+  Do not infer product root cause from a harness failure, symbol, or event
+  count.
 
 ### Check
 
 - The runtime reproduced the prior negative frame and present/Oops symptoms.
-  Product gates, five-minute stability, second boot, teardown, and postflight
-  are NOT MET/pending; do not mark the overall goal complete.
+  QMP teardown and postflight PASS. Product rendering, input/repaint,
+  five-minute stability, second boot, and overall acceptance remain NOT MET;
+  event ordering and guest SIGTERM completion remain UNKNOWN.
 
 ### Act
 
@@ -263,3 +272,47 @@ diagnostic result.
   debugger attach can perturb timing. No parallel QEMU/build.
 - **Integration risk:** no product source/image changes. Exact identity checks,
   QMP-only captures, and scoped teardown limit interference with other work.
+
+## Run closeout evidence (2026-10-02)
+
+- The transferred wall-clock command matched SHA-256
+  `789c9838e394cbc386b3a8b0f1eaa156dd3f39c3da340149b58fdf19ec5e0ed4`, was
+  1,345 bytes, one line, and passed `sh -n`. Both serial-exec attempts returned
+  `FAIL reason=echo-off-response-unexpected`; both guest command outputs were
+  empty, so the journal query was never dispatched. The first 52-byte setup
+  transcript matches the earlier successful guest-launch setup bytes. The
+  second 38-byte setup transcript contains two adjacent
+  `root@qemux86-64:~#` prompts after echo was already disabled. Mini and local
+  harness SHA-256 values match (`436d010e…`). Preserve the first attempt's
+  precise branch cause as UNKNOWN; the repeated prompt state warrants separate
+  mock-backed FLR-0406 work.
+- An initial read-only host probe incorrectly searched the guest's
+  `/run/user/1001` identity file on Mini and failed before mutation. A later
+  file-inventory command also exited before changing state because its shell
+  `printf` format began with `---`; both were corrected as read-only probes.
+- An initial stop-command invocation looked in the Mini repository's
+  `work/commands` instead of the run-scoped transferred command and failed its
+  read precondition; it did not connect to the guest. The correct run-scoped
+  stop command matched the committed source hash
+  `e579363db2a92d97f37ce4cc8b62724f715f695c7c64f37873e00f735f019765`.
+  `serial-login` reported `prompt-synchronized=true`, but its interface does
+  not return the command's status; the stop marker was absent from the separate
+  boot-serial file. Treat guest SIGTERM completion as UNKNOWN. The subsequent
+  negotiated QMP quit passed and reported zero residual target processes and
+  zero QMP socket.
+- Postflight rehashed the exact 0334 artifacts: rootfs
+  `80935c3f9fa81da66f068821637f512749602c701baa37e91bf777b8cf15c44c`, kernel
+  `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`, and
+  qemuboot `2363530e2f39d4e57465cb89e724327f699b8ab6247d9e1bb75fdc2a60780c10`
+  all match preflight. Ports 10930–10932 are free; receiver HEAD remains
+  `54c02bdcddbf80be579c4fd7d493f5bd24f6df6c`, clean. No build, product source,
+  or image file was changed.
+- The post-boundary QMP still and all eight 0.5-second PPM frames have the same
+  source hash `f686a3c2769cb2bc59b362bdc1d956c2d1d128cbcbfa6ea45ffe2eb92b4a5265`.
+  Mini has no available image/video encoder. The PPM bytes were streamed through
+  SSH directly into Mac ffmpeg; no raw PPM was persisted on Mac. Review PNG SHA-256:
+  `dddb1b3e017d85600974be4d48c3b4e57990d9460eb573f24cd8587ff477c19d`;
+  MP4 SHA-256 `4a9b9e835156b8cb73f493cd8a0c3d96c4c8f3d32b94e0ba42a8409277dc527f`
+  (1280x800, 8 frames at 2 fps, 4.0 seconds). The repeated identical pixels
+  show no visual change during this short sample; they do not prove a healthy
+  five-minute present stream.
