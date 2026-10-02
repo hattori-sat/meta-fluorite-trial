@@ -5,7 +5,7 @@
 - Created: 2026-10-02
 - Owner: Mini QEMU / guest Flutter+GDB / serial-exec / QMP evidence roles
 - Branch: `feature-flr-0400-snapshot-deadline-polling` (local only; no push)
-- Milestone base: `dev-flr-0396`
+- Milestone base: `dev-flr-0396-sequoia-material-parity` at `b0b7f8ede77178412240475dd582ffa5641c309d`
 - Immediate dependency: FLR-0399 at `9db57cfe92deddf4bc2037e53c871ac7acdb0657`
 - Plan: [FLR-0400 implementation plan](../../docs/superpowers/plans/2026-10-02-flr0400-snapshot-deadline-polling.md)
 - Working log: [FLR-0400 working log](../logs/2026-10-02-flr0400.md)
@@ -48,9 +48,11 @@ remains separately owned by FLR-0398 after Gate A is established.
   not implicated and must remain strict.
 - Source changes are stacked on FLR-0399 because the new observer depends on
   its committed exact-image startup, process-identity, serial, QMP, and cleanup
-  helpers. The milestone base remains `dev-flr-0396`; this local stacked branch
-  is a documented exception to the normal feature-from-dev rule. Review only
-  the diff from the FLR-0399 dependency commit.
+  helpers. The actual milestone base is
+  `dev-flr-0396-sequoia-material-parity` at `b0b7f8e…`; the previous shorthand
+  `dev-flr-0396` was incorrect. This local stacked branch is a documented
+  exception to the normal feature-from-dev rule. Review only the diff from the
+  FLR-0399 dependency commit.
 
 ### Hypotheses
 

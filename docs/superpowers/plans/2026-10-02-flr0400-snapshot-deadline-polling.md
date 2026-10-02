@@ -8,7 +8,8 @@
 **Ticket:** `work/tickets/FLR-0400-bounded-live-observer-polling.md`
 
 **Branch:** `feature-flr-0400-snapshot-deadline-polling` (local only; no push)
-**Milestone base:** `dev-flr-0396`
+**Milestone base:** `dev-flr-0396-sequoia-material-parity` at
+`b0b7f8ede77178412240475dd582ffa5641c309d`
 **Immediate dependency:** FLR-0399 at `9db57cfe92deddf4bc2037e53c871ac7acdb0657`
 **Image:** reuse the already-built FLR-0396/patch-0334 candidate; no rebuild.
 **Fresh run:** `flr0400-0001`; FLR-0399's consumed `flr0399-0001` is frozen.
