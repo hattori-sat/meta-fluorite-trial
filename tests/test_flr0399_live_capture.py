@@ -1,10 +1,14 @@
+import ast
+import hashlib
 import os
 import signal
+import shlex
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 
@@ -1070,19 +1074,155 @@ class GuestCommandContractTests(unittest.TestCase):
 
     def test_generated_commands_parse_as_bash_and_posix_sh(self):
         for run_id in ("flr0399-0001", "flr0400-0001", "flr0401-0001"):
-            commands = guest_commands(run_id)
-            for shell in ("bash", "sh"):
-                for name, command in commands.__dict__.items():
-                    if not isinstance(command, str) or name.endswith("_path"):
-                        continue
-                    with self.subTest(run_id=run_id, shell=shell, command=name):
-                        result = subprocess.run(
-                            [shell, "-n", "-c", command],
-                            check=False,
-                            capture_output=True,
-                            text=True,
-                        )
-                        self.assertEqual(0, result.returncode, result.stderr)
+            for launch_mode in ("gdb-run", "direct"):
+                commands = guest_commands(run_id, launch_mode=launch_mode)
+                for shell in ("bash", "sh"):
+                    for name, command in commands.__dict__.items():
+                        if not isinstance(command, str) or name.endswith("_path"):
+                            continue
+                        with self.subTest(
+                            run_id=run_id,
+                            launch_mode=launch_mode,
+                            shell=shell,
+                            command=name,
+                        ):
+                            result = subprocess.run(
+                                [shell, "-n", "-c", command],
+                                check=False,
+                                capture_output=True,
+                                text=True,
+                            )
+                            self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_default_gdb_run_launch_command_is_byte_for_byte_unchanged(self):
+        commands = guest_commands("flr0400-0001")
+
+        self.assertEqual(
+            "132c0299c7f04835b72c61fa35272040f4f61d3aadec49f0deeee1d3676deade",
+            hashlib.sha256(commands.launch.encode()).hexdigest(),
+        )
+
+    def test_direct_launch_keeps_the_exact_demo_profile_without_gdb_parent(self):
+        commands = guest_commands("flr0401-0001", launch_mode="direct")
+        launch = commands.launch
+
+        self.assertIn("su -s /bin/sh agl-driver", launch)
+        self.assertIn("test \"$(id -u agl-driver)\" = 1001", launch)
+        self.assertIn("XDG_RUNTIME_DIR=/run/user/1001", launch)
+        self.assertIn("WAYLAND_DISPLAY=wayland-0", launch)
+        self.assertIn("FLR0026_NATIVE_MODEL_MATCH=sequoia", launch)
+        self.assertIn("FLR0026_NATIVE_MODEL_LIMIT=2", launch)
+        self.assertIn("FLUORITE_SEQUOIA_LIT_MATERIAL_OVERRIDE=1", launch)
+        self.assertIn("FLR0305_PRODUCTION_SCENE_LIGHT=1", launch)
+        self.assertIn("/usr/bin/timeout --signal=TERM --kill-after=2s 150", launch)
+        self.assertIn("/usr/bin/flutter-auto -b", launch)
+        self.assertIn(
+            "/usr/share/flutter/toyota-connected-tcna-packages-filament-scene-"
+            "fluorite-examples-demo/3.32.5/release",
+            launch,
+        )
+        self.assertIn('>"$log" 2>&1', launch)
+        self.assertIn("printf '%s %s %s %s %s\\n'", launch)
+        self.assertIn('"$pid" "$uid" "$start"', launch)
+        self.assertNotIn("/usr/bin/gdb -q --batch", launch)
+        self.assertNotIn("--args", launch)
+        self.assertIn(commands.log_path, commands.ready)
+
+    def test_present_stack_command_is_identity_and_unmatched_gated_and_bounded(self):
+        commands = guest_commands("flr0401-0001", launch_mode="direct")
+        command = commands.capture_present_stack
+
+        self.assertIn(commands.log_path, command)
+        self.assertIn(commands.identity_path, command)
+        self.assertIn('read pid saved_uid saved_start wrapper saved_wrapper_start', command)
+        self.assertIn('uid=$(awk', command)
+        self.assertIn('start=$(awk', command)
+        self.assertIn("PRESENT_BEGIN", command)
+        self.assertIn("FLR0026_VK_QUEUE_PRESENT result=", command)
+        self.assertIn("present_return=%s", command)
+        self.assertIn('if [ "$begins" -le "$returns" ]', command)
+        self.assertLess(
+            command.index('if [ "$begins" -le "$returns" ]'),
+            command.index("/usr/bin/gdb"),
+        )
+        self.assertIn('timeout --signal=TERM --kill-after=2s 18', command)
+        gdb_begin = command.index("/usr/bin/gdb ")
+        gdb_end = command.index(' >>"$log" 2>&1', gdb_begin)
+        gdb_argv = shlex.split(command[gdb_begin:gdb_end])
+        self.assertEqual("/usr/bin/gdb", gdb_argv[0])
+        self.assertIn("--nx", gdb_argv)
+        self.assertLess(gdb_argv.index("-iex"), gdb_argv.index("-p"))
+        self.assertEqual("$pid", gdb_argv[gdb_argv.index("-p") + 1])
+        self.assertIn("set sysroot /", gdb_argv)
+        self.assertIn("set solib-absolute-prefix /", gdb_argv)
+        self.assertIn("set solib-search-path /usr/lib:/lib", gdb_argv)
+        self.assertIn("set auto-solib-add off", gdb_argv)
+        gdb_commands = [
+            gdb_argv[index + 1]
+            for index, token in enumerate(gdb_argv[:-1])
+            if token == "-ex"
+        ]
+        self.assertEqual("sharedlibrary libvulkan_lvp[.]so", gdb_commands[0])
+        self.assertEqual("detach", gdb_commands[-1])
+        python_command = gdb_commands[1]
+        self.assertTrue(python_command.startswith("python exec(\""))
+        self.assertTrue(python_command.endswith("\")"))
+        stack_source = ast.literal_eval(python_command[len("python exec(") : -1])
+        self.assertIn("t.name == 'FEngine::loop'", stack_source)
+        self.assertIn("gdb.execute('bt 8'", stack_source)
+        self.assertIn("'lvp_pipe_sync_wait' in stack", stack_source)
+        self.assertIn("gdb.execute('bt 24'", stack_source)
+        self.assertNotIn("thread apply all", stack_source)
+        self.assertIn('>>"$log" 2>&1', command)
+        self.assertIn("FLR0401_GDB_CAPTURE_RESULT=", command)
+        self.assertNotIn("\n", command)
+        self.assertLessEqual(len(command), 4096)
+        self.assertLessEqual(len(wrap_serial_child_command(command)), 4096)
+
+    def test_observe_cli_accepts_and_passes_the_direct_launch_mode(self):
+        with mock.patch.object(live_capture, "observe", return_value=0) as observer:
+            result = live_capture.main(
+                [
+                    "observe",
+                    "--run-id",
+                    "flr0401-0001",
+                    "--evidence-root",
+                    "/evidence",
+                    "--run-dir",
+                    "/evidence/flr0401-0001/qemu",
+                    "--qmp",
+                    "/evidence/flr0401-0001/qemu/qmp.sock",
+                    "--launch-mode",
+                    "direct",
+                ]
+            )
+
+        self.assertEqual(0, result)
+        self.assertEqual("direct", observer.call_args.args[0].launch_mode)
+
+    def test_observe_passes_the_selected_mode_into_guest_command_builder(self):
+        with tempfile.TemporaryDirectory() as evidence_root:
+            run_dir = Path(evidence_root) / "flr0401-0001" / "qemu"
+            args = SimpleNamespace(
+                run_id="flr0401-0001",
+                launch_mode="direct",
+                evidence_root=Path(evidence_root),
+                run_dir=run_dir,
+                qmp=run_dir / "qmp.sock",
+            )
+            with mock.patch.object(
+                live_capture, "guest_commands", wraps=guest_commands
+            ) as command_builder:
+                with self.assertRaises(FileNotFoundError):
+                    live_capture.observe(args)
+
+        command_builder.assert_called_once_with(
+            "flr0401-0001", launch_mode="direct"
+        )
+
+    def test_guest_command_builder_rejects_unknown_launch_mode(self):
+        with self.assertRaisesRegex(ValueError, "launch mode must be gdb-run or direct"):
+            guest_commands("flr0401-0001", launch_mode="gdbserver")
 
     def test_exact_image_qemu_start_helper_parses_as_bash(self):
         start_helper = Path(__file__).parents[1] / "work/commands/FLR-0399-qemu-start.sh"

@@ -166,6 +166,16 @@ fix or product-acceptance pass.
 
 - Task 1 adds strict READY/PRESENT/SUN counter preservation and accepts the
   fresh `flr0401-NNNN` run namespace in the Python and shell validators.
+- Task 2 adds an opt-in direct Flutter launch using the same Demo bundle,
+  identity capture, Wayland/XDG setup, diagnostic environment, timeout, and
+  shared log. The default FLR-0400 launch command remains byte-for-byte fixed
+  by a baseline SHA-256 contract.
+- The one-shot GDB guest command validates PID/UID/start and unmatched Present
+  counters, appends selected stacks to the shared log, and uses the historical
+  FLR-0110 low-memory settings via `-iex` before attach. It loads only Lavapipe
+  symbols, selects `FEngine::loop`, and caps collection at `bt 8` plus
+  conditional `bt 24` for `lvp_pipe_sync_wait`; its timeout and kill grace total
+  20 seconds.
 - No product source, image, recipe, build input, cache, or Mini runtime has been
   changed or touched in this ticket.
 
@@ -175,16 +185,29 @@ fix or product-acceptance pass.
   counter/run-ID contracts.
 - Task 1 green: focused suite 46/46 PASS; QEMU start-helper `bash -n` and
   no-write Python syntax parse PASS.
-- Full Python suite: 197 tests, 196 PASS and one known unrelated FLR-0397 stale
-  run-ID fixture failure. Sandbox initially denied five localhost socket tests;
-  the same suite completed with explicit local socket access and exposed only
-  that known failure.
+- Task 2 red: the baseline-default launch digest passed; direct-mode and
+  capture-command contracts exposed the missing APIs, and the CLI rejected
+  `--launch-mode` (3 errors across 4 selected tests).
+- Task 2 green: the final observer suite passed 52/52. Generated commands for
+  all supported IDs and both launch modes parse as bash and POSIX sh; the
+  default launch digest is unchanged; the CLI mode reaches the guest command
+  builder.
+- `make verify`: canonical, privacy, and shell checks passed; 203 Python tests
+  had 202 PASS and one known unrelated FLR-0397 stale-run-ID failure in
+  `test_serial_exec_capture_passes_strict_gate_without_setup_preamble`. The
+  fixture invokes `flr0350_launch_gate.py --validate` without its now-required
+  run ID. `make verify` stopped at that Python gate.
+- Remaining gates run separately: MCP smoke PASS; Markdown links FAIL on the
+  same 11 historical missing targets (0391/0395 ticket links and 0338/0339
+  QMP media links); file-size, QEMU/runtime harness, runtime-log-slice, Devtool
+  finish/component-rebase, Mini recipe-patch, and Podman/bundle-handoff gates
+  all PASS. No FLR-0401 link is missing.
 
 ### Act
 
-- Commit the green Task 1 slice locally. Next add direct-launch and selected
-  GDB command contracts before implementing the command builder. Then add the
-  trigger/controller tests as a separate slice.
+- Commit the green Task 2 command slice locally after staging checks. Then add
+  the one-shot trigger/controller tests as a separate slice before any Mini
+  runtime action.
 - Do not use this diagnostic ticket as product completion; keep Gate A/B and
   all final acceptance conditions open.
 

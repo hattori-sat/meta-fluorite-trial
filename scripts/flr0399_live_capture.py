@@ -82,6 +82,7 @@ class GuestCommands:
     identity: str
     collect: str
     stop: str
+    capture_present_stack: str
 
 
 def evidence_collect_command(log_path: str, run_id: str) -> str:
@@ -138,10 +139,12 @@ def evidence_collect_command(log_path: str, run_id: str) -> str:
     )
 
 
-def guest_commands(run_id: str) -> GuestCommands:
+def guest_commands(run_id: str, *, launch_mode: str = "gdb-run") -> GuestCommands:
     """Build one-line serial-exec commands from one run-scoped log path."""
     if not RUN_ID_RE.fullmatch(run_id):
         raise ValueError("run id must be a fresh FLR-0399/0400/0401 id")
+    if launch_mode not in {"gdb-run", "direct"}:
+        raise ValueError("launch mode must be gdb-run or direct")
 
     prefix = f"/run/user/1001/{run_id}"
     log_path = f"{prefix}-gdb.log"
@@ -175,6 +178,19 @@ def guest_commands(run_id: str) -> GuestCommands:
         "printf '\\nFLR0399_APP_EXIT_STATUS=%s\\n' \"$rc\" >>\"$log\"; "
         "exit \"$rc\""
     )
+    if launch_mode == "direct":
+        inner = (
+            f"log={q(log_path)}; "
+            "env XDG_RUNTIME_DIR=/run/user/1001 WAYLAND_DISPLAY=wayland-0 "
+            "FLR0026_NATIVE_MODEL_MATCH=sequoia FLR0026_NATIVE_MODEL_LIMIT=2 "
+            "FLUORITE_SEQUOIA_LIT_MATERIAL_OVERRIDE=1 "
+            "FLR0305_PRODUCTION_SCENE_LIGHT=1 "
+            "/usr/bin/timeout --signal=TERM --kill-after=2s 150 "
+            f"/usr/bin/flutter-auto -b {q(DEMO_BUNDLE)} "
+            ">\"$log\" 2>&1; rc=$?; "
+            "printf '\\nFLR0399_APP_EXIT_STATUS=%s\\n' \"$rc\" >>\"$log\"; "
+            "exit \"$rc\""
+        )
     launch = (
         "set -eu; "
         f"log={q(log_path)}; identity={q(identity_path)}; "
@@ -260,6 +276,72 @@ def guest_commands(run_id: str) -> GuestCommands:
         "echo FLR0399_APP_STOP=REQUESTED"
     )
 
+    gdb_program = (
+        "import gdb\n"
+        "threads=[t for t in gdb.selected_inferior().threads() if t.name == 'FEngine::loop']\n"
+        "print('FLR0401_FENGINE_THREAD_COUNT=%d' % len(threads))\n"
+        "expanded=0\n"
+        "for t in threads:\n"
+        " t.switch()\n"
+        " try:\n"
+        "  stack=gdb.execute('bt 8', to_string=True)\n"
+        " except Exception as e:\n"
+        "  print('FLR0401_STACK_ERROR thread=%s error=%s' % (t.num, e))\n"
+        "  continue\n"
+        " print('FLR0401_THREAD=%s name=%s' % (t.num, t.name))\n"
+        " print(stack)\n"
+        " if 'lvp_pipe_sync_wait' in stack and expanded == 0:\n"
+        "  print('FLR0401_EXPANDED_WAIT_THREAD=%s' % t.num)\n"
+        "  print(gdb.execute('bt 24', to_string=True))\n"
+        "  expanded=1"
+    )
+    escaped_gdb_program = (
+        gdb_program.replace("\\", "\\\\")
+        .replace('"', '\\"')
+        .replace("\n", "\\n")
+    )
+    gdb_python = f'python exec("{escaped_gdb_program}")'
+    capture_present_stack = (
+        "set -eu; "
+        f"log={q(log_path)}; identity={q(identity_path)}; "
+        "if [ ! -r \"$log\" ]; then echo FLR0401_GDB_CAPTURE_RESULT=SKIP_LOG; exit 1; fi; "
+        "if [ ! -r \"$identity\" ]; then echo FLR0401_GDB_CAPTURE_RESULT=SKIP_IDENTITY; exit 1; fi; "
+        "read pid saved_uid saved_start wrapper saved_wrapper_start < \"$identity\"; "
+        "case \"$pid:$saved_uid:$saved_start\" in *[!0-9:]*) "
+        "echo FLR0401_GDB_CAPTURE_RESULT=INVALID_IDENTITY; exit 1;; esac; "
+        "if [ \"$saved_uid\" != 1001 ] || [ ! -r \"/proc/$pid/status\" ]; then "
+        "echo FLR0401_GDB_CAPTURE_RESULT=IDENTITY_MISSING; exit 1; fi; "
+        "comm=$(cat \"/proc/$pid/comm\" 2>/dev/null || true); "
+        "uid=$(awk '/^Uid:/{print $2; exit}' \"/proc/$pid/status\"); "
+        "start=$(awk '{print $22}' \"/proc/$pid/stat\"); "
+        "if [ \"$comm\" != flutter-auto ] || [ \"$uid\" != \"$saved_uid\" ] || "
+        "[ \"$start\" != \"$saved_start\" ]; then "
+        "echo FLR0401_GDB_CAPTURE_RESULT=IDENTITY_CHANGED; exit 1; fi; "
+        "begins=$(grep -c 'FLR0026_VK_QUEUE_PRESENT_BEGIN' \"$log\" || true); "
+        "returns=$(grep -c 'FLR0026_VK_QUEUE_PRESENT result=' \"$log\" || true); "
+        "case \"$begins:$returns\" in *[!0-9:]*) "
+        "echo FLR0401_GDB_CAPTURE_RESULT=INVALID_COUNTERS; exit 1;; esac; "
+        "if [ \"$begins\" -le \"$returns\" ]; then "
+        "echo FLR0401_GDB_CAPTURE_RESULT=PRESENT_MATCHED; exit 1; fi; "
+        "printf 'FLR0401_GDB_CAPTURE_BEGIN pid=%s present_begin=%s present_return=%s\\n' "
+        "\"$pid\" \"$begins\" \"$returns\" | tee -a \"$log\"; "
+        "if /usr/bin/timeout --signal=TERM --kill-after=2s 18 "
+        "/usr/bin/gdb -q --batch --nx "
+        "-iex 'set pagination off' -iex 'set confirm off' "
+        "-iex 'set print thread-events off' -iex 'set sysroot /' "
+        "-iex 'set solib-absolute-prefix /' "
+        "-iex 'set solib-search-path /usr/lib:/lib' "
+        "-iex 'set auto-solib-add off' -p \"$pid\" "
+        "-ex 'sharedlibrary libvulkan_lvp[.]so' "
+        f"-ex {q(gdb_python)} -ex 'detach' >>\"$log\" 2>&1; "
+        "then rc=0; else rc=$?; fi; "
+        "if [ \"$rc\" -eq 0 ]; then result=COMPLETE; "
+        "elif [ \"$rc\" -eq 124 ]; then result=TIMEOUT; "
+        "else result=GDB_FAILED; fi; "
+        "printf 'FLR0401_GDB_CAPTURE_RESULT=%s rc=%s pid=%s\\n' "
+        "\"$result\" \"$rc\" \"$pid\" | tee -a \"$log\"; exit \"$rc\""
+    )
+
     commands = GuestCommands(
         log_path=log_path,
         identity_path=identity_path,
@@ -270,6 +352,7 @@ def guest_commands(run_id: str) -> GuestCommands:
         identity=identity,
         collect=collect,
         stop=stop,
+        capture_present_stack=capture_present_stack,
     )
     if any("\n" in command or len(command) > 4096 for command in commands.__dict__.values() if isinstance(command, str)):
         raise ValueError("generated guest command exceeds serial-exec contract")
@@ -976,7 +1059,7 @@ def _encode_videos(run_dir: Path) -> None:
 
 def observe(args: argparse.Namespace) -> int:
     run_id = args.run_id
-    commands = guest_commands(run_id)
+    commands = guest_commands(run_id, launch_mode=args.launch_mode)
     expected = expected_run_dir(args.evidence_root, run_id)
     run_dir = args.run_dir.resolve(strict=True)
     if run_dir != expected or not run_dir.is_dir():
@@ -1173,6 +1256,9 @@ def main(argv: list[str] | None = None) -> int:
     observe_parser.add_argument("--qmp", type=Path, required=True)
     observe_parser.add_argument("--serial-port", type=int, default=SERIAL_PORT)
     observe_parser.add_argument("--timeout-seconds", type=float, default=120.0)
+    observe_parser.add_argument(
+        "--launch-mode", choices=("gdb-run", "direct"), default="gdb-run"
+    )
     args = parser.parse_args(argv)
     if args.operation == "observe":
         try:
