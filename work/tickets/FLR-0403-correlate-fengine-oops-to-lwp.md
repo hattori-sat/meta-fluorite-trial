@@ -108,20 +108,24 @@ Sequoia rendering pass or root-cause claim.
 - GDB, inferior identity/readiness, present markers, and kernel timestamp
   records must resolve to the same run ID and one combined guest log sink;
   copy the log before stopping the app. Record PID/UID/start identity.
-- Record GDB thread number, name, complete `ptid`, and filtered current-image
-  objfile filename/Build-ID. Do not infer causality from symbol names or a
-  matching offset alone.
+- Record GDB thread number/name/target ID and mapped ELF path/Build-ID from the
+  current image. Do not infer causality from symbol names or a matching offset
+  alone.
 - Use one fresh run ID only. Do not retry a consumed ID or run on an unverified
-  receiver tip. Commit locally without push; use the official bundle workflow.
+  receiver tip. This runtime-only task requires no build-receiver source
+  change: do not transfer documentation-only bundles or mutate the receiver.
+  Commit local records without push.
 - Keep raw logs on Mini. Transfer only bounded review evidence and checksums;
   do not record connection details or personal paths in Git.
 
 ## Success criteria
 
-1. Local regression tests require `ptid`/LWP and bounded current objfile
-   Build-ID markers in the generated GDB script, and prove they reach the same
-   guest log as readiness/present evidence without exceeding the existing
-   serial command limit.
+1. Before changing any observer, the documented manual guest commands capture
+   `gdb info threads` target IDs, `/proc/<pid>/maps`, and `readelf -n`
+   Build-IDs for the actually mapped LLVM/Vulkan/Filament objects. Record the
+   exact successful commands and append them to the same run-scoped guest log
+   used for readiness and present markers. If a required tool is absent, record
+   UNKNOWN and do not silently substitute another source.
 2. A read-only Mini preflight proves receiver tip, exact kernel/rootfs/qemuboot
    hashes, no active owner, free ports, and an unused evidence/run ID before
    any QEMU start. Any mismatch stops before runtime mutation.
@@ -130,8 +134,9 @@ Sequoia rendering pass or root-cause claim.
    actual PPM dimensions, hashes, HUD/Sequoia pixel analysis, readiness, and
    present counters. If no live Flutter frame is reached, classify startup and
    do not call it a rendering result.
-4. In the same run, retain timestamp-aligned GDB `ptid`/LWP and loaded
-   Build-IDs, process identity, present state, and kernel Oops TID (if any).
+4. In the same run, retain timestamp-aligned GDB target IDs (including LWP),
+   mapped-file paths/Build-IDs, process identity, present state, and kernel
+   Oops TID (if any).
    Explicitly state whether the TID maps, disappeared before sampling, or was
    absent; keep root-cause causality UNKNOWN unless dependency evidence exists.
 5. Exact app/QEMU/QMP cleanup and postflight prove no new residual processes or
@@ -145,12 +150,14 @@ Sequoia rendering pass or root-cause claim.
 ### Plan
 
 - Close FLR-0402 as analyzer-only and make FLR-0403 the sole active ticket.
-- Add a regression first for GDB `ptid` and filtered `gdb.Objfile.build_id`
-  markers; keep the generated serial command within its current limit.
-- Use the official bundle handoff and read-only Mini preflight. Start one
-  exact-image QEMU only if all ownership, hash, port, and fresh-ID gates pass.
-- Manually launch Flutter with the already-proven guest command, capture QMP
-  before GDB, then collect one bounded GDB/kernel state sample. Do not build.
+- Reuse the proven QEMU and manual Flutter launch sequence. First inspect the
+  exact saved commands and log destinations; do not change the observer.
+- Verify receiver/build state read-only. Use the existing generic QEMU harness
+  for one exact-image run only if ownership, hash, port, receiver, and fresh-ID
+  gates pass; do not check out or update the receiver.
+- Manually capture QMP before GDB, then run bounded `info threads`, maps, and
+  Build-ID commands against the identity-checked process. Only after the
+  manual commands succeed may a separate ticket automate them. Do not build.
 
 ### Do
 
@@ -158,8 +165,8 @@ Sequoia rendering pass or root-cause claim.
 
 ### Check
 
-- Pending local regression, Mini preflight, same-run visual/runtime evidence,
-  and exact cleanup.
+- Pending exact manual-command verification, Mini preflight, same-run visual/
+  runtime evidence, and exact cleanup.
 
 ### Act
 

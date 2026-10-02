@@ -20,31 +20,28 @@ present. This is one diagnostic observation, not product acceptance.
   guest log; retain timestamps and copy it before app teardown.
 - Keep each runtime attempt one-shot and preserve QMP raw PPMs on Mini.
 
-## Task 1 — Test and add only the missing GDB identity fields
+## Task 1 — Recover the exact known-good manual launch/observation commands
 
-**Files:** `scripts/flr0399_live_capture.py`,
-`tests/test_flr0399_live_capture.py`.
+- [x] Read the FLR-0401/0399 records and existing helper source to recover the
+  exact manual guest Flutter command, PID/UID/start identity check, GDB attach
+  command, log sink, QMP endpoints, and cleanup sequence.
+- [x] Compare at least two recorded launch paths only as needed: prefer the
+  exact FLR-0401 direct Example Demo path on rootfs `80935c3f…`; do not mix in
+  the FLR-0394 fixture or a different image/profile.
+- [x] Do not edit the observer, run a new local QEMU, or construct new shell
+  automation in this task before the manual sequence is inspected.
 
-- [ ] Add a regression that generated GDB Python emits every relevant
-  `InferiorThread.ptid` (including LWPID), without removing thread name/number.
-- [ ] Add a filtered marker for current objfile filename and `build_id` for
-  `libLLVM`, `libvulkan_lvp`, and relevant Filament objects; tolerate missing
-  Build-ID only as explicit `UNKNOWN`, never as a successful identity.
-- [ ] Assert identity, present, and GDB diagnostics append to the same guest
-  run log; retain exact PID/UID/start validation, bounded collection, and the
-  existing serial command size limit.
-- [ ] Run focused tests red before implementation, then green; run static
-  shell/Python checks, whitespace, privacy, file-size, and runtime-checkpoint
-  gates. Do not run QEMU from the local Mac.
+## Task 2 — Read-only Mini receiver/build preflight
 
-## Task 2 — Commit and verify the Mini receiver without mutation
-
-- [ ] Commit only FLR-0403 instrumentation/tests and its ticket/log records
-  locally; do not push. Record the exact tip and create the official Git
-  bundle.
-- [ ] Use the established bundle receiver preflight. Verify receiver tip,
-  exact rootfs/kernel/qemuboot hashes, BitBake idle, no QEMU/runqemu/Flutter/
-  GDB process, free reserved ports, and a fresh run ID/evidence path.
+- [x] Verify current Mini receiver tip/worktree without checkout, fetch, bundle
+  update, or branch mutation. No source change is required on the build
+  receiver; do not transfer documentation-only commits.
+- [x] Resolve fixed build/evidence role paths from the prior exact run command
+  and verify exact rootfs/kernel/qemuboot hashes, BitBake idle, no
+  QEMU/runqemu/Flutter/GDB process, free reserved ports, and a fresh run ID.
+- [ ] Run the existing generic QEMU harness in read-only preflight mode for
+  exact 0334 artifacts and `flr0403-0001`. Only after it passes, create the
+  single run evidence directory; start must repeat ownership/hash/port gates.
 - [ ] If any status is missing or ambiguous, stop before QEMU and record it as
   UNKNOWN; do not assume the machine is idle from Mac process visibility.
 
@@ -59,9 +56,13 @@ present. This is one diagnostic observation, not product acceptance.
   inferior is alive. Save the actual PPM dimensions/hashes and analyze the HUD
   and fixed Sequoia ROI. Do this before GDB attach.
 - [ ] At the first persistent unmatched present, perform one identity-checked
-  bounded GDB attach; retain per-thread name/number/ptid, filtered objfile
-  filenames/Build-IDs, and the exact present/counter state. Include the
-  timestamped kernel Oops TID and process/thread state after the observation.
+  bounded GDB attach and manually run `info threads` plus a bounded selected
+  stack. Retain GDB target IDs/LWPs, mapped ELF paths, Build-IDs, and exact
+  present/counter state in the same guest log as readiness markers. Include
+  timestamped kernel Oops TID and process/thread state after observation.
+- [ ] Use the exact mapped path from `/proc/<pid>/maps` with `readelf -n` to
+  identify the current image's ELF Build-ID; do not substitute a matching
+  historical symbol/offset or load all debug symbols as a shortcut.
 - [ ] Stop only the recorded Flutter identity, quit QEMU through its recorded
   QMP socket, and verify zero newly owned residuals/listeners. Never kill an
   unrelated process.
@@ -69,7 +70,16 @@ present. This is one diagnostic observation, not product acceptance.
   or unmatched present occurs, do not manufacture that condition; report the
   actual boundary and select one new discriminator.
 
-## Task 4 — Review and close as bounded diagnostic evidence
+## Task 4 — Only then decide whether observer automation needs a new ticket
+
+- [ ] If all manual commands work and the missing step is genuinely repetitive,
+  record the smallest reusable command contract; do not add it to this runtime
+  ticket. Open a separate ticket before changing the observer.
+- [ ] If a manual command fails, preserve the exact command/error and classify
+  tool availability, permissions, process identity, or target state before any
+  automation.
+
+## Task 5 — Review and close as bounded diagnostic evidence
 
 - [ ] Review the whole QMP screenshot and four-frame video; keep only bounded
   evidence in the repository and raw logs on Mini.
