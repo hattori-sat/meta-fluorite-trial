@@ -173,8 +173,10 @@ diagnostic result.
   is unused, exact kernel/rootfs/qemuboot hashes match the 0334 baseline,
   generic QEMU harness and exact process-cleanup helper match local hashes,
   zero target processes and listeners on ports 10930-10932, and the QMP path
-  is 93 bytes. Host availability was 28,214,048 KiB RAM, 8,331,456 KiB swap,
-  and 15,353,140 KiB free on the evidence filesystem. The Mini pixel-capture
+  is 88 bytes. The final pre-create recheck passed with receiver HEAD unchanged
+  and clean, exact image/helper hashes, zero target owners, free ports,
+  qemux86-64/one configured Fluorite layer, and 28,195,316 KiB available RAM,
+  8,331,456 KiB swap, and 15,353,132 KiB free evidence space. The Mini pixel-capture
   helper differs from the local version; its `capture` interface was checked.
 - Procedure corrections (no runtime or file state changed): initial nested
   SSH/find quoting attempts were rejected before the remote read-only query;
@@ -184,6 +186,11 @@ diagnostic result.
   that with exact BBLAYERS path-basename counting yielded one entry and the
   full preflight passed. The final check used one labeled script over SSH
   stdin, not another helper or QEMU start.
+- Two subsequent read-only preflight attempts also failed closed before any
+  mutation: one had a shell `test` operand-order typo; the next compared the
+  configured BBLAYERS path with the receiver root instead of its `layers/`
+  directory. The exact configured layer path was then verified and the full
+  pre-create recheck passed. No evidence directory was created.
 - The prior 0404 guest command files confirm direct Example Demo launch as UID
   1001 with only HOME/PATH/XDG_RUNTIME_DIR/WAYLAND_DISPLAY. The old 0399
   observer is explicitly excluded because it would change that profile.
