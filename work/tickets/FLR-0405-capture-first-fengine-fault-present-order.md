@@ -91,6 +91,19 @@ cause claim.
 
 - Runtime-only. Do not modify Devtool source, recipe, patch stack, layer, image,
   cache, or build directory. Do not run BitBake or transfer a bundle.
+- Start QEMU with the existing generic `scripts/qemu-runtime-harness.sh`, using
+  the paths recovered from FLR-0404's saved run command. Do not use the
+  FLR-0399 starter (it rejects this run ID) or
+  `scripts/flr0399_live_capture.py` (its direct mode includes diagnostic
+  selectors/material/SUN values and is not the ordinary profile).
+- Use the ticket-scoped POSIX guest commands in
+  `work/commands/FLR-0405-guest-*.cmd` for preflight, direct launch, identity
+  gates, early GDB, first-boundary monitoring, log export, and scoped stop.
+  Validate one-line framing, `sh -n`, and the 4096-byte limit before transfer.
+- Use the Mini receiver's pinned pixel helper only for QMP capture/video; its
+  analyzer differs from the current local copy, so do not pass local-only
+  `--region full`. Analyze transferred review frames locally with explicit
+  dimensions/regions after their hashes are recorded.
 - Before the one QEMU start, recheck canonical local repository, authoritative
   receiver tip/cleanliness, exact rootfs/kernel/qemuboot hashes, configured
   layer identity, no existing runtime owner, free ports, storage/memory, and a
@@ -108,6 +121,10 @@ cause claim.
   `FEngine::loop`/renderer backtraces. Use one 30-second hard bound; do not use
   an unbounded `thread apply all` on a late large thread set. Append GDB output
   to the same guest app log used for readiness and present observations.
+- Monitor at most 300 one-second samples, comparing the launch-time kernel
+  fault baseline. Stop at the first new kernel fault or after two consecutive
+  samples with present-begin greater than present-return; capture a bounded
+  thread/map and focused journal/coredump summary at that boundary.
 - Capture the first Oops/present boundary and a full QMP frame before teardown.
   If present is still unhealthy, stop; no pointer/hover/click trial or blind
   five-minute wait. Do not infer root cause from a symbol name alone.
@@ -146,15 +163,51 @@ diagnostic result.
 
 ### Do
 
-- Not started. FLR-0404 postflight is clear; its existing run was shut down and
-  its evidence remains under `$BUILD_EVIDENCE/flr0404-0001/qemu/`.
-- Create exactly one fresh FLR-0405 run directory only after the immediate
-  preflight gates pass. Record exact command and output hashes here.
+- FLR-0405 QEMU/app runtime has not started, and its run directory has not been
+  created. Read-only Mini inspection recovered the authoritative receiver from
+  FLR-0404 evidence: HEAD `54c02bdcddbf80be579c4fd7d493f5bd24f6df6c`, clean
+  outside ignored `evidence/`. The recorded 0404 runqemu command resolves the
+  same fixed qemux86-64 build/TMPDIR; local.conf selects qemux86-64 and exactly
+  one BBLAYERS path has basename `meta-fluorite-trial`.
+- Fresh read-only preflight passed: 0404 evidence exists, 0405 run ID/QMP path
+  is unused, exact kernel/rootfs/qemuboot hashes match the 0334 baseline,
+  generic QEMU harness and exact process-cleanup helper match local hashes,
+  zero target processes and listeners on ports 10930-10932, and the QMP path
+  is 93 bytes. Host availability was 28,214,048 KiB RAM, 8,331,456 KiB swap,
+  and 15,353,140 KiB free on the evidence filesystem. The Mini pixel-capture
+  helper differs from the local version; its `capture` interface was checked.
+- Procedure corrections (no runtime or file state changed): initial nested
+  SSH/find quoting attempts were rejected before the remote read-only query;
+  local command-template interpolation also failed before SSH. One early
+  preflight counted substring occurrences and stopped at the layer gate because
+  the receiver directory name also contains `meta-fluorite-trial`; replacing
+  that with exact BBLAYERS path-basename counting yielded one entry and the
+  full preflight passed. The final check used one labeled script over SSH
+  stdin, not another helper or QEMU start.
+- The prior 0404 guest command files confirm direct Example Demo launch as UID
+  1001 with only HOME/PATH/XDG_RUNTIME_DIR/WAYLAND_DISPLAY. The old 0399
+  observer is explicitly excluded because it would change that profile.
+- Guest-command review found and corrected one serial-shell hazard: an
+  unscoped `set -e`/early `exit` could close the persistent shell before the
+  harness completion marker. All seven commands now isolate their state and
+  exits in a subshell. `/bin/sh -n`, one-line, and 4096-byte checks pass; the
+  largest command is 4001 bytes.
+- Validation: canonical, privacy, checkpoint (`active=1`), shell syntax, and
+  file-size gates pass. The loopback-enabled Python rerun reports 222/223
+  passing; one unrelated serial-exec validator fixture fails with CLI usage
+  output and remains unresolved. Markdown checking reports 11 historical
+  missing links outside FLR-0405. No 0405 runtime has started.
+- Next: locally commit the ticket, log, TASKS row, and seven guest commands;
+  then repeat the exact read-only Mini ownership/image/process/resource gates.
+  Only if they pass, transfer the small command files into one fresh evidence
+  directory and start generic QEMU once.
 
 ### Check
 
-- Awaiting the one bounded instrumented runtime. No FLR-0405 QEMU, app, GDB, or
-  build has started. Product rendering status remains NOT MET/UNKNOWN.
+- Fresh read-only Mini preflight: PASS. Local artifact checks pass except the
+  noted unrelated serial-exec test and historical Markdown targets. No FLR-0405
+  QEMU, app, GDB, or build has started. Product rendering status remains
+  NOT MET/UNKNOWN.
 
 ### Act
 
