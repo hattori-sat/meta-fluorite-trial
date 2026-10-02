@@ -164,3 +164,18 @@ evidence about Fluorite rendering.
 - **Packaging:** none; the QEMU harness is not installed into the image.
 - **Integration risk:** a Mini-side run is still required to verify the exact
   transferred harness against the real serial endpoint before FLR-0405 resumes.
+
+## Post-commit handoff preflight (2026-10-02)
+
+- Local commit `b1a9948` is clean, local-only, and not pushed. Post-commit
+  canonical, privacy, and FLR-0406 checkpoint checks passed.
+- All required `BUILD_*` role variables are unset in the current shell, and
+  the documented ignored local role file is absent. No SSH/SCP or receiver
+  command was attempted; remote receiver/QEMU ownership is therefore UNKNOWN.
+- The default local bundle is valid but contains the older FLR-0401 branch tip,
+  not `b1a9948`. It was not overwritten. Do not infer a Mini state from that
+  stale local bundle.
+- Resume handoff only after the existing local build-role configuration is
+  loaded. Do not synthesize role values from connection details in chat. Once
+  roles exist, verify receiver idleness/cleanliness and exact handoff target
+  before invoking the documented bundle helper.
