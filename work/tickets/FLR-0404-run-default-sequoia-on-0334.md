@@ -1,6 +1,6 @@
 # FLR-0404 — verify ordinary Sequoia materials/lighting with the HUD
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mini QEMU / guest Example Demo / QMP screenshot-video / runtime evidence roles
@@ -11,36 +11,77 @@
 
 ## Objective
 
-Determine whether the ordinary installed Example Demo on the exact same
-patch-0334 image renders the real Sequoia with its original GLB material,
-embedded textures, and scene-authored lighting while the Flutter CPU/GPU/FPS
-HUD is visible in the same full QMP frame. If a live positive frame exists,
-continue that run through normal pointer/UI updates and five minutes of
-progressing present. This is the first ordinary-profile runtime gate; it does
-not prove the independent second boot required by the overall goal.
+Classify one ordinary installed Example Demo run on the exact patch-0334 image,
+with optional diagnostic selectors/material/light/camera controls absent.
+Capture a full QMP frame while the exact app identity is alive, then stop at the
+first visual or runtime-health failure. A negative run completes this bounded
+test ticket, not the product objective: Sequoia + HUD acceptance remains open.
 
 ## Facts, inferences, hypotheses, and UNKNOWN
 
-### Latest execution gate (2026-10-02)
+### Initial ownership-gate history (resolved)
 
-- A read-only SSH inventory reached a Mini PC checkout candidate, but it is
-  not proven to be the fixed receiver from the local `BUILD_*` role
-  configuration. That candidate is on
-  `feature-flr-0019-qemu-build-iteration-final` at `6e4ccf125`; its TASKS
-  marks FLR-0019 In Progress and its worktree has 18 dirty/untracked files
-  affecting recipes/patches and task records.
-- The expected FLR-0403 raw evidence directory is absent under that candidate,
-  and the exact 0334 image hashes were not verified there.
-- A prior point-in-time process/port inventory found no QEMU, Flutter, or
-  BitBake owner and free reserved ports. This does not establish ownership or
-  handoff for the dirty in-progress checkout.
-- The fixed local `BUILD_*` variables are unset in this executor. Therefore
-  neither the authoritative receiver nor build/evidence paths are established.
-- No source, build, cache, image, receiver, or evidence directory was changed;
-  no QEMU, BitBake, or transfer was started.
+- The first probe examined a dirty home checkout whose tracker marks FLR-0019
+  In Progress. That checkout was not the active layer configured in the fixed
+  build and was never modified or used to launch QEMU.
+- A later read-only provenance check found the separate authoritative receiver
+  at `54c02bdcddbf80be579c4fd7d493f5bd24f6df6c`, clean outside its evidence
+  directory, with exactly one matching configured trial-layer entry and the
+  prior FLR-0403 raw evidence present. The apparent ownership conflict was
+  resolved without touching the dirty checkout.
 
 ### Facts
 
+- FLR-0404 used rootfs SHA-256
+  `80935c3f9fa81da66f068821637f512749602c701baa37e91bf777b8cf15c44c`, kernel
+  SHA-256
+  `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`, and
+  qemuboot SHA-256
+  `2363530e2f39d4e57465cb89e724327f699b8ab6247d9e1bb75fdc2a60780c10`.
+  All three were rechecked after teardown and remained identical. No build,
+  Devtool, recipe, patch, source, or bundle operation occurred.
+- The QEMU harness passed preflight on the one clean receiver. It started one
+  6144-MiB QEMU with ports 10930–10932; guest-ready passed. The ordinary
+  Example Demo 3.32.5 bundle ran once as UID 1001 (`agl-driver`) with
+  `HOME=/home/agl-driver`, `PATH=/usr/bin:/bin`,
+  `XDG_RUNTIME_DIR=/run/user/1001`, and `WAYLAND_DISPLAY=wayland-0` only; no
+  diagnostic model/material/light/camera/render/sync variables were set.
+- The live app identity was PID 645, UID 1001, start token 23230. QMP still
+  captures were immediately bracketed by the same identity. The initial and
+  10-second full-screen 1280×800 captures and all eight frames in the 4-second
+  sequence have the same PPM SHA-256
+  `f686a3c2769cb2bc59b362bdc1d956c2d1d128cbcbfa6ea45ffe2eb92b4a5265`.
+  The complete frame shows a white field and a large black polygon, with no
+  CPU/GPU/FPS HUD or recognizable Sequoia. Identical frames do not prove that
+  valid presents continued.
+- The app log reached two `FLR0026_VK_QUEUE_PRESENT_BEGIN` events but only one
+  successful `FLR0026_VK_QUEUE_PRESENT result=0`; the second begin had no
+  matching return in the preserved log. At guest uptime 266.762166 s, the
+  kernel recorded a user-mode page fault/Oops on CPU 2, PID/TID 691,
+  `Comm=FEngine::loop`, RIP `0x7f08e5185541`, CR2/RSP
+  `0x7f08827f8750`. TID 691 was absent from the later thread list while the
+  parent `flutter-auto` process remained alive.
+- The RIP maps in this process to `libLLVM.so.18.1`, file offset `0xb1d541`,
+  Build-ID `359c1108040bc6bc1af64bb639d0b25385858051`; `addr2line` reports
+  `llvm::CmpInst::isOrdered(llvm::CmpInst::Predicate)`. This is location
+  correlation only, not proof that LLVM caused the present stall or bad pixels.
+- A bounded GDB attach was attempted after preserving QMP. It listed newly
+  attached LWPs but did not reach thread stacks before the 12-second timeout
+  (rc=137). A subsequent exact-identity check showed the app resumed in state
+  `S`, 38 threads, zero stopped threads, and no GDB/timeout process. `coredumpctl`
+  reported no dumps. The post-Oops memory snapshot showed 4,650,236 KiB
+  `MemAvailable`; no OOM/kill record was found in the bounded kernel query.
+  Peak memory before the fault was not sampled.
+- Exact cleanup sent SIGTERM only to PID 645 after verifying UID/start token,
+  then negotiated QMP `quit`. Postflight found no QEMU/runqemu/flutter-auto/GDB
+  process, no QMP socket, and no listeners on 10930–10932. The receiver
+  remained clean outside evidence.
+- Review artifacts: [full QMP PNG](../evidence/FLR-0404-0001/ordinary-live-initial.png),
+  SHA-256 `dddb1b3e017d85600974be4d48c3b4e57990d9460eb573f24cd8587ff477c19d`;
+  [4-second QMP MP4](../evidence/FLR-0404-0001/ordinary-live-8frames.mp4),
+  SHA-256 `3032e371b682702568ae0477eb44b1e6b6762650e8563e37d4c0296895d4134e`.
+  Both are local review files excluded by repository `.gitignore`; exact raw
+  PPMs and logs remain under `$BUILD_EVIDENCE/flr0404-0001/qemu/` on Mini.
 - FLR-0049 iterations 8/10/23 show production Sequoia pixels and red lamps,
   but not together with the Flutter HUD; those captures used special
   selection/environment conditions and are historical references.
@@ -67,41 +108,44 @@ not prove the independent second boot required by the overall goal.
 
 ### Inferences
 
-- The highest-information next comparison is a clean ordinary launch on the
-  same image. Repeating the 0403 overrides cannot answer whether original
-  material/lighting works; reverting to FLR-0049's HUD-hidden model-only
-  profile cannot answer composition.
-- A black ROI only counts as a live negative if the frame is bracketed by the
-  exact app identity and readiness/present state. A post-exit black screen is
-  not a rendering verdict.
+- This run establishes that the ordinary launch did not yield an acceptable
+  screen and that rendering/presentation did not remain healthy. Because a
+  present was unmatched and an FEngine thread faulted, the black polygon and
+  missing HUD cannot yet be treated as an isolated material, lighting, camera,
+  or Wayland-composition negative.
+- TID 691's RIP location, missing post-fault TID, and the unmatched present
+  occurred in the same run. Their causal order is not fully established; the
+  symbol name alone is not a root cause.
+- The available memory snapshot and absent OOM marker weaken an OOM explanation
+  for this point in the run, but do not replace a peak-memory time series.
 
 ### Hypotheses
 
-1. **The diagnostic profile caused or exposed the 0403 failure.** Support:
-   ordinary profile produces a recognizable, textured Sequoia and HUD with
-   advancing present and no Oops/OOM. Refute: ordinary profile has a live HUD
-   but no Sequoia pixels, or reproduces the fault.
-2. **Production Sequoia rendering is independently unhealthy.** Support:
-   model/asset readiness is observed but a correctly identity-bracketed,
-   healthy ordinary frame remains black/absent. Refute: actual Sequoia and HUD
-   are visible together under the unchanged image/profile.
-3. **The ordinary all-model load exceeds guest resources.** Support: bounded
-   memory evidence rises to a kernel OOM/allocation failure. Refute: all
-   default content reaches steady present with ample headroom.
+1. **An FEngine/LLVM-side fault prevents the second present from completing.**
+   Support: one successful return, a second pending present, and an Oops in an
+   FEngine thread mapped to LLVM in the same run. Refute: an instrumented run
+   proves the present was already blocked before that thread faulted, or the
+   pending present belongs to an independent thread/path.
+2. **A synchronization/present stall begins first, with the Oops secondary or
+   independent.** Support: the second present has no return and historical
+   records include present/fence waits. Refute: a timestamped stack/state trace
+   shows the fault precedes and removes the producer required by that present.
+3. **Flutter/Wayland composition is independently invalid in this ordinary
+   profile.** Support: the white field/black polygon and missing HUD recur
+   while instrumented present continues healthily. Refute: the full HUD/scene
+   returns when the render/present path recovers without a composition change.
 
 ### UNKNOWN
 
-- Whether the ordinary 0334 startup visibly selects Sequoia and exposes its
-  original texture/material/light path.
-- The actual default model count and whether all assets reach Scene insertion
-  without a memory/OOM problem.
-- Whether the current effective camera frames Sequoia inside the viewport; do
-  not diagnose a black fixed ROI before whole-frame visual and camera review.
-- Whether the model/present/Oops behavior changes without diagnostic flags.
-- Whether the app has a supported camera/viewpoint control, and whether input
-  causes a repaint or surface-lifecycle regression.
-- Whether 300 seconds of continuous present and the later independent boot
-  can pass on one unchanged final candidate image.
+- Whether the black polygon is the Sequoia, another scene object, or a native
+  surface/background artifact; no vehicle identification is possible here.
+- Whether the original GLB material, embedded textures, scene lights, and
+  effective camera were reached and sampled.
+- Whether the FEngine Oops caused, followed, or was independent of the pending
+  present; GDB did not capture the relevant stack and there is no core dump.
+- Whether app scene-composition behavior changes when present progresses.
+- Whether a supported viewpoint control, pointer/hover/click, 300-second
+  present, or second independent boot can pass on the final candidate image.
 
 ## 4W1H (Why excluded)
 
@@ -109,7 +153,7 @@ not prove the independent second boot required by the overall goal.
 | --- | --- |
 | What | Original Sequoia, HUD composition, input/repaint, advancing present |
 | Where | Exact Mini patch-0334 image, ordinary Example Demo 3.32.5, QMP framebuffer |
-| When | One fresh QEMU boot; capture at first candidate frame and after interactions; continue 300 s only after a live positive frame |
+| When | One fresh QEMU boot; capture while app identity is live; stop at the first abnormal boundary; do not run five minutes without a healthy positive frame |
 | Who | Mini runtime operator, guest `agl-driver`, QMP capture and runtime evidence roles |
 | How | One allow-listed clean environment; no model/material/light/camera diagnostic overrides; same image and one QEMU |
 
@@ -124,10 +168,9 @@ not prove the independent second boot required by the overall goal.
 - Use one fresh run ID `flr0404-0001`, the existing fixed QEMU profile, and
   6144 MiB. Do not start parallel QEMU or build work; do not copy the VM image
   to Mac or make duplicate temporary directories.
-- Default loading is intentionally not capped: record actual selected/model
-  and Scene-add counts, Sequoia asset identity, effective camera/view, and
-  bounded memory samples. Monitor the whole QMP screen instead of deciding
-  from the 0403 fixed ROI alone.
+- Default loading was not capped. The run did not emit a collected model/Scene
+  count or effective camera record, so those remain UNKNOWN. The whole frame
+  was reviewed rather than using the 0403 fixed ROI alone.
 - Launch the normal Example Demo as `agl-driver` using only the session values
   needed for XDG/Wayland, executable PATH, and account home. Do not export
   optional model-selection, material, lighting, camera, render, or sync
@@ -150,85 +193,100 @@ not prove the independent second boot required by the overall goal.
 - A second independent boot is not part of this ticket; keep the overall goal
   open until its separate ticket passes on the same final image.
 
-## Success criteria
+## Success criteria — bounded test completion, not product acceptance
 
-1. Exact 0334 rootfs/kernel/qemuboot hashes, clean receiver, one QEMU owner,
-   free ports, fresh ID, and one evidence directory are proven before start.
-2. The process starts as guest `agl-driver` with a recorded PID/UID/start
-   identity and allow-listed default environment. No optional diagnostic
-   selector/material/SUN/camera/sync flags are active.
-3. A full 1280×800 QMP capture is immediately bracketed by the same live app
-   identity and includes a recognizable production Sequoia plus CPU/GPU/FPS
-   HUD. The vehicle is located in the full frame (not just a preselected ROI),
-   the actual GLB asset identity and effective camera/model/Scene counts are
-   present in bounded runtime evidence, and texture/shading is visibly
-   recognizable. Ordinary material/texture/light overrides are absent.
-4. A short QMP video plus before/after full-frame screenshots and pixel
-   metrics show that pointer/UI update does not whiten the HUD, hide the car,
-   or turn the native surface black. A camera/viewpoint criterion passes only
-   if a supported existing control yields an evidenced changed view with
-   depth/occlusion/shading; otherwise it remains UNKNOWN.
-5. Only after criteria 2–4 pass, counters show progressing successful present
-   through at least 300 seconds after the first positive frame. No FEngine
-   disappearance, kernel Oops/OOM, abnormal exit, or sustained present stop.
-6. Exact app/QMP/QEMU teardown and postflight show no owned residual process
-   or listener, and image hashes remain unchanged.
-7. Ticket/log/evidence retain all successful and failed commands, first
-   abnormal boundary, screenshot/video hashes, bounded logs, and next action.
-   A negative or incomplete run is recorded honestly and is not called target
-   completion.
+1. Exact 0334 rootfs/kernel/qemuboot hashes, authoritative receiver identity,
+   clean non-evidence receiver state, free ports, fresh run ID, and one evidence
+   directory are proven before start.
+2. The ordinary Example Demo starts once as `agl-driver` with recorded
+   PID/UID/start identity and only the required session environment; optional
+   diagnostic selectors/material/light/camera/sync overrides are absent.
+3. At least one full QMP still is bracketed by the same live app identity; the
+   complete frame and a short QMP frame sequence are preserved with hashes.
+4. The first visual/runtime abnormal boundary is recorded; no five-minute wait
+   or input trial is attempted after a negative/unhealthy baseline.
+5. The exact app/QMP/QEMU teardown and postflight prove no owned residual
+   process or listener, the receiver remains clean, and all image hashes remain
+   unchanged.
+
+These criteria classify the run only. The production Sequoia+HUD goal is NOT
+MET by this ticket.
 
 ## Plan / Do / Check / Act
 
 ### Plan
 
 - Use the same image as FLR-0403, but remove the diagnostic profile entirely.
-- Start one runtime only after fresh Mini ownership/hash/port/storage/ID gates.
-- Capture full QMP visual evidence and exact app identity before any GDB work.
-- Continue to input/repaint and 300-second present only after live Sequoia+HUD
-  is established. No source/build change.
+- Start one runtime only after fresh Mini receiver/hash/process/port/storage/ID
+  gates. Launch the app directly with a minimal allow-list environment.
+- Capture the full QMP screen while bracketing exact app identity before any
+  debugger work. Continue to input/repaint and 300-second present only after a
+  live Sequoia+HUD baseline; otherwise stop at the first abnormal boundary.
+- No source/build/image change.
 
 ### Do
 
-- Read-only Mini probe through the default sandbox failed with an OS network
-  denial; the authorized read-only SSH retry succeeded.
-- The guessed receiver-role path was absent. A read-only query of the standard
-  checkout candidate found FLR-0019 In Progress and 18 dirty/untracked files.
-- A bounded Mini ticket query used `rg`, which is unavailable there; the
-  ticket itself was then read with `sed` and confirmed FLR-0019 In Progress.
-- `BUILD_HOST`, `BUILD_RECEIVER`, `BUILD_DIR`, `BUILD_TMPDIR`, and
-  `BUILD_BUNDLE_INBOX` are unset in this executor. The candidate's expected
-  prior evidence directory was absent; image hashes were not verified.
-- No build, transfer, run directory creation, or QEMU launch occurred.
+- `scripts/assert-canonical-repository.sh` was first invoked directly and the
+  shell returned permission denied; the documented `bash` invocation then
+  passed before any workspace edit.
+- Read-only Mini preflight resolved the authoritative receiver, exact image
+  hashes, one BBLAYERS entry, clean source state, available resources, no
+  process/port owner, and fresh `flr0404-0001`. One new evidence directory was
+  created; the official harness preflight/start and guest-ready passed. The
+  start SSH response omitted its final marker, so a read-only process/QMP
+  inventory confirmed the already-started QEMU; no duplicate was launched.
+- The first guest-ready invocation expanded local `$HOME` and failed before
+  reaching the Mini command; the corrected remote-shell invocation passed.
+  Guest preflight confirmed UID 1001, Wayland socket, bundle, and no stale app.
+- Direct ordinary launch passed and recorded PID 645 / UID 1001 / start 23230.
+  Identity-bracketed initial and delayed QMP captures showed the same full
+  frame; the delayed still plus eight-frame sequence were byte-identical.
+- The app/present/Oops snapshot recorded two present begins, one successful
+  return, Oops TID 691, no coredump, and the live parent process. Post-Oops
+  `MemAvailable` was 4,650,236 KiB; this was not a peak-memory sample.
+- The first RIP-map guest command was rejected because a multiline command
+  violated the serial-exec one-line contract. A single-line retry mapped the
+  RIP to LLVM 18.1 / Build-ID `359c1108040bc6bc1af64bb639d0b25385858051` and
+  `llvm::CmpInst::isOrdered`; this does not establish cause.
+- GDB attach was bounded to 12 seconds after preserving the live QMP evidence.
+  It timed out at rc=137 before stacks. A post-GDB check proved the same app
+  had resumed, with zero stopped threads and no GDB process.
+- The complete guest app+GDB transcript, QMP PPMs, command/output records, and
+  their hashes were retained on Mini under
+  `$BUILD_EVIDENCE/flr0404-0001/qemu/`. Only the small review PNG/MP4 were
+  streamed to Mac; no rootfs, QEMU disk, cache, or deploy artifact was copied.
+- Exact recorded app SIGTERM and QMP quit passed. Postflight verified all
+  three image hashes, clean receiver, zero target process/listener/socket.
 
 ### Check
 
-- **Execution gate: FAIL-CLOSED / WAITING.** The Mini checkout candidate is
-  not established as the configured fixed receiver, has another In Progress
-  ticket and dirty source/task files, and does not provide the expected prior
-  evidence path. Free processes/ports do not clear the ownership ambiguity.
-- Exact 0334 image identity on the configured build/evidence role: UNKNOWN.
-- Ordinary-profile runtime, full-screen QMP still/video, input/repaint, and
-  five-minute present: NOT RUN. Product rendering remains UNKNOWN.
+- **Bounded ordinary-profile result: NEGATIVE / UNHEALTHY.** Full-frame QMP is
+  white plus one black polygon with no HUD or recognizable Sequoia, and every
+  sampled frame is identical. The app identity was live around captures.
+- **Present/runtime health: FAIL.** Two present begins, one successful return;
+  FEngine thread TID 691 Oops. GDB stacks and causal order were not obtained.
+- **Product acceptance: NOT MET.** Original Sequoia materials/textures/light,
+  HUD composition, camera/depth, interaction stability, five-minute present,
+  and independent second boot remain unverified.
+- **Cleanup/provenance: PASS.** Exact three image hashes, clean receiver,
+  stopped app/QEMU, absent socket, and free ports verified.
 
 ### Act
 
-- Keep this as the single In Progress ticket while continuing only independent
-  read-only provenance checks. Resume runtime execution only after the
-  configured fixed receiver, build/evidence paths, image hashes, and
-  ownership/handoff are resolved by the documented role configuration or an
-  explicit handoff. Do not use, clean, update, build from, or start QEMU
-  against the dirty candidate.
-- After the execution gate is safe, use the first evidenced rendering failure
-  boundary to select the smallest next runtime or source/API ticket. Keep
-  original material/light, same-frame composition, viewpoint/depth,
-  interaction, five-minute, and second-boot gates separate.
+- Close FLR-0404 as a completed negative ordinary-profile test, not a feature
+  pass. FLR-0405 is the sole In Progress follow-up: repeat the same image and
+  ordinary environment with early, bounded GDB/LWP capture so the pending
+  present and first FEngine fault can be ordered in one run-scoped log.
+- Do not patch product code based solely on the LLVM symbol name. Use FLR-0405
+  evidence to choose the smallest source/runtime boundary ticket. Keep original
+  material/light, composition, viewpoint/depth, input stability, five-minute
+  present, and second-boot acceptance separate.
 
 ## Impact
 
 - **Build-time / packaging:** none.
-- **Runtime:** one existing 6144-MiB QEMU run; full model load may increase
-  memory use. No second QEMU or parallel build.
+- **Runtime:** one 6144-MiB QEMU run, one ordinary app, one bounded GDB attach;
+  no parallel build or second QEMU.
 - **Integration risk:** product input/repaint remains enabled; capture identity
   brackets and QMP-only owner-specific teardown prevent false visual verdicts
   or disturbing another runtime owner.
