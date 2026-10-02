@@ -204,3 +204,60 @@ and classify the stop point first.
   in the repaired paths. No QEMU or image action has occurred.
 - This is observer/evidence/teardown hardening only. No QEMU, BitBake, image,
   Flutter, material, camera, texture, light, or app-layout change has occurred.
+
+## 2026-10-02 read-only Mini ownership preflight
+
+- No target QEMU/runqemu/Flutter/BitBake/Devtool/GDB-server process or listener
+  on the three pinned runtime ports was present at the observation time. One
+  container-hosted `gateway.ivi_bridge` Python process remained running; its
+  ownership is UNKNOWN and it was left untouched.
+- The pinned 6-GiB QEMU profile fit the observed available host memory. The
+  fresh `$BUILD_EVIDENCE/flr0399-0001` directory does not exist.
+- The canonical Mac shell has no documented fixed Mini role values loaded. A
+  receiver candidate from an older plan is clean but detached at `969d93c331`
+  and lacks patch 0334, so it is not accepted as FLR-0399's receiver. The exact
+  active receiver/build/inbox ownership is UNKNOWN; no bundle transfer or
+  checkout was attempted.
+- **Decision:** keep FLR-0399 In Progress but do not start QEMU until the fixed
+  roles and the receiver/image provenance are reconciled. This is a workflow
+  identity gap, not a rendering verdict. No current-image live visual result
+  exists yet.
+
+## 2026-10-02 provenance follow-up
+
+- Read-only Mini verification found the exact FLR-0396 rootfs/kernel/qemuboot
+  hashes in `/mnt/yocto/flourite-qemux86-64`; the active build is
+  `qemux86-64` and uses build-local `TMPDIR`.
+- The active clean trial-layer receiver is at `58ff985594…`; its patch 0334
+  hash matches both the canonical source patch and FLR-0396. The fixed inbox
+  already contains a bundle at that same receiver tip; its SHA-256 is recorded
+  in the working log. No transfer or overwrite was made.
+- The active receiver lacks all three files needed for this ticket's new
+  observer/start/cleanup path (`flr0399_live_capture.py`,
+  `flr0399_process_cleanup.py`, and `FLR-0399-qemu-start.sh`). Thus its existing
+  bundle is stale relative to local FLR-0399 HEAD `a9cbf442…`.
+- **Status:** image and source provenance are now verified; observer availability
+  on Mini, evidence-role configuration, and live Sequoia pixels remain UNKNOWN.
+  No QEMU/build was run. The older scripts were not used because they would not
+  verify the repaired same-log and identity-safe observer contract.
+- **Approval / next gate:** the user explicitly authorized a local commit of
+  these three Markdown records with no push. Commit only these records; then use
+  the official helper (no manual bundle/transfer) to send the committed FLR-0399
+  observer code, verify the exact Mini tip and fixed roles, and run a fresh
+  conflict-free preflight before one QEMU observation.
+
+## 2026-10-02 precommit verification
+
+- `make verify` under the default sandbox stopped at five loopback-only test
+  fixtures with `PermissionError` on `localhost` bind. Re-running with the
+  approved loopback permission allowed those four serial regressions to pass;
+  the full suite ran 186 tests and retained one unrelated FLR-0397 failure:
+  `test_serial_exec_capture_passes_strict_gate_without_setup_preamble` invokes
+  `flr0350_launch_gate.py --validate` without its now-required run ID.
+- Independent later gates passed: MCP 52/52, file-size (2,045 files), QEMU
+  runtime harness, runtime-log slice, Devtool finish, Devtool component rebase,
+  Mini recipe-patch, and Mini bundle-handoff contracts.
+- The global Markdown link check still reports 11 historical missing targets
+  in FLR-0338/0339 evidence and FLR-0391/0395 plans; none is in the three
+  approved files. The commit remains documentation-only; no source/image/QEMU
+  changes are included.
