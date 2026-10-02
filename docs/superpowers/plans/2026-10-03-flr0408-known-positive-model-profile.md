@@ -49,7 +49,7 @@
 - [x] **Step 1: Write the six run-scoped POSIX guest command files.** Built from the already validated FLR-0405 direct-launch/identity/stop contracts; only run-local paths and the explicit historical 0049 model-only profile differ. `scene-gate` is bounded and checks identity/kernel faults; `stop` targets only the saved PID/UID/start token.
 - [x] **Step 2: Add a focused profile regression test.** It checks one-line POSIX syntax, run namespace, the exact historical profile, the required `env -i` allowlist, and exclusion of broad environment/material/camera/readback/input overrides.
 - [x] **Step 3: Run the focused static gates.** After tightening the detached launch, exact secondary-Sequoia scene gate, new-kernel-fault rejection, and bounded oversized-log export: focused test 6/6; all six command files pass `/bin/sh -n`, single-line, and size checks; privacy, file sizes (2,096 files), shell syntax (59 files), canonical guard, `git diff --check`, and runtime checkpoint pass. `make check-markdown` reports only the 11 known historical missing targets outside FLR-0408; no current link fails.
-- [x] **Step 4: Commit the ticket-scoped profile and records locally.** Initial ticket/plan/profile checkpoint committed as `3e8727d` with integration-role metadata and no push. Follow-up commits remain scoped to FLR-0408 records, run commands, and focused tests; no push.
+- [x] **Step 4: Commit the ticket-scoped profile and records locally.** Initial ticket/plan/profile checkpoint committed as `3e8727d`; follow-up Mini preflight record as `29dd087`; launch, scene, fault, and bounded-export gates as `58d8d3e`. Integration-role metadata used; all remain local and unpushed.
 
 ### Task 2: Recheck Mini ownership and immutable image before one QEMU
 

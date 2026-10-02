@@ -176,8 +176,9 @@ product objective.
   exceeded its cap. The local commands now require `sequoia_ngp.glb` in
   `mode=secondary`, reject fault-count increases, preserve a bounded log
   head/tail on overflow, and use the historical detached
-  `/usr/bin/nohup ... </dev/null` contract. Focused verification and local
-  commit are pending; the app has not launched.
+  `/usr/bin/nohup ... </dev/null` contract. Focused verification passed 6/6;
+  the changes were locally committed as `58d8d3e` without push. The app has not
+  launched.
 - The latest read-only Mini preflight confirms one configured
   `meta-fluorite-trial` layer, qemux86-64, fixed build TMPDIR, active source
   clean at `6e9878ba7993`, and separate fixed receiver clean at `969d93c331be`.
@@ -220,8 +221,7 @@ product objective.
 - If scene-add is reached but vehicle pixels fail, use the same run's first-
   fault/log/QMP evidence to choose one smaller render-versus-present
   discriminator; do not repeat this profile without new evidence.
-- First verify and locally commit the detached-launch and evidence-gate
-  adjustments, then refresh only the updated committed guest commands in the
-  existing Mini evidence directory. Launch once over guest SSH; if launch or
+- Refresh only the updated committed guest commands in the existing Mini
+  evidence directory. Launch once over guest SSH; if launch or
   the Sequoia-specific scene-add fails, record UNKNOWN and choose the next
   test from that exact boundary.
