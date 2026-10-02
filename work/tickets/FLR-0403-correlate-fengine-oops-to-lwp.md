@@ -1,6 +1,7 @@
 # FLR-0403 — correlate the FEngine Oops with its GDB LWP and present
 
-- Status: In Progress
+- Status: Waiting
+- Completion note: run completed; required LWP/ELF correlation not obtained
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mac observer/test source / Mini QEMU / guest Flutter+GDB / QMP and kernel evidence roles
@@ -92,9 +93,10 @@ Sequoia rendering pass or root-cause claim.
 
 ## Scope and controls
 
-- Keep the image, patch 0334, Example Demo scene, HUD, launch environment,
-  camera/material/light settings, and QEMU profile fixed. No BitBake, image
-  build, Devtool, product-source patch, diagnostic material override, input
+- Keep the image, patch 0334, Example Demo scene, HUD, camera, and QEMU profile
+  fixed. Preserve FLR-0401's diagnostic LIT/SUN overrides for this
+  Oops/present-correlation run; that profile is explicitly not product
+  acceptance. No BitBake, image build, Devtool, product-source patch, input
   suppression, or second QEMU.
 - First verify the exact receiver/build artifacts and that Mini has no active
   QEMU/runqemu/Flutter/BitBake/GDB owner, occupied reserved ports, or run-ID
@@ -161,25 +163,64 @@ Sequoia rendering pass or root-cause claim.
 
 ### Do
 
-- Pending. No source/runtime edit or new QEMU has been started for FLR-0403.
+- One run, `flr0403-0001`, completed on the unchanged patch-0334 image. The
+  exact rootfs/kernel/qemuboot hashes matched the FLR-0401 baseline; no source,
+  build, image, receiver, or cache was changed. The run used the same diagnostic
+  LIT-material and SUN overrides as the prior observation, so it is not an
+  original-material/light product test.
+- The direct `flutter-auto` process was PID 646, UID 1001, start token 44270.
+  A QMP-only 1280x800 full-frame capture showed CPU/GPU/FPS HUD and Scenes, but
+  the Sequoia ROI `[440,220,400,360]` was uniformly black (144,000/144,000
+  pixels). The capture was not bracketed by an immediately-before/after app
+  identity check; classify the frame as visual evidence, not a certified live
+  app snapshot. See [run evidence](../evidence/FLR-0403-0001.md).
+- Guest kernel recorded an `FEngine::loop` page-fault Oops (TID 695, RIP
+  `0x7fb61183e541`, CR2 `0x00000000aaff9750`) at estimated UTC
+  `2026-10-02T08:01:52.307952Z`; guest uptime was 475.594763 s. The nearest
+  app READY/present snapshot was later, and the QMP image was later still.
+  `coredumpctl` found no core. The app eventually returned 124 from the
+  configured timeout; this status alone is not a product-crash verdict.
+- The process exited before the attempted GDB/maps/Build-ID collection. No
+  `ptid`/LWP mapping or same-run ELF Build-ID was obtained. Oops-to-present
+  causality remains UNKNOWN. The four QMP frame samples had the same PPM hash;
+  this does not establish frame progress.
+- `runqemu` initially appeared as its Python wrapper rather than a
+  `qemu-system` process; read-only descendant inspection identified the actual
+  QEMU child. BusyBox rejected `dmesg --ctime`; plain bounded `dmesg` then
+  succeeded. Both failed checks and their corrections are retained in the
+  working log.
+- Exact QMP teardown and postflight passed: no owned QEMU/runqemu/Flutter/QMP
+  process or reserved listener remained, and image hashes were unchanged.
 
 ### Check
 
-- Pending exact manual-command verification, Mini preflight, same-run visual/
-  runtime evidence, and exact cleanup.
+- Exact-image preflight and generic harness preflight passed; QEMU and guest
+  Flutter ran once; full QMP evidence, focused guest log export, bounded
+  kernel Oops evidence, and exact cleanup/postflight were recorded.
+- The central diagnostic success criterion failed: process lifetime ended
+  before GDB could map Oops TID to LWP or collect current-image Build-IDs.
+  The visual capture is not identity-bracketed, and both visual content and
+  runtime progress are unhealthy/uncertain. This ticket is therefore Waiting,
+  not Done; the failed criterion must not be relabeled as product evidence.
+- Raw guest/QMP artifacts remain on the Mini. The committed evidence manifest
+  contains the QMP PNG, raw PPM/frame hashes, bounded app-log hash, and
+  role-relative Mini evidence location.
 
 ### Act
 
-- Decide the next smallest product boundary from the first correlated event.
-  If TID/ptid or Build-ID remains unavailable, preserve UNKNOWN and improve
-  only that observation path. If present progresses but Sequoia stays black,
-  move to the earliest evidenced scene/material/texture/surface boundary.
+- Preserve the Oops/LWP/Build-ID relationship as UNKNOWN; do not infer that the
+  Oops caused the black ROI. Do not spend another run on the same debugger
+  window without new evidence.
+- The next highest-value product check is a fresh, single-QEMU run of the
+  installed Example Demo on the exact same image with the diagnostic material
+  and SUN overrides absent. That separates the diagnostic profile from the
+  actual Sequoia material/lighting path. It is FLR-0404, a separate ticket.
 
 ## Impact
 
 - **Build-time / packaging:** none; no Yocto recipe or image is changed.
-- **Runtime:** one bounded diagnostic QEMU run if and only if the Mini
-  preflight proves it cannot disturb another owner.
+- **Runtime:** one bounded diagnostic QEMU run completed after read-only Mini
+  ownership/hash/port gates passed; teardown and postflight passed.
 - **Integration risk:** GDB pauses the inferior. Capture QMP before attach,
   bound GDB duration, use identity-checked detach/cleanup, and never interpret
   debugger-induced changes as normal runtime behavior.
