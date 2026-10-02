@@ -39,7 +39,7 @@ present. This is one diagnostic observation, not product acceptance.
 - [x] Resolve fixed build/evidence role paths from the prior exact run command
   and verify exact rootfs/kernel/qemuboot hashes, BitBake idle, no
   QEMU/runqemu/Flutter/GDB process, free reserved ports, and a fresh run ID.
-- [ ] Recheck all owners, ports, artifact hashes, receiver cleanliness, and
+- [x] Recheck all owners, ports, artifact hashes, receiver cleanliness, and
   run-ID absence read-only immediately before any mutation. If they pass,
   create exactly one evidence run directory, then invoke the generic harness's
   read-only preflight (which requires that directory). Start remains a
