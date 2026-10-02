@@ -45,6 +45,8 @@ class FLR0408ProfileTests(unittest.TestCase):
         self.assertIn("env -i HOME=$home PATH=/usr/bin:/bin", launch)
         self.assertIn("XDG_RUNTIME_DIR=/run/user/1001", launch)
         self.assertIn("WAYLAND_DISPLAY=wayland-0", launch)
+        self.assertIn("/usr/bin/nohup env -i", launch)
+        self.assertIn("</dev/null", launch)
         self.assertIn("/usr/bin/flutter-auto -b", launch)
         self.assertNotIn("FLR0026_NATIVE_SKIP_ENVIRONMENT", launch)
         self.assertNotIn("FLR0026_NATIVE_READBACK_PROBE", launch)
@@ -67,10 +69,31 @@ class FLR0408ProfileTests(unittest.TestCase):
         )
         self.assertIn("-lt 90", gate)
         self.assertIn("+ 50", gate)
-        self.assertIn("FLR0026_MODEL_STAGE_SCENE_ADD_DONE", gate)
+        self.assertIn(
+            "FLR0026_MODEL_STAGE_SCENE_ADD_DONE asset=assets/models/sequoia_ngp.glb",
+            gate,
+        )
+        self.assertIn(".*mode=secondary", gate)
         self.assertIn("FLUORITE0408_SCENE_GATE status=$status", gate)
         self.assertIn("KERNEL_FAULT", gate)
         self.assertIn("IDENTITY_CHANGED", gate)
+
+    def test_identity_gate_rejects_new_kernel_faults(self):
+        identity = (COMMAND_DIR / "FLR-0408-guest-identity.cmd").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('if [ "$faults" -gt "$fault_baseline" ]', identity)
+        self.assertIn("status=KERNEL_FAULT", identity)
+
+    def test_export_preserves_bounded_evidence_when_log_exceeds_cap(self):
+        export = (COMMAND_DIR / "FLR-0408-guest-export.cmd").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("app_log_truncated=%s", export)
+        self.assertIn("head -c 250000", export)
+        self.assertIn("tail -c 650000", export)
+        self.assertIn("FLUORITE0408_DMESG_TAIL_BEGIN", export)
+        self.assertIn("FLUORITE0408_JOURNAL_TAIL_BEGIN", export)
 
 
 if __name__ == "__main__":

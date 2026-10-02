@@ -40,16 +40,16 @@
 - Modify: `TASKS.md`
 
 **Interfaces:**
-- Each guest command is exactly one POSIX-shell line and is passed as a committed file to the Mini serial-exec helper.
+- Each guest command is one POSIX-shell line. Stream the committed file into the guest's `/bin/sh -s` over the fixed guest-SSH forward and save output on the Mini. Serial-exec is acceptable only when its setup gate passes; if it fails before dispatch, preserve the setup transcript and use guest SSH rather than blindly retrying the same request.
 - Run-local identity/log paths use `/run/user/1001/fluorite-0408-0001.*`; the identity file stores `pid uid start-token kernel-fault-baseline`.
 - `scene-gate` returns one explicit `FLUORITE0408_SCENE_GATE status=...` record; only `status=READY` permits the after-scene QMP capture.
 - `identity` validates the saved PID/UID/start token, unique `flutter-auto` owner, bounded app-log size, and kernel-fault count before/after QMP capture.
-- `export` writes the bounded full app log and only the selected kernel/journal fault slice into the Mini evidence directory through serial-exec output files; it does not print full logs into the assistant transcript.
+- `export` writes the bounded full app log and selected kernel/journal fault slice into a Mini evidence output file; it does not print full logs into the assistant transcript.
 
 - [x] **Step 1: Write the six run-scoped POSIX guest command files.** Built from the already validated FLR-0405 direct-launch/identity/stop contracts; only run-local paths and the explicit historical 0049 model-only profile differ. `scene-gate` is bounded and checks identity/kernel faults; `stop` targets only the saved PID/UID/start token.
 - [x] **Step 2: Add a focused profile regression test.** It checks one-line POSIX syntax, run namespace, the exact historical profile, the required `env -i` allowlist, and exclusion of broad environment/material/camera/readback/input overrides.
-- [x] **Step 3: Run the focused static gates.** Focused test 4/4; all six command files pass `/bin/sh -n`; privacy, file sizes (2,096 files), shell syntax (59 files), canonical guard, `git diff --check`, and runtime checkpoint pass. `make check-markdown` has 11 known historical missing targets outside FLR-0408; no current link fails.
-- [x] **Step 4: Commit the ticket-scoped profile and records locally.** Initial ticket/plan/profile checkpoint committed as `3e8727d` with integration-role metadata and no push. Follow-up commits remain limited to this FLR-0408 ticket/log/dashboard and evidence manifest.
+- [x] **Step 3: Run the focused static gates.** After tightening the detached launch, exact secondary-Sequoia scene gate, new-kernel-fault rejection, and bounded oversized-log export: focused test 6/6; all six command files pass `/bin/sh -n`, single-line, and size checks; privacy, file sizes (2,096 files), shell syntax (59 files), canonical guard, `git diff --check`, and runtime checkpoint pass. `make check-markdown` reports only the 11 known historical missing targets outside FLR-0408; no current link fails.
+- [x] **Step 4: Commit the ticket-scoped profile and records locally.** Initial ticket/plan/profile checkpoint committed as `3e8727d` with integration-role metadata and no push. Follow-up commits remain scoped to FLR-0408 records, run commands, and focused tests; no push.
 
 ### Task 2: Recheck Mini ownership and immutable image before one QEMU
 
@@ -63,11 +63,11 @@
 - Use the existing active Mini layer checkout only after confirming it remains clean at the expected local feature commit; do not update the separate staging receiver for this runtime-only task.
 - Resolve `$BUILD_DIR`, effective `$BUILD_TMPDIR`, `oe-init-build-env`, `runqemu`, and exact qemuboot/kernel/rootfs paths from current fixed roles and deploy metadata; do not guess from directory names.
 
-- [ ] **Step 1: Revalidate the current machine roles.** Confirm canonical Mac checkout and exact feature tip, active Mini layer tip/cleanliness, the fixed build directory/MACHINE/TMPDIR, and that its bblayers file still points to the clean active layer at the expected commit. Record the separate fixed receiver tip and inbox bundle head; do not mutate them.
-- [ ] **Step 2: Rehash the three deploy artifacts.** Hash the versioned rootfs, kernel, and qemuboot; require the three exact values from Global Constraints. Confirm the qemuboot metadata points to the same qemux86-64 machine and artifact set.
-- [ ] **Step 3: Run the read-only runtime preflight immediately before QEMU.** Require zero QEMU/runqemu/flutter-auto/GDB/BitBake processes, zero listeners on 10930–10932, no `flr0408-0001` evidence/QMP collision, adequate memory/swap/disk/inodes, and the 6144-MiB allocation. If any owner or mismatch exists, do not start.
-- [ ] **Step 4: Create exactly one evidence/run directory after preflight passes.** Use `/mnt/yocto/evidence/flr0408-0001/qemu/`; do not create a second build, TMPDIR, or QEMU run directory. Transfer only the six committed command files there and compare their SHA-256 values with the Mac copies.
-- [ ] **Step 5: Run the harness preflight and start once.** Use the exact existing runqemu profile, 6144 MiB, QMP UNIX socket within the evidence directory, snapshot rootfs, slirp, nographic, and ports 10930/10931/10932. Require QMP readiness and guest SSH readiness; preserve the harness's command, serial, console, and boot logs.
+- [x] **Step 1: Revalidate the current machine roles.** Confirmed the canonical Mac checkout and feature tip, active Mini layer tip/cleanliness, fixed build directory/MACHINE/TMPDIR and active BBLAYERS target. Recorded the separate clean receiver and bundle head; no role was mutated.
+- [x] **Step 2: Rehash the three deploy artifacts.** Rootfs, kernel, and qemuboot hashes matched the exact patch-0334 values; qemuboot identifies qemux86-64/ext4 and the same artifact set.
+- [x] **Step 3: Run the read-only runtime preflight immediately before QEMU.** Ownership, ports, evidence collision, RAM/swap/disk, and 6144-MiB allocation predicates passed before startup.
+- [x] **Step 4: Create exactly one evidence/run directory after preflight passes.** Created `/mnt/yocto/evidence/flr0408-0001/qemu/` and transferred only six committed guest command files; all remote hashes and shell syntax matched. No second build/TMPDIR/QEMU directory was created.
+- [x] **Step 5: Run the harness preflight and start once.** Existing runqemu profile started once at 6144 MiB; QMP and guest SSH became ready, and harness/serial/console/boot logs were retained. The later guest serial-exec setup gate failed before command dispatch; the same read-only preflight passed over guest SSH.
 
 ### Task 3: Launch exact 0049 profile and capture at secondary scene-add
 
@@ -82,11 +82,11 @@
 - The guest app is a single UID-1001 `flutter-auto` whose PID/UID/start token remain constant before the still, across all video frames, and after capture.
 - QMP `capture` saves one full-screen PPM after scene gate READY. QMP `video` saves exactly 8 more PPM frames at 0.5-second intervals in the same run evidence directory.
 
-- [ ] **Step 1: Run guest preflight and launch.** Use serial-exec with bounded timeouts; require guest preflight PASS and `FLUORITE0408_LAUNCH=PASS`. Save the helper output and launch context in the Mini run directory. Do not enable GDB or additional profile variables.
+- [ ] **Step 1: Run guest preflight and launch.** Serial-exec first failed at the setup gate before dispatch, so preserve its transcript and use the documented SSH guest path for the remaining one-line commands. Require guest preflight PASS and `FLUORITE0408_LAUNCH=PASS`; the launch uses the existing `nohup` plus `/dev/null` stdin detach contract. After the launch SSH call returns, use a fresh SSH call for identity/scene gating to verify the app survived session teardown. Save bounded output in the Mini run directory; do not enable GDB or additional profile variables.
 - [ ] **Step 2: Wait for the one bounded scene gate.** Run `scene-gate` for no more than 45 seconds. Proceed only on `status=READY` with the secondary `assets/models/sequoia_ngp.glb` scene-add marker and matching identity. On fault/exit/identity change, export bounded evidence immediately and stop.
 - [ ] **Step 3: Bracket and capture the first full QMP still.** Run the guest identity check, QMP `capture` to `post-scene-add.ppm`, then run the guest identity check again. Require identical PID/UID/start token. Record dimensions and SHA-256 before any image review.
 - [ ] **Step 4: Capture the short QMP sequence without user input.** Recheck identity, capture exactly eight QMP frames at 0.5-second intervals with the pinned helper, and recheck identity immediately after. Stop early if an app exit, kernel Oops, or present failure is reported.
-- [ ] **Step 5: Save bounded runtime logs before stop.** Run guest `export` once to save the shared app log (up to 900,000 bytes), the first Oops/fault slice from `dmesg`/`journalctl`, the exact app identity, present begin/return/success counts, scene-add/asset/material markers, and the QMP capture bracket. Use Mini-side output files; do not dump full logs into the assistant transcript.
+- [ ] **Step 5: Save bounded runtime logs before stop.** Run guest `export` once to save the shared app log in full when at most 900,000 bytes; above that cap, preserve the first 250,000 and last 650,000 bytes with an explicit truncation marker. Include `dmesg`/`journalctl` tails, app identity, present begin/return/success counts, scene-add/asset/material markers, and the QMP capture bracket. Use Mini-side output files; do not dump full logs into the assistant transcript.
 
 ### Task 4: Classify Gate A, display review media, and close the runtime
 

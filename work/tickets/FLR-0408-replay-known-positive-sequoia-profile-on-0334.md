@@ -107,11 +107,13 @@ product objective.
    HOME/PATH/XDG/Wayland settings plus the six historical controls:
    `MODEL_MATCH=sequoia`, `MODEL_LIMIT=2`, `SKIP_SKYBOX=1`,
    `SKIP_INDIRECT_LIGHT=1`, `SKIP_SHAPES=1`, `SKIP_LIGHTS=1`, and
-   `MODEL_STAGE_TRACE=1`. `NATIVE_READBACK_PROBE` stays unset. No camera,
-   material, global environment-skip, input, or sync override is permitted.
+   `MODEL_STAGE_TRACE=1`. `NATIVE_READBACK_PROBE` stays unset. Detach the
+   process using the existing `nohup` plus `/dev/null` stdin contract so it
+   survives the one-shot SSH session. No camera, material, global
+   environment-skip, input, or sync override is permitted.
 3. Require the same live PID/UID/start token around a full-screen QMP still
    immediately after `MODEL_STAGE_SCENE_ADD_DONE` and eight QMP frames 0.5 s
-   apart. Preserve raw PPMs, command/serial/app/kernel evidence on the Mini
+   apart. Preserve raw PPMs, command/serial-setup/app/kernel evidence on the Mini
    before teardown; record their hashes in the evidence manifest.
 4. Report separate `SCENE_ADD`, `GATE_A_PIXELS`, `PRESENT_HEALTH`, and
    `RUNTIME_FAULT` verdicts. Pixel PASS requires recognizable production
@@ -120,6 +122,15 @@ product objective.
 5. Stop only the recorded app identity, QMP-quit only this QEMU, prove exact
    process/socket/port cleanup and unchanged deploy hashes, and preserve
    failures and UNKNOWNs in the ticket, working log, and evidence manifest.
+
+## Visual evidence
+
+- Required artifact: full-screen QMP PPM still after secondary Sequoia
+  `SCENE_ADD_DONE` and an eight-frame QMP sequence, bracketed by the same
+  guest PID/UID/start token. Record exact hashes, resolution, visible content,
+  and evidence-manifest link here after capture.
+- Current state: pending. The first serial-exec attempt stopped before guest
+  command dispatch; it produced no Flutter frame and is not visual evidence.
 
 ## Plan / Do / Check / Act
 
@@ -138,10 +149,35 @@ product objective.
 - The six one-line commands are in `work/commands/FLR-0408-guest-*.cmd`; their
   paths are confined to the 0408 run namespace.
 - `python3 -B tests/test_flr0408_profile.py` passed 4/4.
-- Initial read-only baseline: branch
-  `feature-flr-0408-replay-sequoia-0334` at checkpoint
-  `ffafe4394a73d44db2644438338d11c6de089ba3`. No FLR-0408 QEMU or build has
-  started; revalidate remote ownership and artifact facts before runtime.
+- Initial read-only baseline branch point was `ffafe4394a73`; local records
+  were committed as `3e8727d` and `29dd087`, without push.
+- One 6144-MiB QEMU is currently running as the only target: harness PID
+  `3089625`, QEMU child PID `3089652`, QMP socket present; guest SSH readiness
+  passed. No build or image change occurred.
+- Serial-exec preflight failed `echo-off-response-unexpected` before the guest
+  command was dispatched. Its saved setup transcript is 197 bytes: one setup
+  marker with status 0 and one exact final prompt; command output is empty.
+  Source inspection shows the helper accepts a 50 ms socket timeout as a
+  successful quiet window and rejects any non-timeout read. Since the saved
+  transcript ends exactly at the prompt with no extra bytes, the failure is
+  consistent with EOF at the serial setup boundary; why that endpoint closed
+  remains UNKNOWN. No app was launched.
+- Read-only guest SSH `id -u` returned 0, and the same committed guest
+  preflight returned `FLUORITE0408_PREFLIGHT=PASS`. Use this route for remaining
+  commands, streaming their contents into guest `/bin/sh -s` and saving output
+  on the Mini.
+- A `pgrep -x qemu-system-x86_64` check returned zero because Linux's `comm`
+  truncates the longer executable name; the harness PID file and `ps` confirm
+  the live runqemu/QEMU pair. Use recorded PID/argv evidence, not that exact
+  comm match.
+- Before app launch, review found three evidence-gate gaps: scene readiness
+  accepted any model's generic scene-add marker, identity reported but did not
+  reject a new kernel fault, and export stopped without evidence if the app log
+  exceeded its cap. The local commands now require `sequoia_ngp.glb` in
+  `mode=secondary`, reject fault-count increases, preserve a bounded log
+  head/tail on overflow, and use the historical detached
+  `/usr/bin/nohup ... </dev/null` contract. Focused verification and local
+  commit are pending; the app has not launched.
 - The latest read-only Mini preflight confirms one configured
   `meta-fluorite-trial` layer, qemux86-64, fixed build TMPDIR, active source
   clean at `6e9878ba7993`, and separate fixed receiver clean at `969d93c331be`.
@@ -163,8 +199,18 @@ product objective.
 
 ### Check
 
-- Pending full local repository gates and one bounded runtime attempt. No
-  product or image acceptance is claimed.
+- Focused test 6/6, all six guest shell/one-line/size checks, canonical,
+  privacy, 2,096-file size, 59-file shell syntax, runtime checkpoint
+  (`active=1`), and `git diff --check` pass after launch, scene, fault, and
+  bounded-export changes. `make check-markdown` still reports only the same 11 historical
+  missing targets outside FLR-0408; no new 0408 link fails.
+- The launch command returns before the next SSH call; the first identity or
+  scene-gate check must use a fresh SSH connection to prove the UID-1001 app
+  survives launch-session termination.
+- Runtime remains pre-app: one exact-image QEMU is live; guest SSH and the
+  read-only preflight passed. Serial-exec failed before dispatch, so it is not
+  a product/rendering failure. No visual result or product acceptance is
+  claimed.
 
 ### Act
 
@@ -174,5 +220,8 @@ product objective.
 - If scene-add is reached but vehicle pixels fail, use the same run's first-
   fault/log/QMP evidence to choose one smaller render-versus-present
   discriminator; do not repeat this profile without new evidence.
-- If launch or scene-add fails before reproducing the intended profile, record
-  UNKNOWN and choose the next test from that exact boundary.
+- First verify and locally commit the detached-launch and evidence-gate
+  adjustments, then refresh only the updated committed guest commands in the
+  existing Mini evidence directory. Launch once over guest SSH; if launch or
+  the Sequoia-specific scene-add fails, record UNKNOWN and choose the next
+  test from that exact boundary.
