@@ -272,3 +272,40 @@ evidence about Fluorite rendering.
   Mini receiver/build/TMPDIR roles must come from their authoritative local
   role source, then be verified read-only before transfer or build.
 - No source, receiver, build directory, cache, or process was changed.
+
+## Authorized fixed-receiver handoff (2026-10-03)
+
+### Facts
+
+- The approved local build-role tuple was recovered only from the historical
+  successful handoff invocation whose receiver revision was
+  `9db57cfe92deddf4bc2037e53c871ac7acdb0657`; values are not stored here or
+  printed. The dirty remote-MCP project was not used.
+- Before replacement, the local active bundle and fixed inbox bundle each
+  advertised only `54c02bdcddbf80be579c4fd7d493f5bd24f6df6c`, matching the
+  then-current clean Mini receiver and an ancestor of this local feature tip.
+  They contained no unique pending receiver revision.
+- A read-only process/cgroup check identified the remaining Python process as
+  belonging to the existing IVI bridge/gateway container, not a BitBake or
+  QEMU owner. Its actual cwd was not readable and remains UNKNOWN. No named
+  QEMU/runqemu/Flutter/BitBake owner or reserved-port listener was found.
+- The fixed receiver was clean at `54c02bd`; retained `TOPDIR`/`TMPDIR`
+  snapshots were stale, so only the documented bounded live metadata check
+  could establish the current effective paths.
+- One invocation of
+  `scripts/handoff-fluorite-bundle.sh 5770cec617bf9d59b11216e9aba762b66efa4cbe 9fb2d8c63bda212d4c17ad8f24698226869a2a37`
+  completed successfully. Bundle SHA-256 was
+  `9bad41bf0ada8f59722cb56d348e4cd00328c79b85b9fb12c359b5d6ce0ec752` on
+  local and remote; effective `TOPDIR` and `TMPDIR` checks passed; the fixed
+  receiver is exact tip `9fb2d8c63bda212d4c17ad8f24698226869a2a37` and clean.
+- No `do_patch`, compile, image build, QEMU start, process signal, or change to
+  the dirty remote-MCP project occurred.
+
+### Decision / next check
+
+- The obsolete active bundle was replaced only after its unique advertised tip
+  was proved present as the receiver's current revision; the one canonical
+  handoff helper remained the only transfer/update mechanism.
+- FLR-0406 stays In Progress until the transferred focused tests pass on Mini
+  and the modified serial gate is exercised on the real serial endpoint in a
+  fresh, single-owner FLR-0405 run. Product rendering acceptance remains open.
