@@ -14,7 +14,7 @@ this is only an observation-tool prerequisite.
 - The second setup capture contained two adjacent prompts after tty echo had
   already been disabled. The first failure's exact rejecting predicate remains
   UNKNOWN.
-- The current recognizer accepts only one prompt at the end of the captured
+- At activation, the recognizer accepted one prompt at the end of the captured
   setup response, with either no preceding text or exactly `stty -echo`.
 - An existing test uses a local TCP serial mock. It can assert that no guest
   command is dispatched when setup has not been proven.
@@ -43,11 +43,15 @@ Compare two implementation paths:
 
 - Tolerate multiple prompt-shaped lines. This is a smaller parser change but
   risks treating stale output as proof that the shell is synchronized.
-- Send a controlled echo-off setup command that emits a per-session unique
-  marker, then require that marker and the final prompt before dispatch. This
-  establishes a boundary independent of command echo and tolerates earlier
-  prompt residue without using it as readiness evidence. Prefer this path if
-  mock tests support it.
+- Send a first `stty -echo` command without a nonce and wait for a prompt only
+  as a sequencing barrier. Then send a second nonce-bearing `printf` probe,
+  report the saved `stty` status, and require status zero, exactly one nonce
+  occurrence across the full probe transcript, and one final prompt after the
+  output line. The second-stage nonce detects TTY input echo; the first prompt
+  is never readiness proof. Add a short bounded quiet check for adjacent
+  duplicate prompts, and use a per-command completion nonce to reject stale
+  completion output. The quiet window only covers bytes observed during that
+  bound; it cannot guarantee that a serial stream emits no later bytes.
 
 ## Execution plan
 
@@ -58,19 +62,24 @@ Compare two implementation paths:
    recorded 0405 tip, then create `feature-flr-0406-serial-exec-gate` from that
    checkpoint. Re-run the canonical guard before implementation.
 3. Extend the existing loopback TCP fixture to model prompt chunks, echo-on,
-   already-no-echo, duplicate prompt residue, missing marker, command dispatch
-   count, command output, and nonzero status. Add the smallest regression first
-   and run it against the unchanged implementation to record RED.
+   echo still enabled after a stale prompt, nonzero `stty`, duplicate prompt
+   residue split across TCP reads, missing marker, command dispatch count,
+   command output, stale completion marker, and nonzero status. Add the
+   smallest regression first and run it against the unchanged implementation
+   to record RED.
 4. Implement only the serial-exec setup gate needed by the failing test. Keep
-   failures fail-closed: no guest command before the unique setup marker and
-   final prompt are both observed. Preserve bounded I/O and transcript output.
+   failures fail-closed: no guest command before the second-stage nonce output,
+   successful saved `stty` status, one nonce in the probe transcript, and final
+   prompt are all verified. Fail if the bounded quiet check sees trailing
+   bytes. Use a fresh per-command completion nonce. Preserve bounded I/O and
+   transcript output.
 5. Run focused serial-exec tests, the complete Python harness tests, relevant
    shell/static/contract checks, privacy/checkpoint/markdown/whitespace gates,
    and inspect the final diff. Report unrelated baseline failures separately.
 6. Update FLR-0406 Plan/Do/Check/Act and working log with exact commands,
-   results, and test counts; update FLR-0405 as blocked only by the observation
-   gate and retain its runtime UNKNOWN. Locally commit the ticket-scoped change;
-   do not push.
+   results, and test counts; keep FLR-0405 Waiting only on the observation gate
+   and retain its runtime UNKNOWN. Locally commit the ticket-scoped change; do
+   not push.
 7. Stop before another QEMU run. Resume FLR-0405 only through its existing
    documented Mini handoff, after verifying the exact transferred harness and
    using a fresh run ID.
@@ -79,10 +88,13 @@ Compare two implementation paths:
 
 - Regression is observed failing before the implementation change and passing
   afterward.
-- Echo-on and already-no-echo sessions each dispatch the requested command
-  exactly once and preserve exact output/status.
+- A successful echo-off transition dispatches the requested command exactly
+  once and preserves exact output/status. A stale-prompt path that leaves echo
+  active, and a nonzero `stty` status, both fail closed with zero dispatches.
 - Prompt chunking and stale/duplicate prompt residue do not cause premature
-  dispatch; missing/invalid marker fails closed with zero guest dispatches.
+  dispatch; a prompt duplicated across reads inside the quiet window fails
+  closed with zero guest dispatches; missing/invalid marker fails closed with
+  zero guest dispatches. A stale fixed completion marker cannot report PASS.
 - Focused and repository-relevant tests pass, or remaining baseline failures
   are isolated and recorded.
 - No QEMU, build, product-source, image, or cache state is changed.

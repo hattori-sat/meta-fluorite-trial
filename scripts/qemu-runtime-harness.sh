@@ -377,6 +377,7 @@ serial_exec() {
     [ "${#command_text}" -le 4096 ] || fail 'command-file-too-large'
     exec python3 - "$serial_port" "$serial_user" "$serial_prompt" "$command_text" "$output_file" "$setup_output_file" "$timeout_seconds" <<'PY'
 import re
+import secrets
 import socket
 import sys
 import time
@@ -384,7 +385,7 @@ from pathlib import Path
 
 port, user, prompt, command, output, setup_output, timeout_seconds = sys.argv[1:]
 timeout_seconds = int(timeout_seconds)
-marker = "__FLR_SERIAL_COMMAND_DONE_7B31__"
+marker = "__FLR_SERIAL_COMMAND_DONE_" + secrets.token_hex(12) + "__"
 if marker in command or "\n" in command or "\r" in command:
     print("serial-exec=FAIL reason=unsafe-command", file=sys.stderr)
     raise SystemExit(1)
@@ -459,11 +460,12 @@ if prompt_b not in buf:
     print("serial-exec=FAIL reason=exact-prompt-not-reached", file=sys.stderr)
     raise SystemExit(1)
 
-# Turn terminal echo off in a separate command. The actual command then has
-# no input echo that could be mistaken for its completion marker.
+# Phase 1 contains no nonce: input echo cannot forge the later probe marker.
+# Its prompt is only a sequencing barrier, never readiness evidence.
+setup_command = b"stty -echo; __FLR_SERIAL_STTY_RC=$?\n"
 buf.clear()
 require_remaining("echo-off-send")
-sock.sendall(b"stty -echo\n")
+sock.sendall(setup_command)
 while True:
     require_remaining("echo-off-prompt")
     try:
@@ -476,29 +478,92 @@ while True:
         setup_output, chunk, setup_bytes, setup_limit, setup_truncated
     )
     buf.extend(chunk)
-    if len(buf) > 65536:
-        del buf[:-65536]
-    require_remaining("echo-off-response")
+    if setup_truncated:
+        print("serial-exec=FAIL reason=echo-off-transcript-limit-exceeded", file=sys.stderr)
+        raise SystemExit(1)
+    require_remaining("echo-off-prompt-response")
     if prompt_b in buf:
         break
 if prompt_b not in buf:
     print("serial-exec=FAIL reason=echo-off-prompt-not-reached", file=sys.stderr)
     raise SystemExit(1)
+buf.clear()
 
-# Discard only a fully recognized setup transcript. A prompt substring in
-# arbitrary serial output is not enough to establish a fresh capture boundary.
-prompt_start = buf.find(prompt_b)
+# Phase 2 proves that phase 1 ran: if tty echo is still enabled, this input
+# nonce appears in the echoed command as well as in printf's output.
+setup_marker = ("__FLR_SERIAL_SETUP_DONE_" + secrets.token_hex(12) + "__").encode()
+probe_command = (
+    "printf '\\n"
+    + setup_marker.decode()
+    + ":%s\\n' \"$__FLR_SERIAL_STTY_RC\"\n"
+).encode()
+require_remaining("echo-off-probe-send")
+sock.sendall(probe_command)
+status_pattern = re.compile(
+    rb"(?:^|\r?\n)" + re.escape(setup_marker) + rb":([0-9]+)\r?\n"
+)
+status_match = None
+while True:
+    status_match = status_pattern.search(bytes(buf))
+    if status_match is not None and prompt_b in buf[status_match.end():]:
+        break
+    require_remaining("echo-off-marker-and-prompt")
+    try:
+        chunk = sock.recv(4096)
+    except socket.timeout:
+        continue
+    if not chunk:
+        break
+    setup_bytes, setup_truncated = append_bounded(
+        setup_output, chunk, setup_bytes, setup_limit, setup_truncated
+    )
+    buf.extend(chunk)
+    if setup_truncated:
+        print("serial-exec=FAIL reason=echo-off-transcript-limit-exceeded", file=sys.stderr)
+        raise SystemExit(1)
+    require_remaining("echo-off-marker-and-prompt-response")
+if status_match is None:
+    print("serial-exec=FAIL reason=echo-off-marker-not-observed", file=sys.stderr)
+    raise SystemExit(1)
+if prompt_b not in buf[status_match.end():]:
+    print("serial-exec=FAIL reason=echo-off-prompt-not-reached", file=sys.stderr)
+    raise SystemExit(1)
+if status_match.group(1) != b"0":
+    print("serial-exec=FAIL reason=echo-off-marker-status-invalid", file=sys.stderr)
+    raise SystemExit(1)
+if bytes(buf).count(setup_marker) != 1:
+    print("serial-exec=FAIL reason=echo-off-response-unexpected", file=sys.stderr)
+    raise SystemExit(1)
+
+setup_tail = bytes(buf[status_match.end():])
+prompt_start = setup_tail.find(prompt_b)
 if (
-    buf.count(prompt_b) != 1
-    or prompt_start + len(prompt_b) != len(buf)
+    setup_tail.count(prompt_b) != 1
+    or prompt_start + len(prompt_b) != len(setup_tail)
 ):
     print("serial-exec=FAIL reason=echo-off-response-unexpected", file=sys.stderr)
     raise SystemExit(1)
-setup_response = bytes(buf[:prompt_start]).replace(b"\r\n", b"\n")
-setup_response = setup_response.strip(b"\r\n")
-if setup_response not in (b"", b"stty -echo"):
+
+# Catch adjacent prompt residue split across TCP reads. This bounded quiet
+# check does not claim that a serial stream can never emit later bytes.
+quiet_window = 0.05
+remaining = require_remaining("echo-off-post-prompt-quiet")
+if remaining <= quiet_window:
+    print("serial-exec=FAIL reason=deadline-expired stage=echo-off-post-prompt-quiet", file=sys.stderr)
+    raise SystemExit(124)
+sock.settimeout(quiet_window)
+try:
+    trailing = sock.recv(4096)
+except socket.timeout:
+    trailing = None
+if trailing is not None:
+    if trailing:
+        setup_bytes, setup_truncated = append_bounded(
+            setup_output, trailing, setup_bytes, setup_limit, setup_truncated
+        )
     print("serial-exec=FAIL reason=echo-off-response-unexpected", file=sys.stderr)
     raise SystemExit(1)
+require_remaining("echo-off-post-prompt-quiet-complete")
 buf.clear()
 
 wrapped = (

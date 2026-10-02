@@ -19,7 +19,10 @@ grep -Fq 'tail -n 400' "$harness"
 grep -Fq 'FRAME_BEGIN' "$harness"
 grep -Fq 'Application Id:' "$harness"
 grep -Fq 'cleanup=PASS' "$harness"
-grep -Fq '__FLR_SERIAL_COMMAND_DONE_7B31__' "$harness"
+grep -Fq 'stty -echo; __FLR_SERIAL_STTY_RC=$?' "$harness"
+grep -Fq '__FLR_SERIAL_SETUP_DONE_' "$harness"
+grep -Fq 'marker = "__FLR_SERIAL_COMMAND_DONE_" + secrets.token_hex(12)' "$harness"
+grep -Fq 'quiet_window = 0.05' "$harness"
 # Process-name behavior and embedded Python compilation are exercised by
 # test_qemu_runtime_harness.py, including Linux comm truncation.
 grep -Fq 'runqemu' "$harness"
