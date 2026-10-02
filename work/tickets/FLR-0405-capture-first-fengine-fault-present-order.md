@@ -77,16 +77,11 @@ cause claim.
   sampled, and whether a supported viewpoint control exists.
 - Whether a debugger changes or suppresses the fault.
 
-## Current status (2026-10-02)
+## Current status (2026-10-03)
 
-- Waiting only on the bounded serial-exec gate work in FLR-0406. No product
-  source, image, or cache change is a dependency of FLR-0406.
-- The ordinary-profile frame/present/Oops evidence remains as recorded above;
-  the Oops-versus-present event order and guest SIGTERM completion remain
-  UNKNOWN. Do not restart QEMU or reuse the consumed run ID until the exact
-  harness is verified through the documented Mini handoff.
-- Product rendering, 2D+3D composition, interaction/repaint stability,
-  five-minute present health, and two-boot acceptance remain NOT MET.
+- FLR-0406's serial-exec prerequisite is Done and passed on the fixed receiver. FLR-0405-0002 is negative only for the pre-present captures: its four QMP frames preceded the first successful present, so their black pixels do not classify rendering. FLR-0405-0003 has not started; no current QEMU/build owner is being interrupted.
+- Local observer validation now passes 12/12 tests, including a regression assertion that every guest identity/log path uses host run ID `flr0405-0003`; the fixed-inbox and Mini ownership preflight passed read-only. The current receiver is the exact ancestor of the local feature tip. The canonical handoff and Mini-side tests remain pending.
+- The ordinary-profile event order and guest SIGTERM completion remain UNKNOWN. Current product rendering and 2D+3D composition, interaction/repaint stability, five-minute present health, and two-boot acceptance remain NOT MET.
 
 ## 4W1H (Why excluded)
 
@@ -100,8 +95,7 @@ cause claim.
 
 ## Scope and controls
 
-- Runtime-only. Do not modify Devtool source, recipe, patch stack, layer, image,
-  cache, or build directory. Do not run BitBake or transfer a bundle.
+- Runtime-only. Do not modify Devtool source, recipe, patch stack, layer, image, cache, or build directory, and do not run BitBake tasks or build an image. One canonical Git bundle handoff of the observation-only commands and tests to the fixed receiver is in scope; its documented helper may run its bounded metadata identity check.
 - Start QEMU with the existing generic `scripts/qemu-runtime-harness.sh`, using
   the paths recovered from FLR-0404's saved run command. Do not use the
   FLR-0399 starter (it rejects this run ID) or
@@ -110,7 +104,9 @@ cause claim.
 - Use the ticket-scoped POSIX guest commands in
   `work/commands/FLR-0405-guest-*.cmd` for preflight, direct launch, identity
   gates, early GDB, first-boundary monitoring, log export, and scoped stop.
-  Validate one-line framing, `sh -n`, and the 4096-byte limit before transfer.
+  All guest identity/log paths must use the fresh host run ID `flr0405-0003`.
+  Validate one-line framing, `sh -n`, the raw 4096-byte limit, and wrapper
+  overhead before transfer.
 - Use `FLR-0405-guest-wall-clock-context.cmd` once to retain same-boot
   `journalctl -o short-iso-precise` fault lines with the identity-verified app
   log when correlating present wall time to kernel monotonic time.
@@ -121,8 +117,7 @@ cause claim.
 - Before the one QEMU start, recheck canonical local repository, authoritative
   receiver tip/cleanliness, exact rootfs/kernel/qemuboot hashes, configured
   layer identity, no existing runtime owner, free ports, storage/memory, and a
-  fresh run ID `flr0405-0001`. Use only the recorded fixed receiver and the
-  exact 0334 artifact; do not touch the unrelated dirty FLR-0019 checkout.
+  fresh run ID `flr0405-0003`, and use only the exact 0334 artifact; do not touch the unrelated dirty FLR-0019 checkout.
 - Use the existing QEMU runtime harness, one 6144-MiB instance, and ports
   10930–10932. No second QEMU and no copied rootfs/image on Mac.
 - Launch the same ordinary Example Demo as `agl-driver`, with only
@@ -135,13 +130,8 @@ cause claim.
   `FEngine::loop`/renderer backtraces. Use one 30-second hard bound; do not use
   an unbounded `thread apply all` on a late large thread set. Append GDB output
   to the same guest app log used for readiness and present observations.
-- Monitor at most 300 one-second samples, comparing the launch-time kernel
-  fault baseline. Stop at the first new kernel fault or after two consecutive
-  samples with present-begin greater than present-return; capture a bounded
-  thread/map and focused journal/coredump summary at that boundary.
-- Capture the first Oops/present boundary and a full QMP frame before teardown.
-  If present is still unhealthy, stop; no pointer/hover/click trial or blind
-  five-minute wait. Do not infer root cause from a symbol name alone.
+- Monitor for at most 300 actual seconds only after a positive same-frame Sequoia+HUD QMP verdict and PROGRESS_READY. Compare the launch kernel-fault baseline, require present progress within each five-second interval, and recheck PID/UID/start, marker counts, and kernel state at the deadline. Do not treat an outstanding present on one sample as a stall if successful returns continue; require balanced aggregate counts at the end. On the first health failure, preserve bounded thread/map and focused journal/coredump evidence before scoped teardown.
+- Capture the first Oops/present boundary and a full-screen QMP frame after the successful-present gate and before teardown. If present is still unhealthy, stop; no pointer/hover/click trial or blind five-minute wait. Do not infer root cause from a symbol name alone.
 - Keep raw PPM/log evidence on Mini and transfer only small review PNG/MP4 files
   after hashing. Record every failed as well as successful command.
 - If the first boundary is localized enough to justify a source change, create
