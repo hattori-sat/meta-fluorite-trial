@@ -110,6 +110,10 @@ def _read_ppm(path: Path) -> tuple[int, int, bytes]:
 
 
 def _parse_region(value: str, width: int, height: int) -> tuple[int, int, int, int]:
+    if value == "full":
+        if width <= 0 or height <= 0:
+            raise ValueError("PPM dimensions must be positive")
+        return 0, 0, width, height
     try:
         x, y, region_width, region_height = (int(part) for part in value.split(","))
     except ValueError as exc:

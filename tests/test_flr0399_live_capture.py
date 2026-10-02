@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import io
+import json
 import os
 import re
 import signal
@@ -35,6 +36,43 @@ from flr0399_live_capture import (  # noqa: E402
 )
 import flr0399_live_capture as live_capture  # noqa: E402
 from flr0399_process_cleanup import cleanup_exact_qmp_processes  # noqa: E402
+
+
+def write_analysis_test_ppm(path, width, height, pixels):
+    path.write_bytes(f"P6\n{width} {height}\n255\n".encode() + pixels)
+
+
+class QmpAnalysisTests(unittest.TestCase):
+    def test_720x400_capture_analyzes_available_rois_and_skips_sequoia(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            image = root / "small.ppm"
+            write_analysis_test_ppm(image, 720, 400, bytes(720 * 400 * 3))
+
+            live_capture._analyze_capture(root, image)
+
+            full = json.loads((root / "small-full-analysis.log").read_text())
+            hud = json.loads((root / "small-hud-analysis.log").read_text())
+            sequoia = json.loads(
+                (root / "small-sequoia-analysis.log").read_text()
+            )
+            self.assertEqual((full["width"], full["height"]), (720, 400))
+            self.assertEqual((hud["width"], hud["height"]), (720, 400))
+            self.assertEqual(sequoia["status"], "SKIPPED_OUTSIDE_CAPTURE")
+            self.assertEqual((sequoia["width"], sequoia["height"]), (720, 400))
+            self.assertEqual(sequoia["region"], [440, 220, 400, 360])
+
+    def test_malformed_ppm_remains_fatal_instead_of_being_skipped(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            image = root / "malformed.ppm"
+            image.write_bytes(b"not a PPM")
+
+            with self.assertRaisesRegex(RuntimeError, "QMP pixel analysis failed"):
+                live_capture._analyze_capture(root, image)
+
+            full_log = (root / "malformed-full-analysis.log").read_text()
+            self.assertIn("unsupported PPM format", full_log)
 
 
 def add_fake_process(proc_root, pid, comm, argv, start_time):

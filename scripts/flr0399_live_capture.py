@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import base64
 import hashlib
+import json
 import math
 import os
 import re
@@ -1207,12 +1208,7 @@ def verify_postflight(
 
 
 def _analyze_capture(run_dir: Path, image: Path) -> None:
-    regions = {
-        "full": "0,0,1280,800",
-        "sequoia": "440,220,400,360",
-        "hud": "0,0,320,200",
-    }
-    for name, region in regions.items():
+    def analyze_region(name: str, region: str) -> subprocess.CompletedProcess[str]:
         output = run_dir / f"{image.stem}-{name}-analysis.log"
         result = subprocess.run(
             [
@@ -1232,6 +1228,51 @@ def _analyze_capture(run_dir: Path, image: Path) -> None:
         output.write_text(result.stdout + result.stderr, encoding="utf-8")
         if result.returncode != 0:
             raise RuntimeError(f"QMP pixel analysis failed: {image.name}/{name}")
+        return result
+
+    full_result = analyze_region("full", "full")
+    try:
+        full_analysis = json.loads(full_result.stdout)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"QMP pixel analyzer returned invalid full-frame JSON: {image.name}"
+        ) from exc
+    width = full_analysis.get("width")
+    height = full_analysis.get("height")
+    full_region = full_analysis.get("region")
+    if (
+        type(width) is not int
+        or type(height) is not int
+        or width <= 0
+        or height <= 0
+        or full_region != [0, 0, width, height]
+    ):
+        raise RuntimeError(
+            f"QMP pixel analyzer returned invalid full-frame dimensions: {image.name}"
+        )
+
+    regions = {
+        "sequoia": (440, 220, 400, 360),
+        "hud": (0, 0, 320, 200),
+    }
+    for name, roi in regions.items():
+        x, y, roi_width, roi_height = roi
+        if x + roi_width > width or y + roi_height > height:
+            (run_dir / f"{image.stem}-{name}-analysis.log").write_text(
+                json.dumps(
+                    {
+                        "status": "SKIPPED_OUTSIDE_CAPTURE",
+                        "width": width,
+                        "height": height,
+                        "region": list(roi),
+                    },
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            continue
+        analyze_region(name, ",".join(str(value) for value in roi))
 
 
 def _encode_videos(run_dir: Path) -> None:

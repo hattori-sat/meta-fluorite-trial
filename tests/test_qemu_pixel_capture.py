@@ -16,6 +16,14 @@ def write_ppm(path: Path, width: int, height: int, pixels: bytes) -> None:
 
 
 class QemuPixelCaptureTests(unittest.TestCase):
+    def test_analyze_full_region_uses_ppm_dimensions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            image = Path(directory) / "small.ppm"
+            write_ppm(image, 4, 3, bytes([0, 0, 0] * 12))
+            result = MODULE.analyze(image, "full", None, "0,0,0", 8)
+            self.assertEqual(result["width"], 4)
+            self.assertEqual(result["height"], 3)
+
     def test_analyze_reports_changed_bbox_against_reference(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
