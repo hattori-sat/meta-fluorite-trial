@@ -15,8 +15,10 @@ case "$mode" in
 esac
 
 : "${FLR0399_RUN_ID:?FLR0399_RUN_ID-is-required}"
-[[ "$FLR0399_RUN_ID" =~ ^flr0399-[0-9]{4}$ ]] || fail invalid-run-id
+[[ "$FLR0399_RUN_ID" =~ ^flr(0399|0400)-[0-9]{4}$ ]] || fail invalid-run-id
 run_id=$FLR0399_RUN_ID
+run_ticket=${run_id%%-*}
+ticket_number=${run_ticket#flr}
 : "${BUILD_DIR:?BUILD_DIR-role-required}"
 : "${BUILD_TMPDIR:?BUILD_TMPDIR-role-required}"
 : "${BUILD_EVIDENCE:?BUILD_EVIDENCE-role-required}"
@@ -27,7 +29,7 @@ evidence_root=$BUILD_EVIDENCE
     fail build-roles-must-be-absolute
 run_parent=$evidence_root/$run_id
 run_dir=$run_parent/qemu
-qmp=$run_dir/qmp-0399.sock
+qmp=$run_dir/qmp-$ticket_number.sock
 serial_port=10930
 ssh_port=10931
 telnet_port=10932

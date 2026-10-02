@@ -17,8 +17,11 @@ from flr0399_live_capture import (  # noqa: E402
     evidence_collect_command,
     expected_run_dir,
     guest_commands,
+    make_frame_capture,
+    make_state_reader,
     parse_state_output,
     run_once,
+    state_poll_label,
     verify_postflight,
     wrap_serial_child_command,
     _serial_exec,
@@ -187,6 +190,187 @@ class LiveCaptureControllerTests(unittest.TestCase):
 
         self.assertEqual("READY_TIMEOUT", result.status)
         self.assertFalse(any(event[0] == "capture" for event in events))
+        self.assertEqual(1, sum(event[0] == "teardown" for event in events))
+
+    def test_waiting_captures_once_then_polls_until_ready_and_present(self):
+        now = [0.0]
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0400-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("WAITING", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("WAITING", identity, log_path),
+                Sample("READY", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("PRESENT", identity, log_path),
+                Sample("LIVE", identity, log_path),
+            ]
+        )
+        events = []
+
+        def read_state(stage, timeout_seconds):
+            events.append(("read", stage, timeout_seconds))
+            return next(samples)
+
+        def capture(stage, captured_identity, _remaining):
+            events.append(("capture", stage, captured_identity))
+
+        def sleep(seconds):
+            events.append(("sleep", seconds))
+            now[0] += seconds
+
+        result = run_once(
+            read_state=read_state,
+            capture_frame=capture,
+            preserve_evidence=lambda: events.append(("preserve",)),
+            teardown=lambda: events.append(("teardown",)),
+            expected_log_path=log_path,
+            timeout_seconds=10,
+            monotonic=lambda: now[0],
+            sleep=sleep,
+            poll_interval_seconds=2,
+        )
+
+        self.assertEqual("OBSERVED", result.status)
+        self.assertEqual(["WAITING", "READY", "PRESENT"], [item.stage for item in result.captures])
+        self.assertTrue(all(item.live for item in result.captures))
+        self.assertEqual(1, sum(event[:2] == ("capture", "WAITING") for event in events))
+        self.assertEqual(2, sum(event[0] == "sleep" for event in events))
+        self.assertLess(events.index(("preserve",)), events.index(("teardown",)))
+        self.assertEqual(1, sum(event[0] == "teardown" for event in events))
+
+    def test_present_waiting_is_polled_until_present(self):
+        now = [0.0]
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0400-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("READY", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("WAITING", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("WAITING", identity, log_path),
+                Sample("PRESENT", identity, log_path),
+                Sample("LIVE", identity, log_path),
+            ]
+        )
+        events = []
+
+        def read_state(stage, timeout_seconds):
+            events.append(("read", stage, timeout_seconds))
+            return next(samples)
+
+        def sleep(seconds):
+            events.append(("sleep", seconds))
+            now[0] += seconds
+
+        result = run_once(
+            read_state=read_state,
+            capture_frame=lambda stage, _identity, _remaining: events.append(("capture", stage)),
+            preserve_evidence=lambda: events.append(("preserve",)),
+            teardown=lambda: events.append(("teardown",)),
+            expected_log_path=log_path,
+            timeout_seconds=10,
+            monotonic=lambda: now[0],
+            sleep=sleep,
+            poll_interval_seconds=2,
+        )
+
+        self.assertEqual("OBSERVED", result.status)
+        self.assertEqual(["READY", "WAITING", "PRESENT"], [item.stage for item in result.captures])
+        self.assertEqual(
+            [("sleep", 2), ("sleep", 2)],
+            [event for event in events if event[0] == "sleep"],
+        )
+
+    def test_present_waiting_uses_same_monotonic_deadline_as_ready(self):
+        now = [0.0]
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0400-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("READY", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("WAITING", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("WAITING", identity, log_path),
+            ]
+        )
+        events = []
+
+        def read_state(stage, timeout_seconds):
+            events.append(("read", stage, timeout_seconds))
+            return next(samples)
+
+        def sleep(seconds):
+            events.append(("sleep", seconds))
+            now[0] += seconds
+
+        result = run_once(
+            read_state=read_state,
+            capture_frame=lambda stage, _identity, _remaining: events.append(("capture", stage)),
+            preserve_evidence=lambda: events.append(("preserve",)),
+            teardown=lambda: events.append(("teardown",)),
+            expected_log_path=log_path,
+            timeout_seconds=3,
+            monotonic=lambda: now[0],
+            sleep=sleep,
+            poll_interval_seconds=2,
+        )
+
+        self.assertEqual("PRESENT_DEADLINE_EXPIRED", result.status)
+        self.assertEqual(2, sum(event[0] == "read" and event[1] == "present" for event in events))
+        self.assertEqual(
+            [("sleep", 2), ("sleep", 1)],
+            [event for event in events if event[0] == "sleep"],
+        )
+        self.assertEqual(
+            [("capture", "READY"), ("capture", "WAITING")],
+            [event for event in events if event[0] == "capture"],
+        )
+        self.assertLess(events.index(("preserve",)), events.index(("teardown",)))
+
+    def test_repeated_waiting_does_not_reset_deadline_or_start_late_read(self):
+        now = [0.0]
+        identity = Identity(694, 1001, 23470)
+        log_path = "/run/user/1001/flr0400-0001-gdb.log"
+        samples = iter(
+            [
+                Sample("WAITING", identity, log_path),
+                Sample("LIVE", identity, log_path),
+                Sample("WAITING", identity, log_path),
+                Sample("WAITING", identity, log_path),
+            ]
+        )
+        events = []
+
+        def read_state(stage, timeout_seconds):
+            events.append(("read", stage, timeout_seconds))
+            return next(samples)
+
+        def sleep(seconds):
+            events.append(("sleep", seconds))
+            now[0] += seconds
+
+        result = run_once(
+            read_state=read_state,
+            capture_frame=lambda stage, _identity, _remaining: events.append(("capture", stage)),
+            preserve_evidence=lambda: events.append(("preserve",)),
+            teardown=lambda: events.append(("teardown",)),
+            expected_log_path=log_path,
+            timeout_seconds=5,
+            monotonic=lambda: now[0],
+            sleep=sleep,
+            poll_interval_seconds=2,
+        )
+
+        self.assertEqual("READY_DEADLINE_EXPIRED", result.status)
+        self.assertEqual(3, sum(event[0] == "read" and event[1] == "ready" for event in events))
+        self.assertEqual([("sleep", 2), ("sleep", 2), ("sleep", 1)], [event for event in events if event[0] == "sleep"])
+        self.assertEqual([("capture", "WAITING")], [event for event in events if event[0] == "capture"])
+        self.assertLess(events.index(("preserve",)), events.index(("teardown",)))
+        self.assertEqual(1, sum(event[0] == "preserve" for event in events))
         self.assertEqual(1, sum(event[0] == "teardown" for event in events))
 
     def test_expired_deadline_does_not_issue_a_guest_read(self):
@@ -879,20 +1063,20 @@ class GuestCommandContractTests(unittest.TestCase):
                 expected_run_dir(Path(evidence_root), "../flr0399-0001")
 
     def test_generated_commands_parse_as_bash_and_posix_sh(self):
-        commands = guest_commands("flr0399-0001")
-
-        for shell in ("bash", "sh"):
-            for name, command in commands.__dict__.items():
-                if not isinstance(command, str) or name.endswith("_path"):
-                    continue
-                with self.subTest(shell=shell, command=name):
-                    result = subprocess.run(
-                        [shell, "-n", "-c", command],
-                        check=False,
-                        capture_output=True,
-                        text=True,
-                    )
-                    self.assertEqual(0, result.returncode, result.stderr)
+        for run_id in ("flr0399-0001", "flr0400-0001"):
+            commands = guest_commands(run_id)
+            for shell in ("bash", "sh"):
+                for name, command in commands.__dict__.items():
+                    if not isinstance(command, str) or name.endswith("_path"):
+                        continue
+                    with self.subTest(run_id=run_id, shell=shell, command=name):
+                        result = subprocess.run(
+                            [shell, "-n", "-c", command],
+                            check=False,
+                            capture_output=True,
+                            text=True,
+                        )
+                        self.assertEqual(0, result.returncode, result.stderr)
 
     def test_exact_image_qemu_start_helper_parses_as_bash(self):
         start_helper = Path(__file__).parents[1] / "work/commands/FLR-0399-qemu-start.sh"
@@ -909,7 +1093,7 @@ class GuestCommandContractTests(unittest.TestCase):
         environment = os.environ.copy()
         for name in ("BUILD_DIR", "BUILD_TMPDIR", "BUILD_EVIDENCE"):
             environment.pop(name, None)
-        environment["FLR0399_RUN_ID"] = "flr0399-9998"
+        environment["FLR0399_RUN_ID"] = "flr0400-0001"
 
         result = subprocess.run(
             ["bash", str(start_helper), "preflight"],
@@ -977,14 +1161,104 @@ class GuestCommandContractTests(unittest.TestCase):
                 stage="ready",
             )
 
-    def test_waiting_is_a_single_bounded_timeout_not_a_poll_loop(self):
-        sample = parse_state_output(
-            "FLR0399_STATE=WAITING PID=694 UID=1001 START=23470 "
-            "READY=0 PRESENT_BEGIN=0 PRESENT_RETURN=0 SUN=0 "
-            "LOG_PATH=/run/user/1001/flr0399-0001-gdb.log\n",
-            stage="ready",
+    def test_waiting_marker_remains_a_pollable_state(self):
+        for stage in ("ready", "present"):
+            sample = parse_state_output(
+                "FLR0399_STATE=WAITING PID=694 UID=1001 START=23470 "
+                "READY=0 PRESENT_BEGIN=0 PRESENT_RETURN=0 SUN=0 "
+                "LOG_PATH=/run/user/1001/flr0400-0001-gdb.log\n",
+                stage=stage,
+            )
+            self.assertEqual("WAITING", sample.state)
+
+        with self.assertRaises(ValueError):
+            parse_state_output(
+                "FLR0399_STATE=WAITING LOG_PATH=/run/user/1001/a.log\n",
+                stage="ready",
+            )
+
+    def test_repeated_state_reads_get_unique_serial_evidence_labels(self):
+        self.assertEqual("ready-001", state_poll_label("ready", 1))
+        self.assertEqual("ready-002", state_poll_label("ready", 2))
+        self.assertEqual("present-001", state_poll_label("present", 1))
+        self.assertEqual("present-002", state_poll_label("present", 2))
+        self.assertNotEqual(
+            state_poll_label("present", 1), state_poll_label("present", 2)
         )
-        self.assertEqual("TIMEOUT", sample.state)
+        with self.assertRaises(ValueError):
+            state_poll_label("ready", 0)
+
+    def test_state_reader_labels_repeated_present_waiting_snapshots_uniquely(self):
+        log_path = "/run/user/1001/flr0400-0001-gdb.log"
+        identity = "PID=694 UID=1001 START=23470"
+        outputs = iter(
+            [
+                f"FLR0399_STATE=WAITING {identity} LOG_PATH={log_path}\n",
+                f"FLR0399_STATE=PRESENT {identity} LOG_PATH={log_path}\n",
+            ]
+        )
+        calls = []
+
+        def serial(label, command, timeout_seconds):
+            calls.append((label, command, timeout_seconds))
+            return next(outputs)
+
+        reader = make_state_reader(guest_commands("flr0400-0001"), serial)
+        first = reader("present", 30)
+        second = reader("present", 30)
+
+        self.assertEqual(["WAITING", "PRESENT"], [first.state, second.state])
+        self.assertEqual(["present-001", "present-002"], [call[0] for call in calls])
+        self.assertEqual([15.0, 15.0], [call[2] for call in calls])
+
+    def test_first_live_frame_gets_one_video_and_later_frames_stay_stills(self):
+        capture = make_frame_capture(
+            Path("/evidence/flr0400-0001/qemu"),
+            Path("/evidence/flr0400-0001/qemu/qmp-0400.sock"),
+            "flr0400-0001",
+        )
+        identity = Identity(694, 1001, 23470)
+
+        with mock.patch.object(live_capture, "_capture_qmp") as qmp_capture:
+            capture("WAITING", identity, 90)
+            capture("READY", identity, 80)
+            capture("PRESENT", identity, 70)
+
+        self.assertEqual(
+            [True, False, False],
+            [call.kwargs["video"] for call in qmp_capture.call_args_list],
+        )
+        self.assertEqual(
+            [
+                "flr0400-0001-waiting",
+                "flr0400-0001-ready",
+                "flr0400-0001-present",
+            ],
+            [call.args[2] for call in qmp_capture.call_args_list],
+        )
+
+    def test_guest_state_command_is_one_snapshot_not_a_poll_loop(self):
+        commands = guest_commands("flr0400-0001")
+
+        for command in (commands.ready, commands.present):
+            with self.subTest(command=command):
+                self.assertNotIn("sleep ", command)
+                self.assertNotIn("seq 1", command)
+                self.assertNotIn("for n in", command)
+                self.assertNotIn("while ", command)
+
+    def test_fresh_0400_run_uses_its_own_evidence_directory(self):
+        commands = guest_commands("flr0400-0001")
+
+        self.assertEqual(
+            "/run/user/1001/flr0400-0001-gdb.log", commands.log_path
+        )
+        with tempfile.TemporaryDirectory() as evidence_root:
+            expected = expected_run_dir(Path(evidence_root), "flr0400-0001")
+            self.assertEqual(
+                Path(evidence_root).resolve() / "flr0400-0001" / "qemu",
+                expected,
+            )
 
     def test_guest_command_builder_rejects_non_ticket_run_ids(self):
         for run_id in ("flr0396-0001", "flr0399-0", "../flr0399-0001", ""):

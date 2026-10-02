@@ -1,6 +1,6 @@
 # FLR-0399 — capture live Sequoia state on the exact 0334 image
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Created: 2026-10-01
 - Owner: Mini QEMU / guest Flutter+GDB / QMP capture / runtime-evidence roles
@@ -261,3 +261,39 @@ and classify the stop point first.
   in FLR-0338/0339 evidence and FLR-0391/0395 plans; none is in the three
   approved files. The commit remains documentation-only; no source/image/QEMU
   changes are included.
+
+## 2026-10-02 — one Mini run, observer timeout
+
+- The approved three-record documentation commit is `9db57cfe`; the official
+  bundle handoff sent it to the active Mini receiver with bundle SHA-256
+  `7db4fb79127cbc6f3b421cc1f7ee0d7e0ad229087e99311a4935303465286a54`.
+  Receiver validation passed at the exact commit. The 0334 image was not
+  rebuilt.
+- Mini preflight passed for `flr0399-0001`, the 6144-MiB qemux86-64 profile,
+  exact image hashes, and PIDFD capability. Exactly one QEMU started.
+- The guest launched `/usr/bin/flutter-auto` as UID 1001 (PID 664, start token
+  7271). At the bounded state sample it was still live, with `READY=0`,
+  `PRESENT_BEGIN=0`, `PRESENT_RETURN=0`, and `SUN=1`.
+- The `ready` serial request timed out after 39.5266 seconds. A subsequent
+  `collect` request failed closed with `echo-off-response-unexpected`; its
+  setup transcript contained the late `WAITING` response from the timed-out
+  request. Evidence collection therefore did not complete. No live Flutter
+  QMP frame exists; only the pre-launch QMP frame was captured and it is not a
+  rendering result.
+- Guest stop, QMP quit, exact-process cleanup, final process/socket/port
+  postflight all passed. Independent postflight found no QEMU/runqemu/Flutter/
+  BitBake/Devtool/GDB target or runtime-port listener. No unrelated process was
+  stopped.
+- **Result:** this is an observer/serial transaction failure, not a Sequoia
+  render verdict. Colored Sequoia, current HUD visibility, and Gate A remain
+  UNKNOWN. Preserve `flr0399-0001`; do not retry it.
+- **Inference:** the guest `ready` command's 100-iteration loop and nested
+  `grep`/`awk`/sleep work can outlive the 40-second serial transaction. The
+  late reply contaminating the next serial handshake is consistent with the
+  recorded timing; transport/guest responsiveness remains an alternative
+  until a one-snapshot request is measured.
+- **Next:** FLR-0400 changes each guest request to one snapshot and moves the
+  2-second polling loop to the host under one monotonic 120-second deadline.
+  Its first live WAITING sample will trigger one identity-bracketed full QMP
+  frame before readiness. This ticket remains Waiting with its consumed run
+  and original evidence unchanged.

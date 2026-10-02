@@ -21,7 +21,7 @@ from typing import Callable
 from flr0399_process_cleanup import cleanup_exact_qmp_processes
 
 
-RUN_ID_RE = re.compile(r"flr0399-[0-9]{4}\Z")
+RUN_ID_RE = re.compile(r"flr(?:0399|0400)-[0-9]{4}\Z")
 DEMO_BUNDLE = (
     "/usr/share/flutter/toyota-connected-tcna-packages-filament-scene-"
     "fluorite-examples-demo/3.32.5/release"
@@ -83,7 +83,7 @@ class GuestCommands:
 def evidence_collect_command(log_path: str, run_id: str) -> str:
     """Collect bounded GDB, kernel, and matching coredump evidence fail-closed."""
     if not RUN_ID_RE.fullmatch(run_id):
-        raise ValueError("run id must be a fresh FLR-0399 id: flr0399-NNNN")
+        raise ValueError("run id must be a fresh FLR-0399/0400 id")
     if not log_path or "\n" in log_path or "\r" in log_path:
         raise ValueError("evidence log path must be a non-empty single line")
     q = shlex.quote
@@ -137,7 +137,7 @@ def evidence_collect_command(log_path: str, run_id: str) -> str:
 def guest_commands(run_id: str) -> GuestCommands:
     """Build one-line serial-exec commands from one run-scoped log path."""
     if not RUN_ID_RE.fullmatch(run_id):
-        raise ValueError("run id must be a fresh FLR-0399 id: flr0399-NNNN")
+        raise ValueError("run id must be a fresh FLR-0399/0400 id")
 
     prefix = f"/run/user/1001/{run_id}"
     log_path = f"{prefix}-gdb.log"
@@ -203,18 +203,14 @@ def guest_commands(run_id: str) -> GuestCommands:
             "test -r \"$identity\" || { "
             f"printf 'FLR0399_STATE=IDENTITY_MISSING LOG_PATH=%s\\n' \"$log\"; exit 0; }}; "
             "read pid saved_uid saved_start wrapper saved_wrapper_start < \"$identity\"; "
-            f"state=WAITING; for n in $(seq 1 100); do "
-            f"if {predicate}; then state={stage}; break; fi; "
-            "if [ ! -r \"/proc/$pid/status\" ]; then state=EXITED; break; fi; "
-            "if grep -q 'Program received signal SIGSEGV' \"$log\"; then state=FAULT; break; fi; "
-            "uid=$(awk '/^Uid:/{print $2; exit}' \"/proc/$pid/status\"); "
-            "start=$(awk '{print $22}' \"/proc/$pid/stat\"); "
-            "if [ \"$uid\" != \"$saved_uid\" ] || [ \"$start\" != \"$saved_start\" ]; then state=EXITED; break; fi; "
-            "sleep 0.2; done; "
+            "state=WAITING; "
             "if [ -r \"/proc/$pid/status\" ]; then "
             "uid=$(awk '/^Uid:/{print $2; exit}' \"/proc/$pid/status\"); "
             "start=$(awk '{print $22}' \"/proc/$pid/stat\"); "
-            "else uid=none; start=none; fi; "
+            "if [ \"$uid\" != \"$saved_uid\" ] || [ \"$start\" != \"$saved_start\" ]; then state=EXITED; "
+            "elif grep -q 'Program received signal SIGSEGV' \"$log\"; then state=FAULT; "
+            f"elif {predicate}; then state={stage}; fi; "
+            "else uid=none; start=none; state=EXITED; fi; "
             f"ready=$(grep -c 'FLUORITE_SEQUOIA_LIT_MATERIAL_READY.*parameter=linear-float3' \"$log\" || true); "
             f"begins=$(grep -c 'FLR0026_VK_QUEUE_PRESENT_BEGIN' \"$log\" || true); "
             f"returns=$(grep -c 'FLR0026_VK_QUEUE_PRESENT result=' \"$log\" || true); "
@@ -277,13 +273,22 @@ def guest_commands(run_id: str) -> GuestCommands:
 
 
 def expected_run_dir(evidence_root: Path, run_id: str) -> Path:
-    """Return the one Mini evidence role path for a valid FLR-0399 run id."""
+    """Return the fixed Mini evidence path for a supported observer run id."""
     if not RUN_ID_RE.fullmatch(run_id):
-        raise ValueError("run id must be a fresh FLR-0399 id: flr0399-NNNN")
+        raise ValueError("run id must be a fresh FLR-0399/0400 id")
     root = evidence_root.resolve(strict=True)
     if not root.is_dir():
         raise ValueError("evidence root must be an existing directory")
     return root / run_id / "qemu"
+
+
+def state_poll_label(stage: str, sample_number: int) -> str:
+    """Give each READY/PRESENT snapshot its own immutable evidence label."""
+    if stage not in {"ready", "present"}:
+        raise ValueError("poll stage must be ready or present")
+    if sample_number <= 0:
+        raise ValueError("state sample number must be positive")
+    return f"{stage}-{sample_number:03d}"
 
 
 def parse_state_output(output: str, *, stage: str) -> Sample:
@@ -322,16 +327,63 @@ def parse_state_output(output: str, *, stage: str) -> Sample:
         elif state != "EXITED" or raw_identity[0] is None:
             raise ValueError("malformed FLR-0399 process identity")
 
-    if state in {"READY", "PRESENT", "LIVE", "FAULT"} and identity is None:
+    if state in {"READY", "PRESENT", "WAITING", "LIVE", "FAULT"} and identity is None:
         raise ValueError("live FLR-0399 state lacks process identity")
-    if state == "WAITING" and stage in {"ready", "present"}:
-        state = "TIMEOUT"
     return Sample(
         state=state,
         identity=identity,
         log_path=log_path,
         detail=fields.get("DETAIL", ""),
     )
+
+
+def make_state_reader(
+    commands: GuestCommands,
+    serial: Callable[[str, str, float], str],
+) -> Callable[[str, float], Sample]:
+    """Bind state polling to unique serial artifacts and one guest log source."""
+    poll_numbers = {"ready": 0, "present": 0}
+
+    def read_state(stage: str, remaining: float) -> Sample:
+        if stage in poll_numbers:
+            poll_numbers[stage] += 1
+            serial_label = state_poll_label(stage, poll_numbers[stage])
+            command_stage = stage
+        elif stage.startswith("identity-after-"):
+            serial_label = stage
+            command_stage = "identity"
+        else:
+            serial_label = stage
+            command_stage = stage
+        command = getattr(commands, command_stage)
+        output = serial(serial_label, command, min(15.0, remaining))
+        return parse_state_output(output, stage=command_stage)
+
+    return read_state
+
+
+def make_frame_capture(
+    run_dir: Path,
+    qmp: Path,
+    run_id: str,
+) -> Callable[[str, Identity, float], None]:
+    """Capture every still and exactly one short video at the first live frame."""
+    video_captured = False
+
+    def capture_frame(stage: str, _identity: Identity, remaining: float) -> None:
+        nonlocal video_captured
+        capture_video = not video_captured
+        _capture_qmp(
+            run_dir,
+            qmp,
+            f"{run_id}-{stage.lower()}",
+            video=capture_video,
+            timeout_seconds=remaining,
+        )
+        if capture_video:
+            video_captured = True
+
+    return capture_frame
 
 
 def run_once(
@@ -344,16 +396,21 @@ def run_once(
     timeout_seconds: float,
     expected_uid: int = 1001,
     monotonic: Callable[[], float] = time.monotonic,
+    sleep: Callable[[float], None] = time.sleep,
+    poll_interval_seconds: float = 2.0,
     deadline: float | None = None,
 ) -> Outcome:
-    """Observe READY/present once; capture only with a stable live identity.
+    """Poll bounded guest snapshots until READY/present or the fixed deadline.
 
     The adapter for each guest-state read is responsible for a bounded,
-    single serial-exec request. This controller never retries a missing log.
-    Evidence preservation always precedes the single teardown callback.
+    single serial-exec request. WAITING never extends the absolute deadline;
+    its first live sample gets one diagnostic capture. Evidence preservation
+    always precedes the single teardown callback.
     """
     if timeout_seconds <= 0:
         raise ValueError("timeout_seconds must be positive")
+    if poll_interval_seconds <= 0:
+        raise ValueError("poll_interval_seconds must be positive")
 
     deadline_at = deadline if deadline is not None else monotonic() + timeout_seconds
     captures: list[CaptureRecord] = []
@@ -418,15 +475,43 @@ def run_once(
 
     def observe() -> str:
         nonlocal status
+        waiting_captured = False
+
+        def wait_for_state(stage: str, sample: Sample) -> Sample | None:
+            nonlocal status, waiting_captured
+            while sample.state == "WAITING":
+                if not waiting_captured:
+                    if not capture_live("WAITING", sample):
+                        return None
+                    waiting_captured = True
+                remaining = deadline_at - monotonic()
+                if remaining <= 0:
+                    status = f"{stage.upper()}_DEADLINE_EXPIRED"
+                    return None
+                sleep(min(poll_interval_seconds, remaining))
+                if deadline_at - monotonic() <= 0:
+                    status = f"{stage.upper()}_DEADLINE_EXPIRED"
+                    return None
+                try:
+                    sample = read(stage)
+                except Exception as exc:
+                    if status not in ("LOG_SOURCE_MISMATCH", "LOG_MISSING", "LOG_UNREADABLE"):
+                        errors.append(f"{stage}:{type(exc).__name__}:{exc}")
+                    return None
+            return sample
+
         try:
             ready = read("ready")
         except Exception as exc:
             if status not in ("LOG_SOURCE_MISMATCH", "LOG_MISSING", "LOG_UNREADABLE"):
                 errors.append(f"ready:{type(exc).__name__}:{exc}")
             return status
-
+        ready = wait_for_state("ready", ready)
+        if ready is None:
+            return status
         if ready.state == "TIMEOUT":
             return "READY_TIMEOUT"
+
         if ready.state == "EXITED":
             return "APP_EXITED_BEFORE_READY"
         if ready.state == "FAULT":
@@ -444,7 +529,9 @@ def run_once(
             if status not in ("LOG_SOURCE_MISMATCH", "LOG_MISSING", "LOG_UNREADABLE"):
                 errors.append(f"present:{type(exc).__name__}:{exc}")
             return status
-
+        present = wait_for_state("present", present)
+        if present is None:
+            return status
         if present.state == "TIMEOUT":
             return "PRESENT_TIMEOUT"
         if present.state == "EXITED":
@@ -993,22 +1080,9 @@ def observe(args: argparse.Namespace) -> int:
         if "FLR0399_LAUNCH=PASS" not in launch:
             raise RuntimeError("guest launch marker missing")
 
-        def read_state(stage: str, remaining: float) -> Sample:
-            command_stage = "identity" if stage.startswith("identity-after-") else stage
-            command = getattr(commands, command_stage)
-            return parse_state_output(
-                serial(stage, command, timeout_seconds=remaining),
-                stage=command_stage,
-            )
+        read_state = make_state_reader(commands, serial)
 
-        def capture_frame(stage: str, _identity: Identity, remaining: float) -> None:
-            _capture_qmp(
-                run_dir,
-                qmp,
-                f"{run_id}-{stage.lower()}",
-                video=stage == "READY",
-                timeout_seconds=remaining,
-            )
+        capture_frame = make_frame_capture(run_dir, qmp, run_id)
 
         outcome = run_once(
             read_state=read_state,
@@ -1073,7 +1147,7 @@ def main(argv: list[str] | None = None) -> int:
     observe_parser.add_argument("--run-dir", type=Path, required=True)
     observe_parser.add_argument("--qmp", type=Path, required=True)
     observe_parser.add_argument("--serial-port", type=int, default=SERIAL_PORT)
-    observe_parser.add_argument("--timeout-seconds", type=float, default=48.0)
+    observe_parser.add_argument("--timeout-seconds", type=float, default=120.0)
     args = parser.parse_args(argv)
     if args.operation == "observe":
         try:
