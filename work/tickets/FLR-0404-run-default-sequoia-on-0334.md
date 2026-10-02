@@ -4,7 +4,7 @@
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mini QEMU / guest Example Demo / QMP screenshot-video / runtime evidence roles
-- Branch: `feature-flr-0404-default-sequoia-runtime` (from `dev-flr-0404-ordinary-profile`, advanced to checkpoint `889386a`)
+- Branch: `feature-flr-0404-default-sequoia-runtime` (from `dev-flr-0404-ordinary-profile`, advanced to checkpoint `65f8094`)
 - Depends on: [FLR-0403](FLR-0403-correlate-fengine-oops-to-lwp.md), exact rootfs SHA-256 `80935c3f9fa81da66f068821637f512749602c701baa37e91bf777b8cf15c44c`
 - Plan: [FLR-0404 implementation plan](../../docs/superpowers/plans/2026-10-02-flr0404-default-sequoia-runtime.md)
 - Working log: [FLR-0404 working log](../logs/2026-10-02-flr0404.md)
