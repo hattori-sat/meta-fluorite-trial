@@ -1,6 +1,6 @@
 # FLR-0402 — make QMP analysis dimension-aware
 
-- Status: In Progress
+- Status: Done (bounded analyzer/tooling fix; product goal remains open)
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mac observer/test source / QMP pixel-analysis helper / evidence roles
@@ -159,9 +159,9 @@ Malformed PPMs and real analyzer errors must still fail closed.
 ### Act
 
 - Keep this ticket scoped to analysis dimensions. The Oops TID-to-GDB LWP/ELF
-  mapping is a separate product diagnostic after this helper is verified.
-  The clean-SSH `BUILD_EVIDENCE` role discovery gap is separate and must not
-  be hidden inside this tooling fix.
+  mapping is a separate product diagnostic. The helper/tests/evidence are
+  included in the local-only FLR-0402 closeout transition commit; no push.
+  The clean-SSH `BUILD_EVIDENCE` role discovery gap remains separate.
 
 ## Impact
 

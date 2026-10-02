@@ -61,7 +61,7 @@
 - [x] **Step 1: Replay the 720x400 pre-launch PPM.** Required `full` analysis reported 720x400 and Sequoia was explicitly skipped; HUD analysis completed without observer failure.
 - [x] **Step 2: Replay the 1280x800 live frame.** Full/HUD/Sequoia metrics remained 8,139 changed / 1,192 HUD chromatic / 144,000 black Sequoia pixels.
 - [x] **Step 3: Run canonical, privacy, whitespace, runtime-checkpoint, focused test, and file-size gates.** Do not start QEMU or BitBake. Canonical/privacy/whitespace/runtime-checkpoint/focused-test/file-size pass; Markdown still reports only the 11 documented historical missing links.
-- [ ] **Step 4: Commit only this ticket's helper/tests/records locally.** Do not push or include unrelated files; retain the FLR-0401 PNG/MP4 evidence unchanged.
+- [x] **Step 4: Commit only this ticket's helper/tests/records locally.** The closeout is included in the atomic transition to FLR-0403; no push and no unrelated product files. FLR-0401 PNG/MP4 evidence remains unchanged.
 
 ## Self-review
 
