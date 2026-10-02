@@ -39,9 +39,11 @@ present. This is one diagnostic observation, not product acceptance.
 - [x] Resolve fixed build/evidence role paths from the prior exact run command
   and verify exact rootfs/kernel/qemuboot hashes, BitBake idle, no
   QEMU/runqemu/Flutter/GDB process, free reserved ports, and a fresh run ID.
-- [ ] Run the existing generic QEMU harness in read-only preflight mode for
-  exact 0334 artifacts and `flr0403-0001`. Only after it passes, create the
-  single run evidence directory; start must repeat ownership/hash/port gates.
+- [ ] Recheck all owners, ports, artifact hashes, receiver cleanliness, and
+  run-ID absence read-only immediately before any mutation. If they pass,
+  create exactly one evidence run directory, then invoke the generic harness's
+  read-only preflight (which requires that directory). Start remains a
+  separate action and repeats its own ownership/hash/port gates.
 - [ ] If any status is missing or ambiguous, stop before QEMU and record it as
   UNKNOWN; do not assume the machine is idle from Mac process visibility.
 
