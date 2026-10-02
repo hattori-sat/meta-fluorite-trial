@@ -71,6 +71,55 @@ product objective.
   at `6e9878ba7993acf20c33ba68d9b25db9b5df5d95`; its pixel-capture helper
   matches the Mac SHA-256
   `df826ef28df367d4de42225004f74ce3d2f016a8c2aea42275a8b13b5b233ef1`.
+- The supplemental pre-capture snapshot at `2026-10-02T22:46:07+0000` failed
+  its identity predicate: saved PID 765 was absent and UID-1001
+  `flutter-auto` count was zero. The same snapshot found app-log size
+  32,080,223 bytes, secondary scene-add `0`, present begin/return/success
+  `663/662/662`, and kernel faults `0` against baseline `0`. No QMP capture was
+  started; an after-exit/stale framebuffer would not meet the live-identity
+  requirement.
+- `coredumpctl list` (the guest version does not accept `--boot`) records PID
+  765, UID 1001, signal 11/SIGSEGV at `2026-10-02T22:35:52Z`, executable
+  `/usr/bin/flutter-auto`, and a present 76.0-MiB compressed core. A bounded
+  GDB 14.2 backtrace identifies signal thread LWP 812 and ten return addresses,
+  but every application frame is `???`; GDB warns that deleted
+  `/memfd:mesa-shared`, `/tmp/filament-ashmem-765-*`, and
+  `/memfd:wayland-cursor` mappings cannot be opened.
+- The crashed executable is a stripped PIE, SHA-256
+  `e2842d3faa5d1c693f4497de4a4fb32e2fdd30d4772e369281a9d0c336564e3c`,
+  Build-ID `529c5d321d81192f82f146d9d23736722aec2208`. No `.symtab`, `.debug_*`,
+  `.gnu_debuglink`, or matching `/usr/lib/debug/.build-id/...debug` file was
+  found in the guest. `addr2line`, `llvm-addr2line`, and `llvm-symbolizer` are
+  installed. The core's main-executable mapping and identity are now
+  correlated; symbolization still requires an exact matching unstripped file.
+- The preserved core is `/mnt/yocto/evidence/flr0408-0001/qemu/core-pid765.elf.zst`
+  on the Mini, not in Git or on the Mac. Its verified uncompressed size is
+  886,116,352 bytes; compressed size is 85,823,952 bytes; SHA-256 is
+  `9961abd4e8adc9fb69298e43772fd7674e486df0a85617fe8ff8f18a865548b0`.
+  `zstd -t` passed.
+- The bounded saved GDB transcript is
+  `/mnt/yocto/evidence/flr0408-0001/qemu/gdb-core-pid765-mapped.out`, 98,986
+  bytes, SHA-256
+  `5fa2e889fbe4101db4217e0a1a052c83575aa9ed3ac190067be1afead1b626a7`.
+  It records LWP 812 with `si_code=1` (`SEGV_MAPERR`),
+  `si_addr=RAX=0x7f0a79cbc1c4`, and RIP `0x56032183498d`. The instruction is
+  `mov (%rax),%rax`, an 8-byte indirect read. RIP lies in the mapped
+  `/usr/bin/flutter-auto` range beginning at `0x560320ae3000`, offset
+  `0xd5198d`; the fault address does not appear in the saved process mappings.
+  The crashing thread's caller frames remain `???` because the executable is
+  stripped. GDB's thread, register, signal, instruction, shared-library, and
+  mapping sections are present, but its stderr included `/dev/stdin: Invalid
+  argument` and a host-encoding warning; treat this as useful core evidence,
+  not a clean/reusable debugger invocation.
+- The live-capture window was missed: the 22:15:38Z snapshot still had PID 765
+  alive and present counts `76/75/75`, but the next manual pre-capture check
+  was delayed until 22:46:07Z, after the 22:35:52Z SIGSEGV. No QMP still or
+  video was taken. This is a missed observation opportunity, not evidence of
+  a black or visible frame.
+- After evidence preservation, the existing Mini QMP helper negotiated and
+  accepted `quit`; it reported `cleanup=PASS residual_targets=0 residual_qmp=0`.
+  Ports 10930–10932 were free afterward, and the rootfs/kernel/qemuboot hashes
+  still matched the exact 0334 values above.
 
 ## Inferences
 
@@ -81,6 +130,16 @@ product objective.
 - Scene insertion and process liveness are intermediate signals only. The
   pixel verdict requires recognizable production Sequoia in a live,
   identity-bracketed full-screen QMP capture.
+- The observed runtime fault is a user-space SIGSEGV, not a kernel Oops or OOM
+  in the available bounded evidence. Present begin/return/success counters
+  each rose by 587 between the 22:15:38 and 22:46:07 snapshots; the unmatched
+  begin/return difference remained exactly one. The last observed successful
+  present was at 22:35:50.640 UTC, about 1.4 seconds before the core timestamp.
+  This timing is correlation only and does not identify the faulting operation
+  or establish a present-caused crash.
+- The core identifies the immediate fault as an unmapped 8-byte indirect read
+  in the executable, but the stripped binary and unresolved caller frames do
+  not identify the pointer's owner or where it came from.
 
 ## Hypotheses
 
@@ -96,6 +155,9 @@ product objective.
    Support: launch, process identity, asset selection, or scene-add gate fails
    before the expected marker. This makes the visual result UNKNOWN, not proof
    that the renderer cannot draw Sequoia.
+4. **The bad pointer originates in the faulting code or in an upstream caller.**
+   The core locates the dereference but does not distinguish those paths;
+   matching symbols and caller resolution are required.
 
 ## UNKNOWN
 
@@ -108,6 +170,12 @@ product objective.
   two independent boots pass.
 - Whether any current Oops/present symptom shares a cause with the older
   FLR-0049 renderer observations.
+- Whether the SIGSEGV originated in Flutter, embedded Filament, Mesa/LLVM,
+  another library, or damaged control flow; core mappings and the executable
+  Build-ID are recorded, but the exact unstripped symbols and caller functions
+  are not.
+- Whether the crash has any causal relation to the one unmatched present or to
+  Sequoia scene construction.
 
 ## 4W1H (Why excluded)
 
@@ -150,14 +218,15 @@ product objective.
   `SCENE_ADD_DONE` and an eight-frame QMP sequence, bracketed by the same
   guest PID/UID/start token. Record exact hashes, resolution, visible content,
   and evidence-manifest link here after capture.
-- Current state: no QMP image has been captured for this run yet. The serial
-  setup failure was followed by a successful guest-SSH launch. The committed
-  marker gate then failed `LOG_INVALID` at the oversized-log check, and a
-  later full-log summary found no secondary marker. The marker-gated QMP
-  still/eight-frame criterion remains pending. A separately labelled
-  `diagnostic-no-scene-add` still/eight-frame sequence may be captured only
-  after a fresh manual read-only identity/fault/present bracket; it cannot
-  satisfy Gate A's marker-gated success criterion.
+- Current state: no QMP image was captured. The committed marker gate failed
+  `LOG_INVALID` at its oversized-log check; a later full-log summary found no
+  secondary marker. The fresh manual pre-capture identity check then found PID
+  765 absent and no UID-1001 `flutter-auto`, so the diagnostic branch correctly
+  did not capture a stale frame. The prior live snapshot at 22:15:38Z was not
+  followed promptly by QMP capture; the app crashed at 22:35:52Z before the
+  22:46:07Z pre-capture check. Gate-A pixels remain UNKNOWN; neither a black
+  result nor Sequoia visibility is established by this run. See the
+  [evidence manifest](../evidence/FLR-0408-0001.md).
 
 ## Plan / Do / Check / Act
 
@@ -238,28 +307,42 @@ product objective.
 - The candidate observer correction passed 6/6 focused tests before it was
   restored; it was not deployed or used. On the unchanged committed commands,
   `python3 -B tests/test_flr0408_profile.py -v` passes 6/6, and canonical,
-  privacy, file-size (2,096 files), shell syntax (59 files), runtime
+  privacy, file-size (2,098 files), shell syntax (59 files), runtime
   checkpoint (`active=1`), and `git diff --check` all pass.
-- `make check-markdown` fails only on the same 11 historical missing targets
-  outside FLR-0408; no current FLR-0408 link fails. The pending change set is
-  limited to TASKS, this ticket, its plan, and its working log.
+- Final closeout reran canonical, privacy, file-size, shell, focused tests
+  (6/6), runtime checkpoint (`active=1`), and `git diff --check`; all pass.
+  `make check-markdown` fails only on the same 11 historical missing targets
+  in FLR-0338/0339/0340/0391/0395; no new FLR-0408 link fails.
+- The local closeout change set is limited to TASKS, this ticket, its plan and
+  working log, this evidence manifest, and the bounded GDB command source.
 - Runtime is no longer pre-app: guest-SSH launch and the first fresh identity
   passed. The old scene-gate `LOG_INVALID` is an observer failure. The
   independent full-log snapshot found no secondary Sequoia scene-add marker,
-  but showed continued present returns and no new kernel fault at that
-  snapshot. No visual result or Gate-A/product acceptance is claimed yet.
+  and later the app terminated with SIGSEGV after hundreds of successful
+  present returns. Kernel faults remained zero. The pre-capture identity gate
+  failed, so no visual result or Gate-A/product acceptance is claimed.
+- Core evidence now confirms a user-space unmapped-pointer dereference in the
+  `flutter-auto` executable; caller symbols and pointer origin remain UNKNOWN.
+  The compressed core and GDB output are preserved on the Mini. Exact 0334
+  artifact hashes, QMP shutdown, process/socket cleanup, and forwarded ports
+  were rechecked successfully. A delayed pre-capture check missed the live
+  window; no pixels were obtained.
 
 ### Act
 
-- Preserve the committed observer/gate commands for this run. Take a fresh
-  manual read-only guest snapshot of PID/UID/start, unique app PID, kernel
-  faults, and present counters. If identity matches and faults have not
-  increased, capture exactly one diagnostic QMP still and eight frames, then
-  take the same snapshot again. Label these `diagnostic-no-scene-add`; they do
-  not satisfy Gate A. If identity changes or faults increase, preserve bounded
-  evidence and stop the capture.
-- Review pixels, save the evidence manifest, and stop only this recorded
-  app/QEMU after the bounded diagnostic. Do not repeat the same failing gate
-  without new evidence.
+- Preserve the committed observer/gate commands. The manual pre-snapshot
+  failed because PID 765 was already absent; no diagnostic frame was taken.
+  The 22:15:38Z live snapshot was not followed promptly, and the process
+  SIGSEGV'd at 22:35:52Z before the 22:46:07Z pre-capture check. The core and
+  GDB output are now preserved; only this QEMU was QMP-quit, with no residual
+  target, QMP socket, or forwarded port. Classify `RUNTIME_FAULT=YES`,
+  `SCENE_ADD=UNKNOWN`, `PRESENT_HEALTH=FAIL at process termination`, and
+  `GATE_A_PIXELS=UNKNOWN`.
+- A separate follow-up ticket should resolve the core against the exact
+  unstripped executable/debug symbols and caller chain. The immediate fault
+  site is inside `flutter-auto`, but do not attribute pointer origin to
+  Flutter/Filament/Mesa or causality to present/scene loading without symbols
+  and further evidence. This bounded replay remains In Progress; the user goal
+  is not complete.
 - Do not claim original lighting, HUD composition, interaction/repaint
   stability, five-minute health, or two-boot acceptance from this ticket.
