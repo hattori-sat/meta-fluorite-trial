@@ -181,3 +181,48 @@ evidence about Fluorite rendering.
   loaded. Do not synthesize role values from connection details in chat. Once
   roles exist, verify receiver idleness/cleanliness and exact handoff target
   before invoking the documented bundle helper.
+
+## Subsequent role and Mini-owner recheck (2026-10-02)
+
+### Facts
+
+- The active feature worktree is clean at local commit `c884836`; canonical
+  guard passes. The five `BUILD_*` variables remain unset.
+- A regular Git-ignored remote-role file exists in the canonical clone. Its
+  SSH alias and repository-path fields pass local syntax checks, but
+  `expected_project_revision` is not a valid 40-character lowercase commit.
+  The official remote-MCP wrapper validates this field before `exec ssh`; the
+  attempted `yocto` MCP launch failed closed locally, and no MCP/SSH operation
+  occurred through that launcher. The existing bundle remains the older
+  FLR-0401 tip and was not overwritten.
+- A separate bounded read-only SSH check using the configured alias, batch
+  mode, strict host-key verification, and a 20-second bound succeeded. It
+  observed one QEMU process (PID 3081118, UID 1000, PPID 3081116; Mini-local
+  `ps` start stamp `2026-10-02 23:12:16`, timezone UNKNOWN). No other process
+  matched the bounded Flutter/Weston/BitBake/GDB/runqemu-wrapper filters.
+- No listener was present on the expected QMP ports 10930–10932. This does not
+  rule out a Unix-socket QMP endpoint or establish which image/guest the active
+  QEMU owns. Its ticket, run ID, and operator role remain UNKNOWN.
+- No QMP command, process signal, receiver inspection/update, build, bundle
+  transfer, or second QEMU was issued. The guest's Flutter state is UNKNOWN;
+  host process absence is not evidence about guest processes.
+
+### Decision / stop condition
+
+- Do not attach to, stop, replace, or capture from the unowned QEMU. Do not
+  start BitBake or transfer a bundle while its ownership and receiver/build
+  roles are unresolved.
+- FLR-0406 remains In Progress for the exact Mini serial-helper gate;
+  FLR-0405 remains Waiting. Resume only after the live QEMU is attributable or
+  has independently exited, and a valid local role configuration identifies
+  the exact receiver, build directory, TMPDIR, and project revision. Preserve
+  the stale bundle until its overwrite target is verified.
+
+### UNKNOWN
+
+- Active QEMU command/profile, QMP socket, image hashes, visual output, owner
+  ticket, and whether it is safe to reuse its evidence.
+- Mini canonical repository revision/cleanliness, receiver tip/cleanliness,
+  active BitBake state, and effective `TOPDIR`/`TMPDIR`.
+- Exact FEngine Oops versus unmatched-present order and all production 3D/HUD
+  acceptance criteria.
