@@ -232,13 +232,18 @@ and privacy checks pass. GPT-6.1 Sol's latest review confirms both P2 serial
 transport races are closed with no further findings. No build, bundle handoff,
 or QEMU occurred.
 
-- [ ] **Step 2: Commit scoped ticket, plan, log, tests, and observer changes locally**
+- [x] **Step 2: Commit scoped ticket, plan, log, tests, and observer changes locally**
 
-Run `git diff --check`, canonical/privacy/runtime-checkpoint checks, then commit the FLR-0401 files on `feature-flr-0401-live-present-stack`. Do not push.
+The observer/tests/plan/ticket/log change was committed locally on
+`feature-flr-0401-live-present-stack` as `54c02bdcddbf80be579c4fd7d493f5bd24f6df6c`;
+no push.
 
-- [ ] **Step 3: Use the official bundle handoff and receiver gate**
+- [x] **Step 3: Use the official bundle handoff and receiver gate**
 
-Run only `scripts/handoff-fluorite-bundle.sh` and the paired receiver validator. Require the exact commit tip, a clean receiver, fixed `TOPDIR`/`TMPDIR`, unchanged 0334 artifact hashes, no active build/runtime owner, free QEMU ports/socket, and unused run ID. Do not manually assemble a bundle or create another TMPDIR/container.
+The official bundle helper delivered exact tip `54c02bdcddbf80be579c4fd7d493f5bd24f6df6c`
+to the fixed Mini receiver. Receiver/build/TMPDIR identity, unchanged 0334
+artifacts, process/port/socket state, and unused run ID passed immediately
+before runtime. No build or new TMPDIR/container was created.
 
 ### Task 5: Capture one exact-image live stack and preserve the bounded outcome
 
@@ -251,15 +256,17 @@ Run only `scripts/handoff-fluorite-bundle.sh` and the paired receiver validator.
 - Consumes: committed observer, direct app launch profile, Mini roles, fixed image, serial/QMP helpers.
 - Produces: one live selected stack or one explicit bounded no-trigger/exit/attach-timeout result, full QMP still/video, preserved kernel/coredump evidence, and clean postflight.
 
-- [ ] **Step 1: Run the exact image preflight**
+- [x] **Step 1: Run the exact image preflight**
 
 ```sh
 FLR0399_RUN_ID=flr0401-0001 bash work/commands/FLR-0399-qemu-start.sh preflight
 ```
 
-Expected: exact kernel/rootfs/qemuboot hashes, fixed machine/build/TMPDIR, PIDFD, free QEMU/ports/socket, and fresh evidence path all pass; QEMU remains stopped.
+Exact kernel/rootfs/qemuboot hashes, fixed machine/build/TMPDIR, PIDFD, free
+processes/ports/socket, and fresh evidence path passed; QEMU remained stopped
+until the single authorized start.
 
-- [ ] **Step 2: Start exactly one QEMU and run the direct-launch observer**
+- [x] **Step 2: Start exactly one QEMU and run the direct-launch observer**
 
 ```sh
 FLR0399_RUN_ID=flr0401-0001 bash work/commands/FLR-0399-qemu-start.sh start
@@ -270,18 +277,34 @@ python3 scripts/flr0399_live_capture.py observe \
   --qmp "$BUILD_EVIDENCE/flr0401-0001/qemu/qmp-0401.sock"
 ```
 
-Expected: one direct Flutter identity, first live QMP capture, one triggered GDB attach only if Present is unmatched, exact evidence preservation and teardown. Never rerun the consumed ID.
+One direct Flutter identity and one live unmatched-Present GDB attach were
+captured on `flr0401-0001`. The observer returned FAIL only in post-processing
+because it analyzed a 720x400 pre-launch PPM with a fixed 1280x800 region;
+runtime markers, QMP/GDB evidence, app stop, and QEMU cleanup were preserved.
+The run ID is consumed and will not be reused.
 
-- [ ] **Step 3: Review evidence and determine the next discriminator**
+- [x] **Step 3: Review evidence and determine the next discriminator**
 
-Verify QMP dimensions, still/video hashes, exact PID/UID/start before and after capture/attach, marker counts, selected stack outcome, bounded kernel/coredump query, and postflight. Compare the selected stack with FLR-0341 but do not claim WSI causality from a matching symbol alone. If WSI frames recur, open a separate producer-state discriminator; otherwise follow the captured caller. Keep material/texture/light and composition gates UNKNOWN.
+Review is recorded in [FLR-0401 evidence](../../../work/evidence/FLR-0401-0001.md).
+The HUD is visible, Sequoia ROI is uniformly black, six captured threads are
+in futex/condition waits, one short stack is inside unresolved LLVM frames,
+and no saved frame contains FLR-0341's WSI-wait symbols. Kernel Oops TID 715
+cannot be correlated to a GDB LWP because the observer did not save `ptid` or
+process mappings. Postflight and local still/video verification passed. The
+image analyzer dimension mismatch is assigned to FLR-0402; Oops/LWP/ELF
+correlation remains a separate product diagnostic. Original material/light
+and HUD composition gates remain UNKNOWN/FAIL as recorded.
 
-- [ ] **Step 4: Commit only the task record/evidence review locally**
+- [x] **Step 4: Commit only the task record/evidence review locally**
 
-Commit the updated dashboard, FLR-0401 ticket/log, and small QMP PNG/MP4 evidence artifacts. Do not push; do not transfer images, caches, or build artifacts.
+Commit the dashboard, FLR-0401 ticket/plan/log, evidence manifest, and the
+small QMP PNG/MP4 review derivatives. Do not push. Raw PPM/logs remain on
+Mini; never transfer a QEMU disk image, rootfs, cache, or build artifact.
 
 ## Self-review
 
 - Spec coverage: the one-factor debugger-supervision change, matched process identity, one selected attach, current-image provenance, QMP full frame/video, bounded kernel/coredump evidence, and cleanup all have explicit tasks.
-- Competing hypotheses remain separate; no Oops opcode, submission marker, READY marker, or diagnostic material is promoted to a root cause or product pass.
+- Competing hypotheses remain separate; no Oops opcode, submission marker,
+  READY marker, or diagnostic material is promoted to a root cause or product
+  pass.
 - The default FLR-0399/0400 launch remains unchanged, so the new diagnostic mode can be reviewed independently and reverted without changing prior evidence semantics.

@@ -1,6 +1,6 @@
 # FLR-0401 — capture the live FEngine stack at unmatched Present on image 0334
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mac observer/test source / Mini QEMU / guest Flutter+GDB / QMP evidence roles
@@ -49,12 +49,11 @@ fix or product-acceptance pass.
 - FLR-0366 and FLR-0391 document a similar `FEngine::loop` Oops / `ff <cf>`
   signature. FLR-0366 explicitly shows that opcode/RIP symbol resemblance
   alone does not establish the faulting operation or root cause.
-- The local implementation now covers the counter/run-ID contract, opt-in
-  direct app launch, bounded selected-thread GDB script, one-shot
-  unmatched-Present trigger, and bounded failure-safe teardown. The focused
-  observer suite most recently passes 69/69. These
-  are host-side contract/mock tests only; no Mini transfer, QEMU runtime, or
-  product-image result has occurred for FLR-0401.
+- The local implementation covers the counter/run-ID contract, opt-in direct
+  app launch, bounded selected-thread GDB script, one-shot unmatched-Present
+  trigger, and bounded failure-safe teardown. The focused observer suite
+  passes 69/69. The exact-image Mini runtime result is recorded below; this was
+  an observer/evidence run, not a product fix.
 - Initial read-only reviews identified five pre-fix observer hazards: app/GDB
   writes used independent file offsets; GDB did not recheck inferior identity
   before thread inspection; empty/failed stack collection could be reported as
@@ -70,7 +69,7 @@ fix or product-acceptance pass.
   the shared guest log and returns transport success after the command itself
   completes; regressions exercise fake GDB exit 5 and the balanced-counter
   race, then assert observer evidence collection and cleanup. The latest
-  The latest GPT-6.1 Sol re-review found no further issues and confirmed both
+  GPT-6.1 Sol re-review found no further issues and confirmed both
   P2 transport gaps are closed; actual guest runtime remains unverified.
 
 ### Inferences
@@ -103,7 +102,10 @@ fix or product-acceptance pass.
 
 ### UNKNOWN
 
-- Whether the exact 0334 run reaches FLR-0341's Lavapipe/WSI wait path.
+- Whether any unrecorded/deeper frame reaches FLR-0341's Lavapipe/WSI wait
+  path. No captured top-eight frame contains `lvp_pipe_sync_wait`.
+- Which Linux LWP produced the current-run Oops TID 715, and whether that TID
+  maps to GDB's short LLVM stack or another `FEngine::loop` thread.
 - Whether the missing Present return means blocking, thread fault/exit, or a
   different interruption; the observed event ordering is not causation.
 - The current-run Oops faulting instruction's loaded object, source location,
@@ -112,6 +114,79 @@ fix or product-acceptance pass.
 - Why Sequoia pixels are absent, whether SUN setup produces visible scene
   output, and whether original material/texture/light or HUD composition is
   correct.
+
+## Runtime result and visual evidence — `flr0401-0001`
+
+- Candidate: patch 0334, rootfs SHA-256
+  `80935c3f9fa81da66f068821637f512749602c701baa37e91bf777b8cf15c44c`;
+  same pinned kernel/qemuboot and fixed 6144-MiB QEMU profile. No image build
+  or product-source change occurred.
+- Full `PRESENT_UNMATCHED` QMP capture at 2026-10-02 14:52:29 JST is
+  1280x800, SHA-256
+  `5511064a97cbef85b76cd44809e258f334cf9b18298fd1bfd47c2c894e740f1c`.
+  Visually, the CPU/GPU/FPS HUD and Scenes button are visible at the top; the
+  remaining area is black and Sequoia is not visible. The Sequoia ROI
+  `[440,220,400,360]` is 144,000/144,000 black pixels, with zero chromatic or
+  edge pixels. The HUD ROI `[0,0,320,200]` has 1,192 chromatic pixels.
+- The first-live-state WAITING QMP capture is 1280x800, SHA-256
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`;
+  all four raw QMP video frames have this same hash and are uniformly black.
+  Mini had no `ffmpeg`, so it retained raw frames rather than an MP4. A
+  four-frame, 2-fps MP4 was encoded locally from those exact QMP frames and
+  visually checked; it documents the WAITING state, not the later HUD frame.
+- App identity at the live attach: PID 640, UID 1001, start value 2635;
+  `READY=1`, `PRESENT_BEGIN=1`, `PRESENT_RETURN=0`, `SUN=1`. GDB identity
+  recheck passed and all seven threads named `FEngine::loop` were collected.
+  Six captured stacks wait on futex/condition paths: four are Mesa
+  `lp_cs_tpool_worker`, one is Vulkan `vk_queue_submit_thread_func`, and one is
+  in `libc++.so.1`. The remaining thread has two unresolved frames in
+  `libLLVM.so.18.1` followed by a short/unusable unwind. No captured frame
+  contains `lvp_pipe_sync_wait`; the short LLVM unwind prevents a stronger
+  exclusion.
+- Kernel journal records `Oops: 0000 [#1]`, `CPU: 3 PID: 715 Comm:
+  FEngine::loop`, RIP `0x7fef595d1541`; focused coredump query is `EMPTY`.
+  The GDB output did not record Linux `ptid`/LWP identifiers or the process
+  mappings/build ID, so TID 715 cannot be correlated to a captured GDB thread
+  or symbolized from this run.
+- The observer command returned `FAIL` after runtime collection because its
+  postprocessor forced a 1280x800 `full` ROI on the 720x400 pre-launch PPM
+  (`region extends outside the PPM image`). This is a host-side analysis
+  failure, not evidence that Flutter failed to start. The captured 1280x800
+  live still was re-analyzed at its actual dimensions: full, HUD, and Sequoia
+  regions all returned successfully with the pixel results above.
+- Exact app/GDB-script/QEMU teardown passed: GDB script cleanup marker was
+  recorded, final postflight reports `processes=0`, `qmp=ABSENT`, ports
+  `10930,10931,10932:FREE`; an independent targeted process check also found
+  no QEMU/runqemu/Flutter/BitBake/GDB process.
+- Full evidence index: [FLR-0401-0001 manifest](../evidence/FLR-0401-0001.md).
+  Review still: [full QMP PNG](../evidence/FLR-0401-0001/present-unmatched.png).
+  Four-frame WAITING video: [QMP MP4](../evidence/FLR-0401-0001/waiting-4-frames.mp4).
+  Raw PPM captures and serial/GDB logs remain at `$BUILD_EVIDENCE/flr0401-0001/qemu/`.
+
+### Evidence-based hypothesis update
+
+1. The captured stack does **not support** the prior FLR-0341 WSI-wait
+   hypothesis: none of the seven recorded stacks contains
+   `lvp_pipe_sync_wait` or `wsi_common_queue_present`. Because one LLVM stack
+   is short and no TID/LWP mapping exists, this result does not prove that the
+   Oops and unmatched Present are separate.
+2. The Oops-to-thread relationship remains **UNKNOWN**: kernel TID 715 is not
+   mapped to GDB's internal thread number/Linux LWP and no process mapping was
+   saved. The next product diagnostic must capture those identities and the
+   loaded-object/build-ID ranges before attributing the fault.
+3. The live screenshot confirms a separate visible-output symptom: HUD is
+   rendered while the Sequoia ROI is black. It does not identify whether the
+   first missing boundary is scene draw, submit/sync, or surface presentation.
+
+### Ticket disposition
+
+This ticket is **Done only as the bounded observer/live-stack evidence unit**:
+the exact image preflight, one unmatched-Present GDB capture, full QMP still,
+four-frame video, visual review, runtime markers, and teardown were completed.
+The observer's post-analysis failure is preserved as a separate FLR-0402
+tooling defect. 3D display, original materials/textures/lighting, composition,
+interaction stability, five-minute Present progression, and two-boot
+acceptance remain open; this disposition does not satisfy the product goal.
 
 ## 4W1H (Why excluded)
 
@@ -171,7 +246,8 @@ fix or product-acceptance pass.
    cause.
 4. Full QMP still and four-frame video are preserved and visually inspected;
    Sequoia and HUD ROIs, image hashes, exact marker counts, Oops state, and
-   capture identity are recorded. No image is copied to Mac.
+   capture identity are recorded. Only QMP screenshots/frames may be copied
+   for review; no QEMU disk image, rootfs, or build artifact is copied to Mac.
 5. GDB, app, QEMU, socket, and ports are cleanly detached/stopped and independently
    verified after the run. No unrelated process is touched.
 6. Record the resulting discriminator and open the next one-factor task based
@@ -224,8 +300,9 @@ fix or product-acceptance pass.
 - Script cleanup is issued only after this invocation receives the
   `FLR0401_GDB_SCRIPT=READY` marker from its preparation command. Creation uses
   shell noclobber to avoid overwriting a path that appears after preflight.
-- No product source, image, recipe, build input, cache, or Mini runtime has been
-  changed or touched in this ticket.
+- No product source, image, recipe, build input, cache, or Mini build state was
+  changed. One bounded Mini runtime ran after fresh owner/image/port/socket/
+  evidence-path preflight; no concurrent process was touched.
 
 ### Check
 
@@ -285,19 +362,30 @@ fix or product-acceptance pass.
   finish/component-rebase, Mini recipe-patch, and Podman/bundle-handoff gates
   all PASS. No FLR-0401 link is missing. These checks do not include a Mini
   handoff, BitBake, QEMU, or runtime validation.
+- Runtime acceptance review: fresh Mini preflight PASS; one exact-image
+  unmatched-Present live GDB attach captured seven `FEngine::loop` stacks;
+  full QMP still and four-frame WAITING video were preserved and visually
+  reviewed. HUD ROI has 1,192 chromatic pixels; Sequoia ROI is 144,000/144,000
+  black. Kernel Oops TID 715/RIP `0x7fef595d1541`, coredump `EMPTY`; Oops-to-LWP
+  mapping remains UNKNOWN. The observer's final status is FAIL only because
+  720x400 pre-launch PPM was analyzed as 1280x800; 1280x800 live captures
+  re-analyzed successfully at their actual dimensions. Final postflight PASS:
+  no processes, QMP socket absent, ports 10930–10932 free.
+- Video media verification: Mini reports ffmpeg unavailable and retains four
+  raw frames; all four raw PPM hashes match. The local H.264 review MP4 is
+  1280x800, 2 seconds, exactly four frames, SHA-256
+  `bc759243230a99f71f1be9c8366fe17d7680bb101441261dea37ba4d8bc7282c`;
+  the PNG full still SHA-256 is
+  `68aaf2609276d3dc2d325a7304aba7a8b9ad741e09857cb97555220b6e641308`.
 
 ### Act
 
-- FLR-0400 evidence is committed and the dependent feature branch is created;
-  FLR-0401 is the sole active ticket. Tasks 1–3 are green in local contract and
-  mock tests, but all live/runtime criteria remain unverified. Finish the
-  post-fix GPT-6.1 Sol review, commit the scoped observer/tests/records locally
-  without pushing, then use the official bundle handoff. Repeat the Mini
-  owner/process/ports/socket/evidence-path preflight immediately before the
-  single reserved run; do not build or start a second QEMU. The stack result
-  will select a separate next discriminator, not complete the product goal.
-- Do not use this diagnostic ticket as product completion; keep Gate A/B and
-  all final acceptance conditions open.
+- FLR-0401 closes as a bounded observer/live-stack evidence unit. The QMP
+  analyzer failure is split into FLR-0402; the next product discriminator is
+  a separate Oops TID ↔ GDB LWP/ELF-map correlation ticket. No root cause is
+  assigned from this run. The global Fluorite goal remains active: Gate A/B,
+  original materials/textures/lighting, input/repaint stability, five-minute
+  Present progression, and two independent boots are still unproven.
 
 ## Impact
 
