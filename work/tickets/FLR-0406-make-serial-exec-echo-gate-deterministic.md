@@ -226,3 +226,27 @@ evidence about Fluorite rendering.
   active BitBake state, and effective `TOPDIR`/`TMPDIR`.
 - Exact FEngine Oops versus unmatched-present order and all production 3D/HUD
   acceptance criteria.
+
+## Follow-up process-state poll (2026-10-02 14:27 UTC)
+
+### Facts
+
+- A bounded SSH query using the same configured alias, batch mode, and strict
+  host-key verification found no process record for the previously observed
+  PID 3081118; the query emitted the explicit `PID_NOT_PRESENT` marker.
+- A process-name-only inventory (`PID`, `UID`, `PPID`, `comm`; no command-line
+  arguments) returned `NO_QEMU_PROCESS_MATCHED` at the same check. No QMP
+  endpoint, guest, image, or former operator was inspected.
+- No process was signaled or launched. No build, transfer, or cleanup ran.
+
+### Decision / UNKNOWN
+
+- The earlier QEMU observation is stale, but this bounded match does not prove
+  the Mini is globally idle or identify the prior run/image. Recheck ownership
+  immediately before any future start; do not infer availability from PID
+  absence alone.
+- The five `BUILD_*` roles remain unset and the ignored remote-role config's
+  expected revision remains invalid. Do not transfer/build/start QEMU until
+  those exact roles and the current repository/receiver state are verified.
+- Production Sequoia, HUD composition, input/repaint stability, five-minute
+  present, and two independent boots remain NOT MET.
