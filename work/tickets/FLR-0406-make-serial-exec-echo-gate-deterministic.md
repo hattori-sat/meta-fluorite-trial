@@ -1,6 +1,6 @@
 # FLR-0406 — make the serial-exec echo-off gate deterministic
 
-- Status: In Progress
+- Status: Done (serial-harness scope only; no rendering claim)
 - Priority: High
 - Created: 2026-10-02
 - Owner: QEMU runtime harness / bounded mock serial server / regression-test roles
@@ -309,3 +309,28 @@ evidence about Fluorite rendering.
 - FLR-0406 stays In Progress until the transferred focused tests pass on Mini
   and the modified serial gate is exercised on the real serial endpoint in a
   fresh, single-owner FLR-0405 run. Product rendering acceptance remains open.
+
+## Closeout — Mini serial endpoint verification (2026-10-03)
+
+### Check
+
+- On the exact transferred receiver tip `9fb2d8c63bda212d4c17ad8f24698226869a2a37`,
+  `python3 -B tests/test_qemu_runtime_harness.py` passed 16/16.
+- In one exact-0334 FLR-0405-0002 runtime, all serial-exec commands returned
+  `rc=0` without the previous echo/prompt-gate failure or a command timeout;
+  GDB returned successfully with zero stopped threads.
+- The shared 0405 observation remained inconclusive for rendering: the QMP
+  stills preceded the first present, no Oops was recorded, and the present
+  return/order details belong to FLR-0405. The remote MP4 encoder failed, but
+  this does not invalidate the serial-gate result.
+- App stop, negotiated QMP quit, wrapper/process cleanup, port release, and
+  unchanged 0334 artifact hashes passed.
+
+### Outcome
+
+- Mark this ticket Done for its bounded harness deliverable: the deterministic
+  setup/nonce gate has local unit coverage and has operated against the real
+  Mini QEMU serial endpoint. No product code, Yocto recipe, image, or runtime
+  rendering defect was fixed or declared successful here.
+- Remaining 3D/display work stays open in FLR-0405 and its follow-up runtime
+  evidence.
