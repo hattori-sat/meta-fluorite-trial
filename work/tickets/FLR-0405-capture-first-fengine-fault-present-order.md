@@ -197,10 +197,11 @@ diagnostic result.
   passing; one unrelated serial-exec validator fixture fails with CLI usage
   output and remains unresolved. Markdown checking reports 11 historical
   missing links outside FLR-0405. No 0405 runtime has started.
-- Next: locally commit the ticket, log, TASKS row, and seven guest commands;
-  then repeat the exact read-only Mini ownership/image/process/resource gates.
-  Only if they pass, transfer the small command files into one fresh evidence
-  directory and start generic QEMU once.
+- Local checkpoint `5d8d4f2` committed TASKS, this ticket, its working log, and
+  the seven guest commands on the FLR-0405 feature branch; no push was made.
+- Next: repeat the exact read-only Mini ownership/image/process/resource gates.
+  Only if they pass, transfer the committed small command files into one fresh
+  evidence directory and start generic QEMU once.
 
 ### Check
 
