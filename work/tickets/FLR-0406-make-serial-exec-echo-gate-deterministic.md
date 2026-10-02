@@ -250,3 +250,25 @@ evidence about Fluorite rendering.
   those exact roles and the current repository/receiver state are verified.
 - Production Sequoia, HUD composition, input/repaint stability, five-minute
   present, and two independent boots remain NOT MET.
+
+## Mini remote-project identity check (2026-10-02)
+
+### Facts
+
+- Using the already configured SSH alias and the ignored remote-MCP project
+  path, a bounded read-only query passed `scripts/assert-canonical-repository.sh`.
+- That configured project is on branch
+  `feature-flr-0019-qemu-build-iteration-final`, revision
+  `6e4ccf125ddccac941a2be74612a4d8bb3d37582`, and its tracked/untracked
+  worktree check is not clean.
+- The command did not print dirty paths or read file contents. This remote-MCP
+  project is not established as `BUILD_RECEIVER`; the five fixed `BUILD_*`
+  roles remain unset.
+
+### Decision
+
+- Do not update or use this dirty remote-MCP project as the build receiver.
+  Do not infer its intended revision from the local feature HEAD. The required
+  Mini receiver/build/TMPDIR roles must come from their authoritative local
+  role source, then be verified read-only before transfer or build.
+- No source, receiver, build directory, cache, or process was changed.
