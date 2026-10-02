@@ -184,6 +184,13 @@ selected marker/error lines; raw serial, PPM, and video files remain outside
 Git. QMP teardown negotiates `qmp_capabilities`, sends `quit`, then removes only
 the exact harness-owned stale socket after all target processes disappear.
 
+The Mini PC runtime evidence root is `/mnt/yocto/evidence`, separate from the
+Git receiver and the active BitBake layer. Store raw QMP/serial/app logs under
+one ticket-and-run subdirectory there; do not assume `$BUILD_RECEIVER/evidence`
+is the runtime evidence root. Commit only the sanitized Markdown manifest and
+hashes to the project. Record the evidence directory before starting QEMU and
+verify the files still exist before teardown/closeout.
+
 ## Current observed state
 
 - Docker Desktop is intentionally stopped because no Mac-side Devtool or

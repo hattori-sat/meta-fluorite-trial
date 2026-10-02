@@ -94,3 +94,22 @@
 - [ ] **Step 2: Produce the user-viewable sequence locally if needed.** For numbered 1280x800 QMP PNGs, run /opt/homebrew/bin/ffmpeg -y -framerate 2 -i "$REVIEW_DIR/post-present-%03d.png" -c:v libx264 -pix_fmt yuv420p -movflags +faststart "$REVIEW_DIR/post-present.mp4" and verify it with ffprobe.
 - [ ] **Step 3: Update Facts/Inferences/Hypotheses/UNKNOWN and Plan/Do/Check/Act.** State whether the post-present frame shows Sequoia/HUD, keep present health separate from pixels, and record all failed commands/encoding outcomes. Do not claim full acceptance from one boot.
 - [ ] **Step 4: Run canonical/privacy/checkpoint/diff checks and locally commit the ticket-scoped records.** Keep the QMP review image/video and raw logs out of Git; do not push.
+
+## Iteration 5 closeout — 2026-10-03
+
+- FLR-0405-0003 ran once on the exact 0334 image and ordinary profile. The
+  identity-bracketed live QMP image is white with a large black polygon and has
+  neither the HUD nor an identifiable Sequoia. Eight QMP samples are identical.
+- The first Oops is uptime 166.449039 s; the later live gate fails at uptime
+  223.77 s with counts 2/1/1. Present-marker lines have no timestamps, so only
+  Oops-before-gate is known; call-level order and causality remain UNKNOWN.
+- GDB was late at uptime 1174.50 s; it did not find faulting TID 705. Do not
+  treat LWP 691's poll stack as the fault stack.
+- QEMU teardown and exact 0334 postflight passed. Current Mini evidence-root
+  search did not find the raw FLR-0405-0003 directory or logs. Review PNG/MP4
+  hashes are in [the evidence manifest](../../../work/evidence/FLR-0405-0003.md);
+  preserve the remote-log retention gap as UNKNOWN.
+- FLR-0405 transitions to Waiting because it did not establish causal order or
+  the first failing render/synchronization boundary. FLR-0408 separately
+  replays the known-positive 0049 model-only condition on the same immutable
+  image. No product patch, build, or cache change occurred.

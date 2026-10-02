@@ -1,6 +1,6 @@
 # FLR-0405 — capture ordinary-profile FEngine fault and present order
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Created: 2026-10-02
 - Owner: Mini QEMU / guest Example Demo+GDB / shared app log / QMP and kernel evidence
@@ -79,9 +79,11 @@ cause claim.
 
 ## Current status (2026-10-03)
 
-- FLR-0406's serial-exec prerequisite is Done and passed on the fixed receiver. FLR-0405-0002 is negative only for the pre-present captures: its four QMP frames preceded the first successful present, so their black pixels do not classify rendering. FLR-0405-0003 has not started; no current QEMU/build owner is being interrupted.
-- Local observer validation now passes 12/12 tests, including a regression assertion that every guest identity/log path uses host run ID `flr0405-0003`; the fixed-inbox and Mini ownership preflight passed read-only. The current receiver is the exact ancestor of the local feature tip. The canonical handoff and Mini-side tests remain pending.
-- The ordinary-profile event order and guest SIGTERM completion remain UNKNOWN. Current product rendering and 2D+3D composition, interaction/repaint stability, five-minute present health, and two-boot acceptance remain NOT MET.
+- FLR-0406's serial-exec prerequisite is Done. FLR-0405-0003 ran the ordinary Example Demo on exact patch-0334 as UID 1001, with no optional scene/material/light/camera/render/synchronization variables. A live, identity-bracketed full-screen QMP frame showed a white field and a large black polygon, with no HUD or identifiable Sequoia; its eight-frame sequence was byte-identical. This is negative visual evidence for that ordinary profile, not a cause diagnosis.
+- The kernel Oops at uptime 166.449 s preceded the later live-gate failure at uptime 223.77 s by about 57.32 s. The gate reported present begin/return/success counts 2/1/1. The app's present-marker lines have no timestamps, so the order of the individual present begin/return events relative to the Oops is UNKNOWN. Late GDB attach at uptime 1174.50 s found 23 threads and zero stopped threads; faulting TID 705 was absent. LWP 691 in `poll` is not evidence about TID 705.
+- The exact 0334 rootfs/kernel/qemuboot hashes matched before and after the run. Guest stop, QMP quit, process/socket cleanup, and port release passed. The in-session QMP review PNG/MP4 are verified on the Mac and linked from the evidence manifest; a fresh read-only search of the Mini's known evidence root, fixed receiver, and active source checkout did not find the 0405-0003 raw evidence directory or logs. Raw Mini-log retention is therefore UNKNOWN and is recorded as an evidence-retention failure, not silently treated as success.
+- The corrected observer passes 12/12 focused tests. The Mini active build layer is clean at commit `6e9878b`, while the separate staging receiver is at `969d93c` and its inbox bundle advertises `6e9878b`. The active layer and fixed receiver are distinct; no build or transfer is needed for the next runtime-only test, but this distinction must be rechecked before any source/build handoff.
+- FLR-0405 is Waiting, not Done: causal present/Oops order and the first failing renderer/synchronization boundary remain UNKNOWN. Product Sequoia pixels under the historical model-only profile, original lighting, HUD composition, input/repaint stability, five-minute present health, and two-boot acceptance remain NOT MET. FLR-0408 is the next independent Gate-A discriminator.
 
 ## 4W1H (Why excluded)
 
