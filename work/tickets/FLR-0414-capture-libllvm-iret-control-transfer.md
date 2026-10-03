@@ -1,6 +1,6 @@
 # FLR-0414 — capture the live control transfer into `libLLVM+0xb1d541`
 
-- Status: In Progress
+- Status: Waiting — the live run reproduced the page fault before GDB or the planned hardware breakpoint was started; follow-up is [FLR-0415](FLR-0415-prearm-libllvm-breakpoint.md)
 - Priority: Critical
 - Created: 2026-10-03
 - Owner: Mini QEMU / ordinary Flutter Example Demo / guest GDB / QMP evidence
@@ -94,44 +94,79 @@ the reason, and do not silently change instrumentation or launch a second VM.
 
 ### Success criteria
 
-- [ ] Preflight proves there is no competing Mini build/QEMU/runtime owner; the
+- [x] Preflight proved there was no competing Mini build/QEMU/runtime owner; the
   exact candidate identity is verified before launch.
-- [ ] One ordinary UID-1001 Example Demo run is bracketed by exact process and
-  image identities; active accelerator is captured or explicitly UNKNOWN.
-- [ ] Hardware-breakpoint insertion is verified. Record either a live hit with
-  its caller/register/instruction context or a bounded miss and exact stopping
-  boundary. No software-breakpoint fallback.
-- [ ] Full-screen live QMP still and short video are saved even if the run is
-  unhealthy; pixels are classified from the full frame, not inferred from logs.
-- [ ] The first guest Oops, present counters, app/thread lifecycle, and QEMU
+- [x] One ordinary UID-1001 Example Demo run is bracketed by exact process and
+  image identities; QMP recorded KVM disabled, while TCG remains an inference.
+- [ ] Hardware-breakpoint insertion and live hit/miss boundary are verified.
+  The Oops happened before GDB was started, so this criterion failed; no
+  software-breakpoint fallback was attempted.
+- [x] Full-screen live QMP stills and short videos are saved even though the run
+  was unhealthy; pixels are classified from the full frame, not inferred from logs.
+- [x] The first guest Oops, present counters, app/thread lifecycle, and QEMU
   state share a run identity and one log destination; observer failure and
   product failure are distinguished.
-- [ ] QEMU, app, ports, QMP socket, and handoff receiver pass exact postflight;
+- [x] QEMU, app, ports, QMP socket, and handoff receiver pass exact postflight;
   selected evidence hashes and commands/results are in this log and manifest.
 - [x] Run canonical, privacy, checkpoint, markdown-link and diff checks; the
   known 11 historical missing targets may remain, but no new FLR-0413/0414 or
   evidence link is broken. Commit only the FLR-0413 closeout transition,
-  FLR-0414 ticket/log and TASKS state locally, with no push.
+  FLR-0414 ticket/log, evidence manifest, and TASKS state locally, with no push.
 
 ### Do
 
-- Pending live run. No QEMU/build/process operation has yet been performed
-  under FLR-0414.
+- One Mini `runqemu` instance ran the ordinary Example Demo on the exact
+  FLR-0410 rootfs/kernel/qemuboot hashes recorded in the evidence manifest.
+  Guest PID 646, UID 1001, start token 8925 passed the launch identity gate.
+- The QEMU 8.2.7 QMP monitor reported `query-kvm: enabled=false,present=true`;
+  TCG is inferred from the default because no explicit accelerator was named.
+- Before debugger startup, QMP captured the complete 1280×800 frame and eight
+  frames. The CPU/GPU/FPS HUD and Scenes button are visible; the 3D ROI
+  `(x=0..1279, y=200..799)` is exactly black (768,000/768,000 pixels). All
+  sixteen pre-/post-Oops review frames share SHA-256
+  `d6293e5f4d1ed369e246fc836a4d917223627d6f42fe2b2abfcfa343656bc02f`.
+- Present counters at the first fault: begin/return/success `1/0/0`; 53 shape
+  readiness markers had appeared. At uptime 119.913246 the page fault began;
+  the Oops was recorded at 119.915315 in TID 697 (`FEngine::loop`). RIP and
+  R10 were `0x7fbf96e39541`, RSP `0x00007fbf38ad3750`, CR2
+  `0x0000000038ad3750`, EFLAGS `0x217`. The runtime executable map and exact
+  Build-ID resolve RIP to ELF VMA `0xb1d541`, whose bytes begin `cf 83 ff 07`.
+- No GDB process was launched and no hardware breakpoint was inserted. A
+  read-only post-Oops map preparation command resolved the matching runtime
+  address only after the fault; it cannot recover the transfer that preceded
+  the first hit.
+- The post-Oops frame still shows HUD over a black 3D region and is identical
+  to the pre-Oops frame. This is a real negative 3D observation, not a fully
+  black-screen claim and not a successful Sequoia/material/lighting result.
+- Exact app stop, negotiated QMP quit, harness cleanup, and independent
+  postflight passed. Candidate hashes were unchanged. No build, bundle
+  transfer, product edit, cache operation, or second QEMU run occurred.
 
 ### Check
 
+- **Runtime result: FAILED for the planned control-transfer capture.** The
+  fault recurred, and same-run RIP/Build-ID/map/CR2 evidence was obtained, but
+  the hardware breakpoint was never armed because the app was launched first
+  and faulted before GDB startup. The missed breakpoint is an observer/sequence
+  failure; it does not prove the page fault's cause.
+- QMP proves the HUD is visible while the 3D region is black on this exact
+  candidate. It does not prove why 3D is black. Root cause across Filament,
+  LLVM, Mesa, QEMU/TCG, or guest kernel remains UNKNOWN.
 - A GDB stop, process liveness, READY, or matching register values alone do not
-  pass Sequoia pixels, HUD composition, depth, input/repaint, five-minute, or
-  two-boot gates. Those remain product acceptance conditions.
+  pass production Sequoia pixels, depth, input/repaint, five-minute progressing
+  present, or two-boot gates. Those remain open.
 
 ### Act
 
-- If the address is hit, use the predecessor and same-run signal/stack evidence
-  to choose one next process boundary; do not yet patch Filament, LLVM, Mesa, or
-  QEMU by correlation alone.
-- If it is not hit or the app faults elsewhere, preserve that as a bounded
-  negative result and compare with prior exact-image evidence before opening a
-  new ticket. No same-ticket retry or candidate build.
+- Close this work unit as Waiting with the exact failed boundary recorded. Do
+  not spend time on a post-fault breakpoint attempt in the same run.
+- [FLR-0415](FLR-0415-prearm-libllvm-breakpoint.md) starts the ordinary app as
+  a GDB inferior, catches the exact libLLVM load, validates Build-ID and
+  PT_LOAD/mapping arithmetic, then inserts a hardware breakpoint before
+  continuing. It first performs bounded read-only capability checks and fails
+  closed if the required GDB support is absent.
+- No Filament, LLVM, Mesa, QEMU, or guest-kernel product patch is justified by
+  this run alone.
 - Product goal remains open until the full final-image acceptance matrix passes.
 
 ## Evidence location
@@ -139,5 +174,7 @@ the reason, and do not silently change instrumentation or launch a second VM.
 - Mini raw evidence: `$BUILD_EVIDENCE/flr0414-0001/qemu/`
 - Local review artifacts: one `work/evidence/FLR-0414-0001/` child directory;
   QMP PPM and logs on Mini remain authoritative.
+- [FLR-0414-0001 evidence manifest](../evidence/FLR-0414-0001.md) indexes the
+  hashes, pixel result, selected logs, and QMP visual proof.
 - No rootfs, kernel, VM disk, credentials, personal account, IP, or hostname in
   Git.
