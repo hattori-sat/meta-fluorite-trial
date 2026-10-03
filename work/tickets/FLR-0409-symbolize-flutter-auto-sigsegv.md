@@ -1,6 +1,6 @@
 # FLR-0409 — resolve exact flutter-auto SIGSEGV symbols
 
-- Status: In Progress
+- Status: Done (bounded symbol and source-boundary investigation)
 - Priority: High
 - Created: 2026-10-03
 - Owner: existing Yocto package/debug artifacts / Mini evidence role / GDB-symbolization role
@@ -45,47 +45,85 @@ QMP frame exists. Sequoia/HUD pixels remain UNKNOWN.
   image were not copied to the Mac or committed. FLR-0408 captured no QMP
   screenshot or video.
 
+## Result — exact symbol and first source boundary
+
+- The exact already-existing package-split debug executable was found at the
+  role path
+  `$TMPDIR/work/corei7-64-agl-linux/flutter-auto/2.0/packages-split/flutter-auto-dbg/usr/bin/.debug/flutter-auto`.
+  Its Build-ID is exactly
+  `529c5d321d81192f82f146d9d23736722aec2208`, matching the stripped image ELF;
+  it is x86-64 ET_DYN and contains `.debug_info`, `.debug_line`, and `.symtab`.
+- Core map base `0x560320ae3000` agrees with the executable's first PT_LOAD
+  (`p_vaddr=0`, file offset 0). Thus runtime RIP `0x56032183498d` maps to ELF
+  VMA `0xd5198d`.
+- Exact symbols identify the faulting frame as
+  `plugin_filament_view::FilamentViewPlugin::CallEvent(...)`, called from
+  `ViewTarget::DrawFrame(unsigned int)`, then the `ViewTarget::OnFrame` lambda.
+  The saved LWP 812 instruction reads the first word of the static
+  `_eventCallbacks` map and dereferences it; the dereference faults on unmapped
+  `RAX=si_addr=0x7f0a79cbc1c4`.
+- The effective source at the matching recipe work tree inserts into
+  `_eventCallbacks` in `CallEvent`, then waits on the returned future. Its
+  MethodResult callbacks and registered `ret_*` handler call `set_value()`
+  before erasing entries. There is no mutex guarding the map.
+- The exact Flutter embedder header states that its platform-message callback
+  runs on the thread calling `FlutterEngineInitialize`/`FlutterEngineRun`.
+  `shell/main.cc` constructs `App`; `App` initializes `FlutterView`; that path
+  initializes the engine on the application thread. The engine callback calls
+  `IncomingMessageDispatcher::HandleMessage` directly, without a thread hop.
+- `ECSManager::setupThreadingInternals` creates a separate
+  `ECSManagerThreadRunner`. The QEMU software-frame source path calls
+  `DrawFrame`, waits for the Flutter callback, and posts the next frame to the
+  ECS strand. Because callback code fulfils the promise before erasing the map
+  entry, the next insertion can run while the prior erase is still pending.
+  This is a reachable unsynchronized map-mutation defect. Whether this exact
+  interleaving caused the preserved SIGSEGV remains UNKNOWN.
+- Historical FLR-0277 had already noted the map race as possible but left it
+  open because its frame-event A/B did not establish a reachable conflicting
+  schedule. The current thread contract and software-frame recurrence close
+  that process-level evidence gap; they do not retrospectively prove the old
+  crash's cause.
+- The host's GNU binutils 2.38 resolves function names but does not decode the
+  DWARF 5 forms in the debug companion, so source-line lookup is unavailable
+  with that tool version. The exact source was inspected directly. No rebuild,
+  QEMU start, source write, cache operation, or artifact copy occurred.
+
+See the bounded, sanitized [FLR-0409 evidence manifest](../evidence/FLR-0409-0001.md).
+
 ## Inferences
 
-- The immediate invalid read occurred while executing a mapped instruction
-  belonging to the stripped main executable. This does not prove the app code
-  created the invalid pointer; a caller, library, or earlier state corruption
-  may have supplied it.
-- `0xd5198d` is not automatically the address accepted by `addr2line`; the
-  exact ELF, program headers, core mapping, and PIE load bias must be correlated
-  before symbolization.
-- A function name or successful backtrace would locate a failure boundary but
-  would not alone establish the pointer's origin or the product root cause.
+- The immediate bad value was read while `std::map::operator[]` traversed
+  `_eventCallbacks`; its invalid state is consistent with concurrent map
+  mutation, but does not alone identify when or who corrupted it.
+- Source and callback-thread contracts establish an unsafe concurrent access
+  path independent of whether it explains the saved SIGSEGV.
+- The fault occurred after a `DrawFrame` call boundary. It does not establish
+  a Vulkan, Wayland, Filament rendering, present-completion, or pixel failure.
 
 ## UNKNOWN
 
-- Whether any already-existing package/debug/link artifact contains exact
-  symbols for Build-ID `529c5d321d81192f82f146d9d23736722aec2208`.
-- Which function and caller chain contain the fault; the existing stack is
-  stripped and its pointer origin is unresolved.
-- Whether the immediate invalid read originated in Flutter, Filament, Mesa/
-  LLVM, another library, an API/lifetime boundary, or prior memory corruption.
-- Whether this crash is related to scene construction, the unmatched present,
-  rendering, or display output. FLR-0408 has no live QMP pixels, so Sequoia/HUD
-  visibility is UNKNOWN.
+- Whether the reachable `_eventCallbacks` race caused the saved LWP 812 SIGSEGV;
+  that requires a new fixed/runtime comparison.
+- Whether earlier memory corruption or a separate lifetime violation also
+  contributed.
+- Any FLR-0408 pixels, scene visibility, HUD composition, or rendering/present
+  relationship. That run captured no live QMP frame, so Sequoia/HUD visibility
+  remains UNKNOWN, not black.
 
-## Ranked hypotheses and falsifiers
+## Hypotheses and falsifiers
 
-1. **The faulting component formed or retained a stale/invalid pointer.**
-   Support would require exact symbols and surrounding code showing the value
-   is derived/used inside that path without an invalid incoming argument.
-   Falsify or weaken it if a resolved caller demonstrably supplies the invalid
-   value across a defined API boundary.
-2. **An upstream caller/API/lifetime boundary supplied the invalid pointer.**
-   Support would be a resolved frame/argument path showing the value arrives
-   from a caller or resource handle before the faulting dereference. Weaken it
-   if the incoming value is valid at the call boundary and becomes invalid
-   within the faulting routine (not yet observable from this core alone).
-3. **Earlier memory corruption or optimized/incomplete unwind obscures the
-   pointer's origin.** Support would be inconsistent/corrupted saved state or
-   an unusable caller chain even with matching symbols. Falsify only with
-   stronger independent runtime evidence; absence of such evidence here is
-   not proof that corruption did not occur.
+1. **Concurrent `_eventCallbacks` mutation caused the saved crash.** The exact
+   source permits next-frame insertion to overlap callback-side erase; support
+   for attribution requires a same-path reproduction or a fix eliminating the
+   crash across repeated comparable runs. A crash at an unrelated boundary
+   after synchronization weakens this hypothesis.
+2. **The observed race is real but another invalid write/lifetime issue caused
+   the saved crash.** Support would be a later crash with the map synchronized
+   and evidence localizing it elsewhere. Absence of a crash alone does not
+   prove the historical cause.
+3. **The visual/present failure is independent of this crash boundary.**
+   FLR-0408 has no pixels; a fresh full-frame QMP capture is required to assess
+   it.
 
 ## Search and execution boundary
 
@@ -113,20 +151,18 @@ needs an artifact-owner handoff.
 
 ## Success criteria
 
-- Revalidate the recorded core/transcript identities without moving the large
-  artifacts; record commands, role paths, hashes, and access result.
-- Identify the exact image/package/recipe metadata and inspect only the
-  corresponding existing package/debug and link/install paths.
-- If a matching symbol file exists, verify its Build-ID and ELF mapping, then
-  produce a bounded symbolized instruction/caller report for LWP 812 and state
-  what the surrounding source does and does not prove.
-- If none exists, record the specific metadata and artifact paths checked,
-  conclude `EXACT_SYMBOLS=UNAVAILABLE`, leave caller/component/root cause
-  UNKNOWN, and stop without recreating symbols.
-- Keep pixel state UNKNOWN. Do not claim any Sequoia, HUD, renderer, present,
-  or final product acceptance from this ticket.
-- Record clean read-only completion, evidence hashes, and the next separate
-  ticket needed to obtain symbols or resume live visual validation.
+- [x] Revalidate the recorded core/transcript identities in place; keep large
+  artifacts on the Mini.
+- [x] Identify the exact image manifest and matching package-split debug ELF;
+  verify Build-ID, architecture, segments, and PIE load bias.
+- [x] Resolve the LWP 812 faulting function/caller boundary and inspect the
+  exact effective source and thread contract.
+- [x] Compare the thread/schedule evidence with FLR-0277 without changing its
+  historical record.
+- [x] Record the map race as a confirmed process defect while keeping its
+  causal relation to the saved SIGSEGV UNKNOWN.
+- [x] Keep FLR-0408 visual state UNKNOWN and create separate FLR-0410 for the
+  synchronization fix and fresh runtime validation.
 
 ## 4W1H (Why excluded)
 
@@ -151,27 +187,47 @@ needs an artifact-owner handoff.
 
 ### Do
 
-- Pending. No package/build-output search has run in FLR-0409 yet.
+- Revalidated the in-place core/transcript hashes against FLR-0408 evidence.
+- Found the exact Build-ID-matched `flutter-auto-dbg` package split; no rebuild
+  or package installation was performed.
+- Correlated the ELF load bias and resolved `CallEvent` → `DrawFrame` →
+  `OnFrame` symbols. GNU binutils 2.38 emitted DWARF-form warnings and could
+  not provide source lines; inspected the exact matching recipe source instead.
+- Traced Flutter's exact platform-message callback contract, the App/Engine
+  initialization route, direct inbound dispatch, the separate ECS thread, and
+  the QEMU software-frame recurrence.
+- Read the historical FLR-0119 and FLR-0277 records before selecting a fix.
+  GPT-6.1 Sol's judgment-only review concluded that the source proves a
+  reachable unsynchronized map-mutation defect, but not that it caused the
+  historical SIGSEGV; it recommended one mutex, erase-before-fulfil, and no
+  lock across waits/messages.
+- The initial ViewTarget lookup omitted its `core/scene` directory; a targeted
+  `find` resolved it. The first recursive listing included `.pc` patch-history
+  snapshots, so later searches excluded `.pc` and `.git`. No source state was
+  changed.
 
 ### Check
 
-- Pending. Exact symbolization and caller/root-cause state are UNKNOWN.
-- No runtime pixels are available from FLR-0408; do not treat post-exit state
-  or the missing QMP capture as a visual result.
+- Exact Build-ID match and ELF mapping: **PASS**.
+- Faulting function/caller source boundary: **PASS**.
+- Unsafe map access schedule: **CONFIRMED IN SOURCE**; historical crash
+  causality: **UNKNOWN**.
+- Mini core/GDB hashes and exact 0334 artifact identities: **PASS**.
+- QMP pixels, Sequoia/HUD visibility, and relation to the fault: **UNKNOWN**;
+  FLR-0408 has no live frame.
+- No BitBake, QEMU, cache, source, Devtool, or artifact-copy operation ran.
 
 ### UNKNOWN
 
-- Exact symbol-file availability, the symbolized caller chain, pointer
-  provenance, component ownership, and relationship to presentation are all
-  UNKNOWN until the bounded existing-artifact search is completed.
-- Sequoia/HUD pixel state remains UNKNOWN because no live QMP frame was
-  captured in FLR-0408.
+- Whether the source race caused the saved SIGSEGV; whether independent memory
+  corruption/lifetime problems remain; and all FLR-0408 pixel/scene state.
 
 ### Act
 
-- If exact caller symbols are recovered, create a separate ticket for the
-  narrow source/runtime discriminator selected from that evidence.
-- If exact symbols are absent, stop and create a bounded follow-up only if
-  generating exact debug symbols is necessary and approved. Keep the
-  production visual goal open; the next runtime attempt must capture QMP
-  immediately after confirming the live app identity.
+- Close FLR-0409 as the bounded source-boundary investigation.
+- Start FLR-0410 as the sole In Progress task: synchronize all
+  `_eventCallbacks` accesses, erase the completed entry before waking the ECS
+  waiter, then rebuild on the existing Mini build/TMPDIR and capture QMP
+  immediately after live identity confirmation.
+- Keep the production visual goal open; a crash fix, build success, or
+  diagnostic fixture is not Sequoia/HUD acceptance.
