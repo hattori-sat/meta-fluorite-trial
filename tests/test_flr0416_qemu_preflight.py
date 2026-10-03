@@ -54,7 +54,7 @@ class FLR0416QemuPreflightTests(unittest.TestCase):
         self.assertIsNotNone(match)
         self.assertIn(match.group(1), plan)
 
-    def test_flr0418_run_id_is_consistent_across_capture_guest_and_exporter(self):
+    def test_flr0421_run_id_is_consistent_across_capture_guest_and_exporter(self):
         root = Path(__file__).parents[1]
         paths = (
             root / "scripts/flr0416_live_capture.py",
@@ -70,7 +70,7 @@ class FLR0416QemuPreflightTests(unittest.TestCase):
         for path in paths:
             with self.subTest(path=path.name):
                 source = path.read_text(encoding="utf-8")
-                self.assertIn("flr0418-0001", source, path.name)
+                self.assertIn("flr0421-0001", source, path.name)
                 for stale_identity in (
                     "flr0416-0001",
                     "flr0417-0001",
@@ -84,7 +84,7 @@ class FLR0416QemuPreflightTests(unittest.TestCase):
     def test_preflight_rejects_occupied_run_directory_before_modifying_evidence(self):
         with tempfile.TemporaryDirectory() as directory:
             evidence = Path(directory)
-            occupied = evidence / "flr0418-0001"
+            occupied = evidence / "flr0421-0001"
             occupied.mkdir()
             sentinel = occupied / "preserve.bin"
             sentinel.write_bytes(b"first owner evidence\n")

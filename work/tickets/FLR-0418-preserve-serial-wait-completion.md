@@ -1,13 +1,15 @@
 # FLR-0418 — preserve serial shell completion after guest wait markers
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Created: 2026-10-04
+- Updated: 2026-10-04
 - Owner: Mac capture controller / Mini QEMU / guest GDB observer / QMP evidence
 - Branch: `feature-flr-0418-serial-wait-return`
 - Parent milestone: `dev-flr-0417-capture-entry`
 - Predecessor: [FLR-0417](FLR-0417-repair-capture-entry-and-run-once.md)
 - Candidate baseline: unchanged [FLR-0410-0001](../evidence/FLR-0410-0001.md)
+- Runtime evidence: [FLR-0418-0001 manifest](../evidence/FLR-0418-0001.md)
 - Working log: [FLR-0418 working log](../logs/2026-10-04-flr0418.md)
 - Execution plan: [FLR-0418 plan](../../docs/superpowers/plans/2026-10-04-flr0418-serial-wait-return.md)
 
@@ -41,10 +43,16 @@ not a product-render result.
 
 ### Inference
 
-The `exit 0` is the leading explanation for the missing wrapper completion
-marker: the guest output shows READY and then a login-shell logout, while the
-host waits specifically for the marker appended afterward. This does not rule
-out a separate observer error after the command can return normally.
+The predecessor's `exit 0` is confirmed as the cause of its missing wrapper
+completion marker: the old runtime transcript showed READY then logout, and the
+real-shell regression reproduced the missing marker. The corrected FLR-0418
+runtime wait now returns READY, `rc=0`, and the wrapper marker.
+
+FLR-0418 reached the deliberate `catch-load-libLLVM` breakpoint with all
+Example Demo app threads stopped before the renderer continued. The following
+guest snapshot failed while parsing the incremental kernel-journal response;
+the controller therefore requested an abort before releasing the app. The
+black load-stage screenshot is not evidence of a product render failure.
 
 ### Competing hypotheses
 
@@ -131,8 +139,8 @@ out a separate observer error after the command can return normally.
   invalid short-window rejection before claim, and exhausted guest-budget
   rejection. After Sol's final review, added a second clock-advance regression
   that delays command-file preparation and proves the final dispatch guard
-  rejects ACK/abort 11s and 14s cases before serial-exec. No QEMU or product
-  build has run for FLR-0418.
+  rejects ACK/abort 11s and 14s cases before serial-exec. No product build ran;
+  the one authorized QEMU diagnostic attempt is recorded below.
 
 ### Check
 
@@ -157,33 +165,68 @@ out a separate observer error after the command can return normally.
   verified the final dispatch guard. Its optional P3 request to commit tests
   for post-command-preparation delays is now covered by the four regression
   subcases above. Real Mini PTY behavior remains UNKNOWN.
-- Fresh `make verify` passed canonical, privacy, shell syntax (61 files),
+- Fresh `make verify` passed canonical, shell syntax (61 files),
   Python 348/348, and MCP 52/52, then exited 2 at 55 historical Markdown
   targets. The new FLR-0417/0418/0419 links are not among them; FLR-0417's
   earlier count was 11 and exact revision/media projection equivalence is
   UNKNOWN. [FLR-0420](../tickets/FLR-0420-reconcile-markdown-verification-baseline.md)
   owns reconciliation. File-size, QEMU harness, runtime-log-slice, Devtool
-  finish/rebase, Mini patch, and bundle-handoff gates pass. Staged whitespace
-  was not runnable yet because the intended new files are still unstaged; rerun
-  after explicit staging. Runtime-checkpoint remains pending after this log
-  update.
+  finish/rebase, Mini patch, and bundle-handoff gates passed. The initial
+  post-commit privacy check correctly rejected the commit's Git metadata. The
+  local commit was amended with reset-author to the repository role identity;
+  the resulting tree is unchanged and the fresh privacy check passes. Final
+  staged-whitespace and checkpoint results are recorded in Iteration 7 of the
+  working log.
 - First focused invocation after adding the final-dispatch test failed before
   test collection with `IndentationError` in that test block; indentation was
   corrected, after which the new case passed and the 99-test scoped suite passed.
-- Bundle transfer and the one Mini same-image runtime attempt remain pending.
-  No product build or QEMU has run for FLR-0418 yet.
+- Local commit `8506d4b` was created without push and was transferred through
+  the standard fixed-path bundle helper; at that point Mini receiver HEAD
+  matched exactly and effective TOPDIR/TMPDIR checks passed. Its author metadata
+  then failed privacy validation. The local history was explicitly authorized
+  for rewrite and amended as `1fb42ee`; the Git tree is identical to the
+  transferred commit. The Mini receiver still names the prior commit object,
+  but its tree matches; FLR-0421 must hand off its exact new tip before runtime.
+- Exactly one `flr0418-0001` run was started against unchanged FLR-0410-0001 with
+  6144 MiB. GDB API smoke, ordinary Example Demo launch, and wait-marker serial
+  completion all passed. The load-ready snapshot then returned
+  `kernel_journal_empty_marker_conflicts_with_returned_cursor`; controller
+  status is `LOAD_STAGE_ABORT_REQUESTED`, not a render result. The QMP load
+  still was captured, but the required load bracket is unverified.
+- The pre-launch and load PPMs are byte-identical black 1280×800 frames. GDB had
+  stopped all app threads at `__GI__dl_debug_state` during `libLLVM` loading,
+  before rendering. QMP quit, QEMU disappearance, socket absence, teardown, and
+  postflight passed with no teardown errors. No present progression, 5-minute
+  run, or second boot was tested; kernel-Oops status remains UNKNOWN because the
+  snapshot failed.
+- The fixed allowlist media export passed after teardown. Its two PNG previews
+  were first local-only previews; the selected full-screen load still is now
+  attached as [QMP evidence](../evidence/FLR-0418-0001-qmp-load.png). The PPMs
+  and raw serial/controller evidence remain on Mini. No rootfs or image was
+  copied to the Mac.
+
+### Visual evidence
+
+- QMP-only 1280×800 full-screen load still: [FLR-0418-0001-qmp-load.png](../evidence/FLR-0418-0001-qmp-load.png).
+- The frame is black while all Flutter threads are deliberately stopped at the
+  LLVM load boundary, before the renderer continues. It is not a product-render
+  verdict. PPM SHA-256: `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`;
+  PNG SHA-256: `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`.
 
 ### Act
 
-- Complete fresh validation and exact-scope review, commit locally, transfer by
-  the standard bundle helper, then perform the one unchanged-image attempt only
-  after fresh ownership/resource preflight. Preserve its outcome; create a new
-  ticket for a distinct follow-on failure; never reopen or reuse FLR-0417.
+- Closed as a bounded, unsuccessful diagnostic attempt: the serial-shell
+  completion contract passed, the one new-ID run reached the next snapshot
+  boundary and failed closed there, and exact teardown passed. No second run is
+  allowed under this ticket. FLR-0421 owns the distinct journal-cursor boundary;
+  product rendering remains open and the black pre-render frame is not a
+  rendering failure result.
 
 ## PDCA checker
 
-- Status: NOT CHECKED
-- Checked by:
-- Findings: Do not mark Done until both the local shell-completion contract
-  and the one-run diagnostic/finalization boundary are evidenced. Product
-  rendering remains a separate open goal.
+- Status: PASS WITH CONDITIONS
+- Checked by: GPT-6.1 Sol (judgment-only review) and local evidence review
+- Findings: The ticket's bounded harness and one-attempt/finalization criteria
+  are evidenced. The runtime attempt failed safely at incremental journal
+  parsing before renderer release; no product-render criterion is claimed.
+  FLR-0421 owns the follow-up and must use a fresh immutable run ID.

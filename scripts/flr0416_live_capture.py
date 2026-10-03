@@ -17,11 +17,11 @@ import time
 from pathlib import Path
 
 
-RUN_ID = "flr0418-0001"
-QMP_SOCKET_NAME = "qmp-0418.sock"
+RUN_ID = "flr0421-0001"
+QMP_SOCKET_NAME = "qmp-0421.sock"
 ATTEMPT_CLAIM_NAMES = {
-    "start": "FLR0418-start-claim",
-    "controller": "FLR0418-controller-claim",
+    "start": "FLR0421-start-claim",
+    "controller": "FLR0421-controller-claim",
 }
 ACK_COLLECTION_SECONDS = 540
 SERIAL_WAIT_COMPLETION_RESERVE_SECONDS = 15
@@ -74,6 +74,15 @@ REQUIRED_MINI = {
     },
 }
 IDENTITY_KEYS = ("guest_boot_id", "process", "gdb_process")
+SAFE_GUEST_SNAPSHOT_FAILURE_REASONS = {
+    "snapshot_failed",
+    "journal_anchor_unresolved",
+    "journal_cursor_malformed",
+    "journal_query_incomplete",
+    "journal_empty_result_invalid",
+    "journal_empty_cursor_mismatch",
+    "journal_cursor_missing_or_ambiguous",
+}
 
 
 def canonical_json(value):
@@ -108,7 +117,7 @@ def create_attempt_claim(run_dir, role):
     start_token = _process_start_token(os.getpid())
     claim_dir.mkdir(mode=0o700)
     owner = {
-        "event": "FLR0418_ATTEMPT_CLAIM",
+        "event": "FLR0421_ATTEMPT_CLAIM",
         "role": role,
         "run_id": RUN_ID,
         "pid": os.getpid(),
@@ -350,7 +359,7 @@ def payload_shell_commands(remote_path, payload, owner="agl-driver"):
     """Stage complete bytes privately, then publish the destination atomically."""
     destination = Path(remote_path)
     allowed = destination.parent == Path(GUEST_DIR) or re.fullmatch(
-        r"/run/user/1001/flr0418-0001-(?:load|hit)-(?:manifest|release|abort)\.json",
+        r"/run/user/1001/flr0421-0001-(?:load|hit)-(?:manifest|release|abort)\.json",
         remote_path,
     )
     if not allowed or destination.name in (".", "..") or "\n" in remote_path or "\r" in remote_path:
@@ -459,6 +468,8 @@ def decode_guest_snapshot(output):
     matches = [line.strip()[len(marker) :] for line in output.splitlines() if line.strip().startswith(marker)]
     if len(matches) != 1:
         raise ValueError("guest snapshot response must contain exactly one record")
+    if matches[0].startswith("FAIL "):
+        raise _decode_guest_snapshot_failure(matches[0])
     try:
         value = json.loads(base64.b64decode(matches[0].encode("ascii"), validate=True).decode("utf-8"))
     except (UnicodeEncodeError, binascii.Error, UnicodeDecodeError, json.JSONDecodeError) as error:
@@ -468,14 +479,186 @@ def decode_guest_snapshot(output):
     return value
 
 
+def _decode_guest_snapshot_failure(payload):
+    prefix = "FAIL reason="
+    if not payload.startswith(prefix):
+        return ValueError("guest snapshot failed with malformed bounded diagnostics")
+    reason, separator, encoded = payload[len(prefix) :].partition(" diagnostics=")
+    if (
+        not separator
+        or reason not in SAFE_GUEST_SNAPSHOT_FAILURE_REASONS
+        or len(encoded) > 12000
+    ):
+        return ValueError("guest snapshot failed with malformed bounded diagnostics")
+    try:
+        raw = base64.b64decode(encoded.encode("ascii"), validate=True)
+        if len(raw) > 8192:
+            raise ValueError("guest snapshot diagnostics exceed the host bound")
+        diagnostics = json.loads(raw.decode("utf-8"))
+    except (UnicodeEncodeError, binascii.Error, UnicodeDecodeError, json.JSONDecodeError) as error:
+        return ValueError("guest snapshot failed with invalid bounded diagnostics")
+    if not _is_redacted_journal_diagnostics(diagnostics):
+        return ValueError("guest snapshot failed with invalid diagnostic shape")
+    return ValueError(
+        "guest snapshot failed reason=" + reason + " diagnostics=" + canonical_json(diagnostics)
+    )
+
+
+def _is_sha256(value):
+    return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
+
+
+def _is_nonnegative_integer(value):
+    return type(value) is int and 0 <= value <= 10 * 1024 * 1024 + 1
+
+
+def _is_redacted_journal_summary(summary, *, query):
+    common = {
+        "returncode",
+        "complete",
+        "timed_out",
+        "oversized",
+        "line_overflow",
+        "truncated",
+        "reaped",
+        "collector_error",
+        "total_bytes_seen",
+        "stdout_bytes",
+        "stdout_sha256",
+        "stderr_bytes",
+        "stderr_sha256",
+        "stderr_empty",
+        "stdout_line_count",
+        "empty_marker_count",
+        "empty_marker_line",
+        "cursor_count",
+        "cursor_line",
+        "cursor_malformed",
+        "cursor_sha256",
+        "other_line_count",
+        "fault_count",
+        "cursor_equal_anchor",
+    }
+    expected = common | ({"classification", "fault_matches"} if query else {"exact_anchor"})
+    if not isinstance(summary, dict) or set(summary) != expected:
+        return False
+    if not (
+        summary["returncode"] is None
+        or (type(summary["returncode"]) is int and -255 <= summary["returncode"] <= 255)
+    ):
+        return False
+    for key in (
+        "complete",
+        "timed_out",
+        "oversized",
+        "line_overflow",
+        "truncated",
+        "reaped",
+        "stderr_empty",
+        "cursor_malformed",
+    ):
+        if type(summary[key]) is not bool:
+            return False
+    if summary["cursor_equal_anchor"] is not None and type(summary["cursor_equal_anchor"]) is not bool:
+        return False
+    if summary["collector_error"] is not None and (
+        not isinstance(summary["collector_error"], str)
+        or re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,63}", summary["collector_error"]) is None
+    ):
+        return False
+    for key in (
+        "total_bytes_seen",
+        "stdout_bytes",
+        "stderr_bytes",
+        "stdout_line_count",
+        "empty_marker_count",
+        "cursor_count",
+        "other_line_count",
+        "fault_count",
+    ):
+        if not _is_nonnegative_integer(summary[key]):
+            return False
+    for key in ("empty_marker_line", "cursor_line"):
+        if summary[key] is not None and not _is_nonnegative_integer(summary[key]):
+            return False
+    if not _is_sha256(summary["stdout_sha256"]) or not _is_sha256(summary["stderr_sha256"]):
+        return False
+    if summary["cursor_sha256"] is not None and not _is_sha256(summary["cursor_sha256"]):
+        return False
+    if query:
+        if not isinstance(summary["classification"], str) or summary["classification"] not in {
+            "UNCLASSIFIED",
+            "INVALID_EMPTY_RESULT",
+            "NO_NEW_ENTRIES_NO_CURSOR",
+            "NO_NEW_ENTRIES_EQUAL_CURSOR",
+            "INVALID_EMPTY_CURSOR",
+            "INVALID_CURSOR_COUNT",
+            "NEW_ENTRIES",
+        }:
+            return False
+        matches = summary["fault_matches"]
+        if not isinstance(matches, list) or len(matches) > 16:
+            return False
+        for match in matches:
+            if (
+                not isinstance(match, dict)
+                or set(match) != {"category", "line_bytes", "line_sha256"}
+                or not isinstance(match["category"], str)
+                or match["category"] not in {"KERNEL_FAULT", "MEMORY", "PROCESS_FAULT"}
+                or not _is_nonnegative_integer(match["line_bytes"])
+                or not _is_sha256(match["line_sha256"])
+            ):
+                return False
+        return True
+    return type(summary["exact_anchor"]) is bool
+
+
+def _is_redacted_journal_diagnostics(diagnostics):
+    if not isinstance(diagnostics, dict):
+        return False
+    if not diagnostics:
+        return True
+    allowed = {
+        "collector",
+        "systemd_version",
+        "baseline_cursor_sha256",
+        "anchor_before",
+        "query",
+        "anchor_after",
+    }
+    if not set(diagnostics).issubset(allowed):
+        return False
+    if diagnostics.get("collector") != "flr0421-bounded-v1":
+        return False
+    version = diagnostics.get("systemd_version")
+    if not isinstance(version, str) or re.fullmatch(
+        r"systemd-[0-9]+(?:\.[0-9]+)*|UNKNOWN|TEST", version
+    ) is None:
+        return False
+    if "baseline_cursor_sha256" in diagnostics and not _is_sha256(
+        diagnostics["baseline_cursor_sha256"]
+    ):
+        return False
+    for key in ("anchor_before", "anchor_after"):
+        if key in diagnostics and not _is_redacted_journal_summary(
+            diagnostics[key], query=False
+        ):
+            return False
+    if "query" in diagnostics and not _is_redacted_journal_summary(
+        diagnostics["query"], query=True
+    ):
+        return False
+    return any(key in diagnostics for key in ("anchor_before", "query", "anchor_after"))
+
+
 def guest_file_size_command(path):
-    if not path.startswith("/run/user/1001/flr0418-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0421-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     return "set -eu; test -f " + shlex.quote(path) + "; printf 'FLR0416_SIZE=%s\\n' \"$(wc -c < " + shlex.quote(path) + " | tr -d ' ')\""
 
 
 def guest_file_chunk_command(path, offset, size=GUEST_FETCH_CHUNK):
-    if not path.startswith("/run/user/1001/flr0418-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0421-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     if offset < 0 or size < 1 or size > GUEST_FETCH_CHUNK:
         raise ValueError("guest artifact chunk range is invalid")
@@ -1685,7 +1868,7 @@ class CaptureController:
             create_attempt_claim(self.run_dir, "controller")
         except Exception as error:
             reason = "already-claimed" if isinstance(error, FileExistsError) else type(error).__name__
-            print("FLR0418_CONTROLLER_CLAIM=FAIL reason=" + reason, file=sys.stderr)
+            print("FLR0421_CONTROLLER_CLAIM=FAIL reason=" + reason, file=sys.stderr)
             return 1
 
         result = {
@@ -1818,6 +2001,8 @@ def decode_guest_json(output, expected_event):
     matches = [line.strip()[len(marker) :] for line in output.splitlines() if line.strip().startswith(marker)]
     if len(matches) != 1:
         raise ValueError("guest JSON response must contain exactly one record")
+    if matches[0].startswith("FAIL "):
+        raise _decode_guest_snapshot_failure(matches[0])
     try:
         record = json.loads(base64.b64decode(matches[0].encode("ascii"), validate=True).decode("utf-8"))
     except (UnicodeEncodeError, binascii.Error, UnicodeDecodeError, json.JSONDecodeError) as error:
@@ -1830,7 +2015,7 @@ def decode_guest_json(output, expected_event):
 def guest_file_command(path, name):
     if not name or re.fullmatch(r"[A-Za-z0-9_.-]+", name) is None:
         raise ValueError("guest artifact name is invalid")
-    if not path.startswith("/run/user/1001/flr0418-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0421-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     quoted = shlex.quote(path)
     return (
@@ -2239,9 +2424,9 @@ def main(argv=None):
             create_attempt_claim(args.run_dir, args.claim_only)
         except Exception as error:
             reason = "already-claimed" if isinstance(error, FileExistsError) else type(error).__name__
-            print("FLR0418_START_CLAIM=FAIL reason=" + reason, file=sys.stderr)
+            print("FLR0421_START_CLAIM=FAIL reason=" + reason, file=sys.stderr)
             return 1
-        print("FLR0418_START_CLAIM=PASS run_id=" + RUN_ID)
+        print("FLR0421_START_CLAIM=PASS run_id=" + RUN_ID)
         return 0
     if args.qmp is None:
         parser.error("--qmp is required for capture mode")

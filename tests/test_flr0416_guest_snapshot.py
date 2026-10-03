@@ -1,6 +1,10 @@
 import importlib.util
+import contextlib
+import io
+import json
 from types import SimpleNamespace
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 
@@ -30,13 +34,12 @@ class FLR0416GuestSnapshotTests(unittest.TestCase):
                 stderr="",
             )
 
-        text, cursor, observation = MODULE._run_journal(
-            after_cursor="opaque=cursor-0", runner=runner
-        )
+        result = MODULE._run_journal(after_cursor="opaque=cursor-0", runner=runner)
 
-        self.assertEqual("new kernel record", text)
-        self.assertEqual("opaque=cursor-1", cursor)
-        self.assertEqual("NEW_ENTRIES", observation)
+        self.assertEqual(0, result.fault_count)
+        self.assertEqual("opaque=cursor-1", result.cursor)
+        self.assertEqual("NEW_ENTRIES", result.observation)
+        self.assertFalse(result.diagnostics["query"]["cursor_equal_anchor"])
         self.assertIn(
             "--after-cursor=opaque=cursor-0", observed["calls"][1][0]
         )
@@ -63,16 +66,17 @@ class FLR0416GuestSnapshotTests(unittest.TestCase):
                 returncode=0, stdout="-- No entries --\n", stderr=""
             )
 
-        text, cursor, observation = MODULE._run_journal(
-            after_cursor="opaque=valid-anchor", runner=runner
+        result = MODULE._run_journal(after_cursor="opaque=valid-anchor", runner=runner)
+        self.assertEqual("opaque=valid-anchor", result.cursor)
+        self.assertEqual("NO_NEW_ENTRIES", result.observation)
+        self.assertEqual(
+            "NO_NEW_ENTRIES_NO_CURSOR",
+            result.diagnostics["query"]["classification"],
         )
-        self.assertEqual("", text)
-        self.assertEqual("opaque=valid-anchor", cursor)
-        self.assertEqual("NO_NEW_ENTRIES", observation)
 
     def test_kernel_journal_does_not_accept_empty_output_without_valid_anchor(self):
         result = SimpleNamespace(returncode=0, stdout="-- No entries --\n", stderr="")
-        with self.assertRaisesRegex(MODULE.SnapshotError, "cursor is missing"):
+        with self.assertRaisesRegex(MODULE.SnapshotError, "not exact"):
             MODULE._run_journal(runner=lambda *args, **kwargs: result)
 
     def test_kernel_journal_rejects_seek_that_resolves_to_nearest_cursor(self):
@@ -85,7 +89,7 @@ class FLR0416GuestSnapshotTests(unittest.TestCase):
                 )
             self.fail("must not query after an unresolved cursor")
 
-        with self.assertRaisesRegex(MODULE.SnapshotError, "different entry"):
+        with self.assertRaisesRegex(MODULE.SnapshotError, "resolve exactly"):
             MODULE._run_journal(after_cursor="opaque=missing", runner=runner)
 
     def test_kernel_journal_rejects_anchor_rotated_during_incremental_read(self):
@@ -105,7 +109,7 @@ class FLR0416GuestSnapshotTests(unittest.TestCase):
                 returncode=0, stdout="-- No entries --\n", stderr=""
             )
 
-        with self.assertRaisesRegex(MODULE.SnapshotError, "different entry"):
+        with self.assertRaisesRegex(MODULE.SnapshotError, "resolve exactly"):
             MODULE._run_journal(after_cursor="opaque=old", runner=runner)
         self.assertEqual(3, calls)
 
@@ -123,8 +127,197 @@ class FLR0416GuestSnapshotTests(unittest.TestCase):
                 stderr="",
             )
 
-        with self.assertRaisesRegex(MODULE.SnapshotError, "conflicts"):
+        with self.assertRaisesRegex(MODULE.SnapshotError, "did not equal"):
             MODULE._run_journal(after_cursor="opaque=old", runner=runner)
+
+    def test_kernel_journal_accepts_empty_marker_with_exact_anchor_cursor(self):
+        def runner(command, **kwargs):
+            if any(arg.startswith("--cursor=") for arg in command):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout="anchor record\n-- cursor: opaque=old\n",
+                    stderr="",
+                )
+            return SimpleNamespace(
+                returncode=0,
+                stdout="-- No entries --\n-- cursor: opaque=old\n",
+                stderr="",
+            )
+
+        result = MODULE._run_journal(after_cursor="opaque=old", runner=runner)
+
+        self.assertEqual("opaque=old", result.cursor)
+        self.assertEqual("NO_NEW_ENTRIES", result.observation)
+        self.assertTrue(result.diagnostics["query"]["cursor_equal_anchor"])
+        self.assertTrue(result.diagnostics["anchor_before"]["exact_anchor"])
+        self.assertTrue(result.diagnostics["anchor_after"]["exact_anchor"])
+
+    def test_kernel_journal_rejects_empty_marker_with_extra_output(self):
+        def runner(command, **kwargs):
+            if any(arg.startswith("--cursor=") for arg in command):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout="anchor record\n-- cursor: opaque=old\n",
+                    stderr="",
+                )
+            return SimpleNamespace(
+                returncode=0,
+                stdout="-- No entries --\nunexpected line\n-- cursor: opaque=old\n",
+                stderr="",
+            )
+
+        with self.assertRaisesRegex(MODULE.SnapshotError, "not exact"):
+            MODULE._run_journal(after_cursor="opaque=old", runner=runner)
+
+    def test_kernel_journal_rejects_duplicate_cursor_in_empty_response(self):
+        def runner(command, **kwargs):
+            if any(arg.startswith("--cursor=") for arg in command):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout="anchor record\n-- cursor: opaque=old\n",
+                    stderr="",
+                )
+            return SimpleNamespace(
+                returncode=0,
+                stdout=(
+                    "-- No entries --\n"
+                    "-- cursor: opaque=old\n"
+                    "-- cursor: opaque=old\n"
+                ),
+                stderr="",
+            )
+
+        with self.assertRaisesRegex(MODULE.SnapshotError, "did not equal") as caught:
+            MODULE._run_journal(after_cursor="opaque=old", runner=runner)
+        marker = MODULE._failure_marker(caught.exception)
+        self.assertNotIn("opaque=old", marker)
+
+    def test_kernel_journal_rejects_query_stderr_and_nonzero_status(self):
+        def runner(command, **kwargs):
+            if any(arg.startswith("--cursor=") for arg in command):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout="anchor record\n-- cursor: opaque=old\n",
+                    stderr="",
+                )
+            return SimpleNamespace(
+                returncode=3,
+                stdout="-- No entries --\n-- cursor: opaque=old\n",
+                stderr="private stderr detail\n",
+            )
+
+        with self.assertRaisesRegex(MODULE.SnapshotError, "returned an error") as caught:
+            MODULE._run_journal(after_cursor="opaque=old", runner=runner)
+        marker = MODULE._failure_marker(caught.exception)
+        self.assertNotIn("private stderr detail", marker)
+        self.assertNotIn("opaque=old", marker)
+
+    def test_failure_marker_and_emitted_baseline_do_not_expose_cursor(self):
+        cursor = "opaque=secret"
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            MODULE._emit({"event": "KERNEL_BASELINE", "journal_cursor": cursor})
+        encoded = output.getvalue().strip().split("=", 1)[1]
+        public = json.loads(MODULE.base64.b64decode(encoded).decode("utf-8"))
+        self.assertNotIn(cursor, json.dumps(public))
+        self.assertEqual(
+            MODULE.hashlib.sha256(cursor.encode("ascii")).hexdigest(),
+            public["journal_cursor_sha256"],
+        )
+
+    def test_journalctl_version_is_reduced_to_numeric_systemd_version(self):
+        result = MODULE._journalctl_version(
+            runner=lambda *args, **kwargs: SimpleNamespace(
+                returncode=0,
+                stdout="systemd 255 (255.4-1)\nPAM\n",
+                stderr="",
+            )
+        )
+        self.assertEqual("systemd-255", result)
+
+    def test_bounded_collector_drains_both_pipes_concurrently(self):
+        code = (
+            "import os\n"
+            "for _ in range(80):\n"
+            " os.write(1, b'x'*1023 + b'\\n')\n"
+            " os.write(2, b'y'*1023 + b'\\n')\n"
+        )
+        result = MODULE._collect_bounded_command(
+            [sys.executable, "-c", code],
+            timeout=5,
+            max_output_bytes=256 * 1024,
+            max_line_bytes=4096,
+        )
+
+        self.assertTrue(result.complete)
+        self.assertTrue(result.reaped)
+        self.assertEqual(80 * 1024, result.stdout_bytes)
+        self.assertEqual(80 * 1024, result.stderr_bytes)
+        self.assertFalse(result.stderr_empty)
+
+    def test_bounded_collector_stops_and_reaps_on_total_byte_limit(self):
+        code = "import os\nwhile True: os.write(1, b'x'*4095 + b'\\n')\n"
+        result = MODULE._collect_bounded_command(
+            [sys.executable, "-c", code],
+            timeout=5,
+            max_output_bytes=4096,
+            max_line_bytes=8192,
+        )
+
+        self.assertTrue(result.oversized)
+        self.assertTrue(result.truncated)
+        self.assertFalse(result.complete)
+        self.assertTrue(result.reaped)
+        self.assertLessEqual(result.total_bytes_seen, 4097)
+
+    def test_bounded_collector_stops_and_reaps_on_line_state_limit(self):
+        code = "import os\nos.write(1, b'x'*100 + b'\\n')\n"
+        result = MODULE._collect_bounded_command(
+            [sys.executable, "-c", code],
+            timeout=5,
+            max_output_bytes=1024,
+            max_line_bytes=32,
+        )
+
+        self.assertTrue(result.line_overflow)
+        self.assertTrue(result.truncated)
+        self.assertFalse(result.complete)
+        self.assertTrue(result.reaped)
+
+    def test_bounded_collector_times_out_and_reaps(self):
+        result = MODULE._collect_bounded_command(
+            [sys.executable, "-c", "import time; time.sleep(5)"],
+            timeout=0.1,
+            max_output_bytes=1024,
+            max_line_bytes=128,
+        )
+
+        self.assertTrue(result.timed_out)
+        self.assertTrue(result.truncated)
+        self.assertFalse(result.complete)
+        self.assertTrue(result.reaped)
+
+    def test_cursor_diagnostics_never_contain_raw_cursor_or_kernel_line(self):
+        def runner(command, **kwargs):
+            if any(arg.startswith("--cursor=") for arg in command):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout="private kernel detail\n-- cursor: opaque=secret\n",
+                    stderr="",
+                )
+            return SimpleNamespace(
+                returncode=0,
+                stdout="-- No entries --\n-- cursor: opaque=secret\n",
+                stderr="",
+            )
+
+        result = MODULE._run_journal(after_cursor="opaque=secret", runner=runner)
+        serialized = json.dumps(result.diagnostics, sort_keys=True)
+
+        self.assertEqual("NO_NEW_ENTRIES", result.observation)
+        self.assertIn('"cursor_equal_anchor": true', serialized)
+        self.assertNotIn("opaque=secret", serialized)
+        self.assertNotIn("private kernel detail", serialized)
 
     def test_present_counts_distinguish_begin_return_and_success(self):
         counts = MODULE.parse_present_counts(
@@ -143,9 +336,10 @@ class FLR0416GuestSnapshotTests(unittest.TestCase):
         )
 
         self.assertEqual(2, count)
-        self.assertIn("BUG: unable to handle page fault", matches)
-        self.assertIn("Killed process 7", matches)
-        self.assertNotIn("normal boot", matches)
+        self.assertEqual(["KERNEL_FAULT", "MEMORY"], [item["category"] for item in matches])
+        self.assertTrue(all("line_sha256" in item for item in matches))
+        self.assertNotIn("BUG: unable to handle page fault", json.dumps(matches))
+        self.assertNotIn("Killed process 7", json.dumps(matches))
 
     def test_proc_identity_uses_starttime_after_parenthesized_comm(self):
         with tempfile.TemporaryDirectory() as directory:
