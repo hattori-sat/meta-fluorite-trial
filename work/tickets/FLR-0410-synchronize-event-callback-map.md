@@ -112,6 +112,11 @@ that production Sequoia/HUD acceptance is complete.
 - [x] A source commit is created first; official Devtool `update-recipe` then
   produces one patch whose `From` header matches that source commit. The patch
   is copied byte-identically and registered once under `meta-fluorite-trial`.
+- [x] Canonical layer delta, ticket, dashboard, and working log are committed
+  locally as `d3da2090b17d`; nothing was pushed. The official patch is preserved
+  byte-for-byte. The outer repository's generic `git show --check` reports four
+  single-space unified-diff context lines inside that generated patch; source
+  commit whitespace validation passes and Mini `do_patch` remains authoritative.
 - [ ] The canonical repository/privacy/recipe gates pass; the authorized layer
   baseline lock is refreshed only by the standard helper if the tracked layer
   changes. Do not create or track an `index.local` file.
@@ -168,6 +173,9 @@ that production Sequoia/HUD acceptance is complete.
   the map synchronization policy on top of baseline `c9ffc87`.
 - Official Devtool `update-recipe` generated patch 0335, which is byte-identical
   to its registered layer copy and changes only `filament_view_plugin.cc`.
+- The layer delta, patch, bbappend registration, authorized baseline lock,
+  FLR-0410/0411 records, and dashboard were committed locally in
+  `d3da2090b17d` with no push.
 - The effective Mini build-layer checkout was distinguished from the separate
   staging repository. No Mini-side write, BitBake task, or QEMU run has yet
   occurred.
@@ -175,7 +183,14 @@ that production Sequoia/HUD acceptance is complete.
 ### Check
 
 - Source diff/status, callback-map audit, official Devtool generation,
-  byte-identical copy, unique registration, and `git diff --check`: PASS.
+  byte-identical copy, unique registration, and source-commit whitespace check:
+  PASS.
+- Canonical local commit: `d3da2090b17d`, no push; working tree clean at commit
+  time. `git show --check` reports four trailing-whitespace notices on
+  single-space context lines in the generated unified patch. The patch is an
+  official Devtool artifact and is not hand-edited; the scoped canonical check
+  excluding that patch and the Devtool source check pass. `git apply --stat`
+  parses the patch successfully. Mini `do_patch` is still pending.
 - Mini `do_patch`, compile, image, and QMP runtime: pending. Do not use the
   FLR-0408 post-exit black state or missing frame as a rendering verdict.
 
