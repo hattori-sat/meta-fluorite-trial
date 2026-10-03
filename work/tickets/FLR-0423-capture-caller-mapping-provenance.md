@@ -4,12 +4,13 @@
 - Priority: High
 - Created: 2026-10-04
 - Owner: Runtime capture harness / guest GDB observer / bounded evidence
-- Depends on: [FLR-0421](FLR-0421-preserve-journal-cursor-evidence.md)
+- Depends on: [FLR-0421](FLR-0421-preserve-journal-cursor-evidence.md), [FLR-0424](FLR-0424-reconcile-feature-pr-baseline.md)
 - Evidence: [FLR-0421-0001](../evidence/FLR-0421-0001.md)
 - Candidate: unchanged [FLR-0410-0001](../evidence/FLR-0410-0001.md)
-- Branch: create from `dev-flr-0421-runtime-evidence` only after FLR-0421 is
-  integrated through the repository PR workflow; do not cherry-pick or push as
-  part of this Inbox ticket.
+- Branch: create from the exact verified milestone `dev` only after FLR-0421
+  has a safe PR path and is integrated. FLR-0424 owns the current baseline
+  provenance gate; do not activate this ticket or publish its branch before
+  that gate is resolved.
 - Planned fresh run ID: `flr0423-0001` (do not create its evidence directory or
   activate this ticket before the branch prerequisite is met)
 
@@ -76,8 +77,8 @@ single most informative next check. Do not substitute load-time mappings.
 
 ## Next action
 
-Keep this ticket in Inbox until FLR-0421 has a valid path into the milestone
-`dev` branch. Once ready, create its feature branch from that `dev`, write the
-execution plan, and begin with a failing unit test for the currently
-unexplained caller-map rejection. Never weaken the release gate to obtain a
-frame.
+Keep this ticket in Inbox until FLR-0424 establishes the exact safe milestone
+baseline and FLR-0421 is integrated through the approved PR workflow. Once
+ready, create its feature branch from that verified `dev`, write the execution
+plan, and begin with a failing unit test for the currently unexplained
+caller-map rejection. Never weaken the release gate to obtain a frame.

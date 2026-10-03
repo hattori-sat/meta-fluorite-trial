@@ -355,3 +355,40 @@ success measure was not met, and the overall product goal remains open.
   QMP capture did not occur because the caller-map gate failed closed. Keep this
   ticket In Progress; do not infer product rendering acceptance from snapshot,
   GDB hit, or harness success. FLR-0423 is the separate next issue.
+
+## Repository/PR integration gate — 2026-10-04
+
+### Facts
+
+- The worktree is clean at `216e5f1`. Fresh local checks passed: privacy,
+  runtime checkpoint (`active=1`), file size, and runtime-log slice.
+- Remote refs are `origin/main` at `5770cec`, `origin/dev-foundation` at
+  `aaa3671`, and `origin/dev-fluorite-demo` at `3616e71`. The local intended
+  milestone `dev-flr-0421-runtime-evidence` is at `1fb42ee`; its reflog says
+  `branch: Created from HEAD` at the FLR-0418 feature tip.
+- `origin/main` is an ancestor of the local milestone, which is 155 commits
+  ahead. The feature is 3 commits ahead of that local milestone (24 files,
+  +2,652/−236), but diverges from `origin/dev-fluorite-demo` (158 local-only,
+  14 remote-only; three-dot diff 2,080 files, +217,421/−316).
+- An escalated `git push --dry-run` reported a new branch would be created; it
+  made no remote change. No push, PR, merge, cherry-pick, or branch rewrite was
+  performed. Fetching the observed remote heads only added local
+  remote-tracking refs; the worktree stayed clean.
+
+### Inference and decision
+
+- The local target isolates this ticket's commit range but does not prove that
+  its 155-commit milestone snapshot was integrated under the required branch
+  workflow. Existing remote `dev` branches would pull in extensive history.
+- GPT-6.1 Sol's read-only review found no safe existing remote base for a
+  ticket-scoped PR and recommended a reviewed baseline-recovery disposition.
+- Keep FLR-0421 open and its single runtime ID consumed. Do not publish or merge
+  this branch until [FLR-0424](FLR-0424-reconcile-feature-pr-baseline.md)
+  resolves the baseline provenance. FLR-0423 remains Inbox behind that gate.
+
+### UNKNOWN
+
+- Whether the local milestone's 155 commits form the approved FLR-0421 milestone
+  dependency set, or include unrelated/unreviewed feature work.
+- The policy-compliant way to publish the milestone without broadening a
+  ticket-scoped PR or rewriting protected history.
