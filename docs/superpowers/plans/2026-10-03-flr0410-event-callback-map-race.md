@@ -57,11 +57,11 @@
 - Read: `scripts/run-podman-devtool.sh`, `scripts/rebase-fluorite-devtool-component.sh`
 - Read-only checks: `scripts/assert-canonical-repository.sh`, `TASKS.md`, fixed Podman labels/status, fixed Mini receiver/build identity, exact recipe patch stack
 
-- [ ] Run the canonical guard and inspect the sole In Progress ticket, feature branch, clean worktree, privacy check, and applicable source/recipe instructions.
-- [ ] Check the existing Podman machine/container IDs and mount labels; call the documented Podman wrapper status twice and read `devtool status`. Do not directly `podman exec` or `docker exec`.
-- [ ] Confirm the Devtool component workspace is the single `fluorite-plugins` registration at its existing source path, based on all active recipe patches including 0334. Record its baseline commit and source commit before editing.
-- [ ] Confirm no `bitbake`, `runqemu`, `qemu-system-x86_64`, or `flutter-auto` owner is active on the Mini, and that the fixed receiver and `BUILD_DIR`/`TMPDIR` match the environment record. Do not change branch or clean build state.
-- [ ] If any shared source/build/runtime owner or identity is ambiguous, keep the source untouched and investigate only independent read-only evidence.
+- [x] Canonical guard, sole active ticket, feature branch, privacy gate, and applicable source/recipe instructions confirmed.
+- [x] Existing Podman machine/container and mount labels confirmed; two wrapper `status` calls and one `devtool-status` passed through the documented wrapper. Direct wrapper calls inside the restricted sandbox were denied access to the existing socket; no machine/container was started or recreated.
+- [x] Exactly one `fluorite-plugins` registration uses the existing Devtool source tree. Baseline `c9ffc87` contains 0334; source HEAD before the change was `c9ffc87`.
+- [x] Mini's active build layer and staging receiver were distinguished from current `BBLAYERS`, history, independent Git dirs, and process state. Historical records identify the configured checkout as the active build layer. It is the run-local `BUILD_RECEIVER`; the staging repository remains untouched. The handoff helper's effective `TOPDIR`/`TMPDIR` query remains a mandatory pre-update gate.
+- [x] No Mini `bitbake`, `runqemu`, QEMU, or `flutter-auto` owner was active at the read-only check. Recheck immediately before handoff and build.
 
 ## Task 3: Make the minimal Devtool source change
 
@@ -100,11 +100,11 @@ Protect insertion with the same `eventCallbacksMutex`:
 }
 ```
 
-- [ ] Confirm whether `<mutex>` is already included; add only that include if it is not.
-- [ ] Implement the helper in the existing plugin namespace and route success, error, not-implemented, and `ret_*` completion through it. The `ret_*` handler returns success only when the helper returns true.
-- [ ] Do not hold the mutex during `InvokeMethod`, promise fulfilment, or `future.wait()`.
-- [ ] Enumerate every `_eventCallbacks` use in the active source, including declaration/definition. Verify every read/write is now inside the locked insertion or helper; do not change `_eventIdCounter` unless a second writer is evidenced.
-- [ ] Run the source Git diff/status checks through the fixed Podman wrapper. Confirm exactly the intended source path is dirty, then `git add .`/commit in the Devtool source repository using the documented Fluorite Devtool identity.
+- [x] `<mutex>` was not directly included; the source now includes it explicitly.
+- [x] Implemented one take/erase-under-lock helper and routed success, error, not-implemented, and `ret_*` completion through it. The `ret_*` result is success only when the helper finds the event.
+- [x] The mutex is not held during `InvokeMethod`, `promise->set_value()`, or `future.wait()`.
+- [x] Enumerated all map references across the component: only the locked insertion and locked helper read/erase the map; remaining references are declaration/definition. `_eventIdCounter` has one `CallEvent` writer/call path and is unchanged.
+- [x] Wrapper diff/status checks found exactly one source path. Devtool source commit `0290b78ad139c9572b15b9e02f077421f3903b09` has parent `c9ffc87dee884af62099a18f95d7c72642997708` and changes only `filament_view_plugin.cc`.
 
 ## Task 4: Generate and register the deterministic patch
 
@@ -113,15 +113,15 @@ Protect insertion with the same `eventCallbacksMutex`:
 - Modify: `layers/meta-fluorite-trial/recipes-graphics/toyota/flutter-auto_2.0.bbappend`
 - The standard component helper may refresh `manifests/baseline-sources.lock` because the tracked layer tree changes; do not add an index lock.
 
-- [ ] Use the existing `scripts/rebase-fluorite-devtool-component.sh` path with the exact recorded baseline and committed source revision. This performs official `devtool update-recipe --mode patch --append --no-remove` for the split `fluorite-plugins` component.
-- [ ] Verify the generated patch `From` commit equals the Devtool source commit, patch changes only the intended source, copy is byte-identical, and bbappend registration is unique and uses `patchdir=ivi-homescreen-plugins`.
+- [x] Used the existing `scripts/rebase-fluorite-devtool-component.sh` path at baseline `c9ffc87` and source commit `0290b78`; it completed with `component-rebase=PASS` through official `devtool update-recipe --mode patch --append --no-remove`.
+- [x] Generated patch `From` is the exact source commit; it changes only `filament_view_plugin.cc`, matches the canonical copy byte-for-byte (SHA-256 `6687e42f40de7be69bd0276ec892da07951936c1f9cd13b1721ed33058dc9d6b`), and is registered once after 0334 with `patchdir=ivi-homescreen-plugins`.
 - [ ] Run the focused component/recipe patch gates and repository privacy/Markdown checks. Do not hand-edit generated patch text or repair a context failure by editing the patch.
 - [ ] Commit the canonical layer/ticket/log delta locally. Record hashes and branch/tip; do not push.
 
 ## Task 5: Transfer once and build on the fixed Mini environment
 
 - [ ] Reconfirm sole active ticket and no other Mini BitBake/build/QEMU owner immediately before handoff/build.
-- [ ] Use `scripts/handoff-fluorite-bundle.sh` once for the exact committed base/tip; verify bundle hash at the fixed inbox/receiver, bundle verification, and exact receiver tip.
+- [ ] Use `scripts/handoff-fluorite-bundle.sh` once for the exact committed base/tip; verify the fixed inbox, effective-BBLAYERS `BUILD_RECEIVER`, bundle hash, bundle verification, effective TOPDIR/TMPDIR, and exact receiver tip. Leave the distinct staging repository untouched.
 - [ ] Run Mini `flutter-auto:do_patch`, then `do_compile`, then the exact configured image build in the existing `BUILD_DIR`/`TMPDIR`. Preserve complete command exit codes/task counts while retaining only bounded failure excerpts in the committed log.
 - [ ] Do not rerun a failed task without the first actionable error and evidence-based correction; do not clean caches to force success.
 - [ ] Hash rootfs, kernel, qemuboot, and manifest. This becomes the runtime candidate identity; no pre-build or previous-rootfs screenshots count as this candidate's evidence.

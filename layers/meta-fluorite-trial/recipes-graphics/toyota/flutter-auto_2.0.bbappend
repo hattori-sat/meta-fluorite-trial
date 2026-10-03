@@ -236,3 +236,5 @@ SRC_URI:append = " file://0332-flr0385-sequoia-known-lit-material-devtool.patch;
 SRC_URI:append = " file://0333-flr0391-sequoia-constant-lit-material-devtool.patch;patchdir=ivi-homescreen-plugins"
 
 SRC_URI:append = " file://0334-flr0396-match-working-lit-material-interface-devtool.patch;patchdir=ivi-homescreen-plugins"
+
+SRC_URI:append = " file://0335-flr0410-synchronize-event-callback-map-devtool.patch;patchdir=ivi-homescreen-plugins"

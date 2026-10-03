@@ -1,0 +1,102 @@
+From 0290b78ad139c9572b15b9e02f077421f3903b09 Mon Sep 17 00:00:00 2001
+From: Fluorite Devtool <fluorite-devtool@example.invalid>
+Date: Sat, 3 Oct 2026 01:41:01 +0000
+Subject: [PATCH] fix(filament-view): synchronize event callback map
+
+---
+ plugins/filament_view/filament_view_plugin.cc | 50 +++++++++++--------
+ 1 file changed, 30 insertions(+), 20 deletions(-)
+
+diff --git a/plugins/filament_view/filament_view_plugin.cc b/plugins/filament_view/filament_view_plugin.cc
+index d857464..9624d9f 100644
+--- a/plugins/filament_view/filament_view_plugin.cc
++++ b/plugins/filament_view/filament_view_plugin.cc
+@@ -20,6 +20,7 @@
+ #include <atomic>
+ #include <chrono>
+ #include <cstdlib>
++#include <mutex>
+ #include <core/components/derived/camera.h>
+ #include <core/components/derived/transform.h>
+ #include <core/scene/serialization/scene_text_deserializer.h>
+@@ -187,6 +188,27 @@ void DeserializeDataAndSetupMessageChannels(
+   animationSystem->setupMessageChannels(registrar, "plugin.filament_view.animation_info");
+ }
+ 
++namespace {
++
++std::mutex eventCallbacksMutex;
++
++bool completeEventCallback(const int64_t eventId) {
++  std::shared_ptr<std::promise<void>> promise;
++  {
++    std::lock_guard<std::mutex> lock(eventCallbacksMutex);
++    auto it = FilamentViewPlugin::_eventCallbacks.find(eventId);
++    if (it == FilamentViewPlugin::_eventCallbacks.end()) {
++      return false;
++    }
++    promise = std::move(it->second);
++    FilamentViewPlugin::_eventCallbacks.erase(it);
++  }
++  promise->set_value();
++  return true;
++}
++
++}  // namespace
++
+ std::future<void> FilamentViewPlugin::CallEvent(
+   const std::string& eventName,
+   std::initializer_list<std::pair<const char*, flutter::EncodableValue>> data
+@@ -205,33 +227,24 @@ std::future<void> FilamentViewPlugin::CallEvent(
+   auto promise = std::make_shared<std::promise<void>>();
+   auto future = promise->get_future();
+ 
+-  FilamentViewPlugin::_eventCallbacks[eventId] = std::move(promise);
++  {
++    std::lock_guard<std::mutex> lock(eventCallbacksMutex);
++    FilamentViewPlugin::_eventCallbacks[eventId] = std::move(promise);
++  }
+ 
+   spdlog::trace("InvokeMethod: calling event {}", eventName);
+   auto retval = std::make_unique<flutter::MethodResultFunctions<flutter::EncodableValue>>(  //
+     [&, eventId](const auto* /*result*/) {
+       spdlog::trace("[EventBus] Event completed successfully");
+-      auto it = FilamentViewPlugin::_eventCallbacks.find(eventId);
+-      if (it != FilamentViewPlugin::_eventCallbacks.end()) {
+-        it->second->set_value();
+-        FilamentViewPlugin::_eventCallbacks.erase(it);
+-      }
++      completeEventCallback(eventId);
+     },
+     [&, eventId](const auto& error_code, const auto& error_message, const auto* /*result*/) {
+       spdlog::error("[EventBus] Event failed with error code {}: {}", error_code, error_message);
+-      auto it = FilamentViewPlugin::_eventCallbacks.find(eventId);
+-      if (it != FilamentViewPlugin::_eventCallbacks.end()) {
+-        it->second->set_value();
+-        FilamentViewPlugin::_eventCallbacks.erase(it);
+-      }
++      completeEventCallback(eventId);
+     },
+     [&, eventId]() {
+       spdlog::warn("[EventBus] Event was not implemented");
+-      auto it = FilamentViewPlugin::_eventCallbacks.find(eventId);
+-      if (it != FilamentViewPlugin::_eventCallbacks.end()) {
+-        it->second->set_value();
+-        FilamentViewPlugin::_eventCallbacks.erase(it);
+-      }
++      completeEventCallback(eventId);
+     }
+   );
+ 
+@@ -418,10 +431,7 @@ void FilamentViewPlugin::setupMessageChannels(flutter::PluginRegistrar* registra
+         int64_t eventId = std::get<int64_t>(*callArg);
+         spdlog::debug("[EventBus] Event ID: {}", eventId);
+         // Fetch promise and set value
+-        if (FilamentViewPlugin::_eventCallbacks.find(eventId)
+-            != FilamentViewPlugin::_eventCallbacks.end()) {
+-          FilamentViewPlugin::_eventCallbacks[eventId]->set_value();
+-          FilamentViewPlugin::_eventCallbacks.erase(eventId);
++        if (completeEventCallback(eventId)) {
+           result->Success();
+         } else {
+           spdlog::warn("[EventBus] Unhandled event ID: {}", eventId);

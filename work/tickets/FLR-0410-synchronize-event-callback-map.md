@@ -104,12 +104,12 @@ that production Sequoia/HUD acceptance is complete.
 
 ## Success criteria
 
-- [ ] The Devtool source baseline is the exact current recipe-applied
+- [x] The Devtool source baseline is the exact current recipe-applied
   `fluorite-plugins` history; no uncommitted pre-existing source changes are
   overwritten or reset.
-- [ ] A focused source audit finds one synchronization policy for every
+- [x] A focused source audit finds one synchronization policy for every
   `_eventCallbacks` access, and completion erases the event before waking ECS.
-- [ ] A source commit is created first; official Devtool `update-recipe` then
+- [x] A source commit is created first; official Devtool `update-recipe` then
   produces one patch whose `From` header matches that source commit. The patch
   is copied byte-identically and registered once under `meta-fluorite-trial`.
 - [ ] The canonical repository/privacy/recipe gates pass; the authorized layer
@@ -164,12 +164,20 @@ that production Sequoia/HUD acceptance is complete.
 
 ### Do
 
-- Pending. No FLR-0410 source or recipe change has yet been made.
+- Devtool source commit `0290b78ad139c9572b15b9e02f077421f3903b09` implements
+  the map synchronization policy on top of baseline `c9ffc87`.
+- Official Devtool `update-recipe` generated patch 0335, which is byte-identical
+  to its registered layer copy and changes only `filament_view_plugin.cc`.
+- The effective Mini build-layer checkout was distinguished from the separate
+  staging repository. No Mini-side write, BitBake task, or QEMU run has yet
+  occurred.
 
 ### Check
 
-- Pending. Do not use the FLR-0408 post-exit black state or missing frame as a
-  rendering verdict.
+- Source diff/status, callback-map audit, official Devtool generation,
+  byte-identical copy, unique registration, and `git diff --check`: PASS.
+- Mini `do_patch`, compile, image, and QMP runtime: pending. Do not use the
+  FLR-0408 post-exit black state or missing frame as a rendering verdict.
 
 ### UNKNOWN
 
