@@ -69,6 +69,13 @@ the reason, and do not silently change instrumentation or launch a second VM.
 3. Reuse only the exact `f8ed8f11…` candidate and established Mini `runqemu`
    QMP-first procedure, with one fresh run ID `flr0414-0001`, one QEMU, the
    ordinary Example Demo as UID 1001, and one shared guest-log destination.
+   Use the ticket-scoped, syntax-checked guest commands in
+   `work/commands/FLR-0414-guest-launch.cmd`,
+   `work/commands/FLR-0414-guest-gdb-prepare.cmd`,
+   `work/commands/FLR-0414-guest-hwbp.cmd`,
+   `work/commands/FLR-0414-guest-evidence-export.cmd`, and
+   `work/commands/FLR-0414-guest-stop.cmd`; pin the current committed QMP
+   helpers inside this run's evidence directory, not in the build receiver.
 4. Query the active accelerator using the QEMU monitor/QMP path. Bracket the
    app PID, UID, `/proc` start token, loaded libLLVM Build-ID/map, READY state,
    and present/fault counters.
