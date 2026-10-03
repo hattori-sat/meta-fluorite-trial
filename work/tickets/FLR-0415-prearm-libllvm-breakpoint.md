@@ -1,6 +1,6 @@
 # FLR-0415 — pre-arm the libLLVM hardware breakpoint before ordinary rendering
 
-- Status: In Progress
+- Status: Waiting
 - Priority: Critical
 - Created: 2026-10-03
 - Owner: guest GDB / UID-1001 Example Demo / Mini QEMU / QMP evidence
@@ -43,13 +43,47 @@ fails, preserve the exact failure and stop without restarting the guest.
 - **Fact:** read-only inspection of the exact FLR-0410 rootfs found
   `/usr/bin/gdb` (11,697,224 bytes), a `libpython3.12.so.1.0` dependency and
   matching runtime library, and embedded `catch load [REGEX]` support text.
-  This does not prove the guest GDB's `python` command works.
-- **Inference:** GDB-owned app startup plus a pre-run load catchpoint can close
-  the sequencing gap if the exact guest GDB supports the required commands.
-- **UNKNOWN:** guest GDB's Python support/dependencies and load-catchpoint
-  behavior; whether hardware insertion succeeds; whether the target address is
-  reached again; the preceding transfer; and primary cause across Fluorite,
-  LLVM, Mesa, QEMU/TCG, or guest kernel.
+- **Fact (FLR-0415-0001):** the unchanged FLR-0410 rootfs/kernel/qemuboot
+  passed the Mini preflight; guest GDB 14.2's Python command and load
+  catchpoint passed before the single UID-1001 Example Demo launch.
+- **Fact:** guest PID 776, UID 1001, start token 123232 loaded the expected
+  libLLVM Build-ID
+  `359c1108040bc6bc1af64bb639d0b25385858051`. PT_LOAD/live mapping and
+  load-bias arithmetic resolved VMA `0xb1d541` to
+  `0x7fffefb4d541`; GDB confirmed a hardware-assisted breakpoint there.
+- **Fact:** the breakpoint hit on `FEngine::loop` LWP 818 inside
+  `llvm::CmpInst::isOrdered()+1`. The GDB transcript contains RIP/R10/RSP/
+  EFLAGS/CS/SS, instruction bytes/disassembly, threads, and a bounded stack.
+  The caller return address `0x7fff89afc320` remains unsymbolized.
+- **Fact:** at least one Vulkan queue-present call returned `result=0`;
+  a second `FLR0026_VK_QUEUE_PRESENT_BEGIN` appears before the hit, with no
+  matching result line in the saved transcript. The bounded dmesg comparison
+  reported kernel fault baseline/current `0/0`.
+- **Fact:** the breakpoint command's Python hit-marker formatting raised
+  `TypeError: not all arguments converted during string formatting` after
+  the diagnostic register/stack commands. No `-hit` marker or
+  `FLR0415_RELEASE=TIMEOUT` line was recorded; the exact GDB/app exit path
+  after the sourced-command error is UNKNOWN.
+- **Fact:** QMP saved a full 1280×800 still and two eight-frame sequences.
+  All observed frame hashes were
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`,
+  visually uniform black. The guest/app/QMP capture times were not reliably
+  bracketed, so these pixels are not a product-render verdict.
+- **Fact:** read-only postflight SHA-256 checks after exact teardown matched
+  the same FLR-0410 kernel, rootfs, and qemuboot artifacts recorded before
+  startup; the diagnostic run did not mutate the candidate image.
+- **Inference:** GDB-owned startup closed the earlier sequencing gap for this
+  one run: the exact target instruction was reached with the verified
+  hardware breakpoint armed. That does not prove LLVM is defective or caused
+  the prior Oops.
+- **Inference:** a guest-side observer formatting defect interrupted the
+  planned first-hit hold. It is an instrumentation failure, not evidence of a
+  product crash or renderer root cause.
+- **UNKNOWN:** caller DSO/Build-ID and control flow for return address
+  `0x7fff89afc320`; the exact relationship between successful queue-present
+  calls and QMP pixels; whether any QMP still was captured while the inferior
+  was still alive; the reason the visible framebuffer was black; and primary
+  cause across Fluorite, LLVM, Mesa, QEMU/TCG, or guest kernel.
 
 ## Competing hypotheses
 
@@ -136,23 +170,23 @@ emulator root cause.
 
 ### Success criteria
 
-- [ ] Read-only preflight identifies the exact rootfs GDB binary/dependency
+- [x] Read-only preflight identifies the exact rootfs GDB binary/dependency
   evidence, target load-catchpoint facility, exact libLLVM Build-ID/PT_LOAD,
   and deterministic address calculation. Any remaining Python-command
   uncertainty is checked in the same QEMU, before app launch; a missing static
   prerequisite stops before QEMU.
-- [ ] One owner-free Mini QEMU run reuses the exact FLR-0410 rootfs, kernel,
+- [x] One owner-free Mini QEMU run reuses the exact FLR-0410 rootfs, kernel,
   qemuboot, ordinary UID-1001 environment, and Example Demo bundle; identity
   is recorded before and after.
-- [ ] GDB is the ordinary app's parent from launch. The target DSO load catch
+- [x] GDB is the ordinary app's parent from launch. The target DSO load catch
   is set before `run`; exact path/Build-ID and PT_LOAD/live mapping agree.
-- [ ] Hardware insertion at the computed `load_bias+0xb1d541` is directly
+- [x] Hardware insertion at the computed `load_bias+0xb1d541` is directly
   verified before continuing. No software breakpoint or plain unverified
   breakpoint is accepted.
 - [ ] First target hit or bounded failure is captured with exact registers,
   bytes, stack, thread, PID identity, same-run present/kernel evidence, and a
   full QMP still/video. First hit remains stopped after capture.
-- [ ] One-run cleanup passes for the exact app/GDB/QEMU identities, ports,
+- [x] One-run cleanup passes for the exact app/GDB/QEMU identities, ports,
   QMP socket, and candidate artifact hashes.
 - [ ] Facts/inferences/hypotheses/UNKNOWN and command results are recorded in
   this ticket/log/manifest; canonical, privacy, checkpoint, link, and diff
@@ -161,30 +195,96 @@ emulator root cause.
 ### Do
 
 - Read-only Mini rootfs inspection found the exact GDB binary, libpython
-  dependency/runtime library, and `catch load [REGEX]` support text. The exact
-  GDB version and active Python command are not statically established.
-- No FLR-0415 QEMU, app, build, source edit, cache action, or bundle transfer
-  has run. The bounded GDB smoke is planned at guest boot before the app starts,
-  within the same single QEMU run.
+  dependency/runtime library, and `catch load [REGEX]` support text. Fresh
+  Mini preflight rehashed the unchanged FLR-0410 rootfs/kernel/qemuboot and
+  found no runtime/build owner, reserved-port conflict, or consumed run ID.
+- One QEMU started from the exact candidate with 6144 MiB. The 16 transferred
+  command/helper files matched their local SHA-256 values. No BitBake, build,
+  source edit, cache action, bundle transfer, or image mutation occurred.
+- The first serial-exec invocation used relative command/output paths; the
+  harness rejected it before guest execution. The corrected absolute-path
+  invocation passed. Guest GDB 14.2 reported Python support, accepted the
+  `catch load` command, and passed the pre-app smoke. App and hardware
+  breakpoint were explicitly NOT STARTED/NOT ATTEMPTED at that gate.
+- The GDB script transferred through two aligned serial chunks and its guest
+  SHA-256 matched source: `d6e2153b9e5d4018a2004d5258ec0291900d7c51080ed0f2733504b31227859f`.
+- The first app launch guard returned `rc=1` because the guest install
+  sentinel contained the literal two characters `\n` after the expected hash.
+  It failed before recording the GDB/app identity. The sentinel formatter is
+  corrected locally; the same QEMU is retained and no second instance is
+  permitted. An updated guest check must prove no GDB/Flutter process before
+  retrying this not-yet-started app launch once.
+- Before Flutter launch, QMP captured the full 1280×800 frame and eight frames
+  0.5 seconds apart. All 1,024,000 pixels were exact black and all eight
+  samples had one hash (`d4e96a65…`). This is a pre-app/boot-state screenshot,
+  not evidence about Flutter or the product scene.
+- The corrected finalizer/status/launch command files were committed locally
+  as `d07607e`, copied only into this existing run evidence directory, and
+  matched their local SHA-256 values. The no-process gate initially passed
+  while the old sentinel correctly failed; the fixed finalizer then returned
+  `FLR0415_GDB_INSTALL=PASS`, and the complete prelaunch gate returned
+  `FLR0415_PRELAUNCH=PASS_ready`.
+- The single GDB-owned app launch returned
+  `FLR0415_LAUNCH=PASS wrapper=758 gdb=763 uid=1001 kernel_fault_baseline=0`.
+  Guest status confirmed Build-ID/map agreement and
+  `Hardware assisted breakpoint 2 at 0x7fffefb4d541`.
+- The bounded GDB log is 123,842 bytes. It records two Vulkan queue-present
+  begins and one earlier `result=0`, then the target hit and formatting
+  exception. Guest snapshot reports app identity EXITED and kernel
+  fault baseline/current `0/0`; do not attribute that exit to a kernel Oops.
+- The QMP observation still and eight frames had hash
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`.
+  The post-hit still and eight-frame sample were also uniform black with that
+  hash. Because guest and Mini capture timestamps were inconsistent and
+  process liveness was not bracketed around each capture, this does not prove
+  a live product frame was black.
+- Exact guest teardown reported `FLR0415_STOP=PASS exact_residual=none`.
+  QMP quit was accepted and reported `cleanup=PASS residual_targets=0
+  residual_qmp=0`. The recorded Mini runqemu/QEMU PIDs 3139225/3139252 and
+  their start ticks 292522835/292522842 were absent afterward; QMP socket and
+  ports 10940–10942 were clear. Postflight hashes matched kernel
+  `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`,
+  rootfs
+  `f8ed8f1194d13175fe91676fba24cdd8d564a69deb58d1bc0b7d91a87faeef08`, and
+  qemuboot
+  `3872b66339ac3601c701f1b54cab5630796ccf5f0f95ebc4e7077210e89d107f`.
+  Evidence remains on Mini; no image/build/cache data was transferred,
+  modified, or deleted.
 
 ### Check
 
 - Breakpoint capture is diagnostic only. A load catch, GDB stop, process
   liveness, or matching RIP is not product rendering success.
+- The GDB breakpoint itself reached the target and the required register,
+  instruction, stack, present, kernel, QMP, and teardown evidence was saved.
+  The hit-marker Python exception means the first hit was not held through the
+  planned explicit-release gate; criterion 5 remains incomplete.
+- QMP evidence is visually black, but capture-time/process-state/present
+  correlation is UNKNOWN. The prior GDB exception and later process exit do not
+  establish a product-render failure or kernel Oops.
+- Static closeout checks: canonical repository PASS, privacy PASS, and
+  `git diff --check` PASS. Markdown link check reports the same 11 historical
+  missing targets outside this ticket; no FLR-0415 link is among them. The
+  ticket checkpoint is deferred until the successor is the sole In Progress
+  item.
 - Product gates remain: original Sequoia texture/material/light, same-frame
   HUD+Sequoia, view/depth/occlusion, input/repaint stability, five minutes of
   advancing present, and two independent boots on the same final image.
 
 ### Act
 
-- If a hit is captured, use its same-run stack/register/map evidence to select
-  one next process boundary; do not patch a layer based on address correlation
-  alone. A breakpoint hit does not guarantee reconstruction of the preceding
-  control transfer.
+- The one FLR-0415 application launch is spent. Do not relaunch in this ticket.
+  Keep this ticket Waiting for FLR-0416, which owns correction and offline
+  validation of hit-marker construction plus a new bounded capture unit.
+- Do not patch a layer from the target address or black QMP pixels alone.
+  FLR-0416 must resolve the caller mapping and bracket captures with present,
+  process, and clock evidence before selecting a product boundary.
 - If static preflight fails, do not start QEMU. If the in-guest GDB smoke or
   insertion fails, do not launch/restart Flutter; save QMP evidence and stop
-  the same recorded QEMU safely. Do not retry with ordinary startup, another
-  debugger mechanism, or a second VM under the same ticket.
+  the same recorded QEMU safely. A pre-inferior script/hash guard error may be
+  corrected once after recording the cause, but must reuse the same QEMU and
+  re-prove that no GDB/Flutter process started. Do not use ordinary startup,
+  another debugger mechanism, or a second VM under this ticket.
 - Only evidence that points to a controllable product boundary may justify a
   minimal Devtool source change. The overall product goal remains open.
 
