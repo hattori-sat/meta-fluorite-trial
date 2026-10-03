@@ -40,6 +40,10 @@ fails, preserve the exact failure and stop without restarting the guest.
   `359c1108040bc6bc1af64bb639d0b25385858051`.
 - **Fact:** no GDB process or hardware breakpoint was started before that Oops.
   The later command only resolved the live map/address after the fault.
+- **Fact:** read-only inspection of the exact FLR-0410 rootfs found
+  `/usr/bin/gdb` (11,697,224 bytes), a `libpython3.12.so.1.0` dependency and
+  matching runtime library, and embedded `catch load [REGEX]` support text.
+  This does not prove the guest GDB's `python` command works.
 - **Inference:** GDB-owned app startup plus a pre-run load catchpoint can close
   the sequencing gap if the exact guest GDB supports the required commands.
 - **UNKNOWN:** guest GDB's Python support/dependencies and load-catchpoint
@@ -78,39 +82,44 @@ emulator root cause.
    record branch/revision and verify the inherited FLR-0410 candidate identity.
 2. Before QEMU, inspect the exact candidate rootfs read-only for GDB version and
    configure/build features, Python runtime/dependencies, load-catchpoint
-   command support, libLLVM Build-ID, and PT_LOAD layout. Validate the mapping
-   calculation against the recorded FLR-0414 map and static ELF facts. If a
-   prerequisite is absent or cannot be established without a boot, stop before
-   QEMU and record UNKNOWN precisely.
-3. Immediately before runtime, verify no Mini QEMU/runqemu/flutter-auto/
+   command support, libLLVM Build-ID, and PT_LOAD layout. Fail before QEMU if
+   the exact GDB or a required runtime dependency/catchpoint facility is
+   missing. Static strings do not prove that GDB's Python command is active.
+3. If static inspection leaves only runtime GDB/Python command support
+   uncertain, test `gdb --version`, a short `python import gdb` command, and
+   `help catch load` inside the **same single QEMU run**, before launching the
+   app. If the smoke test fails, capture the result, skip Flutter, and tear
+   down that same QEMU; never boot a second VM for the capability check.
+4. Immediately before runtime, verify no Mini QEMU/runqemu/flutter-auto/
    BitBake owner, used port/QMP socket, or conflicting evidence directory.
    Re-hash the exact rootfs/kernel/qemuboot inputs; do not build or transfer a
    bundle.
-4. Use one QMP-first Mini run and a fresh ID `flr0415-0001`. Start GDB as UID
+5. Use one QMP-first Mini run and a fresh ID `flr0415-0001`. Start GDB as UID
    1001 with the same ordinary environment and Example Demo bundle. Set the
    exact `catch load` before `run`; at the stop, verify the mapped path and
    Build-ID, calculate load bias from ELF PT_LOAD plus live map offset, and
    prove the target is inside the matching executable mapping.
-5. Insert exactly one hardware breakpoint at `load_bias + 0xb1d541`. Require
+6. Insert exactly one hardware breakpoint at `load_bias + 0xb1d541`. Require
    positive insertion evidence and fail closed on any software-breakpoint
    substitution or insertion error. Continue once. On the first hit, save
    `RIP/R10/RSP/EFLAGS/CS/SS`, instruction bytes/disassembly, a bounded stack,
    TID/LWP, PID/UID/start token, present/kernel state, and complete QMP still
    plus short QMP-only video. Do not auto-continue after the hit.
-6. If the app Oopses/exits, the breakpoint misses, or a timeout occurs, save
+7. If the app Oopses/exits, the breakpoint misses, or a timeout occurs, save
    the exact first boundary and do not relaunch within this ticket. Stop only
    the recorded GDB/app/QEMU identities, send QMP `quit`, and verify processes,
    ports, sockets, and candidate hashes.
-7. Record evidence hashes and PDCA. Preserve product rendering goal as open;
+8. Record evidence hashes and PDCA. Preserve product rendering goal as open;
    create a new ticket only if the captured boundary identifies a distinct
    next work unit.
 
 ### Success criteria
 
-- [ ] Read-only preflight identifies guest GDB version/features, Python support
-  and runtime dependency state, target load-catchpoint support, exact libLLVM
-  Build-ID/PT_LOAD, and a deterministic address calculation. No QEMU starts if
-  an essential prerequisite is UNKNOWN or FAIL.
+- [ ] Read-only preflight identifies the exact rootfs GDB binary/dependency
+  evidence, target load-catchpoint facility, exact libLLVM Build-ID/PT_LOAD,
+  and deterministic address calculation. Any remaining Python-command
+  uncertainty is checked in the same QEMU, before app launch; a missing static
+  prerequisite stops before QEMU.
 - [ ] One owner-free Mini QEMU run reuses the exact FLR-0410 rootfs, kernel,
   qemuboot, ordinary UID-1001 environment, and Example Demo bundle; identity
   is recorded before and after.
@@ -130,8 +139,12 @@ emulator root cause.
 
 ### Do
 
-- Read-only capability preflight is pending. No FLR-0415 Mini command, QEMU,
-  source edit, build, or artifact transfer has run.
+- Read-only Mini rootfs inspection found the exact GDB binary, libpython
+  dependency/runtime library, and `catch load [REGEX]` support text. The exact
+  GDB version and active Python command are not statically established.
+- No FLR-0415 QEMU, app, build, source edit, cache action, or bundle transfer
+  has run. The bounded GDB smoke is planned at guest boot before the app starts,
+  within the same single QEMU run.
 
 ### Check
 
@@ -147,9 +160,10 @@ emulator root cause.
   one next process boundary; do not patch a layer based on address correlation
   alone. A breakpoint hit does not guarantee reconstruction of the preceding
   control transfer.
-- If preflight or insertion fails, preserve exact command/output and stop this
-  run safely. Do not retry with ordinary startup, another debugger mechanism,
-  or a second VM under the same ticket.
+- If static preflight fails, do not start QEMU. If the in-guest GDB smoke or
+  insertion fails, do not launch/restart Flutter; save QMP evidence and stop
+  the same recorded QEMU safely. Do not retry with ordinary startup, another
+  debugger mechanism, or a second VM under the same ticket.
 - Only evidence that points to a controllable product boundary may justify a
   minimal Devtool source change. The overall product goal remains open.
 
