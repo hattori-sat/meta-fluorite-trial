@@ -409,10 +409,11 @@ success measure was not met, and the overall product goal remains open.
 - Full-range privacy checks passed at review tip for
   `origin/main..dev-flr-0421-runtime-evidence` and
   `dev-flr-0421-runtime-evidence..HEAD`. They must pass again after this update.
-- The subsequent escalated publication request was rejected by the host
-  approval gate because the earlier explicit `pushなし` instruction conflicts
-  with the later broad permission. A read-only remote check confirms both refs
-  are still absent. No PR or merge occurred; do not retry or bypass the gate.
+- The first escalated publication request was rejected while the earlier
+  explicit `pushなし` instruction was still in force. The user then explicitly
+  authorized the previously specified two refs and PR. The exact dev ref was
+  published at `1fb42ee107ea852f9c4709aedc2fda69234d5933`; the feature ref was
+  published at `94ab0ed1039018083f4680453f2f6b8706fc78ad`.
 - FLR-0424 records the completed baseline disposition. FLR-0421 remains In
   Progress because the required post-release QMP capture and product behavior
   are still UNKNOWN.
@@ -422,5 +423,6 @@ success measure was not met, and the overall product goal remains open.
 - Whether all 155 commits on the local milestone have been independently
   reviewed as a dependency set. Publication exposes that history for review but
   is not approval of its integration.
-- No remote branch or PR exists; PR review/integration and post-release
-  Sequoia/HUD runtime evidence remain outstanding.
+- Draft PR #7 is open from `feature-flr-0421-journal-cursor-evidence` to
+  `dev-flr-0421-runtime-evidence`. It has not been merged; PR review and
+  integration remain outstanding.
