@@ -48,7 +48,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
-| [FLR-0415](work/tickets/FLR-0415-prearm-libllvm-breakpoint.md) | pre-arm a verified hardware breakpoint on the exact candidate's `libLLVM+0xb1d541` before ordinary Example Demo rendering | Mini QEMU / UID-1001 app launched under guest GDB / one QMP+GDB evidence directory | In Progress: FLR-0414-0001 reproduced the Oops at the mapped VMA but did not start GDB before launch; QMP shows HUD and black 3D ROI, present 1/0/0. Sol recommends a pre-run load catchpoint plus exact Build-ID/PT_LOAD calculation and hardware insertion. Exact rootfs inspection found GDB, libpython3.12, and catch-load help strings; runtime Python support is still UNKNOWN. | Read-only exact-image checks passed for GDB/dependency/catchpoint presence. Fresh Mini ownership checks next; in one QEMU run, test guest GDB version/Python/load catchpoint before starting Flutter. If PASS, launch ordinary app under GDB and insert hbreak at the PT_LOAD+mapping-verified address; if FAIL, collect QMP and tear down without launching a second VM. |
+| [FLR-0415](work/tickets/FLR-0415-prearm-libllvm-breakpoint.md) | pre-arm a verified hardware breakpoint on the exact candidate's `libLLVM+0xb1d541` before ordinary Example Demo rendering | Mini QEMU / UID-1001 app launched under guest GDB / one QMP+GDB evidence directory | In Progress: FLR-0414-0001 reproduced the Oops at the mapped VMA but did not start GDB before launch; QMP shows HUD and black 3D ROI, present 1/0/0. Sol recommends a pre-run load catchpoint plus exact Build-ID/PT_LOAD calculation and hardware insertion. Exact rootfs inspection found GDB, libpython3.12, and catch-load help strings; runtime Python support remains UNKNOWN. | FLR-0415 command assets now validate shell syntax, the 4096-byte serial-command contract, embedded Python syntax, and exact GDB-script transfer hash. Next: fresh Mini preflight and artifact rehash; one 6144-MiB QEMU; GDB/Python/load-catch smoke before Flutter; then one GDB-owned ordinary launch only if smoke passes. |
 | [FLR-0409](work/tickets/FLR-0409-symbolize-flutter-auto-sigsegv.md) | locate exact Build-ID-matched symbols for the saved `flutter-auto` SIGSEGV and resolve its defensible caller boundary | Existing 0334 image/package/debug/link outputs and preserved Mini core; read-only | Done as a bounded investigation: exact Build-ID/load mapping and `CallEvent`→`DrawFrame` symbols found; source/thread review confirms the map race is reachable, but causality for the saved SIGSEGV is UNKNOWN. No build, QEMU, or source edit. | FLR-0410 applied the synchronization change and ran one new candidate; see its separate Waiting record. FLR-0408 pixels remain UNKNOWN. |
 | [FLR-0408](work/tickets/FLR-0408-replay-known-positive-sequoia-profile-on-0334.md) | replay FLR-0049's production Sequoia model-only profile on exact 0334 as a bounded Gate-A pixel discriminator | Mini QEMU / UID-1001 Example Demo / shared app log / QMP and kernel evidence | Waiting; visual result UNKNOWN. Launch PID 765/UID 1001/start 239895 passed; old scene gate returned `LOG_INVALID`; the 22:15Z snapshot had marker=0 and present `76/75/75`, kernel faults=0. App SIGSEGV at 22:35:52Z; delayed 22:46Z identity check failed, so no QMP still/video was captured. The preserved core proves an unmapped-pointer dereference in stripped `flutter-auto`; caller/origin UNKNOWN. Core/GDB hashes and exact 0334 identities are recorded; QMP teardown/ports passed. | Keep the 0049 replay's pixels UNKNOWN. FLR-0410 ran a distinct ordinary-profile candidate but faulted; FLR-0413 resolved the exact candidate instruction bytes; FLR-0414-0001 later showed HUD over black 3D with the Oops and is Waiting; FLR-0415 owns a pre-armed capture attempt. Do not interpret the missing 0408 frame as black or visible. |
 | [FLR-0405](work/tickets/FLR-0405-capture-first-fengine-fault-present-order.md) | correlate the first ordinary-profile FEngine fault with the unmatched present before the faulting LWP disappears | Mini QEMU / guest Example Demo+GDB / shared app log / QMP and kernel evidence | Waiting: FLR-0405-0003 ran exact 0334. Oops uptime 166.449 precedes the later unhealthy gate at 223.77, but present markers have no timestamps; event order and causality are UNKNOWN. The live identity-bracketed QMP frame is white/black polygon with no HUD or recognizable Sequoia; eight frames are identical. Late GDB missed TID 705. Teardown passed; raw Mini evidence retention is UNKNOWN. | Do not repeat the same ordinary-profile run. Revisit only if FLR-0408 shows the positive profile also fails; then capture the earliest fault in the minimal reproducible condition. |
@@ -351,20 +351,17 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 ## Next
 
-**Current next gate (2026-10-03):** FLR-0415 is active. Start with read-only
-capability checks against the unchanged FLR-0410 rootfs. Existing exact-image
-inspection found guest GDB, its `libpython3.12` dependency, and `catch load`
-help strings; a bounded in-guest GDB version/Python/load-catchpoint smoke must
-pass before Flutter launches, within the same single QEMU. If it passes and
-fresh Mini ownership checks are clean, run one ordinary UID-1001 Example Demo
-under GDB. Stop on the exact library load, calculate and validate load bias
-from PT_LOAD and live mapping, insert a hardware breakpoint at
-`load_bias+0xb1d541`, and capture the first hit or exact bounded failure with
-full QMP still/video and present/kernel state. If the smoke fails, do not start
-Flutter or a second VM. No build, bundle transfer, product edit,
-ordinary-launch fallback, or software breakpoint. Product material/lighting,
-same-frame HUD, interaction/repaint, five-minute present, and two-boot
-acceptance remain unmet.
+**Current next gate (2026-10-03):** FLR-0415 is active. Run the ticket-scoped
+Mini preflight against the unchanged FLR-0410 rootfs/kernel/qemuboot and confirm
+the sole run evidence directory, ports, and owners are clean. Start one
+6144-MiB QEMU, test guest GDB version/Python/load-catch support before Flutter,
+and save QMP evidence even if that smoke fails. Only on PASS launch the ordinary
+UID-1001 Example Demo as a GDB inferior, validate Build-ID/PT_LOAD/live map,
+insert `hbreak` at `load_bias+0xb1d541`, and capture the first hit or bounded
+stop with full QMP still/video and present/kernel state. Do not build, transfer
+a bundle, modify product source, use an ordinary-launch fallback, or start a
+second VM. Product material/lighting, same-frame HUD, interaction/repaint,
+five-minute present, and two-boot acceptance remain unmet.
 
 **Historical FLR-0370 next-gate rationale (2026-09-30):** Current-image controls form three cells: UNLIT+parameter is visible (FLR-0368), LIT/SUN+parameter is black (FLR-0367), and LIT/SUN+constant is visible (FLR-0369). Thus global color assignment failure was not supported; the remaining candidate was the LIT/SUN × dynamic-expression interaction. That comparison motivated FLR-0371 and remains its historical basis; it is not the current active-ticket status.
 

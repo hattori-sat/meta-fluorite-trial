@@ -113,6 +113,27 @@ emulator root cause.
    create a new ticket only if the captured boundary identifies a distinct
    next work unit.
 
+### Prepared execution assets
+
+- `work/commands/FLR-0415-qemu-start.sh` derives the exact run artifacts from
+  the saved FLR-0414 runqemu command, checks their recorded hashes and fixed
+  `qemux86-64` build context, then calls the committed QEMU harness. It uses
+  one new evidence directory, ports 10940–10942, and 6144 MiB.
+- `work/commands/FLR-0415-prearm-libllvm.gdb` performs the guest GDB-owned
+  launch. It reads only ELF headers/program headers/PT_NOTE, verifies Build-ID
+  and executable PT_LOAD against the live mapping, inserts one always-inserted
+  hardware breakpoint, records the first stop, and waits for explicit host
+  release without auto-continuing.
+- `work/commands/FLR-0415-guest-gdb-smoke.cmd` gates Flutter startup. The GDB
+  script is transferred through bounded, base64-aligned `serial-exec` chunks;
+  the guest verifies its SHA-256 before launch. Serial inputs are one physical
+  line and at most 4096 bytes.
+- Guest snapshot/status/export/release/stop commands are ticket-scoped and
+  identity checked. Full GDB output is transferred if bounded below the serial
+  transcript cap; oversized output falls back to a focused, recorded tail. The
+  QMP capture helper and QEMU harness are checksum-pinned before start. No
+  product source, image, cache, or build state is changed.
+
 ### Success criteria
 
 - [ ] Read-only preflight identifies the exact rootfs GDB binary/dependency

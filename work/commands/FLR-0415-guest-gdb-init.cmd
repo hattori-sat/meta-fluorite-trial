@@ -1,0 +1,1 @@
+( set -eu; r=/run/user/1001/flr0415-0001; grep -q 'FLR0415_GDB_SMOKE=PASS' "$r-smoke" || { echo FLR0415_GDB_INSTALL=FAIL_smoke-not-passed; exit 1; }; test ! -e "$r.gdb"; umask 077; : > "$r.gdb"; chown agl-driver:agl-driver "$r.gdb"; chmod 600 "$r.gdb"; echo FLR0415_GDB_INSTALL=READY; )

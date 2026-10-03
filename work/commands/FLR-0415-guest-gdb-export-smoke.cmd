@@ -1,0 +1,1 @@
+( set -eu; r=/run/user/1001/flr0415-0001; echo FLR0415_GDB_VERSION_BEGIN; cat "$r-gdb-version"; echo FLR0415_GDB_VERSION_END; echo FLR0415_GDB_SMOKE_BEGIN; cat "$r-smoke"; echo FLR0415_GDB_SMOKE_END; echo FLR0415_GDB_FILE_BEGIN; cat /run/user/1001/FLR0415_GDB_FILE_SENTINEL; sha256sum "$r.gdb"; echo FLR0415_GDB_FILE_END; )

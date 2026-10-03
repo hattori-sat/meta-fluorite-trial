@@ -1,0 +1,1 @@
+( set -eu; r=/run/user/1001/flr0415-0001; test -s "$r-hit" -o -s "$r-stop" -o -s "$r-failure" || { echo FLR0415_RELEASE=FAIL_no-captured-stop; exit 1; }; if [ ! -e "$r-release" ]; then su -s /bin/sh agl-driver -c "umask 077; printf '%s\\n' host-captured > '$r-release'"; fi; echo FLR0415_RELEASE=PASS; )
