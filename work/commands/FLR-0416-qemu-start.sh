@@ -9,13 +9,13 @@ repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)
 : "${BUILD_EVIDENCE:?BUILD_EVIDENCE-role-required}"
 [[ "$BUILD_EVIDENCE" = /* && -d "$BUILD_EVIDENCE" && ! -L "$BUILD_EVIDENCE" ]] || fail evidence-role-invalid
 
-run_parent=$BUILD_EVIDENCE/flr0418-0001
+run_parent=$BUILD_EVIDENCE/flr0421-0001
 run_dir=$run_parent/qemu
-qmp=$run_dir/qmp-0418.sock
+qmp=$run_dir/qmp-0421.sock
 if [ "$mode" = preflight ] || [ "$mode" = prepare ]; then
     { [ ! -e "$run_parent" ] && [ ! -L "$run_parent" ]; } || fail run-id-already-consumed
 fi
-if [ "$mode" = start ] && { [ -e "$run_dir/FLR0418-start-claim" ] || [ -L "$run_dir/FLR0418-start-claim" ]; }; then
+if [ "$mode" = start ] && { [ -e "$run_dir/FLR0421-start-claim" ] || [ -L "$run_dir/FLR0421-start-claim" ]; }; then
     fail start-attempt-already-claimed
 fi
 serial_port=10943
@@ -122,7 +122,7 @@ if [ "$mode" = prepare ]; then
         [ "$source_sha" = "$staged_sha" ] || fail "stage-copy-mismatch:${source##*/}"
         printf '%s  %s\n' "$source_sha" "${source##*/}" >> "$run_dir/FLR0416-staged-files.sha256"
     done
-    echo "FLR0416_STAGE=PASS run_id=flr0418-0001 files=${#stage_sources[@]}"
+    echo "FLR0416_STAGE=PASS run_id=flr0421-0001 files=${#stage_sources[@]}"
     exit 0
 fi
 

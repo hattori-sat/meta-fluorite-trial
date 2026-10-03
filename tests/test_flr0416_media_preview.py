@@ -161,13 +161,13 @@ class FLR0416MediaPreviewTests(unittest.TestCase):
         names = MODULE.allowed_media_names()
         self.assertIn(MODULE.CONTROLLER_FINAL, names)
         self.assertNotIn("FLR0416-controller-result.json", names)
-        self.assertIn("flr0418-0001-qmp-hit-frame-0007.ppm", names)
-        self.assertIn("flr0418-0001-qmp-post-frame-0000.ppm", names)
+        self.assertIn("flr0421-0001-qmp-hit-frame-0007.ppm", names)
+        self.assertIn("flr0421-0001-qmp-post-frame-0000.ppm", names)
         self.assertFalse(any("rootfs" in name or "kernel" in name or "log" in name for name in names))
         self.assertEqual(8, sum("qmp-hit-frame-" in name for name in names))
 
     def test_media_archive_hash_manifest_is_verified_and_unexpected_files_fail(self):
-        frame = "flr0418-0001-qmp-hit-frame-0000.ppm"
+        frame = "flr0421-0001-qmp-hit-frame-0000.ppm"
         payloads, manifest = MODULE.validate_media_archive(self._archive({frame: b"ppm"}))
         self.assertEqual(b"ppm", payloads[frame])
         self.assertEqual(hashlib.sha256(b"ppm").hexdigest(), manifest["files"][frame]["sha256"])
@@ -183,7 +183,7 @@ class FLR0416MediaPreviewTests(unittest.TestCase):
             )
         self.assertEqual(9, len(records))
         self.assertIsNotNone(bracket)
-        last = "flr0418-0001-qmp-hit-frame-0007.ppm"
+        last = "flr0421-0001-qmp-hit-frame-0007.ppm"
         files[last] = b"changed"
         with mock.patch.object(MODULE, "parse_p6_ppm", return_value=(1280, 800)):
             with self.assertRaisesRegex(ValueError, "metadata/hash mismatch"):
@@ -279,7 +279,7 @@ class FLR0416MediaPreviewTests(unittest.TestCase):
                     )
 
     def test_remote_archive_program_streams_only_exact_allowlisted_media(self):
-        frame = "flr0418-0001-qmp-hit-frame-0000.ppm"
+        frame = "flr0421-0001-qmp-hit-frame-0000.ppm"
         with tempfile.TemporaryDirectory() as directory:
             (Path(directory) / frame).write_bytes(b"verified frame")
             (Path(directory) / MODULE.CONTROLLER_FINAL).write_text(
@@ -319,7 +319,7 @@ class FLR0416MediaPreviewTests(unittest.TestCase):
 
     def test_preview_labels_playback_rate_as_nominal_not_realtime(self):
         files = self._capture_records("hit")
-        report = json.loads(files["flr0418-0001-qmp-hit-capture.json"])
+        report = json.loads(files["flr0421-0001-qmp-hit-capture.json"])
         still = report["still_and_frames"][0]
         files[still["name"] + ".capture.json"] = json.dumps(still).encode()
         with (

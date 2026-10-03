@@ -1,4 +1,5 @@
 import importlib.util
+import base64
 import hashlib
 import contextlib
 import io
@@ -16,6 +17,11 @@ SCRIPT = Path(__file__).parents[1] / "scripts/flr0416_live_capture.py"
 SPEC = importlib.util.spec_from_file_location("flr0416_live_capture", SCRIPT)
 assert SPEC is not None and SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)
+GUEST_SCRIPT = Path(__file__).parents[1] / "work/commands/flr0416_guest_snapshot.py"
+GUEST_SPEC = importlib.util.spec_from_file_location("flr0416_guest_snapshot", GUEST_SCRIPT)
+assert GUEST_SPEC is not None and GUEST_SPEC.loader is not None
+GUEST_MODULE = importlib.util.module_from_spec(GUEST_SPEC)
+GUEST_SPEC.loader.exec_module(GUEST_MODULE)
 
 
 class FLR0416LiveCaptureTests(unittest.TestCase):
@@ -27,8 +33,126 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             "gdb_process": {"pid": 301, "uid": 1001, "start_token": "401"},
         }
 
+    def _bounded_journal_failure(self, diagnostics=None, reason="journal_query_incomplete"):
+        if diagnostics is None:
+            anchor = {
+                "returncode": 0,
+                "complete": True,
+                "timed_out": False,
+                "oversized": False,
+                "line_overflow": False,
+                "truncated": False,
+                "reaped": True,
+                "collector_error": None,
+                "total_bytes_seen": 64,
+                "stdout_bytes": 64,
+                "stdout_sha256": "a" * 64,
+                "stderr_bytes": 0,
+                "stderr_sha256": "b" * 64,
+                "stderr_empty": True,
+                "stdout_line_count": 2,
+                "empty_marker_count": 0,
+                "empty_marker_line": None,
+                "cursor_count": 1,
+                "cursor_line": 1,
+                "cursor_malformed": False,
+                "cursor_sha256": "c" * 64,
+                "other_line_count": 1,
+                "fault_count": 0,
+                "cursor_equal_anchor": True,
+                "exact_anchor": True,
+            }
+            query = {key: value for key, value in anchor.items() if key != "exact_anchor"}
+            query.update(
+                classification="INVALID_EMPTY_CURSOR",
+                fault_matches=[],
+                cursor_equal_anchor=False,
+            )
+            diagnostics = {
+                "collector": "flr0421-bounded-v1",
+                "systemd_version": "systemd-255",
+                "baseline_cursor_sha256": "d" * 64,
+                "anchor_before": anchor,
+                "query": query,
+                "anchor_after": anchor,
+            }
+        return GUEST_MODULE._failure_marker(
+            GUEST_MODULE.SnapshotError(reason, diagnostics=diagnostics)
+        ) + "\n"
+
+    def test_snapshot_failure_decoder_preserves_only_allowlisted_redacted_diagnostics(self):
+        marker = self._bounded_journal_failure()
+        with self.assertRaises(ValueError) as caught:
+            MODULE.decode_guest_snapshot(marker)
+        message = str(caught.exception)
+        self.assertIn("reason=journal_query_incomplete", message)
+        self.assertIn("INVALID_EMPTY_CURSOR", message)
+        self.assertIn("cursor_equal_anchor", message)
+        self.assertIn("stdout_sha256", message)
+        self.assertNotIn("opaque=private-cursor", message)
+        self.assertNotIn("private kernel record", message)
+
+    def test_guest_json_failure_decoder_uses_the_same_redacted_allowlist(self):
+        marker = self._bounded_journal_failure()
+        with self.assertRaises(ValueError) as caught:
+            MODULE.decode_guest_json(marker, "KERNEL_BASELINE")
+        self.assertIn("INVALID_EMPTY_CURSOR", str(caught.exception))
+        self.assertNotIn("opaque=private-cursor", str(caught.exception))
+
+    def test_failure_decoder_rejects_unredacted_unknown_diagnostic_fields(self):
+        raw_cursor = "opaque=private-cursor"
+        marker = self._bounded_journal_failure(
+            {"raw_cursor": raw_cursor, "raw_line": "private kernel record"}
+        )
+        for decoder in (
+            MODULE.decode_guest_snapshot,
+            lambda output: MODULE.decode_guest_json(output, "KERNEL_BASELINE"),
+        ):
+            with self.subTest(decoder=decoder):
+                with self.assertRaisesRegex(ValueError, "invalid diagnostic shape") as caught:
+                    decoder(marker)
+                self.assertNotIn(raw_cursor, str(caught.exception))
+                self.assertNotIn("private kernel record", str(caught.exception))
+
+    def test_failure_decoder_rejects_unhashable_diagnostic_labels_without_echoing_values(self):
+        diagnostics = self._bounded_journal_failure()
+        raw_value = ["opaque=private-cursor"]
+        payload = json.loads(
+            base64.b64decode(diagnostics.split("diagnostics=", 1)[1].strip()).decode("utf-8")
+        )
+        payload["query"]["classification"] = raw_value
+        marker = self._bounded_journal_failure(payload)
+        with self.assertRaisesRegex(ValueError, "invalid diagnostic shape") as caught:
+            MODULE.decode_guest_snapshot(marker)
+        self.assertNotIn("opaque=private-cursor", str(caught.exception))
+
+    def test_failure_decoder_rejects_oversized_encoded_diagnostics_before_parsing(self):
+        marker = "FLR0416_GUEST_SNAPSHOT=FAIL reason=bounded_failure diagnostics=" + ("A" * 12001)
+        with self.assertRaisesRegex(ValueError, "malformed bounded diagnostics"):
+            MODULE.decode_guest_snapshot(marker)
+
+    def test_failure_decoder_does_not_echo_unrecognized_guest_reason_text(self):
+        marker = self._bounded_journal_failure(reason="opaque=private-cursor")
+        self.assertIn("FAIL reason=snapshot_failed ", marker)
+        with self.assertRaises(ValueError) as caught:
+            MODULE.decode_guest_snapshot(marker)
+        self.assertNotIn("private-cursor", str(caught.exception))
+        self.assertNotIn("opaque_private_cursor", str(caught.exception))
+
+    def test_failure_decoder_rejects_unrecognized_reason_in_raw_marker(self):
+        marker = self._bounded_journal_failure()
+        payload = marker.split(" diagnostics=", 1)[1].strip()
+        untrusted = (
+            "FLR0416_GUEST_SNAPSHOT=FAIL reason=opaque_private_cursor diagnostics="
+            + payload
+            + "\n"
+        )
+        with self.assertRaisesRegex(ValueError, "malformed bounded diagnostics") as caught:
+            MODULE.decode_guest_snapshot(untrusted)
+        self.assertNotIn("opaque_private_cursor", str(caught.exception))
+
     def _guest_files(self, stage):
-        prefix = "flr0418-0001-"
+        prefix = "flr0421-0001-"
         armed = {
             "guest_boot_id": self.identity["guest_boot_id"],
             "process": self.identity["process"],
@@ -55,7 +179,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         return files
 
     def _mini_files(self, stage):
-        prefix = "flr0418-0001-"
+        prefix = "flr0421-0001-"
         if stage == "load":
             names = [prefix + "load-bracket.json", prefix + "qmp-load-still.ppm"]
         else:
@@ -102,7 +226,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                     controller.marker_timeout_seconds = 1
                     controller._ack_deadline = None
                     controller._abort_deadline = None
-                    wrapper_marker = "__FLR_SERIAL_COMMAND_DONE_TEST_0418__"
+                    wrapper_marker = "__FLR_SERIAL_COMMAND_DONE_TEST_0421__"
                     transcripts = []
 
                     def run_serial_command(label, command, timeout_seconds=40, **kwargs):
@@ -529,7 +653,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             with mock.patch("shutil.which", return_value=None):
                 files = controller._capture_sequence("hit", 2)
 
-        report_name = "flr0418-0001-qmp-hit-capture.json"
+        report_name = "flr0421-0001-qmp-hit-capture.json"
         report = json.loads(files[report_name])
         self.assertEqual("PENDING_MAC_PREVIEW", report["video_status"])
         self.assertEqual(3, len(report["still_and_frames"]))
@@ -541,7 +665,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
         chunks = MODULE.payload_chunks(payload, max_chars=3000)
         commands = MODULE.payload_shell_commands(
-            "/run/user/1001/flr0418-0001/payload.bin", payload
+            "/run/user/1001/flr0421-0001/payload.bin", payload
         )
 
         encoded = "".join(chunks)
@@ -557,12 +681,12 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             )
             self.assertEqual(0, syntax.returncode, syntax.stderr)
         self.assertIn("set -C", commands[0])
-        self.assertNotIn("/run/user/1001/flr0418-0001/payload.bin", " ".join(commands[:-1]))
+        self.assertNotIn("/run/user/1001/flr0421-0001/payload.bin", " ".join(commands[:-1]))
         self.assertIn("os.link(tmp,dst)", commands[-1])
-        self.assertIn("/run/user/1001/flr0418-0001/payload.bin", commands[-1])
+        self.assertIn("/run/user/1001/flr0421-0001/payload.bin", commands[-1])
         with self.assertRaisesRegex(ValueError, "empty guest payload"):
             MODULE.payload_shell_commands(
-                "/run/user/1001/flr0418-0001/empty.bin", b""
+                "/run/user/1001/flr0421-0001/empty.bin", b""
             )
 
     def test_guest_setup_builds_only_bounded_one_line_serial_commands(self):
@@ -616,14 +740,14 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
     def test_guest_file_decoder_requires_one_exact_named_payload(self):
         content = b'{"event":"LOAD_READY"}\n'
         import base64
-        output = "noise\nFLR0416_FILE=flr0418-0001-load-ready.json:" + base64.b64encode(content).decode()
+        output = "noise\nFLR0416_FILE=flr0421-0001-load-ready.json:" + base64.b64encode(content).decode()
 
         self.assertEqual(
             content,
-            MODULE.decode_guest_file(output, "flr0418-0001-load-ready.json"),
+            MODULE.decode_guest_file(output, "flr0421-0001-load-ready.json"),
         )
         with self.assertRaisesRegex(ValueError, "exactly one"):
-            MODULE.decode_guest_file(output + "\n" + output.splitlines()[-1], "flr0418-0001-load-ready.json")
+            MODULE.decode_guest_file(output + "\n" + output.splitlines()[-1], "flr0421-0001-load-ready.json")
         with self.assertRaisesRegex(ValueError, "base64"):
             MODULE.decode_guest_file("FLR0416_FILE=x:%%%", "x")
 
@@ -636,19 +760,19 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
         self.assertEqual("EVIDENCE_MANIFEST", manifest["event"])
         self.assertEqual(self.identity["process"], manifest["process"])
-        self.assertEqual("guest", manifest["files"]["flr0418-0001-load-ready.json"]["source"])
+        self.assertEqual("guest", manifest["files"]["flr0421-0001-load-ready.json"]["source"])
         self.assertEqual(
-            hashlib.sha256(mini["flr0418-0001-qmp-load-still.ppm"]).hexdigest(),
-            manifest["files"]["flr0418-0001-qmp-load-still.ppm"]["sha256"],
+            hashlib.sha256(mini["flr0421-0001-qmp-load-still.ppm"]).hexdigest(),
+            manifest["files"]["flr0421-0001-qmp-load-still.ppm"]["sha256"],
         )
-        del mini["flr0418-0001-qmp-load-still.ppm"]
+        del mini["flr0421-0001-qmp-load-still.ppm"]
         with self.assertRaisesRegex(ValueError, "required Mini"):
             MODULE.build_manifest("load", self.identity, guest, mini)
 
     def test_hit_manifest_requires_all_eight_qmp_frames_and_matching_identity(self):
         guest = self._guest_files("hit")
         mini = self._mini_files("hit")
-        del mini["flr0418-0001-qmp-hit-frame-0007.ppm"]
+        del mini["flr0421-0001-qmp-hit-frame-0007.ppm"]
 
         with self.assertRaisesRegex(ValueError, "required Mini"):
             MODULE.build_manifest("hit", self.identity, guest, mini)
@@ -674,7 +798,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             hashlib.sha256(manifest).hexdigest(), release["manifest_sha256"]
         )
         self.assertEqual(
-            "/run/user/1001/flr0418-0001-load-manifest.json",
+            "/run/user/1001/flr0421-0001-load-manifest.json",
             release["manifest_path"],
         )
 
@@ -711,7 +835,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             manifest = MODULE.build_manifest(
                 "load", self.identity, self._guest_files("load"), self._mini_files("load")
             )
-            manifest_path = run_dir / "flr0418-0001-load-manifest.json"
+            manifest_path = run_dir / "flr0421-0001-load-manifest.json"
             manifest_path.write_bytes(manifest)
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=repo_root
@@ -731,7 +855,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
             self.assertEqual(manifest, manifest_path.read_bytes())
             release = json.loads(
-                (run_dir / "flr0418-0001-load-release.json").read_text(encoding="utf-8")
+                (run_dir / "flr0421-0001-load-release.json").read_text(encoding="utf-8")
             )
             self.assertEqual(hashlib.sha256(manifest).hexdigest(), release["manifest_sha256"])
 
@@ -820,7 +944,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                 },
             },
         }
-        hashes = {"flr0418-0001-qmp-load-still.ppm": "a" * 64}
+        hashes = {"flr0421-0001-qmp-load-still.ppm": "a" * 64}
         record = MODULE.build_bracket(
             "load", self.identity, sample, sample, 10, 20, hashes, 100, 200
         )
@@ -868,7 +992,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                 stopped_dead,
                 10,
                 20,
-                {"flr0418-0001-qmp-load-still.ppm": "a" * 64},
+                {"flr0421-0001-qmp-load-still.ppm": "a" * 64},
                 100,
                 200,
             )
@@ -899,8 +1023,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             }
 
         hashes = {
-            "flr0418-0001-qmp-hit-still.ppm": "a" * 64,
-            **{"flr0418-0001-qmp-hit-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
+            "flr0421-0001-qmp-hit-still.ppm": "a" * 64,
+            **{"flr0421-0001-qmp-hit-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
         }
         before = snapshot("hit", 200, "T")
         after = snapshot("hit", 300, "T")
@@ -923,8 +1047,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         running_post_after = snapshot("post", 300, "S")
         with self.assertRaisesRegex(ValueError, "post-release.*stopped"):
             MODULE.build_bracket("post", self.identity, stopped_post_before, running_post_after, 100, 400, {
-                "flr0418-0001-qmp-post-still.ppm": "a" * 64,
-                **{"flr0418-0001-qmp-post-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
+                "flr0421-0001-qmp-post-still.ppm": "a" * 64,
+                **{"flr0421-0001-qmp-post-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
             }, 100, 400)
 
     def test_ppm_validator_requires_complete_p6_rgb_raster(self):
@@ -1002,8 +1126,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=root
             )
-            first = run_dir / "flr0418-0001-qmp-post-frame-0000.ppm"
-            last = run_dir / "flr0418-0001-qmp-post-frame-0007.ppm"
+            first = run_dir / "flr0421-0001-qmp-post-frame-0000.ppm"
+            last = run_dir / "flr0421-0001-qmp-post-frame-0007.ppm"
             first.write_bytes(b"reference-frame")
             last.write_bytes(b"sample-frame")
             response = {
@@ -1027,8 +1151,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=root
             )
-            first = run_dir / "flr0418-0001-qmp-post-frame-0000.ppm"
-            last = run_dir / "flr0418-0001-qmp-post-frame-0007.ppm"
+            first = run_dir / "flr0421-0001-qmp-post-frame-0000.ppm"
+            last = run_dir / "flr0421-0001-qmp-post-frame-0007.ppm"
             first.write_bytes(b"reference-frame")
             last.write_bytes(b"sample-frame")
             response = {
@@ -1066,7 +1190,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
-            controller.qmp = root / "qmp-0418.sock"
+            controller.qmp = root / "qmp-0421.sock"
             controller.run_dir = root
             controller.start_script = root / "start.sh"
             controller.harness = root / "harness.sh"
@@ -1094,7 +1218,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
-            controller.qmp = root / "qmp-0418.sock"
+            controller.qmp = root / "qmp-0421.sock"
             controller.run_dir = root
             controller.start_script = root / "start.sh"
             controller.qemu_identity = {"pid": 200, "start_token": "300"}
@@ -1279,7 +1403,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             harness.parent.mkdir()
             harness.write_text("stub\n")
             pixel_capture.write_text("stub\n")
-            qmp = run_dir / "qmp-0418.sock"
+            qmp = run_dir / "qmp-0421.sock"
             qmp.touch()
             with mock.patch.object(Path, "is_socket", return_value=True):
                 controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
@@ -1398,8 +1522,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with mock.patch.object(MODULE, "CaptureController", DummyController):
             result = MODULE.main(
                 [
-                    "--run-dir", "/evidence/flr0418-0001/qemu",
-                    "--qmp", "/evidence/flr0418-0001/qemu/qmp-0418.sock",
+                    "--run-dir", "/evidence/flr0421-0001/qemu",
+                    "--qmp", "/evidence/flr0421-0001/qemu/qmp-0421.sock",
                     "--repo-root", "/repo",
                     "--marker-timeout-seconds", "90",
                     "--post-release-seconds", "11",
