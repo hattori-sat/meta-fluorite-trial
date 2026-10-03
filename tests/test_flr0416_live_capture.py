@@ -1,8 +1,11 @@
 import importlib.util
 import hashlib
+import contextlib
+import io
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 from unittest import mock
@@ -25,7 +28,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         }
 
     def _guest_files(self, stage):
-        prefix = "flr0417-0001-"
+        prefix = "flr0418-0001-"
         armed = {
             "guest_boot_id": self.identity["guest_boot_id"],
             "process": self.identity["process"],
@@ -52,13 +55,455 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         return files
 
     def _mini_files(self, stage):
-        prefix = "flr0417-0001-"
+        prefix = "flr0418-0001-"
         if stage == "load":
             names = [prefix + "load-bracket.json", prefix + "qmp-load-still.ppm"]
         else:
             names = [prefix + "hit-bracket.json", prefix + "qmp-hit-still.ppm"]
             names += [prefix + "qmp-hit-frame-%04d.ppm" % i for i in range(8)]
         return {name: ("media:" + name).encode() for name in names}
+
+    def test_wait_marker_outcomes_keep_serial_shell_alive_for_wrapper_and_next_command(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for outcome in (
+                "READY",
+                "OBSERVER_ERROR",
+                "OBSERVER_AND_READY",
+                "GDB_EXITED_OR_CHANGED",
+                "GDB_CHANGED",
+                "TIMEOUT",
+                "WAIT_COMMAND_ERROR",
+            ):
+                with self.subTest(outcome=outcome):
+                    case_root = root / outcome
+                    case_root.mkdir()
+                    guest_root = str(case_root / "guest-run")
+                    proc_root = case_root / "proc"
+                    stat_path = proc_root / "321" / "stat"
+                    marker = "FLR0416_WAIT=load-ready.json:"
+                    if outcome == "READY":
+                        Path(guest_root + "-load-ready.json").write_text("ready\n")
+                    elif outcome == "OBSERVER_ERROR":
+                        Path(guest_root + "-observer-error").write_text("failure\n")
+                    elif outcome == "OBSERVER_AND_READY":
+                        Path(guest_root + "-observer-error").write_text("failure\n")
+                        Path(guest_root + "-load-ready.json").write_text("ready\n")
+                    elif outcome in ("GDB_CHANGED", "TIMEOUT", "WAIT_COMMAND_ERROR"):
+                        stat_path.parent.mkdir(parents=True)
+                        start_token = "654" if outcome in ("TIMEOUT", "WAIT_COMMAND_ERROR") else "655"
+                        stat_fields = ["321", "(fixture)", "S"] + ["0"] * 18 + [start_token]
+                        stat_path.write_text(" ".join(stat_fields) + "\n")
+
+                    controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
+                    controller.launch_identity = {
+                        "gdb_process": {"pid": 321, "start_token": "654"}
+                    }
+                    controller.marker_timeout_seconds = 1
+                    controller._ack_deadline = None
+                    controller._abort_deadline = None
+                    wrapper_marker = "__FLR_SERIAL_COMMAND_DONE_TEST_0418__"
+                    transcripts = []
+
+                    def run_serial_command(label, command, timeout_seconds=40, **kwargs):
+                        self.assertEqual("wait-load-ready.json", label)
+                        self.assertGreater(timeout_seconds, 1)
+                        shell_timeout = int(re.search(r'-lt ([0-9]+)', command).group(1))
+                        self.assertEqual(
+                            shell_timeout + 2, kwargs["minimum_guest_timeout_seconds"]
+                        )
+                        self.assertEqual(2, kwargs["deadline_reserve_seconds"])
+                        wrapped = (
+                            command
+                            + "; rc=$?; stty echo; printf '\\nrc=%s\\n"
+                            + wrapper_marker
+                            + "\\n' \"$rc\"\nprintf 'NEXT_SHELL_COMMAND=PASS\\n'\n"
+                        )
+                        script = "stty() { :; }\n"
+                        if outcome == "WAIT_COMMAND_ERROR":
+                            script += "sleep() { return 1; }\n"
+                        script += wrapped
+                        result = subprocess.run(
+                            ["/bin/sh", "-c", script],
+                            check=False,
+                            capture_output=True,
+                            text=True,
+                            timeout=3,
+                        )
+                        transcript = result.stdout + result.stderr
+                        transcripts.append(transcript)
+                        self.assertEqual(0, result.returncode, transcript)
+                        self.assertEqual(1, transcript.count(wrapper_marker), transcript)
+                        self.assertIn("rc=0\n" + wrapper_marker, transcript)
+                        self.assertIn("NEXT_SHELL_COMMAND=PASS", transcript)
+                        self.assertNotIn("logout", transcript.lower())
+                        return transcript
+
+                    with mock.patch.object(MODULE, "GUEST_ROOT", guest_root), mock.patch.object(
+                        MODULE, "PROC_ROOT", str(proc_root)
+                    ), mock.patch.object(controller, "_serial", side_effect=run_serial_command):
+                        if outcome == "READY":
+                            controller._wait_marker("load-ready.json", 1)
+                        else:
+                            expected_outcome = (
+                                "GDB_EXITED_OR_CHANGED" if outcome == "GDB_CHANGED" else (
+                                    "OBSERVER_ERROR" if outcome == "OBSERVER_AND_READY" else outcome
+                                )
+                            )
+                            with self.assertRaisesRegex(RuntimeError, expected_outcome):
+                                controller._wait_marker("load-ready.json", 1)
+
+                    self.assertEqual(1, len(transcripts))
+                    expected_marker_outcome = (
+                        "READY" if outcome == "READY" else (
+                            "GDB_EXITED_OR_CHANGED" if outcome == "GDB_CHANGED" else (
+                                "OBSERVER_ERROR" if outcome == "OBSERVER_AND_READY" else outcome
+                            )
+                        )
+                    )
+                    self.assertEqual(1, transcripts[0].count(marker + expected_marker_outcome))
+
+    def test_wait_marker_budget_precedes_serial_timeout_for_ack_and_abort_windows(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            now = 1000.0
+            completion_reserve_seconds = 15
+            for deadline_kind in ("ack", "abort"):
+                for remaining in (90, 30, 16.5, 16, 15.999, 15.5, 15, 14):
+                    with self.subTest(deadline=deadline_kind, remaining=remaining):
+                        run_dir = root / (deadline_kind + "-" + str(remaining))
+                        run_dir.mkdir()
+                        controller = MODULE.CaptureController(
+                            run_dir,
+                            run_dir / "qmp.sock",
+                            repo_root=Path(__file__).parents[1],
+                        )
+                        if deadline_kind == "ack":
+                            controller._ack_deadline = now + remaining
+                        else:
+                            controller._abort_deadline = now + remaining
+                        controller.launch_identity = {
+                            "gdb_process": {"pid": 321, "start_token": "654"}
+                        }
+                        guest_root = str(run_dir / "guest-run")
+                        Path(guest_root + "-load-ready.json").write_text("ready\n")
+                        observed = {}
+
+                        def fake_serial_exec(argv, **kwargs):
+                            command_file = Path(argv[argv.index("--command-file") + 1])
+                            command = command_file.read_text(encoding="utf-8")
+                            observed["shell_timeout"] = int(
+                                re.search(r'-lt ([0-9]+)', command).group(1)
+                            )
+                            observed["guest_timeout"] = int(
+                                argv[argv.index("--timeout-seconds") + 1]
+                            )
+                            observed["outer_timeout"] = kwargs["timeout"]
+                            output_file = Path(argv[argv.index("--output") + 1])
+                            output_file.write_text(
+                                "FLR0416_WAIT=load-ready.json:READY\n",
+                                encoding="utf-8",
+                            )
+                            return subprocess.CompletedProcess(
+                                argv,
+                                0,
+                                "serial-exec=PASS command_status=0 output=ready\n",
+                                "",
+                            )
+
+                        with mock.patch.object(
+                            MODULE, "GUEST_ROOT", guest_root
+                        ), mock.patch.object(
+                            MODULE.time,
+                            "monotonic",
+                            side_effect=[now, now, now, now],
+                        ), mock.patch.object(
+                            MODULE.subprocess, "run", side_effect=fake_serial_exec
+                        ):
+                            available_wait = int(remaining) - completion_reserve_seconds
+                            if available_wait < 1:
+                                with self.assertRaisesRegex(
+                                    TimeoutError, "no serial completion reserve"
+                                ):
+                                    controller._wait_marker("load-ready.json")
+                            else:
+                                controller._wait_marker("load-ready.json")
+
+                        if available_wait < 1:
+                            self.assertEqual({}, observed)
+                            continue
+
+                        self.assertEqual(
+                            min(controller.marker_timeout_seconds, available_wait),
+                            observed["shell_timeout"],
+                        )
+                        self.assertGreaterEqual(observed["shell_timeout"], 1)
+                        self.assertEqual(
+                            10,
+                            observed["guest_timeout"] - observed["shell_timeout"],
+                        )
+                        self.assertEqual(
+                            2,
+                            observed["outer_timeout"] - observed["guest_timeout"],
+                        )
+                        self.assertLessEqual(observed["outer_timeout"], remaining)
+                        self.assertGreaterEqual(remaining - observed["outer_timeout"], 2)
+
+    def test_wait_marker_budget_recalculates_after_dispatch_delay(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            now = 1000.0
+            for deadline_kind in ("ack", "abort"):
+                with self.subTest(deadline=deadline_kind):
+                    run_dir = root / deadline_kind
+                    run_dir.mkdir()
+                    controller = MODULE.CaptureController(
+                        run_dir,
+                        run_dir / "qmp.sock",
+                        repo_root=Path(__file__).parents[1],
+                    )
+                    if deadline_kind == "ack":
+                        controller._ack_deadline = now + 90
+                    else:
+                        controller._abort_deadline = now + 90
+                    controller.launch_identity = {
+                        "gdb_process": {"pid": 321, "start_token": "654"}
+                    }
+                    guest_root = str(run_dir / "guest-run")
+                    Path(guest_root + "-load-ready.json").write_text("ready\n")
+                    observed = {}
+
+                    def fake_serial_exec(argv, **kwargs):
+                        command_file = Path(argv[argv.index("--command-file") + 1])
+                        command = command_file.read_text(encoding="utf-8")
+                        observed["shell_timeout"] = int(
+                            re.search(r'-lt ([0-9]+)', command).group(1)
+                        )
+                        observed["guest_timeout"] = int(
+                            argv[argv.index("--timeout-seconds") + 1]
+                        )
+                        observed["outer_timeout"] = kwargs["timeout"]
+                        output_file = Path(argv[argv.index("--output") + 1])
+                        output_file.write_text(
+                            "FLR0416_WAIT=load-ready.json:READY\n", encoding="utf-8"
+                        )
+                        return subprocess.CompletedProcess(
+                            argv, 0, "serial-exec=PASS command_status=0 output=ready\n", ""
+                        )
+
+                    with mock.patch.object(
+                        MODULE, "GUEST_ROOT", guest_root
+                    ), mock.patch.object(
+                        MODULE.time,
+                        "monotonic",
+                        side_effect=[now, now + 1, now + 1, now + 1],
+                    ), mock.patch.object(
+                        MODULE.subprocess, "run", side_effect=fake_serial_exec
+                    ):
+                        controller._wait_marker("load-ready.json")
+                    self.assertEqual(75, observed["shell_timeout"])
+                    self.assertEqual(85, observed["guest_timeout"])
+                    self.assertEqual(87, observed["outer_timeout"])
+                    self.assertLessEqual(observed["outer_timeout"], 89)
+                    self.assertGreaterEqual(89 - observed["outer_timeout"], 2)
+
+    def test_wait_marker_refuses_transport_budget_that_cannot_cover_shell_loop(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            now = 1000.0
+            for deadline_kind in ("ack", "abort"):
+                for delay, expected_error in (
+                    (11, "cannot preserve completion reserve"),
+                    (14, "shorter than guest wait"),
+                ):
+                    with self.subTest(deadline=deadline_kind, delay=delay):
+                        run_dir = root / (deadline_kind + "-" + str(delay))
+                        run_dir.mkdir()
+                        controller = MODULE.CaptureController(
+                            run_dir,
+                            run_dir / "qmp.sock",
+                            repo_root=Path(__file__).parents[1],
+                        )
+                        if deadline_kind == "ack":
+                            controller._ack_deadline = now + 90
+                        else:
+                            controller._abort_deadline = now + 90
+                        controller.launch_identity = {
+                            "gdb_process": {"pid": 321, "start_token": "654"}
+                        }
+                        guest_root = str(run_dir / "guest-run")
+                        Path(guest_root + "-load-ready.json").write_text("ready\n")
+                        with mock.patch.object(
+                            MODULE, "GUEST_ROOT", guest_root
+                        ), mock.patch.object(
+                            MODULE.time,
+                            "monotonic",
+                            side_effect=[now, now + delay, now + delay, now + delay],
+                        ), mock.patch.object(MODULE.subprocess, "run") as serial_exec:
+                            with self.assertRaisesRegex(TimeoutError, expected_error):
+                                controller._wait_marker("load-ready.json")
+                        serial_exec.assert_not_called()
+
+    def test_wait_marker_refuses_final_dispatch_budget_after_command_preparation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            now = 1000.0
+            for deadline_kind in ("ack", "abort"):
+                for delay, expected_error in (
+                    (11, "cannot preserve completion reserve"),
+                    (14, "shorter than guest wait"),
+                ):
+                    with self.subTest(deadline=deadline_kind, delay=delay):
+                        run_dir = root / (deadline_kind + "-" + str(delay))
+                        run_dir.mkdir()
+                        controller = MODULE.CaptureController(
+                            run_dir,
+                            run_dir / "qmp.sock",
+                            repo_root=Path(__file__).parents[1],
+                        )
+                        if deadline_kind == "ack":
+                            controller._ack_deadline = now + 90
+                        else:
+                            controller._abort_deadline = now + 90
+                        controller.launch_identity = {
+                            "gdb_process": {"pid": 321, "start_token": "654"}
+                        }
+                        guest_root = str(run_dir / "guest-run")
+                        Path(guest_root + "-load-ready.json").write_text("ready\n")
+                        with mock.patch.object(
+                            MODULE, "GUEST_ROOT", guest_root
+                        ), mock.patch.object(
+                            MODULE.time,
+                            "monotonic",
+                            side_effect=[now, now, now, now + delay],
+                        ), mock.patch.object(
+                            MODULE.subprocess, "run"
+                        ) as serial_exec:
+                            with self.assertRaisesRegex(TimeoutError, expected_error):
+                                controller._wait_marker("load-ready.json")
+
+                        serial_exec.assert_not_called()
+                        command_files = list(run_dir.glob("FLR0416-serial-*.cmd"))
+                        self.assertEqual(1, len(command_files))
+                        self.assertIn("wait_for_marker", command_files[0].read_text())
+
+    def test_wait_marker_refuses_serial_dispatch_when_guest_budget_is_exhausted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            now = 1000.0
+            for deadline_kind in ("ack", "abort"):
+                with self.subTest(deadline=deadline_kind):
+                    run_dir = root / deadline_kind
+                    run_dir.mkdir()
+                    controller = MODULE.CaptureController(
+                        run_dir,
+                        run_dir / "qmp.sock",
+                        repo_root=Path(__file__).parents[1],
+                    )
+                    if deadline_kind == "ack":
+                        controller._ack_deadline = now + 30
+                    else:
+                        controller._abort_deadline = now + 30
+                    controller.launch_identity = {
+                        "gdb_process": {"pid": 321, "start_token": "654"}
+                    }
+                    guest_root = str(run_dir / "guest-run")
+                    Path(guest_root + "-load-ready.json").write_text("ready\n")
+                    with mock.patch.object(
+                        MODULE, "GUEST_ROOT", guest_root
+                    ), mock.patch.object(
+                        MODULE.time,
+                        "monotonic",
+                        side_effect=[now, now + 28.5, now + 28.5, now + 28.5],
+                    ), mock.patch.object(MODULE.subprocess, "run") as serial_exec:
+                        with self.assertRaisesRegex(
+                            TimeoutError, "guest timeout budget"
+                        ):
+                            controller._wait_marker("load-ready.json")
+                    serial_exec.assert_not_called()
+
+    def test_cli_marker_window_is_validated_before_attempt_claim(self):
+        with tempfile.TemporaryDirectory() as directory:
+            run_dir = Path(directory) / "qemu"
+            with mock.patch.object(MODULE, "create_attempt_claim") as claim:
+                for invalid_seconds in (15, 16, 541):
+                    with self.subTest(seconds=invalid_seconds), contextlib.redirect_stderr(
+                        io.StringIO()
+                    ):
+                        with self.assertRaises(SystemExit):
+                            MODULE.main(
+                                [
+                                    "--run-dir",
+                                    str(run_dir),
+                                    "--claim-only",
+                                    "start",
+                                    "--marker-timeout-seconds",
+                                    str(invalid_seconds),
+                                ]
+                            )
+                claim.assert_not_called()
+                for valid_seconds in (17, 540):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        self.assertEqual(
+                            0,
+                            MODULE.main(
+                                [
+                                    "--run-dir",
+                                    str(run_dir),
+                                    "--claim-only",
+                                    "start",
+                                    "--marker-timeout-seconds",
+                                    str(valid_seconds),
+                                ]
+                            ),
+                        )
+                self.assertEqual(2, claim.call_count)
+
+    def test_constructor_rejects_marker_window_outside_17_to_540_seconds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for invalid_seconds in (15, 16, 541):
+                with self.subTest(seconds=invalid_seconds), self.assertRaisesRegex(
+                    ValueError, "marker timeout"
+                ):
+                    MODULE.CaptureController(
+                        root,
+                        root / "qmp.sock",
+                        repo_root=root,
+                        marker_timeout_seconds=invalid_seconds,
+                    )
+            for valid_seconds in (17, 540):
+                accepted = MODULE.CaptureController(
+                    root,
+                    root / "qmp.sock",
+                    repo_root=root,
+                    marker_timeout_seconds=valid_seconds,
+                )
+                self.assertEqual(valid_seconds, accepted.marker_timeout_seconds)
+
+    def test_wait_marker_rejects_missing_duplicate_and_unknown_outcomes(self):
+        marker = "FLR0416_WAIT=load-ready.json:"
+        cases = (
+            ("missing", "", "missing or duplicated"),
+            ("duplicate", marker + "READY\n" + marker + "READY\n", "missing or duplicated"),
+            ("unknown", marker + "MAYBE\n", "invalid outcome"),
+        )
+        controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
+        controller.launch_identity = {
+            "gdb_process": {"pid": 321, "start_token": "654"}
+        }
+        controller.marker_timeout_seconds = 1
+        controller._ack_deadline = None
+        controller._abort_deadline = None
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch.object(MODULE, "GUEST_ROOT", str(Path(directory) / "guest-run")):
+                for label, output, error in cases:
+                    with self.subTest(label=label), mock.patch.object(
+                        controller, "_serial", return_value=output
+                    ) as serial:
+                        with self.assertRaisesRegex(RuntimeError, error):
+                            controller._wait_marker("load-ready.json", 1)
+                        serial.assert_called_once()
 
     def test_capture_sequence_defers_video_to_mac_without_failing_capture(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -84,7 +529,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             with mock.patch("shutil.which", return_value=None):
                 files = controller._capture_sequence("hit", 2)
 
-        report_name = "flr0417-0001-qmp-hit-capture.json"
+        report_name = "flr0418-0001-qmp-hit-capture.json"
         report = json.loads(files[report_name])
         self.assertEqual("PENDING_MAC_PREVIEW", report["video_status"])
         self.assertEqual(3, len(report["still_and_frames"]))
@@ -96,7 +541,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
         chunks = MODULE.payload_chunks(payload, max_chars=3000)
         commands = MODULE.payload_shell_commands(
-            "/run/user/1001/flr0417-0001/payload.bin", payload
+            "/run/user/1001/flr0418-0001/payload.bin", payload
         )
 
         encoded = "".join(chunks)
@@ -112,12 +557,12 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             )
             self.assertEqual(0, syntax.returncode, syntax.stderr)
         self.assertIn("set -C", commands[0])
-        self.assertNotIn("/run/user/1001/flr0417-0001/payload.bin", " ".join(commands[:-1]))
+        self.assertNotIn("/run/user/1001/flr0418-0001/payload.bin", " ".join(commands[:-1]))
         self.assertIn("os.link(tmp,dst)", commands[-1])
-        self.assertIn("/run/user/1001/flr0417-0001/payload.bin", commands[-1])
+        self.assertIn("/run/user/1001/flr0418-0001/payload.bin", commands[-1])
         with self.assertRaisesRegex(ValueError, "empty guest payload"):
             MODULE.payload_shell_commands(
-                "/run/user/1001/flr0417-0001/empty.bin", b""
+                "/run/user/1001/flr0418-0001/empty.bin", b""
             )
 
     def test_guest_setup_builds_only_bounded_one_line_serial_commands(self):
@@ -171,14 +616,14 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
     def test_guest_file_decoder_requires_one_exact_named_payload(self):
         content = b'{"event":"LOAD_READY"}\n'
         import base64
-        output = "noise\nFLR0416_FILE=flr0417-0001-load-ready.json:" + base64.b64encode(content).decode()
+        output = "noise\nFLR0416_FILE=flr0418-0001-load-ready.json:" + base64.b64encode(content).decode()
 
         self.assertEqual(
             content,
-            MODULE.decode_guest_file(output, "flr0417-0001-load-ready.json"),
+            MODULE.decode_guest_file(output, "flr0418-0001-load-ready.json"),
         )
         with self.assertRaisesRegex(ValueError, "exactly one"):
-            MODULE.decode_guest_file(output + "\n" + output.splitlines()[-1], "flr0417-0001-load-ready.json")
+            MODULE.decode_guest_file(output + "\n" + output.splitlines()[-1], "flr0418-0001-load-ready.json")
         with self.assertRaisesRegex(ValueError, "base64"):
             MODULE.decode_guest_file("FLR0416_FILE=x:%%%", "x")
 
@@ -191,19 +636,19 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
         self.assertEqual("EVIDENCE_MANIFEST", manifest["event"])
         self.assertEqual(self.identity["process"], manifest["process"])
-        self.assertEqual("guest", manifest["files"]["flr0417-0001-load-ready.json"]["source"])
+        self.assertEqual("guest", manifest["files"]["flr0418-0001-load-ready.json"]["source"])
         self.assertEqual(
-            hashlib.sha256(mini["flr0417-0001-qmp-load-still.ppm"]).hexdigest(),
-            manifest["files"]["flr0417-0001-qmp-load-still.ppm"]["sha256"],
+            hashlib.sha256(mini["flr0418-0001-qmp-load-still.ppm"]).hexdigest(),
+            manifest["files"]["flr0418-0001-qmp-load-still.ppm"]["sha256"],
         )
-        del mini["flr0417-0001-qmp-load-still.ppm"]
+        del mini["flr0418-0001-qmp-load-still.ppm"]
         with self.assertRaisesRegex(ValueError, "required Mini"):
             MODULE.build_manifest("load", self.identity, guest, mini)
 
     def test_hit_manifest_requires_all_eight_qmp_frames_and_matching_identity(self):
         guest = self._guest_files("hit")
         mini = self._mini_files("hit")
-        del mini["flr0417-0001-qmp-hit-frame-0007.ppm"]
+        del mini["flr0418-0001-qmp-hit-frame-0007.ppm"]
 
         with self.assertRaisesRegex(ValueError, "required Mini"):
             MODULE.build_manifest("hit", self.identity, guest, mini)
@@ -229,7 +674,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             hashlib.sha256(manifest).hexdigest(), release["manifest_sha256"]
         )
         self.assertEqual(
-            "/run/user/1001/flr0417-0001-load-manifest.json",
+            "/run/user/1001/flr0418-0001-load-manifest.json",
             release["manifest_path"],
         )
 
@@ -266,7 +711,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             manifest = MODULE.build_manifest(
                 "load", self.identity, self._guest_files("load"), self._mini_files("load")
             )
-            manifest_path = run_dir / "flr0417-0001-load-manifest.json"
+            manifest_path = run_dir / "flr0418-0001-load-manifest.json"
             manifest_path.write_bytes(manifest)
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=repo_root
@@ -286,7 +731,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
             self.assertEqual(manifest, manifest_path.read_bytes())
             release = json.loads(
-                (run_dir / "flr0417-0001-load-release.json").read_text(encoding="utf-8")
+                (run_dir / "flr0418-0001-load-release.json").read_text(encoding="utf-8")
             )
             self.assertEqual(hashlib.sha256(manifest).hexdigest(), release["manifest_sha256"])
 
@@ -375,7 +820,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                 },
             },
         }
-        hashes = {"flr0417-0001-qmp-load-still.ppm": "a" * 64}
+        hashes = {"flr0418-0001-qmp-load-still.ppm": "a" * 64}
         record = MODULE.build_bracket(
             "load", self.identity, sample, sample, 10, 20, hashes, 100, 200
         )
@@ -423,7 +868,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                 stopped_dead,
                 10,
                 20,
-                {"flr0417-0001-qmp-load-still.ppm": "a" * 64},
+                {"flr0418-0001-qmp-load-still.ppm": "a" * 64},
                 100,
                 200,
             )
@@ -454,8 +899,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             }
 
         hashes = {
-            "flr0417-0001-qmp-hit-still.ppm": "a" * 64,
-            **{"flr0417-0001-qmp-hit-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
+            "flr0418-0001-qmp-hit-still.ppm": "a" * 64,
+            **{"flr0418-0001-qmp-hit-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
         }
         before = snapshot("hit", 200, "T")
         after = snapshot("hit", 300, "T")
@@ -478,8 +923,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         running_post_after = snapshot("post", 300, "S")
         with self.assertRaisesRegex(ValueError, "post-release.*stopped"):
             MODULE.build_bracket("post", self.identity, stopped_post_before, running_post_after, 100, 400, {
-                "flr0417-0001-qmp-post-still.ppm": "a" * 64,
-                **{"flr0417-0001-qmp-post-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
+                "flr0418-0001-qmp-post-still.ppm": "a" * 64,
+                **{"flr0418-0001-qmp-post-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
             }, 100, 400)
 
     def test_ppm_validator_requires_complete_p6_rgb_raster(self):
@@ -557,8 +1002,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=root
             )
-            first = run_dir / "flr0417-0001-qmp-post-frame-0000.ppm"
-            last = run_dir / "flr0417-0001-qmp-post-frame-0007.ppm"
+            first = run_dir / "flr0418-0001-qmp-post-frame-0000.ppm"
+            last = run_dir / "flr0418-0001-qmp-post-frame-0007.ppm"
             first.write_bytes(b"reference-frame")
             last.write_bytes(b"sample-frame")
             response = {
@@ -582,8 +1027,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=root
             )
-            first = run_dir / "flr0417-0001-qmp-post-frame-0000.ppm"
-            last = run_dir / "flr0417-0001-qmp-post-frame-0007.ppm"
+            first = run_dir / "flr0418-0001-qmp-post-frame-0000.ppm"
+            last = run_dir / "flr0418-0001-qmp-post-frame-0007.ppm"
             first.write_bytes(b"reference-frame")
             last.write_bytes(b"sample-frame")
             response = {
@@ -621,7 +1066,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
-            controller.qmp = root / "qmp-0417.sock"
+            controller.qmp = root / "qmp-0418.sock"
             controller.run_dir = root
             controller.start_script = root / "start.sh"
             controller.harness = root / "harness.sh"
@@ -649,7 +1094,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
-            controller.qmp = root / "qmp-0417.sock"
+            controller.qmp = root / "qmp-0418.sock"
             controller.run_dir = root
             controller.start_script = root / "start.sh"
             controller.qemu_identity = {"pid": 200, "start_token": "300"}
@@ -834,7 +1279,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             harness.parent.mkdir()
             harness.write_text("stub\n")
             pixel_capture.write_text("stub\n")
-            qmp = run_dir / "qmp-0417.sock"
+            qmp = run_dir / "qmp-0418.sock"
             qmp.touch()
             with mock.patch.object(Path, "is_socket", return_value=True):
                 controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
@@ -953,8 +1398,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with mock.patch.object(MODULE, "CaptureController", DummyController):
             result = MODULE.main(
                 [
-                    "--run-dir", "/evidence/flr0417-0001/qemu",
-                    "--qmp", "/evidence/flr0417-0001/qemu/qmp-0417.sock",
+                    "--run-dir", "/evidence/flr0418-0001/qemu",
+                    "--qmp", "/evidence/flr0418-0001/qemu/qmp-0418.sock",
                     "--repo-root", "/repo",
                     "--marker-timeout-seconds", "90",
                     "--post-release-seconds", "11",

@@ -1,6 +1,6 @@
 # FLR-0417 — repair capture entry/finalization and run once
 
-- Status: In Progress
+- Status: Done
 - Priority: High
 - Created: 2026-10-03
 - Owner: Mac capture controller / Mini QEMU / UID-1001 Example Demo / QMP evidence
@@ -154,8 +154,15 @@ progress, or two independent boots. Those product gates remain open.
   inherited cwd, missing final identity, and absent claim contract; launcher
   tests exposed missing fresh-ID/claim behavior and collision rejection after
   earlier unrelated preflight. The corresponding final tests are green.
-- No Mini handoff, runtime attempt, QEMU, Devtool, `do_patch`, BitBake, product
-  source, image, or cache operation has occurred yet.
+- Commit `e1a3949a7163dcf739975eefa916bfeb72540f06` was transferred with the
+  established bundle helper and the fixed Mini receiver reached that exact
+  HEAD. No Devtool, `do_patch`, BitBake, product-source, image, or cache change
+  occurred.
+- Exactly one `flr0417-0001` QEMU observation ran on unchanged FLR-0410-0001.
+  Guest GDB API smoke and Example Demo launch both returned PASS. The load wait
+  printed `FLR0416_WAIT=load-ready.json:READY`, then the guest serial login
+  shell logged out; the serial runner reached its bounded
+  `guest-command-output` deadline waiting for the completion marker.
 
 ### Check
 
@@ -170,19 +177,38 @@ progress, or two independent boots. Those product gates remain open.
   missing. The initial sandboxed run's 13 localhost-bind errors were execution
   policy, not test assertions; the same full command outside the sandbox passed
   all 339 Python and 52 MCP tests.
-- Local commit and bundle, fresh Mini owner/build/artifact/resource preflight,
-  GDB smoke, QMP/present/kernel correlation, and teardown are still pending.
-  The product-render result remains UNKNOWN and is not part of this ticket's
-  pass criteria.
+- Local tests and validation passed before commit; the exact commit/bundle was
+  transferred and receiver identity/preflight passed before the one run.
+- The controller recorded `DIAGNOSTIC_CAPTURE_FAIL` at
+  `wait-load-ready.json`, exact QEMU PID/start identity, QMP quit PASS, process
+  gone, QMP socket absent, official postflight PASS, and
+  `teardown_verified=true`. Product acceptance is `NOT_CLAIMED`.
+- Only the pre-launch system still exists. Raw Mini PPM SHA-256 is
+  `d4e96a65fd4f8e97bc1d762fc90cf2593bc2efb53a3125a72502fdae0f09395c`; its
+  derived PNG SHA-256 is
+  `3e25a09ca6defc8efa884ff9945f86dea746b99e7fd6c70fdfdfa8109877351a`.
+  It is black and was captured before GDB/Example Demo launch, so it is not a
+  product-render observation. No load/hit/post QMP frame or video exists.
+- The transcript and controller source strongly support a serial-wrapper exit
+  defect: `_wait_marker()` emits `exit 0` after READY, while `serial-exec`
+  appends its `rc` and unique completion marker only after the guest command
+  returns. The transcript contains logout/login prompt but no completion
+  marker; the runner reports `deadline-expired stage=guest-command-output`.
+  Whether a separate observer error occurs after fixing this is UNKNOWN.
 
 ### Act
 
-- Preserve this attempt as diagnostic evidence only. Any additional attempt or
-  product patch requires a new ticket and explicit PDCA boundary.
+- Close FLR-0417 as a bounded diagnostic/finalization unit. Preserve its only
+  run ID and raw Mini evidence; do not replay it. FLR-0418 owns the separate
+  serial-shell completion repair and a new immutable run ID. Overall product
+  rendering remains open.
 
 ## PDCA checker
 
-- Status: NOT CHECKED
-- Checked by:
-- Findings: The runtime attempt has not started. Do not mark Done based on code,
-  test, bundle, guest-ready, or GDB constructor success alone.
+- Status: PASS
+- Checked by: GPT-6.1 Sol, independent read-only audit on 2026-10-04
+- Findings: The bounded diagnostic acceptance is evidenced. `FLR0416_*` are
+  protocol labels from the retained helper family; the immutable runtime and
+  staged guest paths are `flr0417-0001`, and the controller stores outputs in
+  that run directory. The run preserved the first serial-completion failure
+  and exact teardown. Product rendering, present, and composition remain open.

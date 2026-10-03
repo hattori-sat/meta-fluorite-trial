@@ -17,16 +17,21 @@ import time
 from pathlib import Path
 
 
-RUN_ID = "flr0417-0001"
-QMP_SOCKET_NAME = "qmp-0417.sock"
+RUN_ID = "flr0418-0001"
+QMP_SOCKET_NAME = "qmp-0418.sock"
 ATTEMPT_CLAIM_NAMES = {
-    "start": "FLR0417-start-claim",
-    "controller": "FLR0417-controller-claim",
+    "start": "FLR0418-start-claim",
+    "controller": "FLR0418-controller-claim",
 }
 ACK_COLLECTION_SECONDS = 540
+SERIAL_WAIT_COMPLETION_RESERVE_SECONDS = 15
+MINIMUM_MARKER_TIMEOUT_SECONDS = (
+    SERIAL_WAIT_COMPLETION_RESERVE_SECONDS + 2
+)
 ABORT_GRACE_SECONDS = 50
 GUEST_DIR = "/run/user/1001/" + RUN_ID
 GUEST_ROOT = "/run/user/1001/" + RUN_ID
+PROC_ROOT = "/proc"
 DEMO_BUNDLE = (
     "/usr/share/flutter/toyota-connected-tcna-packages-filament-scene-"
     "fluorite-examples-demo/3.32.5/release"
@@ -36,6 +41,21 @@ SERIAL_PROMPT = "root@qemux86-64:~# "
 SERIAL_COMMAND_LIMIT = 4096
 SERIAL_PAYLOAD_CHUNK = 3000
 GUEST_FETCH_CHUNK = 32768
+
+
+def parse_marker_timeout_seconds(value):
+    try:
+        seconds = int(value)
+    except (TypeError, ValueError) as error:
+        raise argparse.ArgumentTypeError("marker timeout must be an integer") from error
+    if not (MINIMUM_MARKER_TIMEOUT_SECONDS <= seconds <= ACK_COLLECTION_SECONDS):
+        raise argparse.ArgumentTypeError(
+            "marker timeout must be between %d and %d seconds"
+            % (MINIMUM_MARKER_TIMEOUT_SECONDS, ACK_COLLECTION_SECONDS)
+        )
+    return seconds
+
+
 REQUIRED_GUEST = {
     "load": {RUN_ID + "-armed.json", RUN_ID + "-load-ready.json"},
     "hit": {
@@ -88,7 +108,7 @@ def create_attempt_claim(run_dir, role):
     start_token = _process_start_token(os.getpid())
     claim_dir.mkdir(mode=0o700)
     owner = {
-        "event": "FLR0417_ATTEMPT_CLAIM",
+        "event": "FLR0418_ATTEMPT_CLAIM",
         "role": role,
         "run_id": RUN_ID,
         "pid": os.getpid(),
@@ -330,7 +350,7 @@ def payload_shell_commands(remote_path, payload, owner="agl-driver"):
     """Stage complete bytes privately, then publish the destination atomically."""
     destination = Path(remote_path)
     allowed = destination.parent == Path(GUEST_DIR) or re.fullmatch(
-        r"/run/user/1001/flr0417-0001-(?:load|hit)-(?:manifest|release|abort)\.json",
+        r"/run/user/1001/flr0418-0001-(?:load|hit)-(?:manifest|release|abort)\.json",
         remote_path,
     )
     if not allowed or destination.name in (".", "..") or "\n" in remote_path or "\r" in remote_path:
@@ -389,6 +409,29 @@ def payload_shell_commands(remote_path, payload, owner="agl-driver"):
     return tuple(commands)
 
 
+def wait_marker_shell_command(suffix, timeout, gdb_pid, gdb_start_token):
+    """Build a one-line guest wait that reports an outcome without exiting its shell."""
+    path = GUEST_ROOT + "-" + suffix
+    marker = "FLR0416_WAIT=" + suffix + ":"
+    return (
+        "set -eu; p="
+        + str(gdb_pid)
+        + "; expected="
+        + shlex.quote(str(gdb_start_token))
+        + "; proc_root="
+        + shlex.quote(PROC_ROOT)
+        + "; wait_for_marker() { n=0; while [ \"$n\" -lt "
+        + str(timeout)
+        + " ]; do if [ -s "
+        + shlex.quote(GUEST_ROOT + "-observer-error")
+        + " ]; then return 10; fi; if [ -s "
+        + shlex.quote(path)
+        + " ]; then return 0; fi; start=$(awk '{print $22}' \"$proc_root/$p/stat\" 2>/dev/null || true); if [ ! -r \"$proc_root/$p/stat\" ] || [ \"$start\" != \"$expected\" ]; then return 11; fi; sleep 1 || return 13; n=$((n+1)); done; return 12; }; if wait_for_marker; then wait_status=0; else wait_status=$?; fi; case \"$wait_status\" in 0) outcome=READY;; 10) outcome=OBSERVER_ERROR;; 11) outcome=GDB_EXITED_OR_CHANGED;; 12) outcome=TIMEOUT;; *) outcome=WAIT_COMMAND_ERROR;; esac; printf '%s%s\\n' "
+        + shlex.quote(marker)
+        + " \"$outcome\""
+    )
+
+
 def decode_guest_file(output, name):
     marker = "FLR0416_FILE=" + name + ":"
     matches = [line.strip()[len(marker) :] for line in output.splitlines() if line.strip().startswith(marker)]
@@ -426,13 +469,13 @@ def decode_guest_snapshot(output):
 
 
 def guest_file_size_command(path):
-    if not path.startswith("/run/user/1001/flr0417-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0418-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     return "set -eu; test -f " + shlex.quote(path) + "; printf 'FLR0416_SIZE=%s\\n' \"$(wc -c < " + shlex.quote(path) + " | tr -d ' ')\""
 
 
 def guest_file_chunk_command(path, offset, size=GUEST_FETCH_CHUNK):
-    if not path.startswith("/run/user/1001/flr0417-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0418-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     if offset < 0 or size < 1 or size > GUEST_FETCH_CHUNK:
         raise ValueError("guest artifact chunk range is invalid")
@@ -499,7 +542,11 @@ class CaptureController:
         self.marker_timeout_seconds = int(marker_timeout_seconds)
         if not (0 <= self.post_release_seconds <= 300):
             raise ValueError("post-release observation is outside the bounded range")
-        if not (10 <= self.marker_timeout_seconds <= ACK_COLLECTION_SECONDS):
+        if not (
+            MINIMUM_MARKER_TIMEOUT_SECONDS
+            <= self.marker_timeout_seconds
+            <= ACK_COLLECTION_SECONDS
+        ):
             raise ValueError("marker timeout is outside the bounded range")
         self.harness = self.repo_root / "scripts/qemu-runtime-harness.sh"
         self.pixel_capture = self.repo_root / "scripts/qemu-pixel-capture.py"
@@ -668,12 +715,28 @@ class CaptureController:
                 return False
             time.sleep(min(0.1, remaining))
 
-    def _serial(self, label, command, timeout_seconds=40, *, respect_deadline=True):
+    def _serial(
+        self,
+        label,
+        command,
+        timeout_seconds=40,
+        *,
+        respect_deadline=True,
+        minimum_guest_timeout_seconds=None,
+        deadline_reserve_seconds=0,
+    ):
         if "\n" in command or "\r" in command or len(command) > SERIAL_COMMAND_LIMIT:
             raise ValueError("guest command violates one-line/4096-byte serial contract")
         requested_timeout = float(timeout_seconds)
+        if minimum_guest_timeout_seconds is not None:
+            minimum_guest_timeout_seconds = int(minimum_guest_timeout_seconds)
+            if minimum_guest_timeout_seconds < 1:
+                raise ValueError("minimum guest timeout must be positive")
+        deadline_reserve_seconds = int(deadline_reserve_seconds)
+        if deadline_reserve_seconds < 0:
+            raise ValueError("serial deadline reserve cannot be negative")
         bounded_timeout = self._bounded_timeout(
-            requested_timeout, respect_deadline=respect_deadline
+            requested_timeout + 2, respect_deadline=respect_deadline
         )
         active_deadline = (
             self._ack_deadline
@@ -682,10 +745,21 @@ class CaptureController:
         )
         if active_deadline is not None:
             remaining = active_deadline - time.monotonic()
-            guest_timeout = min(
-                int(requested_timeout), max(1, int(remaining) - 2)
-            )
-            outer_timeout = min(guest_timeout + 2, bounded_timeout)
+            guest_timeout = min(int(requested_timeout), int(remaining) - 2)
+            if guest_timeout < 1:
+                raise TimeoutError("serial command has no guest timeout budget")
+            if (
+                minimum_guest_timeout_seconds is not None
+                and guest_timeout < minimum_guest_timeout_seconds
+            ):
+                raise TimeoutError(
+                    "serial timeout is shorter than guest wait marker"
+                )
+            outer_timeout = min(guest_timeout + 2, bounded_timeout, remaining)
+            if outer_timeout - guest_timeout < 2:
+                raise TimeoutError("serial command has insufficient controller grace")
+            if remaining - outer_timeout < deadline_reserve_seconds:
+                raise TimeoutError("serial deadline cannot preserve completion reserve")
         else:
             guest_timeout = max(1, min(600, int(requested_timeout)))
             outer_timeout = max(10, requested_timeout + 15)
@@ -714,6 +788,28 @@ class CaptureController:
             "--timeout-seconds",
             str(max(1, min(600, guest_timeout))),
         ]
+        if active_deadline is not None:
+            dispatch_remaining = active_deadline - time.monotonic()
+            guest_timeout = min(guest_timeout, int(dispatch_remaining) - 2)
+            if guest_timeout < 1:
+                raise TimeoutError("serial command has no guest timeout budget")
+            if (
+                minimum_guest_timeout_seconds is not None
+                and guest_timeout < minimum_guest_timeout_seconds
+            ):
+                raise TimeoutError("serial timeout is shorter than guest wait marker")
+            outer_timeout = min(
+                guest_timeout + 2, bounded_timeout, dispatch_remaining
+            )
+            if outer_timeout - guest_timeout < 2:
+                raise TimeoutError("serial command has insufficient controller grace")
+            if dispatch_remaining - outer_timeout < deadline_reserve_seconds:
+                raise TimeoutError(
+                    "serial deadline cannot preserve completion reserve"
+                )
+            argv[argv.index("--timeout-seconds") + 1] = str(
+                max(1, min(600, guest_timeout))
+            )
         try:
             result = subprocess.run(
                 argv,
@@ -875,40 +971,58 @@ class CaptureController:
         return output
 
     def _wait_marker(self, suffix, timeout_seconds=None):
-        path = GUEST_ROOT + "-" + suffix
         marker = "FLR0416_WAIT=" + suffix + ":"
         timeout = (
             self.marker_timeout_seconds
             if timeout_seconds is None
             else max(1, min(ACK_COLLECTION_SECONDS, int(timeout_seconds)))
         )
-        gdb = self.launch_identity["gdb_process"]
-        command = (
-            "set -eu; p="
-            + str(gdb["pid"])
-            + "; expected="
-            + shlex.quote(gdb["start_token"])
-            + "; n=0; while [ \"$n\" -lt "
-            + str(timeout)
-            + " ]; do "
-            + "if [ -s "
-            + shlex.quote(GUEST_ROOT + "-observer-error")
-            + " ]; then echo "
-            + shlex.quote(marker + "OBSERVER_ERROR")
-            + "; exit 0; fi; "
-            + "if [ -s "
-            + shlex.quote(path)
-            + " ]; then echo "
-            + shlex.quote(marker + "READY")
-            + "; exit 0; fi; "
-            + "if [ ! -r /proc/$p/stat ] || [ \"$(awk '{print $22}' /proc/$p/stat 2>/dev/null || true)\" != \"$expected\" ]; then echo "
-            + shlex.quote(marker + "GDB_EXITED_OR_CHANGED")
-            + "; exit 0; fi; sleep 1; n=$((n+1)); done; echo "
-            + shlex.quote(marker + "TIMEOUT")
+        active_deadline = (
+            self._ack_deadline
+            if self._ack_deadline is not None
+            else self._abort_deadline
         )
-        output = self._serial("wait-" + suffix, command, timeout + 10)
-        if marker + "READY" not in output:
-            raise RuntimeError("guest did not reach " + suffix + ": " + marker)
+        if active_deadline is not None:
+            remaining = active_deadline - time.monotonic()
+            wait_budget = (
+                int(remaining)
+                - SERIAL_WAIT_COMPLETION_RESERVE_SECONDS
+            )
+            if wait_budget < 1:
+                raise TimeoutError("wait marker has no serial completion reserve")
+            timeout = min(
+                timeout,
+                wait_budget,
+            )
+        gdb = self.launch_identity["gdb_process"]
+        command = wait_marker_shell_command(
+            suffix, timeout, gdb["pid"], gdb["start_token"]
+        )
+        output = self._serial(
+            "wait-" + suffix,
+            command,
+            timeout + 10,
+            minimum_guest_timeout_seconds=timeout + 2,
+            deadline_reserve_seconds=2,
+        )
+        outcomes = [
+            line.strip()[len(marker) :]
+            for line in output.splitlines()
+            if line.strip().startswith(marker)
+        ]
+        if len(outcomes) != 1:
+            raise RuntimeError("guest wait marker response is missing or duplicated")
+        outcome = outcomes[0]
+        if outcome == "READY":
+            return
+        if outcome not in (
+            "OBSERVER_ERROR",
+            "GDB_EXITED_OR_CHANGED",
+            "TIMEOUT",
+            "WAIT_COMMAND_ERROR",
+        ):
+            raise RuntimeError("guest wait marker response has an invalid outcome")
+        raise RuntimeError("guest wait ended for " + suffix + ": " + outcome)
 
     def _fetch_guest(self, remote_path, local_name):
         if remote_path in self.guest_cache:
@@ -1571,7 +1685,7 @@ class CaptureController:
             create_attempt_claim(self.run_dir, "controller")
         except Exception as error:
             reason = "already-claimed" if isinstance(error, FileExistsError) else type(error).__name__
-            print("FLR0417_CONTROLLER_CLAIM=FAIL reason=" + reason, file=sys.stderr)
+            print("FLR0418_CONTROLLER_CLAIM=FAIL reason=" + reason, file=sys.stderr)
             return 1
 
         result = {
@@ -1716,7 +1830,7 @@ def decode_guest_json(output, expected_event):
 def guest_file_command(path, name):
     if not name or re.fullmatch(r"[A-Za-z0-9_.-]+", name) is None:
         raise ValueError("guest artifact name is invalid")
-    if not path.startswith("/run/user/1001/flr0417-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0418-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     quoted = shlex.quote(path)
     return (
@@ -2114,7 +2228,7 @@ def main(argv=None):
     parser.add_argument("--repo-root", type=Path)
     parser.add_argument(
         "--marker-timeout-seconds",
-        type=int,
+        type=parse_marker_timeout_seconds,
         default=ACK_COLLECTION_SECONDS,
         help="shared maximum per-stage collection window (default: 540 seconds)",
     )
@@ -2125,9 +2239,9 @@ def main(argv=None):
             create_attempt_claim(args.run_dir, args.claim_only)
         except Exception as error:
             reason = "already-claimed" if isinstance(error, FileExistsError) else type(error).__name__
-            print("FLR0417_START_CLAIM=FAIL reason=" + reason, file=sys.stderr)
+            print("FLR0418_START_CLAIM=FAIL reason=" + reason, file=sys.stderr)
             return 1
-        print("FLR0417_START_CLAIM=PASS run_id=" + RUN_ID)
+        print("FLR0418_START_CLAIM=PASS run_id=" + RUN_ID)
         return 0
     if args.qmp is None:
         parser.error("--qmp is required for capture mode")

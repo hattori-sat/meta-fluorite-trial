@@ -98,38 +98,38 @@ No product source, Devtool, BitBake, image, or cache changes.
   historical Markdown link failures without broadening scope.
 - [x] Run the repository test suite. (The 339 repository tests and 52 MCP tests
   passed; `make verify` is stopped only by 11 pre-existing Markdown targets.)
-- [ ] Review the explicit staged diff; commit the ticket, plan, log, code, and
+- [x] Review the explicit staged diff; commit the ticket, plan, log, code, and
   tests locally using privacy-safe metadata. Do not push.
-- [ ] Create the normal Git bundle from the exact new commit and use the
+- [x] Create the normal Git bundle from the exact new commit and use the
   established helper only. Verify helper-reported bundle SHA and exact receiver
   HEAD; no manual source copy and no build.
 
 ### Task 4 — one fresh exact-image runtime attempt
 
-- [ ] Recheck no owners/builds, run-ID and claim paths absent, ports/QMP socket
+- [x] Recheck no owners/builds, run-ID and claim paths absent, ports/QMP socket
   free, 6144-MiB policy/headroom, and exact unchanged FLR-0410 kernel/rootfs/
   qemuboot hashes before prepare/start.
-- [ ] Prepare one evidence directory, verify all staged hashes, acquire the
+- [x] Prepare one evidence directory, verify all staged hashes, acquire the
   atomic start claim, and start one QEMU. Require guest readiness.
-- [ ] Invoke capture once. Require controller claim before it can own teardown;
+- [x] Invoke capture once. Require controller claim before it can own teardown;
   run guest GDB/Python API smoke before launching Flutter.
-- [ ] Capture first-hit load/hit/post evidence with the existing identity,
+- [x] Capture first-hit load/hit/post evidence with the existing identity,
   present, kernel, guest-clock, and QMP brackets. If any stage fails, stop at
   first failure and retain bounded evidence; do not launch an ordinary fallback.
-- [ ] Quit only the recorded QEMU. Check PID/start identity disappearance, QMP
+- [x] Quit only the recorded QEMU. Check PID/start identity disappearance, QMP
   socket absence, postflight, and unchanged image hashes. Save final JSON before
   preview export.
-- [ ] If teardown is verified, export the allowlisted QMP still/video to Mac,
+- [x] If teardown is verified, export the allowlisted QMP still/video to Mac,
   inspect the entire frame, and record hashes. If evidence is incomplete, keep
   the result UNKNOWN and do not infer a render failure from a post-exit frame.
 
 ### Task 5 — close this bounded diagnostic unit
 
-- [ ] Compare the two orchestration hypotheses with support/falsifier evidence.
-- [ ] Update the ticket/log/TASKS with exact run ID, commit/bundle identity,
+- [x] Compare the two orchestration hypotheses with support/falsifier evidence.
+- [x] Update the ticket/log/TASKS with exact run ID, commit/bundle identity,
   preflight, guest GDB, QMP/present/kernel, teardown, and media verdicts.
-- [ ] Run canonical/privacy/checkpoint/diff verification and a read-only
+- [x] Run canonical/privacy/checkpoint/diff verification and a read-only
   postflight for no residual QEMU/build owners.
-- [ ] Mark FLR-0417 Done only if its observation/finalization acceptance gates
+- [x] Mark FLR-0417 Done only if its observation/finalization acceptance gates
   pass. Even then keep the product 3D goal open until its separate material,
   HUD, interaction, five-minute, and two-boot criteria are proven.

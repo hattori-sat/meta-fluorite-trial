@@ -164,12 +164,12 @@ def validate_controller_release(root, stage, expected_process):
 
         if not (
             release.get("event") == "CONTROLLER_ACK"
-            and release.get("run_id") == "flr0417-0001"
+            and release.get("run_id") == "flr0418-0001"
             and release.get("stage") == stage
             and release.get("manifest_path") == manifest_path
             and release.get("acknowledged") is True
             and manifest.get("event") == "EVIDENCE_MANIFEST"
-            and manifest.get("run_id") == "flr0417-0001"
+            and manifest.get("run_id") == "flr0418-0001"
             and manifest.get("stage") == stage
             and manifest.get("controller_acknowledged") is True
         ):
@@ -259,7 +259,7 @@ def validate_controller_release(root, stage, expected_process):
         breakpoint = ready.get("breakpoint", {})
         return bool(
             hit.get("event") == "HIT_RECORD"
-            and hit.get("run_id") == "flr0417-0001"
+            and hit.get("run_id") == "flr0418-0001"
             and hit.get("guest_boot_id") == expected_process["guest_boot_id"]
             and hit.get("process") == expected_process["process"]
             and hit.get("gdb_process") == expected_process["gdb_process"]
@@ -272,7 +272,7 @@ def validate_controller_release(root, stage, expected_process):
             and hit.get("caller_mapping") != "UNKNOWN"
             and ready.get("event") == "HIT_READY"
             and ready.get("stop_boundary") == "temporary-hardware-breakpoint"
-            and ready.get("run_id") == "flr0417-0001"
+            and ready.get("run_id") == "flr0418-0001"
             and ready.get("release_eligible") is True
             and ready.get("release_blockers") == []
             and ready.get("all_app_threads_stopped") is True
@@ -304,7 +304,7 @@ def validate_controller_abort(root, stage, expected_process):
             abort = json.load(stream)
         return bool(
             abort.get("event") == "CONTROLLER_ABORT"
-            and abort.get("run_id") == "flr0417-0001"
+            and abort.get("run_id") == "flr0418-0001"
             and abort.get("stage") == stage
             and abort.get("guest_boot_id") == expected_process["guest_boot_id"]
             and abort.get("process") == expected_process["process"]
