@@ -9,8 +9,8 @@
 - Candidate: unchanged [FLR-0410-0001](../evidence/FLR-0410-0001.md)
 - Branch: create from the exact verified milestone `dev` only after FLR-0421
   has a safe PR path and is integrated. FLR-0424 owns the current baseline
-  provenance gate; do not activate this ticket or publish its branch before
-  that gate is resolved.
+  provenance disposition (Done); do not activate this ticket or publish its
+  branch before FLR-0421 is integrated through the PR workflow.
 - Planned fresh run ID: `flr0423-0001` (do not create its evidence directory or
   activate this ticket before the branch prerequisite is met)
 
@@ -77,8 +77,8 @@ single most informative next check. Do not substitute load-time mappings.
 
 ## Next action
 
-Keep this ticket in Inbox until FLR-0424 establishes the exact safe milestone
-baseline and FLR-0421 is integrated through the approved PR workflow. Once
-ready, create its feature branch from that verified `dev`, write the execution
-plan, and begin with a failing unit test for the currently unexplained
+Keep this ticket in Inbox until FLR-0421 is integrated through the approved PR
+workflow. FLR-0424 has established the publication-only baseline disposition.
+Once ready, create this feature branch from that verified `dev`, write the
+execution plan, and begin with a failing unit test for the currently unexplained
 caller-map rejection. Never weaken the release gate to obtain a frame.

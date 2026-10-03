@@ -1,15 +1,15 @@
 # FLR-0424 — reconcile the feature PR baseline
 
-- Status: Inbox
+- Status: Done
 - Priority: High
 - Created: 2026-10-04
 - Owner: Git branch provenance / milestone integration
 - Blocks: [FLR-0423](FLR-0423-capture-caller-mapping-provenance.md)
 - Related: [FLR-0421](FLR-0421-preserve-journal-cursor-evidence.md)
 - Evidence: FLR-0421 branch audit in the [working log](../logs/2026-10-04-flr0421.md)
-- Branch: do not create a feature branch until the approved milestone base is
-  identified. Do not push, merge, rebase, cherry-pick, force-update, or delete
-  refs as part of this Inbox ticket.
+- Branch: this was a read-only baseline disposition; no feature branch was
+  created for it. The approved publication sequence belongs to FLR-0421. No
+  merge or history rewrite is authorized by this disposition.
 
 ## Purpose
 
@@ -22,6 +22,8 @@ base. Existing remote `dev` branches would produce a very broad feature diff.
 
 - `origin/main` is `5770cec`; it is an ancestor of local
   `dev-flr-0421-runtime-evidence` (`1fb42ee`), which is 155 commits ahead.
+- The local milestone interval contains 122 first-parent commits and 4 merge
+  commits; the latest first-parent sequence covers FLR-0410 through FLR-0418.
 - The local milestone branch's reflog records that it was created from `HEAD`
   at the FLR-0418 feature tip, rather than recording an explicit `main`
   starting point.
@@ -45,6 +47,24 @@ base. Existing remote `dev` branches would produce a very broad feature diff.
 Neither explanation is established. Compare the commit graph and ticket
 ownership/dependencies; do not infer validity from the local diff size alone.
 
+## Reviewed disposition
+
+- GPT-6.1 Sol's final read-only review judged that descent from `origin/main`
+  plus the inspected topology is sufficient for a **narrow publication-only
+  path**, not for certifying the preceding milestone history.
+- Publish the existing local `dev-flr-0421-runtime-evidence` at exactly
+  `1fb42ee` as a new remote ref. Then push the FLR-0421 feature ref and create
+  a PR with that `dev` ref as base. Do not merge the PR or merge the dev branch
+  into `main` as part of this disposition.
+- At review tip `29c4294`, feature-to-local-dev was 4 commits / 25 files
+  (+2,823/−236); the only planned addition to that reviewed tip is this
+  docs-only disposition commit. Recompute the exact PR diff before pushing.
+- Full-range privacy checks for `origin/main..dev-flr-0421-runtime-evidence`
+  and `dev-flr-0421-runtime-evidence..HEAD` passed before this docs update;
+  rerun both ranges after commit and before any push.
+- The user explicitly authorized commits and pushes. This does not authorize a
+  merge, and the 155 prior commits remain subject to review.
+
 ## Scope and guardrails
 
 - Map local/remote `main`, `dev-*`, and relevant `feature-*` ancestry and exact
@@ -66,12 +86,14 @@ ownership/dependencies; do not infer validity from the local diff size alone.
 2. A reviewed disposition names the exact safe base and the minimal
    policy-compliant publish/PR sequence, or records why no safe sequence can
    yet be selected.
-3. A simulated/actual diff against that base is bounded to the intended ticket
-   and its documented dependencies; no broad unrelated history is hidden.
+3. The simulated diff against the selected base is bounded to the intended
+   feature and documented handoff records; no broad unrelated history is
+   hidden.
 4. All existing refs and work remain recoverable; the decision and verification
    are recorded before any external mutation.
 
 ## Next action
 
-Perform the bounded ancestry/dependency audit after FLR-0421's local evidence is
-preserved. Do not push or merge until the baseline disposition is reviewed.
+Execute the recorded FLR-0421 publication sequence only after the post-commit
+full-range privacy checks pass. Keep the existing `main` and remote `dev` refs
+unchanged; do not merge.

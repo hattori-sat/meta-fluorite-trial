@@ -375,7 +375,7 @@ success measure was not met, and the overall product goal remains open.
   performed. Fetching the observed remote heads only added local
   remote-tracking refs; the worktree stayed clean.
 
-### Inference and decision
+### Inference and decision — initial review; superseded below
 
 - The local target isolates this ticket's commit range but does not prove that
   its 155-commit milestone snapshot was integrated under the required branch
@@ -386,9 +386,37 @@ success measure was not met, and the overall product goal remains open.
   this branch until [FLR-0424](FLR-0424-reconcile-feature-pr-baseline.md)
   resolves the baseline provenance. FLR-0423 remains Inbox behind that gate.
 
-### UNKNOWN
+### UNKNOWN — initial review; superseded below
 
 - Whether the local milestone's 155 commits form the approved FLR-0421 milestone
   dependency set, or include unrelated/unreviewed feature work.
 - The policy-compliant way to publish the milestone without broadening a
   ticket-scoped PR or rewriting protected history.
+
+## Final publication disposition — 2026-10-04
+
+- Follow-up topology inspection confirmed `origin/main` (`5770cec`) is an
+  ancestor of local `dev-flr-0421-runtime-evidence` (`1fb42ee`), which has 122
+  first-parent commits and 4 merge commits after main. The initial no-safe-base
+  review above is superseded by GPT-6.1 Sol's updated read-only review.
+- Sol's final verdict is **GO for publication only**: push the existing local
+  milestone at exactly `1fb42ee` as a new remote `dev` ref, then push the
+  FLR-0421 feature and create a feature-to-dev PR. This does not authorize a
+  merge, certify the 155 prior commits, or permit changing existing refs.
+- At review tip `29c4294`, the feature range was 4 commits / 25 files
+  (+2,823/−236). The only subsequent planned change is this docs-only decision
+  record; recompute exact range and rerun privacy checks before publication.
+- Full-range privacy checks passed at review tip for
+  `origin/main..dev-flr-0421-runtime-evidence` and
+  `dev-flr-0421-runtime-evidence..HEAD`. They must pass again after this update.
+- FLR-0424 records the completed baseline disposition. FLR-0421 remains In
+  Progress because the required post-release QMP capture and product behavior
+  are still UNKNOWN.
+
+### Remaining UNKNOWN
+
+- Whether all 155 commits on the local milestone have been independently
+  reviewed as a dependency set. Publication exposes that history for review but
+  is not approval of its integration.
+- Actual remote publication, PR review/integration, and any post-release
+  Sequoia/HUD runtime evidence have not occurred yet.
