@@ -115,26 +115,27 @@ Protect insertion with the same `eventCallbacksMutex`:
 
 - [x] Used the existing `scripts/rebase-fluorite-devtool-component.sh` path at baseline `c9ffc87` and source commit `0290b78`; it completed with `component-rebase=PASS` through official `devtool update-recipe --mode patch --append --no-remove`.
 - [x] Generated patch `From` is the exact source commit; it changes only `filament_view_plugin.cc`, matches the canonical copy byte-for-byte (SHA-256 `6687e42f40de7be69bd0276ec892da07951936c1f9cd13b1721ed33058dc9d6b`), and is registered once after 0334 with `patchdir=ivi-homescreen-plugins`.
-- [ ] Run the focused component/recipe patch gates and repository privacy/Markdown checks. Do not hand-edit generated patch text or repair a context failure by editing the patch.
+- [x] Run the focused component/recipe patch gates and repository privacy/Markdown checks. Mini `do_patch`/`do_compile` and privacy passed; Markdown checker was run and reports the same 11 pre-existing missing links in FLR-0338/0339/0340/0391/0395, with no FLR-0410/0411 target missing. Do not hand-edit generated patch text or repair a context failure by editing the patch.
 - [ ] Commit the canonical layer/ticket/log delta locally. Record hashes and branch/tip; do not push.
 
 ## Task 5: Transfer once and build on the fixed Mini environment
 
-- [ ] Reconfirm sole active ticket and no other Mini BitBake/build/QEMU owner immediately before handoff/build.
-- [ ] Use `scripts/handoff-fluorite-bundle.sh` once for the exact committed base/tip; verify the fixed inbox, effective-BBLAYERS `BUILD_RECEIVER`, bundle hash, bundle verification, effective TOPDIR/TMPDIR, and exact receiver tip. Leave the distinct staging repository untouched.
-- [ ] Run Mini `flutter-auto:do_patch`, then `do_compile`, then the exact configured image build in the existing `BUILD_DIR`/`TMPDIR`. Preserve complete command exit codes/task counts while retaining only bounded failure excerpts in the committed log.
-- [ ] Do not rerun a failed task without the first actionable error and evidence-based correction; do not clean caches to force success.
-- [ ] Hash rootfs, kernel, qemuboot, and manifest. This becomes the runtime candidate identity; no pre-build or previous-rootfs screenshots count as this candidate's evidence.
+- [x] Reconfirm sole active ticket and no other Mini BitBake/build/QEMU owner immediately before handoff/build.
+- [x] Use `scripts/handoff-fluorite-bundle.sh` once for the exact committed base/tip; verify the fixed inbox, effective-BBLAYERS `BUILD_RECEIVER`, bundle hash, bundle verification, effective TOPDIR/TMPDIR, and exact receiver tip. Leave the distinct staging repository untouched.
+- [x] Run Mini `flutter-auto:do_patch`, then `do_compile`, then the exact configured image build in the existing `BUILD_DIR`/`TMPDIR`. Preserve complete command exit codes/task counts while retaining only bounded failure excerpts in the committed log.
+- [x] Do not rerun a failed task without the first actionable error and evidence-based correction; do not clean caches to force success.
+- [x] Hash rootfs, kernel, qemuboot, and manifest. This becomes the runtime candidate identity; no pre-build or previous-rootfs screenshots count as this candidate's evidence.
 
 ## Task 6: Validate the candidate runtime and separate process health from pixels
 
-- [ ] Preflight one QEMU using the existing harness, exact image hashes, unique ports/socket, 4096 MiB when selected from prior memory evidence, and one recorded run ID.
+- [ ] Preflight one QEMU using the existing harness, exact image hashes, unique ports/socket, 6144 MiB from the prior ordinary-profile runs and user authorization, and one recorded run ID. Recheck qemuboot hash separately because the harness validates rootfs/kernel hashes only.
 - [ ] Launch the ordinary Example Demo / normal `flutter-auto` path as the established guest user. Do not use constant-color override, diagnostic cube, CPU SHM image, skipped frame event, input suppression, or sync bypass.
-- [ ] Immediately after recording exact PID/UID/start identity and `flutter-auto` READY, capture a complete QMP still and start a short QMP-only video before any longer observer or debugger action. Keep the original image dimensions/full frame.
+- [ ] Use the ordinary-profile launch from FLR-0405 as the starting point; do not reuse FLR-0408's command because it skipped skybox, indirect lighting, shapes, and lights. Verify guest UID 1001, Wayland socket, ordinary Example Demo path, no competing `flutter-auto`, and no profile override/bypass in the actual environment.
+- [ ] Immediately after recording exact live PID/UID/start identity, capture a complete QMP still and start a short QMP-only video before waiting for READY or beginning longer observer/debugger work. Record readiness concurrently, preserving the initial screen and original image dimensions/full frame.
 - [ ] Verify Gate A separately: identifiable production Sequoia pixels with original texture/material/lighting; compare known full-screen/historical ROIs only after visually confirming the whole frame.
 - [ ] Verify Gate B separately: CPU/GPU/FPS HUD and Sequoia in that same QMP frame; inspect actual overlap/order and non-HUD Sequoia region.
-- [ ] Exercise pointer motion, hover, click, and normal UI updates while preserving redraw. Capture after each state and verify no HUD whitening, vehicle disappearance, or full black.
-- [ ] Monitor present counters and process/kernel state for five minutes; record start/end counter deltas and first fault. Negotiate QMP quit and verify only the owned QEMU/process/socket is gone.
+- [ ] Exercise pointer motion, hover, click, and normal UI updates while preserving redraw. Prove the guest handled each action (not merely QMP input acceptance), capture after each state, and verify no HUD whitening, vehicle disappearance, or full black.
+- [ ] Monitor present progress and process/kernel state throughout five minutes, including intermediate samples (not just endpoints); record the observation window, per-sample counters, and first fault. Negotiate QMP quit and verify only the owned QEMU/process/socket is gone.
 - [ ] Only after boot 1 passes, repeat independently on the exact same candidate image for boot 2 and capture the same gates. Do not call the overall goal complete if any gate is missing or UNKNOWN.
 
 ## Verification and risk notes

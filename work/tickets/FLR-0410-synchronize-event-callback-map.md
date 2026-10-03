@@ -125,13 +125,21 @@ that production Sequoia/HUD acceptance is complete.
   `BUILD_DIR`/`TMPDIR`, with no cache deletion, cleansstate, or second build
   tree.
 - [ ] Before QEMU, confirm no other owner is using the Mini build/TMPDIR/QEMU.
-  Run only one QEMU at a time, using the established 4096 MiB profile if
-  required, and capture a full QMP frame immediately after exact guest
-  PID/UID/start-identity confirmation and before teardown.
+  Run only one QEMU at a time at 6144 MiB (prior ordinary-profile runs plus
+  user authorization), and independently verify qemuboot identity because the
+  runtime harness hashes rootfs/kernel only. Start from FLR-0405's ordinary
+  launch, not FLR-0408's command that skipped skybox/indirect light/shapes/
+  lights. Check guest UID 1001, Wayland socket, Example Demo bundle, no competing
+  app, and no selector/bypass in the actual environment. Capture the full QMP
+  screen/video immediately after live PID/UID/start identity; record READY in
+  parallel rather than waiting for it before the first capture.
 - [ ] The ordinary Example Demo keeps `flutter-auto` alive, presents continue,
   and has no new kernel Oops or core during the bounded run. Record exact
   counters and raw evidence hashes; do not equate process liveness with pixels.
-- [ ] Report production Sequoia, original material/lighting, HUD, depth,
+- [ ] Prove guest handling of pointer motion, hover, click, and normal redraw;
+  QMP input acceptance alone does not establish app handling. Sample present
+  and process/kernel health throughout the five-minute window, not just at its
+  endpoints. Report production Sequoia, original material/lighting, HUD, depth,
   interaction, five-minute stability, and two-boot gates separately. If any
   remains unproven, leave the overall goal open and open a separate ticket for
   the next independent boundary.
@@ -178,8 +186,9 @@ that production Sequoia/HUD acceptance is complete.
   `d3da2090b17d` with no push.
 - The effective Mini build-layer checkout was distinguished from the separate
   staging repository, and the full-history bundle was delivered to that
-  effective checkout. Mini `flutter-auto:do_patch` and forced `do_compile`
-  have now passed; no image build or QEMU run has yet occurred.
+  effective checkout. Mini `flutter-auto:do_patch`, forced `do_compile`, and
+  the full `agl-ivi-image-flutter` build all passed on the existing build and
+  TMPDIR. No QEMU runtime has yet occurred.
 
 ### Check
 
@@ -193,8 +202,9 @@ that production Sequoia/HUD acceptance is complete.
   excluding that patch and the Devtool source check pass. `git apply --stat`
   parses the patch successfully; Mini `do_patch` and `do_compile` results are
   recorded below.
-- Mini full image and QMP runtime: pending. Do not use the
-  FLR-0408 post-exit black state or missing frame as a rendering verdict.
+- Mini full image: **PASS**; QMP runtime and all visual/health gates: pending.
+  Do not use the FLR-0408 post-exit black state or missing frame as a rendering
+  verdict.
 
 - Full-history bundle handoff, remote SHA verification, exact receiver tip,
   effective `TOPDIR`/`TMPDIR`, and receiver cleanliness: PASS. The bundle SHA
@@ -216,15 +226,35 @@ that production Sequoia/HUD acceptance is complete.
   check using only `S`, `WORKDIR`, the exact `patchdir`, and two expected source
   markers then passed. This was an observer-path mistake, not a patch or
   product failure.
-- Full `agl-ivi-image-flutter` image build, image hashes, QMP pixels, runtime
-  stability, and teardown: pending.
+- Full `agl-ivi-image-flutter` build: exit 0 in 5m31s; 11898 tasks attempted,
+  11878 not rerun, all succeeded. BitBake was idle afterward; available space
+  was 64,349,060 KiB. Raw task output and compact summary are retained under
+  the fixed Mini receiver's ignored `evidence/FLR-0410/` directory. Raw build
+  log SHA-256: `a129d8844d0d89253591fdf8012bb3b4f40315cd9626c9556e606e44116a8c62`.
+- The completed rootfs, manifest, qemuboot config, and kernel artifact hashes
+  are respectively `f8ed8f1194d13175fe91676fba24cdd8d564a69deb58d1bc0b7d91a87faeef08`,
+  `f9ce275b76ac46611a641123ab279be45060ee35f790947ea470d0d37be61ab7`,
+  `3872b66339ac3601c704f1b54cab5630796ccf5f0f95ebc4e7077210e89d107f`, and
+  `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`.
+  Rootfs/manifest/qemuboot resolve to completed timestamp `20261003021855`;
+  kernel resolves to the existing `20260405092846` artifact. All hashes were
+  read from the Mini deploy directory and must be rechecked before launch.
+- Qemuboot targets qemux86-64/ext4, uses a USB tablet, and defaults to 2048 MiB
+  RAM. The planned 6144 MiB runtime override matches prior ordinary-profile
+  runs and the user's authorization; it is not a product/configuration change.
+- Two artifact-inspection commands initially assumed shell-style uppercase
+  `QB_*` keys, but the qemuboot file is INI with lowercase `qb_*`. The bounded
+  follow-up read corrected the format assumption and retrieved the config and
+  hashes; no state changed.
+- QMP still/video, Sequoia pixels, same-frame HUD composition, interaction/
+  repaint stability, five-minute health, second independent boot, and teardown
+  remain pending/UNKNOWN. Build success alone proves none of these.
 
 ### UNKNOWN
 
 - Whether synchronizing the map prevents the specific saved SIGSEGV.
 - Whether the ordinary Example Demo will show identifiable Sequoia and HUD on
-  the resulting candidate image.
-- Whether the full `agl-ivi-image-flutter` build succeeds with this commit.
+  this exact rootfs `f8ed8f11…`.
 - Whether the production material/texture/lighting, depth, interaction,
   five-minute present, and two-boot requirements will pass.
 
@@ -235,7 +265,20 @@ that production Sequoia/HUD acceptance is complete.
   composition boundary. Do not extend this map ticket to unrelated scene fixes.
 - Complete the overall goal only after every user-specified acceptance gate
   passes on the same final candidate image.
-- Next, run exactly one `agl-ivi-image-flutter` build in the existing Mini
-  build/TMPDIR after a fresh idle/space/receiver check. Preserve the raw output
-  outside Git and record the task summary; notify the user before the long
-  build. Do not clean downloads, sstate, TMPDIR, or recipe state to force it.
+- Before QEMU, repeat the argv-aware owner check (not `comm`-only), verify the
+  exact receiver/build/TMPDIR roles, artifact hashes, ports, stale QMP socket,
+  available resources, and absence of a prior `flr0410-0001` run directory.
+  Launch only one ordinary Example Demo QEMU at 6144 MiB, starting from the
+  FLR-0405 ordinary launch rather than FLR-0408's scene-suppressing profile.
+  Validate UID 1001, Wayland, bundle, no app competitor, and actual env before
+  drawing conclusions. Capture full-screen QMP still/video immediately after
+  live PID/UID/start identity; collect READY concurrently, not as a capture
+  prerequisite. Do not apply selectors, debug material/light/camera, input
+  suppression, or synchronization bypasses. If identity is lost, an Oops or
+  abnormal exit appears, preserve evidence and stop that run; distinguish an
+  observer failure from a product fault and do not classify a post-exit frame.
+- If the first run is healthy and visually positive, continue guest-confirmed
+  interaction, repaint, and intermediate present/kernel samples throughout the
+  five-minute window, then perform a second independent boot of this exact
+  candidate. Preserve raw evidence outside Git; do not clean downloads, sstate,
+  TMPDIR, or recipe state.
