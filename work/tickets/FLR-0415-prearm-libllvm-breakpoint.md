@@ -188,7 +188,7 @@ emulator root cause.
   full QMP still/video. First hit remains stopped after capture.
 - [x] One-run cleanup passes for the exact app/GDB/QEMU identities, ports,
   QMP socket, and candidate artifact hashes.
-- [ ] Facts/inferences/hypotheses/UNKNOWN and command results are recorded in
+- [x] Facts/inferences/hypotheses/UNKNOWN and command results are recorded in
   this ticket/log/manifest; canonical, privacy, checkpoint, link, and diff
   checks pass or retain only the known historical broken-link set.
 
@@ -265,8 +265,8 @@ emulator root cause.
 - Static closeout checks: canonical repository PASS, privacy PASS, and
   `git diff --check` PASS. Markdown link check reports the same 11 historical
   missing targets outside this ticket; no FLR-0415 link is among them. The
-  ticket checkpoint is deferred until the successor is the sole In Progress
-  item.
+  FLR-0415 and FLR-0416 checkpoint contracts both PASS with FLR-0416 as the
+  sole In Progress item.
 - Product gates remain: original Sequoia texture/material/light, same-frame
   HUD+Sequoia, view/depth/occlusion, input/repaint stability, five minutes of
   advancing present, and two independent boots on the same final image.
