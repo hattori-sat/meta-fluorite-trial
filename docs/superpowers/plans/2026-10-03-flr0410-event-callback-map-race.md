@@ -47,8 +47,8 @@
 
 - [x] Record the exact debug ELF Build-ID, ELF mapping, `CallEvent` stack, source thread contract, the Sol review, and the remaining causality UNKNOWN in FLR-0409.
 - [x] Mark FLR-0409 Done only as a bounded symbol/source-boundary result; keep FLR-0408 pixels UNKNOWN.
-- [ ] Make FLR-0410 the only In Progress ticket and commit this documentation checkpoint locally without pushing.
-- [ ] Fast-forward the current dev milestone only if its branch is an ancestor of the completed FLR-0409 tip; then create `feature-flr-0410-event-callback-map-race`. If the relationship is not a clean fast-forward, stop and retain the evidence rather than moving a branch forcibly.
+- [x] Make FLR-0410 the only In Progress ticket and commit this documentation checkpoint locally without pushing.
+- [x] Fast-forward the current dev milestone only if its branch is an ancestor of the completed FLR-0409 tip; then create `feature-flr-0410-event-callback-map-race`. If the relationship is not a clean fast-forward, stop and retain the evidence rather than moving a branch forcibly.
 
 ## Task 2: Verify the exact Devtool baseline and exclusive build/runtime ownership
 
