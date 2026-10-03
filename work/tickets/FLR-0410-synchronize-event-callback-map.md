@@ -1,8 +1,9 @@
 # FLR-0410 — synchronize Flutter event completion with the ECS frame loop
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Created: 2026-10-03
+- Updated: 2026-10-03
 - Owner: Flutter platform-message callback / Filament ECS frame-event roles
 - Branch: `feature-flr-0410-event-callback-map-race`
 - Depends on: [FLR-0409](FLR-0409-symbolize-flutter-auto-sigsegv.md),
@@ -10,6 +11,44 @@
   historical [FLR-0277](FLR-0277-isolate-production-call-event-segv.md)
 - Plan: [FLR-0410 implementation plan](../../docs/superpowers/plans/2026-10-03-flr0410-event-callback-map-race.md)
 - Working log: [FLR-0410 working log](../logs/2026-10-03-flr0410.md)
+- Latest runtime evidence: [FLR-0410-0001 manifest](../evidence/FLR-0410-0001.md)
+- Follow-up: [FLR-0413](FLR-0413-resolve-fengine-loop-page-fault-instruction.md)
+
+## Latest result — FLR-0410-0001
+
+- Official patch handoff, `do_patch`, `do_compile`, and full image build
+  passed. Candidate rootfs SHA-256:
+  `f8ed8f1194d13175fe91676fba24cdd8d564a69deb58d1bc0b7d91a87faeef08`.
+- One ordinary-profile QEMU run launched the UID-1001 Example Demo. The first
+  immediate full-screen QMP still was entirely black. The later live/fault
+  frame and all eight frames in the four-second review video were byte-identical
+  to one another, but were **not black**: they show a white field and a large
+  near-black polygon, with no identifiable Sequoia and no HUD. Equal hashes
+  establish a static capture, not an all-black image.
+- The later 1280×800 frame has 37 colors, 598,250 pure-white pixels, 425,750
+  pixels with every channel ≤8, and zero exact-black pixels. The geometry is
+  not recognizable as the production vehicle.
+- The guest recorded two present begins, one return, one successful return, an
+  unmatched begin, and two kernel faults. At uptime 376.161, `FEngine::loop`
+  (TID 758) took a user-mode supervisor-read page fault at RIP
+  `0x7f1c3bd22541`, CR2 `0x00000000d9486750`; RSP had the same low 32-bit value
+  as CR2. The RIP maps to ELF VMA `0xb1d541` in libLLVM Build-ID
+  `359c1108040bc6bc1af64bb639d0b25385858051`.
+- A later GDB snapshot found the faulting LWP gone while the parent
+  `flutter-auto` remained alive; no coredump was available. This does not prove
+  the old callback-map SIGSEGV cause or the FLR-0341 present-wait stack.
+- QMP quit, app stop, postflight, port checks, artifact rehash, and residual
+  owner checks passed. No input/repaint, five-minute, or second-boot gate was
+  run after the fault. Runtime acceptance **FAILED**; FLR-0413 owns the next
+  instruction/address discriminator.
+
+### QMP evidence
+
+![FLR-0410-0001 live/fault frame: white field and large dark polygon, no identifiable Sequoia or HUD](../evidence/FLR-0410-0001/after-fault.png)
+
+The first black capture, video, pixel counts, raw Mini paths, and hashes are
+indexed in the evidence manifest. Mini PPM frames are authoritative; the MP4
+is a review encoding.
 
 ## Work unit
 
@@ -117,14 +156,14 @@ that production Sequoia/HUD acceptance is complete.
   byte-for-byte. The outer repository's generic `git show --check` reports four
   single-space unified-diff context lines inside that generated patch; source
   commit whitespace validation passes and Mini `do_patch` remains authoritative.
-- [ ] The canonical repository/privacy/recipe gates pass; the authorized layer
+- [x] The canonical repository/privacy/recipe gates pass; the authorized layer
   baseline lock is refreshed only by the standard helper if the tracked layer
   changes. Do not create or track an `index.local` file.
-- [ ] One verified full-history bundle reaches the fixed Mini receiver; exact
+- [x] One verified full-history bundle reaches the fixed Mini receiver; exact
   candidate `do_patch`, `do_compile`, and full image tasks pass on the existing
   `BUILD_DIR`/`TMPDIR`, with no cache deletion, cleansstate, or second build
   tree.
-- [ ] Before QEMU, confirm no other owner is using the Mini build/TMPDIR/QEMU.
+- [x] Before QEMU, confirm no other owner is using the Mini build/TMPDIR/QEMU.
   Run only one QEMU at a time at 6144 MiB (prior ordinary-profile runs plus
   user authorization), and independently verify qemuboot identity because the
   runtime harness hashes rootfs/kernel only. Start from FLR-0405's ordinary
@@ -133,9 +172,10 @@ that production Sequoia/HUD acceptance is complete.
   app, and no selector/bypass in the actual environment. Capture the full QMP
   screen/video immediately after live PID/UID/start identity; record READY in
   parallel rather than waiting for it before the first capture.
-- [ ] The ordinary Example Demo keeps `flutter-auto` alive, presents continue,
-  and has no new kernel Oops or core during the bounded run. Record exact
-  counters and raw evidence hashes; do not equate process liveness with pixels.
+- [ ] **FAIL — FLR-0410-0001:** a kernel fault was recorded in `FEngine::loop`
+  and the present sequence was unmatched. The parent `flutter-auto` remaining
+  alive is not a healthy-render pass. Exact counters and hashes are in the
+  evidence manifest.
 - [ ] Prove guest handling of pointer motion, hover, click, and normal redraw;
   QMP input acceptance alone does not establish app handling. Sample present
   and process/kernel health throughout the five-minute window, not just at its
@@ -188,7 +228,8 @@ that production Sequoia/HUD acceptance is complete.
   staging repository, and the full-history bundle was delivered to that
   effective checkout. Mini `flutter-auto:do_patch`, forced `do_compile`, and
   the full `agl-ivi-image-flutter` build all passed on the existing build and
-  TMPDIR. No QEMU runtime has yet occurred.
+  TMPDIR. At that build checkpoint QEMU had not yet run; see the latest result
+  above for the subsequent runtime outcome.
 
 ### Check
 
@@ -202,9 +243,9 @@ that production Sequoia/HUD acceptance is complete.
   excluding that patch and the Devtool source check pass. `git apply --stat`
   parses the patch successfully; Mini `do_patch` and `do_compile` results are
   recorded below.
-- Mini full image: **PASS**; QMP runtime and all visual/health gates: pending.
-  Do not use the FLR-0408 post-exit black state or missing frame as a rendering
-  verdict.
+- Mini full image: **PASS**. FLR-0410-0001 then failed runtime health with an
+  `FEngine::loop` kernel page fault and an unmatched present. Its QMP captures
+  do not show recognizable Sequoia or HUD; see the linked manifest.
 
 - Full-history bundle handoff, remote SHA verification, exact receiver tip,
   effective `TOPDIR`/`TMPDIR`, and receiver cleanliness: PASS. The bundle SHA
@@ -246,15 +287,16 @@ that production Sequoia/HUD acceptance is complete.
   `QB_*` keys, but the qemuboot file is INI with lowercase `qb_*`. The bounded
   follow-up read corrected the format assumption and retrieved the config and
   hashes; no state changed.
-- QMP still/video, Sequoia pixels, same-frame HUD composition, interaction/
-  repaint stability, five-minute health, second independent boot, and teardown
-  remain pending/UNKNOWN. Build success alone proves none of these.
+- QMP still/video and teardown are complete for FLR-0410-0001. It showed no
+  identifiable Sequoia/HUD and failed runtime health. Interaction/repaint,
+  five-minute stability, and second independent boot were not run after the
+  fault. Build success proves none of these gates.
 
 ### UNKNOWN
 
 - Whether synchronizing the map prevents the specific saved SIGSEGV.
-- Whether the ordinary Example Demo will show identifiable Sequoia and HUD on
-  this exact rootfs `f8ed8f11…`.
+- Whether the static white-field/dark-polygon frame results from the renderer
+  fault, its present boundary, or a distinct draw/composition problem.
 - Whether the production material/texture/lighting, depth, interaction,
   five-minute present, and two-boot requirements will pass.
 
@@ -282,3 +324,12 @@ that production Sequoia/HUD acceptance is complete.
   five-minute window, then perform a second independent boot of this exact
   candidate. Preserve raw evidence outside Git; do not clean downloads, sstate,
   TMPDIR, or recipe state.
+
+### Current disposition
+
+- FLR-0410 is **Waiting**, not Done. The source patch and image build pass, but
+  the only candidate runtime faulted before it could establish renderer health.
+  FLR-0413 owns the independent RIP/CR2/ELF instruction-boundary analysis.
+- Do not repeat this QEMU profile or change scene/material/light/camera,
+  composition, input, or present behavior before FLR-0413 identifies the first
+  missing fault boundary. The overall product objective remains open.
