@@ -1,6 +1,6 @@
 # FLR-0413 — resolve the FEngine page-fault instruction/address boundary
 
-- Status: In Progress
+- Status: Done — bounded static address/instruction/helper reconciliation; product goal remains open
 - Priority: Critical
 - Created: 2026-10-03
 - Owner: guest kernel page-fault evidence / `FEngine::loop` / ELF mapping roles
@@ -155,11 +155,11 @@ conditional inference, not a proven product or emulator root cause.
 - [x] Classify each claim as Fact, Inference, Hypothesis, or UNKNOWN; the
   static address/mapping boundary is resolved, while control transfer and
   fault-time segment state remain UNKNOWN.
-- [ ] Open a separate ticket/log for the one live hardware-breakpoint capture
-  and activate it after this closeout commit; fault-time context is essential.
+- [x] Opened the separate [FLR-0414 ticket/log](FLR-0414-capture-libllvm-iret-control-transfer.md)
+  for the one live hardware-breakpoint capture; fault-time context is essential.
 - [x] Run canonical/privacy/checkpoint/Markdown-link/diff checks and commit
   only FLR-0413 static records locally. The full link checker reports the same
-  11 historical missing targets; no new FLR-0410/0413 link is implicated.
+  11 historical missing targets; no new FLR-0410/0413/0414 link is implicated.
 
 ## Plan / Do / Check / Act
 
@@ -206,12 +206,12 @@ conditional inference, not a proven product or emulator root cause.
 
 - Preserve FLR-0410-0001 exactly; no need to repeat its build or alter product
   code to resolve this static boundary.
-- Create one identity-bound live hardware-breakpoint ticket against the same
-  candidate; capture the active accelerator before allowing the target
-  instruction to continue.
-- Keep FLR-0413 In Progress until the successor ticket and TASKS transition
-  are committed. Never promote the conditional emulator mechanism to root
-  cause without live state.
+- FLR-0413 is Done only as a bounded static discriminator. No product cause or
+  renderer fix is claimed.
+- [FLR-0414](FLR-0414-capture-libllvm-iret-control-transfer.md) owns one
+  hardware-breakpoint run against the same image. Do not rebuild or retransfer
+  the candidate, and do not promote the conditional mechanism to root cause
+  without live state.
 - Do not mark the overall goal Done from matching a symbol name, process
   readiness, a diagnostic fixture, or present counters alone.
 
