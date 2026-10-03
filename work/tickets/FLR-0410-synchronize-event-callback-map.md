@@ -177,8 +177,9 @@ that production Sequoia/HUD acceptance is complete.
   FLR-0410/0411 records, and dashboard were committed locally in
   `d3da2090b17d` with no push.
 - The effective Mini build-layer checkout was distinguished from the separate
-  staging repository. No Mini-side write, BitBake task, or QEMU run has yet
-  occurred.
+  staging repository, and the full-history bundle was delivered to that
+  effective checkout. Mini `flutter-auto:do_patch` and forced `do_compile`
+  have now passed; no image build or QEMU run has yet occurred.
 
 ### Check
 
@@ -190,15 +191,40 @@ that production Sequoia/HUD acceptance is complete.
   single-space context lines in the generated unified patch. The patch is an
   official Devtool artifact and is not hand-edited; the scoped canonical check
   excluding that patch and the Devtool source check pass. `git apply --stat`
-  parses the patch successfully. Mini `do_patch` is still pending.
-- Mini `do_patch`, compile, image, and QMP runtime: pending. Do not use the
+  parses the patch successfully; Mini `do_patch` and `do_compile` results are
+  recorded below.
+- Mini full image and QMP runtime: pending. Do not use the
   FLR-0408 post-exit black state or missing frame as a rendering verdict.
+
+- Full-history bundle handoff, remote SHA verification, exact receiver tip,
+  effective `TOPDIR`/`TMPDIR`, and receiver cleanliness: PASS. The bundle SHA
+  is `5ccf8095037ec13eb7211732efe86dcd7012901e863cd2ac5f6a61ac9cb69012`;
+  the active receiver reached `1613a9c8daee560ea639fdb76aad5f9fd15f88a8`.
+- Mini `flutter-auto:do_patch`: PASS via the existing recipe patch-gate helper;
+  its bounded summary reports `workdir-reset=PASS` and `do_patch=PASS`. The
+  applied source is under the recipe's `S/ivi-homescreen-plugins` patchdir and
+  contains the new synchronization helper. No BitBake process remained.
+- Mini forced `flutter-auto:do_compile`: exit 0 in 1m52s. BitBake attempted
+  2686 tasks, 2681 required no rerun, and all succeeded. The raw task output
+  and compact exit/task-count summary remain under the fixed receiver's
+  ignored `evidence/FLR-0410/` role directory; BitBake process count after the
+  task was zero. No cache was removed and no alternate build/TMPDIR was used.
+- One supplementary read-only source check initially treated `S` as the
+  component root and returned exit 1; the actual configured `patchdir` is
+  `ivi-homescreen-plugins`. The command also selected the enormous `SRC_URI`
+  metadata line and its output was truncated. No state changed. A narrower
+  check using only `S`, `WORKDIR`, the exact `patchdir`, and two expected source
+  markers then passed. This was an observer-path mistake, not a patch or
+  product failure.
+- Full `agl-ivi-image-flutter` image build, image hashes, QMP pixels, runtime
+  stability, and teardown: pending.
 
 ### UNKNOWN
 
 - Whether synchronizing the map prevents the specific saved SIGSEGV.
 - Whether the ordinary Example Demo will show identifiable Sequoia and HUD on
   the resulting candidate image.
+- Whether the full `agl-ivi-image-flutter` build succeeds with this commit.
 - Whether the production material/texture/lighting, depth, interaction,
   five-minute present, and two-boot requirements will pass.
 
@@ -209,3 +235,7 @@ that production Sequoia/HUD acceptance is complete.
   composition boundary. Do not extend this map ticket to unrelated scene fixes.
 - Complete the overall goal only after every user-specified acceptance gate
   passes on the same final candidate image.
+- Next, run exactly one `agl-ivi-image-flutter` build in the existing Mini
+  build/TMPDIR after a fresh idle/space/receiver check. Preserve the raw output
+  outside Git and record the task summary; notify the user before the long
+  build. Do not clean downloads, sstate, TMPDIR, or recipe state to force it.
