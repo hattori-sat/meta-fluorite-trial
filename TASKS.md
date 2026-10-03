@@ -4,7 +4,7 @@ Last updated: 2026-10-03
 
 ## Current focus
 
-**Active as of 2026-10-03:** FLR-0415 is Waiting. Its single exact-image GDB-owned run verified the target hardware breakpoint and captured registers/instructions/stack, but the hit-marker command failed with Python `TypeError`; kernel fault count stayed 0. QMP samples were uniformly black, but timing/process/present correlation is UNKNOWN. No current-image product-render pass is established. FLR-0416 will own the observer fix and next single run.
+**Active as of 2026-10-03:** FLR-0416 is the sole In Progress ticket, stacked on FLR-0415's committed evidence. FLR-0415's GDB-owned run verified the target hardware breakpoint and captured registers/instructions/stack, but nested callback formatting failed before its hit marker; kernel faults stayed 0/0. QMP samples were uniformly black, but app/present/time correlation is UNKNOWN. FLR-0416 has 62 focused offline tests and the full repository suite passes 311 tests with localhost-only socket access. Tests cover typed observation, atomic guest record publication, deadlines anchored before guest waits, cursor checks around incremental reads, bounded identity-bound aborts, release-outcome UNKNOWN handling, complete QMP evidence, and fail-closed process/port preflight. The link checker still reports the same 11 historical missing targets, with no new FLR-0416 failures. Mini smoke/runtime and product result remain UNKNOWN. No current-image product-render pass is established.
 
 **Current user-visible target (2026-10-03):** display production Sequoia with original material/texture/lighting, composed with the Flutter HUD, stable through input/repaint, five minutes of progressing present, and two independent boots on one final candidate image. Keep visual gates separate: production Sequoia pixels (Gate A), then same-frame HUD+Sequoia composition (Gate B). FLR-0394 proves only a self-created LIT fixture plus HUD. FLR-0049 proves historical production Sequoia pixels/red lamps on another run, but not HUD composition or current-image acceptance. FLR-0404 and FLR-0405-0003 are negative ordinary-profile runs. FLR-0408 replayed the known-positive 0049 model-only controls on exact 0334, but the SIGSEGV occurred before a QMP frame. FLR-0409 found a reachable unsynchronized callback-map access pattern without proving historical crash causality. FLR-0410's synchronization patch built, but the candidate faulted and showed no recognizable car/HUD. FLR-0413 mapped the exact page-fault instruction. FLR-0414-0001 then showed the HUD with a black 3D ROI on the same candidate; present was 1/0/0 and the FEngine Oops recurred, but the control-transfer breakpoint was missed. FLR-0415 reached the hardware breakpoint but its hit-marker command raised TypeError; no product render result is established. No current-image product render pass is established; FLR-0398 remains gated.
 
@@ -32,7 +32,7 @@ Last updated: 2026-10-03
 
 **FLR-0391 result:** Patch 0333 applied the proven constant blue LIT source to Sequoia; Mini `do_patch`, compile, and full image build passed. Runtime reached `READY=1/BOUND=24/SUN=1`, but live QMP showed the HUD/Scenes over a fully black Sequoia ROI (0/144000). Present was 2 begins/1 return, then `FEngine::loop` Oops #2 and app status 124. Full screenshot/video and metrics: [FLR-0391 manifest](work/evidence/FLR-0391-0001.md). The material was applied, but visible Sequoia is NOT established.
 
-**Active task:** FLR-0415 is Waiting after the first target hit and observer exception. Preserve its evidence and do not relaunch it. The successor FLR-0416 will prevalidate the GDB hit recorder, then make one new owner-free run on the unchanged FLR-0410 image and correlate the caller map, present sequence, process identity, and QMP pixels. Product gates remain open.
+**Active task:** FLR-0416 is the sole In Progress ticket. FLR-0415 remains Waiting and must not be rerun. The typed first-hit observer has 12 passing offline tests; guest GDB 14.2 smoke and Mini runtime are still UNKNOWN. Before one unchanged-image run, verify owner-free Mini, fresh run ID, free ports/socket, and exact FLR-0410 artifacts. Top-level gates are `run → load READY/ACK → continue → callback → HIT_READY/ACK-or-abort → continue`; the load command list contains no wait/continue. A controller release rechecks app/GDB/boot identity, manifest digest, and guest artifact hashes. Caller UNKNOWN permits held QMP capture but forbids release. Capture pre/hit/post QMP and bounded present/kernel/process evidence; exact teardown only. No build or product-source change in this diagnostic ticket.
 
 WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking logへ残す。
 
@@ -48,6 +48,7 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 
 | ID | Problem / outcome | Owner | PDCA | Next action |
 | --- | --- | --- | --- | --- |
+| [FLR-0416](work/tickets/FLR-0416-correlate-libllvm-hit-with-present-and-qmp.md) | repair the GDB first-hit observer and correlate one exact-image caller/present/QMP boundary before changing product code | GDB observer / Mini QEMU / UID-1001 Example Demo / bounded QMP evidence | In Progress: 62 focused tests and all 311 repository tests pass; observer JSON publication is atomic, stage deadlines begin before guest waits, journal cursors are checked around incremental reads, identity-bound aborts are time-bounded, release ACK uncertainty is explicit, and process/port preflight fails closed. Markdown links retain 11 historical missing targets. Guest GDB smoke/runtime remain UNKNOWN; no rendering verdict. | Finish offline gates, locally commit ticket/helpers, read-only Mini owner/receiver/build check, official helper-only bundle handoff, then one unchanged FLR-0410 run if every gate passes |
 | [FLR-0409](work/tickets/FLR-0409-symbolize-flutter-auto-sigsegv.md) | locate exact Build-ID-matched symbols for the saved `flutter-auto` SIGSEGV and resolve its defensible caller boundary | Existing 0334 image/package/debug/link outputs and preserved Mini core; read-only | Done as a bounded investigation: exact Build-ID/load mapping and `CallEvent`→`DrawFrame` symbols found; source/thread review confirms the map race is reachable, but causality for the saved SIGSEGV is UNKNOWN. No build, QEMU, or source edit. | FLR-0410 applied the synchronization change and ran one new candidate; see its separate Waiting record. FLR-0408 pixels remain UNKNOWN. |
 | [FLR-0408](work/tickets/FLR-0408-replay-known-positive-sequoia-profile-on-0334.md) | replay FLR-0049's production Sequoia model-only profile on exact 0334 as a bounded Gate-A pixel discriminator | Mini QEMU / UID-1001 Example Demo / shared app log / QMP and kernel evidence | Waiting; visual result UNKNOWN. Launch PID 765/UID 1001/start 239895 passed; old scene gate returned `LOG_INVALID`; the 22:15Z snapshot had marker=0 and present `76/75/75`, kernel faults=0. App SIGSEGV at 22:35:52Z; delayed 22:46Z identity check failed, so no QMP still/video was captured. The preserved core proves an unmapped-pointer dereference in stripped `flutter-auto`; caller/origin UNKNOWN. Core/GDB hashes and exact 0334 identities are recorded; QMP teardown/ports passed. | Keep the 0049 replay's pixels UNKNOWN. FLR-0410 ran a distinct ordinary-profile candidate but faulted; FLR-0413 resolved the exact candidate instruction bytes; FLR-0414-0001 later showed HUD over black 3D with the Oops and is Waiting; FLR-0415 owns a pre-armed capture attempt. Do not interpret the missing 0408 frame as black or visible. |
 | [FLR-0405](work/tickets/FLR-0405-capture-first-fengine-fault-present-order.md) | correlate the first ordinary-profile FEngine fault with the unmatched present before the faulting LWP disappears | Mini QEMU / guest Example Demo+GDB / shared app log / QMP and kernel evidence | Waiting: FLR-0405-0003 ran exact 0334. Oops uptime 166.449 precedes the later unhealthy gate at 223.77, but present markers have no timestamps; event order and causality are UNKNOWN. The live identity-bracketed QMP frame is white/black polygon with no HUD or recognizable Sequoia; eight frames are identical. Late GDB missed TID 705. Teardown passed; raw Mini evidence retention is UNKNOWN. | Do not repeat the same ordinary-profile run. Revisit only if FLR-0408 shows the positive profile also fails; then capture the earliest fault in the minimal reproducible condition. |
@@ -343,23 +344,28 @@ WIP limit: 原則`In Progress`は1件。緊急割込みは理由をworking log�
 | Phase | State | Evidence / next gate |
 | --- | --- | --- |
 | Baseline and ticket scope | Completed | FLR-0027でshape/light分離の独立gateを完了し、FLR-0028へ分割 |
-| QEMU / Fluorite | FLR-0415 diagnostic reached its exact libLLVM hardware breakpoint; product verdict still UNKNOWN | Exact FLR-0410 image under GDB: FEngine LWP 818 hit `CmpInst::isOrdered()+1`; observer marker TypeError; kernel faults 0/0. QMP samples were black but not bracketed to live app/presents. FLR-0416 repairs observer and captures caller/present/time boundary before product changes. |
+| QEMU / Fluorite | FLR-0416 observer and first-hit correlation pending | FLR-0415 hit `libLLVM+0xb1d541` but its marker failed; product cause and pixels are UNKNOWN. FLR-0416 tests identity-gated load/hit/preflight paths; no new QEMU has started. |
 | Native render path | Production acceptance still open | The retrospective confirms positive same-frame fixture+HUD evidence, historical Sequoia candidates, and later post-GO production black ROIs as separate evidence classes. Return to production QMP only after the strict FIFO gate reaches GO |
 | Wayland composition | Completed for diagnostic path | FLR-0042でSHM child attachとQMP visible pixelsを確認 |
 | Mac → mini PC build | Completed | c1252c4のbundle、固定receiver、既存build/TMPDIR、do_patch/do_compile/full imageが成功 |
 
 ## Next
 
-**Current next gate (2026-10-03):** FLR-0415 is Waiting after its single
-same-image GDB-owned launch hit `libLLVM+0xb1d541` in `FEngine::loop`. The hardware
-breakpoint was verified and registers/bytes/stack were logged, but the hit
-marker raised a Python formatting TypeError; full stop/release and live QMP
-correlation were not proven. Kernel faults were 0/0; QMP frames were uniform
-black, but app/present timing is UNKNOWN. The exact QEMU was stopped and its
-ports/socket cleared. Open FLR-0416 to fix marker construction and correlate
-caller mapping, presents, process identity, and QMP captures on one fresh run
-of the unchanged FLR-0410 image. Product Sequoia/HUD, interaction/repaint,
-five-minute progression, and two-boot acceptance remain open.
+**Current next gate (2026-10-03):** FLR-0416 has 62 focused and 311 full
+repository tests passing; static/privacy/checkpoint gates pass, with only the
+same 11 historical Markdown-link failures. Commit the FLR-0415 closeout and
+FLR-0416 diagnostic-only changes locally, then inspect Mini receiver/build/
+QEMU owners read-only. Fixed BUILD_* role variables are currently unset, so
+do not handcraft transfer paths; use only the standard bundle helper after its
+exact receiver/build roles are safely resolved. Repeat the full immediate
+visibility/owner/port/hash preflight before any QEMU start. Only if every gate
+passes, start one 6144-MiB QMP-first VM on unchanged FLR-0410 artifacts,
+smoke-test GDB before Flutter, and capture library-load, first-hit, and
+post-release QMP states bracketed by process identity, time, present counts,
+and kernel state. No product source, Devtool, BitBake, build, cache or image
+change; no ordinary-launch fallback or second VM. Product Sequoia/HUD,
+interaction/repaint, five-minute progression, and two-boot acceptance remain
+open.
 
 **Historical FLR-0370 next-gate rationale (2026-09-30):** Current-image controls form three cells: UNLIT+parameter is visible (FLR-0368), LIT/SUN+parameter is black (FLR-0367), and LIT/SUN+constant is visible (FLR-0369). Thus global color assignment failure was not supported; the remaining candidate was the LIT/SUN × dynamic-expression interaction. That comparison motivated FLR-0371 and remains its historical basis; it is not the current active-ticket status.
 
