@@ -1,6 +1,7 @@
 import importlib.util
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -24,7 +25,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         }
 
     def _guest_files(self, stage):
-        prefix = "flr0416-0001-"
+        prefix = "flr0417-0001-"
         armed = {
             "guest_boot_id": self.identity["guest_boot_id"],
             "process": self.identity["process"],
@@ -51,7 +52,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         return files
 
     def _mini_files(self, stage):
-        prefix = "flr0416-0001-"
+        prefix = "flr0417-0001-"
         if stage == "load":
             names = [prefix + "load-bracket.json", prefix + "qmp-load-still.ppm"]
         else:
@@ -83,7 +84,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             with mock.patch("shutil.which", return_value=None):
                 files = controller._capture_sequence("hit", 2)
 
-        report_name = "flr0416-0001-qmp-hit-capture.json"
+        report_name = "flr0417-0001-qmp-hit-capture.json"
         report = json.loads(files[report_name])
         self.assertEqual("PENDING_MAC_PREVIEW", report["video_status"])
         self.assertEqual(3, len(report["still_and_frames"]))
@@ -95,7 +96,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
         chunks = MODULE.payload_chunks(payload, max_chars=3000)
         commands = MODULE.payload_shell_commands(
-            "/run/user/1001/flr0416-0001/payload.bin", payload
+            "/run/user/1001/flr0417-0001/payload.bin", payload
         )
 
         encoded = "".join(chunks)
@@ -111,12 +112,12 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             )
             self.assertEqual(0, syntax.returncode, syntax.stderr)
         self.assertIn("set -C", commands[0])
-        self.assertNotIn("/run/user/1001/flr0416-0001/payload.bin", " ".join(commands[:-1]))
+        self.assertNotIn("/run/user/1001/flr0417-0001/payload.bin", " ".join(commands[:-1]))
         self.assertIn("os.link(tmp,dst)", commands[-1])
-        self.assertIn("/run/user/1001/flr0416-0001/payload.bin", commands[-1])
+        self.assertIn("/run/user/1001/flr0417-0001/payload.bin", commands[-1])
         with self.assertRaisesRegex(ValueError, "empty guest payload"):
             MODULE.payload_shell_commands(
-                "/run/user/1001/flr0416-0001/empty.bin", b""
+                "/run/user/1001/flr0417-0001/empty.bin", b""
             )
 
     def test_guest_setup_builds_only_bounded_one_line_serial_commands(self):
@@ -170,14 +171,14 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
     def test_guest_file_decoder_requires_one_exact_named_payload(self):
         content = b'{"event":"LOAD_READY"}\n'
         import base64
-        output = "noise\nFLR0416_FILE=flr0416-0001-load-ready.json:" + base64.b64encode(content).decode()
+        output = "noise\nFLR0416_FILE=flr0417-0001-load-ready.json:" + base64.b64encode(content).decode()
 
         self.assertEqual(
             content,
-            MODULE.decode_guest_file(output, "flr0416-0001-load-ready.json"),
+            MODULE.decode_guest_file(output, "flr0417-0001-load-ready.json"),
         )
         with self.assertRaisesRegex(ValueError, "exactly one"):
-            MODULE.decode_guest_file(output + "\n" + output.splitlines()[-1], "flr0416-0001-load-ready.json")
+            MODULE.decode_guest_file(output + "\n" + output.splitlines()[-1], "flr0417-0001-load-ready.json")
         with self.assertRaisesRegex(ValueError, "base64"):
             MODULE.decode_guest_file("FLR0416_FILE=x:%%%", "x")
 
@@ -190,19 +191,19 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
         self.assertEqual("EVIDENCE_MANIFEST", manifest["event"])
         self.assertEqual(self.identity["process"], manifest["process"])
-        self.assertEqual("guest", manifest["files"]["flr0416-0001-load-ready.json"]["source"])
+        self.assertEqual("guest", manifest["files"]["flr0417-0001-load-ready.json"]["source"])
         self.assertEqual(
-            hashlib.sha256(mini["flr0416-0001-qmp-load-still.ppm"]).hexdigest(),
-            manifest["files"]["flr0416-0001-qmp-load-still.ppm"]["sha256"],
+            hashlib.sha256(mini["flr0417-0001-qmp-load-still.ppm"]).hexdigest(),
+            manifest["files"]["flr0417-0001-qmp-load-still.ppm"]["sha256"],
         )
-        del mini["flr0416-0001-qmp-load-still.ppm"]
+        del mini["flr0417-0001-qmp-load-still.ppm"]
         with self.assertRaisesRegex(ValueError, "required Mini"):
             MODULE.build_manifest("load", self.identity, guest, mini)
 
     def test_hit_manifest_requires_all_eight_qmp_frames_and_matching_identity(self):
         guest = self._guest_files("hit")
         mini = self._mini_files("hit")
-        del mini["flr0416-0001-qmp-hit-frame-0007.ppm"]
+        del mini["flr0417-0001-qmp-hit-frame-0007.ppm"]
 
         with self.assertRaisesRegex(ValueError, "required Mini"):
             MODULE.build_manifest("hit", self.identity, guest, mini)
@@ -228,7 +229,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             hashlib.sha256(manifest).hexdigest(), release["manifest_sha256"]
         )
         self.assertEqual(
-            "/run/user/1001/flr0416-0001-load-manifest.json",
+            "/run/user/1001/flr0417-0001-load-manifest.json",
             release["manifest_path"],
         )
 
@@ -265,7 +266,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             manifest = MODULE.build_manifest(
                 "load", self.identity, self._guest_files("load"), self._mini_files("load")
             )
-            manifest_path = run_dir / "flr0416-0001-load-manifest.json"
+            manifest_path = run_dir / "flr0417-0001-load-manifest.json"
             manifest_path.write_bytes(manifest)
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=repo_root
@@ -285,7 +286,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
             self.assertEqual(manifest, manifest_path.read_bytes())
             release = json.loads(
-                (run_dir / "flr0416-0001-load-release.json").read_text(encoding="utf-8")
+                (run_dir / "flr0417-0001-load-release.json").read_text(encoding="utf-8")
             )
             self.assertEqual(hashlib.sha256(manifest).hexdigest(), release["manifest_sha256"])
 
@@ -374,7 +375,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                 },
             },
         }
-        hashes = {"flr0416-0001-qmp-load-still.ppm": "a" * 64}
+        hashes = {"flr0417-0001-qmp-load-still.ppm": "a" * 64}
         record = MODULE.build_bracket(
             "load", self.identity, sample, sample, 10, 20, hashes, 100, 200
         )
@@ -422,7 +423,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                 stopped_dead,
                 10,
                 20,
-                {"flr0416-0001-qmp-load-still.ppm": "a" * 64},
+                {"flr0417-0001-qmp-load-still.ppm": "a" * 64},
                 100,
                 200,
             )
@@ -453,8 +454,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             }
 
         hashes = {
-            "flr0416-0001-qmp-hit-still.ppm": "a" * 64,
-            **{"flr0416-0001-qmp-hit-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
+            "flr0417-0001-qmp-hit-still.ppm": "a" * 64,
+            **{"flr0417-0001-qmp-hit-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
         }
         before = snapshot("hit", 200, "T")
         after = snapshot("hit", 300, "T")
@@ -477,8 +478,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         running_post_after = snapshot("post", 300, "S")
         with self.assertRaisesRegex(ValueError, "post-release.*stopped"):
             MODULE.build_bracket("post", self.identity, stopped_post_before, running_post_after, 100, 400, {
-                "flr0416-0001-qmp-post-still.ppm": "a" * 64,
-                **{"flr0416-0001-qmp-post-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
+                "flr0417-0001-qmp-post-still.ppm": "a" * 64,
+                **{"flr0417-0001-qmp-post-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
             }, 100, 400)
 
     def test_ppm_validator_requires_complete_p6_rgb_raster(self):
@@ -556,8 +557,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=root
             )
-            first = run_dir / "flr0416-0001-qmp-post-frame-0000.ppm"
-            last = run_dir / "flr0416-0001-qmp-post-frame-0007.ppm"
+            first = run_dir / "flr0417-0001-qmp-post-frame-0000.ppm"
+            last = run_dir / "flr0417-0001-qmp-post-frame-0007.ppm"
             first.write_bytes(b"reference-frame")
             last.write_bytes(b"sample-frame")
             response = {
@@ -581,8 +582,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             controller = MODULE.CaptureController(
                 run_dir, run_dir / "qmp.sock", repo_root=root
             )
-            first = run_dir / "flr0416-0001-qmp-post-frame-0000.ppm"
-            last = run_dir / "flr0416-0001-qmp-post-frame-0007.ppm"
+            first = run_dir / "flr0417-0001-qmp-post-frame-0000.ppm"
+            last = run_dir / "flr0417-0001-qmp-post-frame-0007.ppm"
             first.write_bytes(b"reference-frame")
             last.write_bytes(b"sample-frame")
             response = {
@@ -620,7 +621,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
-            controller.qmp = root / "qmp-0416.sock"
+            controller.qmp = root / "qmp-0417.sock"
             controller.run_dir = root
             controller.start_script = root / "start.sh"
             controller.harness = root / "harness.sh"
@@ -648,7 +649,7 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
-            controller.qmp = root / "qmp-0416.sock"
+            controller.qmp = root / "qmp-0417.sock"
             controller.run_dir = root
             controller.start_script = root / "start.sh"
             controller.qemu_identity = {"pid": 200, "start_token": "300"}
@@ -670,12 +671,17 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             self.assertFalse(controller.errors == [])
             self.assertTrue(controller.postflight_verified)
 
-    def _run_controller_with_teardown(self, qmp_status, *, process_gone=True):
+    def _run_controller_with_teardown(
+        self, qmp_status, *, process_gone=True, layout_error=None
+    ):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            evidence = root / "evidence"
+            run_dir = evidence / MODULE.RUN_ID / "qemu"
+            run_dir.mkdir(parents=True)
             controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
-            controller.run_dir = root
-            controller.qmp = root / "qmp-0416.sock"
+            controller.run_dir = run_dir
+            controller.qmp = run_dir / MODULE.QMP_SOCKET_NAME
             controller.qemu_identity = {"pid": 200, "start_token": "300"}
             controller.qemu_identity_verified = True
             controller.qemu_process_gone = False
@@ -685,7 +691,18 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             controller.teardown_warnings = []
             controller._prepared_ack_deadlines = {}
             controller.post_release_seconds = 0
-            controller._check_layout = lambda: None
+            if layout_error:
+                controller.qemu_identity = None
+                controller.qemu_identity_verified = False
+
+                def verify_identity_then_fail():
+                    controller.qemu_identity = {"pid": 200, "start_token": "300"}
+                    controller.qemu_identity_verified = True
+                    raise RuntimeError(layout_error)
+
+                controller._check_layout = verify_identity_then_fail
+            else:
+                controller._check_layout = lambda: None
             controller._record_result = lambda record: None
             controller._guest_setup = lambda: None
             controller._capture_one = lambda name: (b"ppm", {"sha256": "a" * 64})
@@ -728,7 +745,9 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                 saved[name] = payload
 
             controller._save_once = save_once
-            exit_code = controller.run()
+            with mock.patch.dict(os.environ, {"BUILD_EVIDENCE": str(evidence)}):
+                with mock.patch.object(MODULE, "_process_start_token", return_value="300"):
+                    exit_code = controller.run()
             final = json.loads(saved["FLR0416-controller-final.json"])
             return exit_code, final
 
@@ -785,11 +804,141 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             qmp_socket_absent=True,
         )
         self.assertFalse(unverified["teardown_verified"])
+        missing_identity = MODULE.controller_final_record(
+            {"run_id": MODULE.RUN_ID, "status": "DIAGNOSTIC_CAPTURE_FAIL"},
+            qemu_identity_verified=True,
+            qemu_process_gone=True,
+            postflight_verified=True,
+            qmp_quit_status="PASS",
+            teardown_errors=[],
+            qmp_socket_absent=True,
+        )
+        self.assertFalse(missing_identity["teardown_verified"])
         status, code = MODULE.final_capture_status(
             "DIAGNOSTIC_CAPTURE_PASS", [], False
         )
         self.assertEqual("DIAGNOSTIC_CAPTURE_INCOMPLETE", status)
         self.assertEqual(1, code)
+
+    def test_canonical_guard_runs_from_resolved_repository_cwd(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            repo_root = root / "repo"
+            repo_root.mkdir()
+            evidence = root / "evidence"
+            run_dir = evidence / MODULE.RUN_ID / "qemu"
+            run_dir.mkdir(parents=True)
+            (run_dir / "FLR0416-staged-files.sha256").write_text("staged\n")
+            harness = repo_root / "scripts/qemu-runtime-harness.sh"
+            pixel_capture = repo_root / "scripts/qemu-pixel-capture.py"
+            harness.parent.mkdir()
+            harness.write_text("stub\n")
+            pixel_capture.write_text("stub\n")
+            qmp = run_dir / "qmp-0417.sock"
+            qmp.touch()
+            with mock.patch.object(Path, "is_socket", return_value=True):
+                controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
+                controller.repo_root = repo_root.resolve()
+                controller.run_dir = run_dir.resolve()
+                controller.qmp = qmp.resolve()
+                controller.harness = harness
+                controller.pixel_capture = pixel_capture
+                controller.serial_port = 10943
+                controller.qemu_identity = None
+                controller.qemu_identity_verified = False
+                controller._save_once = lambda name, payload: (run_dir / name).write_bytes(payload)
+
+                def verify_identity():
+                    controller.qemu_identity = {"pid": 200, "start_token": "300"}
+                    return 200
+
+                controller._verify_qemu_identity = verify_identity
+                completed = subprocess.CompletedProcess([], 0, "guard pass\n", "")
+                with mock.patch.dict(os.environ, {"BUILD_EVIDENCE": str(evidence)}):
+                    with mock.patch.object(
+                        MODULE.subprocess, "run", return_value=completed
+                    ) as run:
+                        controller._check_layout()
+
+                self.assertEqual(repo_root.resolve(), run.call_args.kwargs.get("cwd"))
+                failed_guard = subprocess.CompletedProcess([], 1, "guard fail\n", "")
+                with mock.patch.dict(os.environ, {"BUILD_EVIDENCE": str(evidence)}):
+                    with mock.patch.object(
+                        MODULE.subprocess, "run", return_value=failed_guard
+                    ) as failing_run:
+                        with self.assertRaisesRegex(
+                            RuntimeError, "canonical repository guard failed"
+                        ):
+                            controller._check_layout()
+                self.assertEqual(
+                    repo_root.resolve(), failing_run.call_args.kwargs.get("cwd")
+                )
+
+    def test_early_layout_exception_retains_qemu_identity_without_promoting_render(self):
+        exit_code, final = self._run_controller_with_teardown(
+            "PASS", layout_error="canonical repository guard failed"
+        )
+        self.assertEqual(1, exit_code)
+        self.assertEqual("DIAGNOSTIC_CAPTURE_FAIL", final["status"])
+        self.assertEqual(
+            {"pid": 200, "start_token": "300"}, final["qemu_host_identity"]
+        )
+        self.assertTrue(final["teardown_verified"])
+        self.assertEqual("NOT_CLAIMED", final["product_acceptance"])
+
+    def test_attempt_claim_is_atomic_create_only_and_preserves_first_owner(self):
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            run_dir = evidence / MODULE.RUN_ID / "qemu"
+            run_dir.mkdir(parents=True)
+            with mock.patch.dict(os.environ, {"BUILD_EVIDENCE": str(evidence)}):
+                with mock.patch.object(MODULE, "_process_start_token", return_value="300"):
+                    first_claim = MODULE.create_attempt_claim(run_dir, "start")
+                    first_owner = (first_claim / "owner.json").read_bytes()
+                    self.assertEqual(
+                        MODULE.RUN_ID,
+                        json.loads(first_owner.decode("utf-8"))["run_id"],
+                    )
+
+                    with self.assertRaises(FileExistsError):
+                        MODULE.create_attempt_claim(run_dir, "start")
+
+            self.assertEqual(first_owner, (first_claim / "owner.json").read_bytes())
+
+    def test_attempt_claim_does_not_reserve_run_if_owner_identity_is_unavailable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            run_dir = evidence / MODULE.RUN_ID / "qemu"
+            run_dir.mkdir(parents=True)
+            with mock.patch.dict(os.environ, {"BUILD_EVIDENCE": str(evidence)}):
+                with mock.patch.object(
+                    MODULE,
+                    "_process_start_token",
+                    side_effect=RuntimeError("missing proc identity"),
+                ):
+                    with self.assertRaisesRegex(RuntimeError, "missing proc identity"):
+                        MODULE.create_attempt_claim(run_dir, "start")
+            self.assertFalse((run_dir / MODULE.ATTEMPT_CLAIM_NAMES["start"]).exists())
+
+    def test_duplicate_controller_claim_never_enters_qmp_cleanup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            run_dir = evidence / MODULE.RUN_ID / "qemu"
+            run_dir.mkdir(parents=True)
+            with mock.patch.dict(os.environ, {"BUILD_EVIDENCE": str(evidence)}):
+                with mock.patch.object(MODULE, "_process_start_token", return_value="300"):
+                    MODULE.create_attempt_claim(run_dir, "controller")
+            controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
+            controller.run_dir = run_dir
+            controller.qmp = run_dir / MODULE.QMP_SOCKET_NAME
+            controller._qmp_quit_and_postflight = mock.Mock()
+
+            with mock.patch.dict(os.environ, {"BUILD_EVIDENCE": str(evidence)}):
+                with mock.patch.object(MODULE, "_process_start_token", return_value="300"):
+                    exit_code = controller.run()
+
+        self.assertNotEqual(0, exit_code)
+        controller._qmp_quit_and_postflight.assert_not_called()
 
     def test_main_executes_controller_with_explicit_roles(self):
         observed = {}
@@ -804,8 +953,8 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         with mock.patch.object(MODULE, "CaptureController", DummyController):
             result = MODULE.main(
                 [
-                    "--run-dir", "/evidence/flr0416-0001/qemu",
-                    "--qmp", "/evidence/flr0416-0001/qemu/qmp-0416.sock",
+                    "--run-dir", "/evidence/flr0417-0001/qemu",
+                    "--qmp", "/evidence/flr0417-0001/qemu/qmp-0417.sock",
                     "--repo-root", "/repo",
                     "--marker-timeout-seconds", "90",
                     "--post-release-seconds", "11",

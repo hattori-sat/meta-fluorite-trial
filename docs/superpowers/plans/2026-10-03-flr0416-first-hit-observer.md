@@ -282,3 +282,27 @@ engine.
 - [ ] Run canonical/privacy/checkpoint/diff checks; record only the known
   historical Markdown-link failures. Inspect the exact staged diff and make a
   local commit without push.
+
+### Recorded one-shot execution result (2026-10-03)
+
+- The transferred commit `d97dec4` passed the full read-only FLR-0416 start
+  preflight on the unchanged FLR-0410 artifacts. `prepare` staged 12
+  hash-verified files. One 6144-MiB QEMU started and guest SSH readiness passed.
+- The capture controller stopped before `_guest_setup`, GDB smoke, Flutter, or
+  QMP capture with `RuntimeError:canonical repository guard failed`. A remote
+  cwd-only A/B proves the guard fails from SSH's default directory and passes
+  from the receiver root. The receiver origin and required metadata files pass
+  their checks; this is a caller working-directory contract, not a repository
+  identity failure.
+- QMP quit succeeded, the recorded runqemu PID and exact QMP socket are absent,
+  and official postflight passed. The controller-final record omitted the
+  already-verified host identity because the guard exception happened before
+  `run()` copied it into the result; therefore `teardown_verified=false` must
+  remain unchanged despite independent cleanup evidence.
+- No screenshot/video, guest GDB smoke, Flutter process, present correlation,
+  or product visual result exists. Run ID `flr0416-0001` is consumed under this
+  one-shot ticket; do not relaunch it. The evidence inventory and bounded
+  records are under `$BUILD_EVIDENCE/flr0416-0001/qemu/`.
+- The next action requires the pending Sol judgment about a separate ticket
+  and fresh run-ID contract. A follow-up should test cwd-independent guard
+  execution and early-failure identity retention before any new QEMU start.

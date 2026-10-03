@@ -1,6 +1,6 @@
 # FLR-0416 — correlate the first libLLVM hit with present and QMP
 
-- Status: In Progress
+- Status: Waiting
 - Priority: High
 - Created: 2026-10-03
 - Owner: guest GDB observer / UID-1001 Example Demo / Mini QEMU / QMP evidence
@@ -273,34 +273,55 @@ show ordering and association but cannot by itself prove a general cause.
   smoke and verifies nominal 4-fps playback is not represented as real time.
 - Fresh read-only Mini ownership/port scan: PASS, 254 `/proc` entries scanned,
   zero disappeared/unresolved, zero relevant owners, and all three requested
-  ports free. Receiver is clean at `b13d6aa`; fixed build/TMPDIR directories
-  exist and the intended project layer is selected. No QEMU was started.
+  ports free. Receiver was clean at `b13d6aa`; fixed build/TMPDIR directories
+  existed and the intended project layer was selected.
 - The local role file is absent and role variables are unset. The GPT-6.1 Sol
   override was requested for judgment; the recommendation was to use only
-  previously verified transient roles after fresh checks. The response itself
-  could not verify model attribution. The standard helper's effective
-  `TOPDIR`/`TMPDIR` check and the full start preflight remain pending.
+  previously verified transient roles after fresh checks. The response could
+  not verify model attribution. The standard helper's effective `TOPDIR`/
+  `TMPDIR` checks passed after the user-authorized transient handoff.
 - Post-edit canonical, privacy, runtime-checkpoint, diff, and shell-syntax gates
   pass. The Markdown checker still reports the same 11 historical missing
   targets; no new FLR-0416 link is missing.
-- Prior Mini preflight failed on missing FFmpeg before creating a run or QEMU;
-  this code revision has not yet been transferred or passed through the full
-  start-profile preflight.
-- QEMU/GDB smoke, live first-hit evidence, runtime pixels, and all product
-  acceptance gates remain UNKNOWN / NOT RUN.
+- The full start-profile preflight passed: fresh run ID, headroom, exact
+  FLR-0410 artifact hashes, process visibility, owners, and ports all passed.
+  `prepare` staged 12 hash-verified files. One 6144-MiB QEMU started and guest
+  SSH readiness passed on attempt 1.
+- Capture then failed before guest setup at
+  `RuntimeError:canonical repository guard failed`. The cwd-only A/B failed
+  from SSH's default directory and passed from the receiver root. No GDB smoke,
+  Flutter process, QMP still/video, or rendering evidence was produced.
+- QMP quit passed; recorded PID and QMP socket are absent; official postflight
+  passed. The final JSON omitted the exact QEMU identity and therefore records
+  `teardown_verified=false`; preserve this structured result without
+  retrospective promotion.
+- The one-shot `flr0416-0001` allowance is consumed. Do not retry in this
+  ticket. All product acceptance gates remain UNKNOWN / NOT RUN.
 
 ### Act
 
-- Two rounds of read-only review findings were addressed; the final review found
-  no remaining blocker in this scope. GPT-6.1 Sol was requested by explicit
-  model override, but the reviewer could not verify model attribution. Commit
-  locally, use the standard bundle handoff after one more read-only Mini
-  ownership/receiver check, and repeat the full Mini start preflight.
-  Only if owner/image/resource gates pass should one unchanged FLR-0410 QEMU be
-  started; exact GDB 14.2 smoke must pass before Flutter.
+- Two rounds of read-only review findings were addressed. GPT-6.1 Sol was
+  requested by explicit model override; the tool did not independently attest
+  the running model. The sole runtime attempt exposed a cwd-dependent guard
+  launch and a final-record identity gap. Sol's judgment is to keep these
+  coupled observation corrections with one bounded fresh diagnostic in a
+  single successor ticket, FLR-0417. Preserve this attempt and never relaunch
+  consumed run ID `flr0416-0001`.
 - This diagnostic ticket cannot complete the 3D product goal. Production
   Sequoia material/texture/lighting, same-frame HUD, interaction/repaint
   stability, five-minute present, and two-boot acceptance remain open.
+
+### Status update — 2026-10-03
+
+- Final status: Waiting. QMP quit, recorded PID disappearance, QMP socket
+  absence, and official postflight each passed; the structured controller-final
+  record is not promoted and correctly retains `teardown_verified=false` because
+  the verified identity was omitted on the early exception path.
+- No guest setup, GDB smoke, Flutter launch, QMP frame, or product observation
+  occurred. Rendering is UNKNOWN, not failed and not passed.
+- [FLR-0417](FLR-0417-repair-capture-entry-and-run-once.md) owns the cwd,
+  identity-retention, and duplicate-owner fixes plus exactly one fresh-image
+  diagnostic attempt under a new immutable run ID.
 
 ## Unknowns
 

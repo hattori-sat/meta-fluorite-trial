@@ -8,7 +8,7 @@ set breakpoint always-inserted on
 python
 import gdb
 import sys
-sys.path.insert(0, "/run/user/1001/flr0416-0001")
+sys.path.insert(0, "/run/user/1001/flr0417-0001")
 import flr0416_gdb_callback as flr0416
 assert hasattr(gdb, "BP_HARDWARE_BREAKPOINT")
 end

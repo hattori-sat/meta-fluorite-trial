@@ -9,9 +9,15 @@ repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)
 : "${BUILD_EVIDENCE:?BUILD_EVIDENCE-role-required}"
 [[ "$BUILD_EVIDENCE" = /* && -d "$BUILD_EVIDENCE" && ! -L "$BUILD_EVIDENCE" ]] || fail evidence-role-invalid
 
-run_parent=$BUILD_EVIDENCE/flr0416-0001
+run_parent=$BUILD_EVIDENCE/flr0417-0001
 run_dir=$run_parent/qemu
-qmp=$run_dir/qmp-0416.sock
+qmp=$run_dir/qmp-0417.sock
+if [ "$mode" = preflight ] || [ "$mode" = prepare ]; then
+    { [ ! -e "$run_parent" ] && [ ! -L "$run_parent" ]; } || fail run-id-already-consumed
+fi
+if [ "$mode" = start ] && { [ -e "$run_dir/FLR0417-start-claim" ] || [ -L "$run_dir/FLR0417-start-claim" ]; }; then
+    fail start-attempt-already-claimed
+fi
 serial_port=10943
 ssh_port=10944
 telnet_port=10945
@@ -90,7 +96,6 @@ check_headroom() {
 }
 
 if [ "$mode" = preflight ]; then
-    { [ ! -e "$run_parent" ] && [ ! -L "$run_parent" ]; } || fail run-id-already-consumed
     check_headroom
     run_host_preflight
     echo 'FLR0416_QEMU_PREFLIGHT=PASS image=FLR-0410-0001 run_id=fresh headroom=PASS'
@@ -98,7 +103,6 @@ if [ "$mode" = preflight ]; then
 fi
 
 if [ "$mode" = prepare ]; then
-    { [ ! -e "$run_parent" ] && [ ! -L "$run_parent" ]; } || fail run-id-already-consumed
     check_headroom
     run_host_preflight
     for source in "${stage_sources[@]}"; do
@@ -118,7 +122,7 @@ if [ "$mode" = prepare ]; then
         [ "$source_sha" = "$staged_sha" ] || fail "stage-copy-mismatch:${source##*/}"
         printf '%s  %s\n' "$source_sha" "${source##*/}" >> "$run_dir/FLR0416-staged-files.sha256"
     done
-    echo "FLR0416_STAGE=PASS run_id=flr0416-0001 files=${#stage_sources[@]}"
+    echo "FLR0416_STAGE=PASS run_id=flr0417-0001 files=${#stage_sources[@]}"
     exit 0
 fi
 
@@ -191,5 +195,7 @@ runqemu_bin=${oe_init%/oe-init-build-env}/scripts/runqemu
 
 check_headroom
 run_host_preflight
+python3 "$repo_root/scripts/flr0416_live_capture.py" \
+    --claim-only start --run-dir "$run_dir" || fail start-attempt-claim-failed
 "$harness" start --run-dir "$run_dir" --qmp "$qmp" --oe-init "$oe_init" --build-dir "$build_dir" --runqemu-bin "$runqemu_bin" --qemuboot "$qemuboot" --kernel "$kernel" --rootfs "$rootfs" --kernel-sha256 3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74 --rootfs-sha256 f8ed8f1194d13175fe91676fba24cdd8d564a69deb58d1bc0b7d91a87faeef08 --serial-port "$serial_port" --ssh-port "$ssh_port" --telnet-port "$telnet_port" --memory-mb "$memory_mb"
 echo 'FLR0416_QEMU_START=PASS image=FLR-0410-0001 memory_mb=6144'

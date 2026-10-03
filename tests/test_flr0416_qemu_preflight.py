@@ -1,4 +1,5 @@
 import importlib.util
+import os
 import re
 import subprocess
 import tempfile
@@ -52,6 +53,55 @@ class FLR0416QemuPreflightTests(unittest.TestCase):
         match = re.search(r'check_digest "\$qemuboot" ([0-9a-f]{64})', starter)
         self.assertIsNotNone(match)
         self.assertIn(match.group(1), plan)
+
+    def test_flr0417_run_id_is_consistent_across_capture_guest_and_exporter(self):
+        root = Path(__file__).parents[1]
+        paths = (
+            root / "scripts/flr0416_live_capture.py",
+            root / "scripts/export_flr0416_media_preview.py",
+            root / "work/commands/FLR-0416-qemu-start.sh",
+            root / "work/commands/FLR-0416-gdb-smoke.gdb",
+            root / "work/commands/FLR-0416-prearm-libllvm.gdb",
+            root / "work/commands/FLR-0416-guest-gdb-smoke.cmd",
+            root / "work/commands/flr0416_gdb_observer.py",
+            root / "work/commands/flr0416_gdb_callback.py",
+            root / "work/commands/flr0416_guest_snapshot.py",
+        )
+        for path in paths:
+            with self.subTest(path=path.name):
+                source = path.read_text(encoding="utf-8")
+                self.assertIn("flr0417-0001", source, path.name)
+                self.assertNotIn("flr0416-0001", source, path.name)
+
+    def test_preflight_rejects_occupied_run_directory_before_modifying_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            occupied = evidence / "flr0417-0001"
+            occupied.mkdir()
+            sentinel = occupied / "preserve.bin"
+            sentinel.write_bytes(b"first owner evidence\n")
+            before = {path.name: path.read_bytes() for path in occupied.iterdir()}
+            environment = dict(os.environ)
+            environment["BUILD_EVIDENCE"] = str(evidence)
+
+            result = subprocess.run(
+                ["bash", str(STARTER), "preflight"],
+                env=environment,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+
+            self.assertNotEqual(0, result.returncode)
+            self.assertIn("run-id-already-consumed", result.stderr)
+            self.assertEqual(before, {path.name: path.read_bytes() for path in occupied.iterdir()})
+
+    def test_start_claim_is_acquired_before_invoking_qemu_harness(self):
+        starter = STARTER.read_text(encoding="utf-8")
+        claim = starter.index("--claim-only start")
+        qemu_start = starter.index('"$harness" start --run-dir')
+        self.assertLess(claim, qemu_start)
 
     def test_process_scan_reports_other_uid_zombie_owner_explicitly(self):
         with tempfile.TemporaryDirectory() as directory:

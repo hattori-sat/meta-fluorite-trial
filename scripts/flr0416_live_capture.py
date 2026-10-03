@@ -17,7 +17,12 @@ import time
 from pathlib import Path
 
 
-RUN_ID = "flr0416-0001"
+RUN_ID = "flr0417-0001"
+QMP_SOCKET_NAME = "qmp-0417.sock"
+ATTEMPT_CLAIM_NAMES = {
+    "start": "FLR0417-start-claim",
+    "controller": "FLR0417-controller-claim",
+}
 ACK_COLLECTION_SECONDS = 540
 ABORT_GRACE_SECONDS = 50
 GUEST_DIR = "/run/user/1001/" + RUN_ID
@@ -53,6 +58,64 @@ IDENTITY_KEYS = ("guest_boot_id", "process", "gdb_process")
 
 def canonical_json(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True) + "\n"
+
+
+def _process_start_token(pid):
+    try:
+        stat_tail = (
+            Path("/proc") / str(pid) / "stat"
+        ).read_text(encoding="ascii").rsplit(")", 1)[1].split()
+    except (OSError, IndexError) as error:
+        raise RuntimeError("claim owner process start identity is unavailable") from error
+    if len(stat_tail) <= 19 or not stat_tail[19].isdigit():
+        raise RuntimeError("claim owner process start identity is malformed")
+    return stat_tail[19]
+
+
+def create_attempt_claim(run_dir, role):
+    """Create one durable, no-replace claim for this ticket's one-shot run."""
+    if role not in ATTEMPT_CLAIM_NAMES:
+        raise ValueError("attempt claim role is invalid")
+    evidence = os.environ.get("BUILD_EVIDENCE", "")
+    if not evidence or not Path(evidence).is_absolute() or not Path(evidence).is_dir():
+        raise RuntimeError("BUILD_EVIDENCE role is missing or invalid")
+    run_dir = Path(run_dir).resolve(strict=True)
+    expected = Path(evidence).resolve(strict=True) / RUN_ID / "qemu"
+    if run_dir != expected:
+        raise RuntimeError("attempt claim run directory differs from the fixed evidence role")
+
+    claim_dir = run_dir / ATTEMPT_CLAIM_NAMES[role]
+    start_token = _process_start_token(os.getpid())
+    claim_dir.mkdir(mode=0o700)
+    owner = {
+        "event": "FLR0417_ATTEMPT_CLAIM",
+        "role": role,
+        "run_id": RUN_ID,
+        "pid": os.getpid(),
+        "start_token": start_token,
+        "created_wall_ns": time.time_ns(),
+    }
+    owner_path = claim_dir / "owner.json"
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(owner_path, flags, 0o600)
+    try:
+        payload = canonical_json(owner).encode("utf-8")
+        remaining = memoryview(payload)
+        while remaining:
+            written = os.write(descriptor, remaining)
+            if written <= 0:
+                raise OSError("claim owner write made no progress")
+            remaining = remaining[written:]
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    for directory in (claim_dir, run_dir):
+        directory_fd = os.open(directory, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    return claim_dir
 
 
 def sha256_bytes(value):
@@ -267,7 +330,7 @@ def payload_shell_commands(remote_path, payload, owner="agl-driver"):
     """Stage complete bytes privately, then publish the destination atomically."""
     destination = Path(remote_path)
     allowed = destination.parent == Path(GUEST_DIR) or re.fullmatch(
-        r"/run/user/1001/flr0416-0001-(?:load|hit)-(?:manifest|release|abort)\.json",
+        r"/run/user/1001/flr0417-0001-(?:load|hit)-(?:manifest|release|abort)\.json",
         remote_path,
     )
     if not allowed or destination.name in (".", "..") or "\n" in remote_path or "\r" in remote_path:
@@ -363,13 +426,13 @@ def decode_guest_snapshot(output):
 
 
 def guest_file_size_command(path):
-    if not path.startswith("/run/user/1001/flr0416-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0417-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     return "set -eu; test -f " + shlex.quote(path) + "; printf 'FLR0416_SIZE=%s\\n' \"$(wc -c < " + shlex.quote(path) + " | tr -d ' ')\""
 
 
 def guest_file_chunk_command(path, offset, size=GUEST_FETCH_CHUNK):
-    if not path.startswith("/run/user/1001/flr0416-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0417-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     if offset < 0 or size < 1 or size > GUEST_FETCH_CHUNK:
         raise ValueError("guest artifact chunk range is invalid")
@@ -523,7 +586,7 @@ class CaptureController:
         expected_run = Path(evidence).resolve(strict=True) / RUN_ID / "qemu"
         if self.run_dir != expected_run:
             raise RuntimeError("run directory differs from fixed BUILD_EVIDENCE role")
-        if self.qmp != self.run_dir / "qmp-0416.sock" or not self.qmp.is_socket():
+        if self.qmp != self.run_dir / QMP_SOCKET_NAME or not self.qmp.is_socket():
             raise RuntimeError("QMP socket is not the exact live FLR-0416 socket")
         if not (self.run_dir / "FLR0416-staged-files.sha256").is_file():
             raise RuntimeError("committed helper staging manifest is missing")
@@ -539,6 +602,7 @@ class CaptureController:
             capture_output=True,
             text=True,
             timeout=10,
+            cwd=self.repo_root,
         )
         self._save_once(
             "FLR0416-canonical-guard.log",
@@ -1503,6 +1567,13 @@ class CaptureController:
             self._end_ack_window()
 
     def run(self):
+        try:
+            create_attempt_claim(self.run_dir, "controller")
+        except Exception as error:
+            reason = "already-claimed" if isinstance(error, FileExistsError) else type(error).__name__
+            print("FLR0417_CONTROLLER_CLAIM=FAIL reason=" + reason, file=sys.stderr)
+            return 1
+
         result = {
             "run_id": RUN_ID,
             "image": "FLR-0410-0001",
@@ -1578,6 +1649,8 @@ class CaptureController:
         finally:
             self._end_ack_window()
             self._prepared_ack_deadlines.clear()
+            if self.qemu_identity_verified and isinstance(self.qemu_identity, dict):
+                result["qemu_host_identity"] = dict(self.qemu_identity)
             teardown_error_start = len(self.errors)
             if self.qemu_identity_verified:
                 try:
@@ -1643,7 +1716,7 @@ def decode_guest_json(output, expected_event):
 def guest_file_command(path, name):
     if not name or re.fullmatch(r"[A-Za-z0-9_.-]+", name) is None:
         raise ValueError("guest artifact name is invalid")
-    if not path.startswith("/run/user/1001/flr0416-0001") or "\n" in path:
+    if not path.startswith("/run/user/1001/flr0417-0001") or "\n" in path:
         raise ValueError("guest artifact path is outside the FLR-0416 scope")
     quoted = shlex.quote(path)
     return (
@@ -2035,7 +2108,8 @@ def interrupt_gdb_command(gdb_process, app_process, expected_gdb=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, required=True)
-    parser.add_argument("--qmp", type=Path, required=True)
+    parser.add_argument("--qmp", type=Path)
+    parser.add_argument("--claim-only", choices=("start",))
     parser.add_argument("--serial-port", type=int, default=10943)
     parser.add_argument("--repo-root", type=Path)
     parser.add_argument(
@@ -2046,6 +2120,17 @@ def main(argv=None):
     )
     parser.add_argument("--post-release-seconds", type=int, default=8)
     args = parser.parse_args(argv)
+    if args.claim_only:
+        try:
+            create_attempt_claim(args.run_dir, args.claim_only)
+        except Exception as error:
+            reason = "already-claimed" if isinstance(error, FileExistsError) else type(error).__name__
+            print("FLR0417_START_CLAIM=FAIL reason=" + reason, file=sys.stderr)
+            return 1
+        print("FLR0417_START_CLAIM=PASS run_id=" + RUN_ID)
+        return 0
+    if args.qmp is None:
+        parser.error("--qmp is required for capture mode")
     repo_root = args.repo_root or (Path(os.environ["REPO_ROOT"]) if os.environ.get("REPO_ROOT") else None)
     if repo_root is None:
         parser.error("--repo-root or REPO_ROOT role is required")
