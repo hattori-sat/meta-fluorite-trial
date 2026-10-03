@@ -11,7 +11,6 @@ import json
 import os
 import re
 import shlex
-import shutil
 import subprocess
 import sys
 import time
@@ -112,13 +111,83 @@ def parse_p6_ppm(data, expected_width=1280, expected_height=800):
     return width, height
 
 
-def final_capture_status(status, errors, qmp_socket_absent):
+def final_capture_status(
+    status, errors, qmp_socket_absent, *, teardown_verified=True
+):
     """Make capture and teardown errors visible in the exit status."""
-    if errors or not qmp_socket_absent:
+    if errors or not qmp_socket_absent or teardown_verified is not True:
         if status == "DIAGNOSTIC_CAPTURE_PASS":
             status = "DIAGNOSTIC_CAPTURE_INCOMPLETE"
         return status, 1
-    return status, 0
+    return status, 0 if status == "DIAGNOSTIC_CAPTURE_PASS" else 1
+
+
+def controller_final_record(
+    result,
+    *,
+    qemu_identity_verified,
+    qemu_process_gone,
+    postflight_verified,
+    qmp_quit_status,
+    teardown_errors,
+    qmp_socket_absent,
+):
+    """Record teardown independently from the diagnostic capture verdict."""
+    record = dict(result)
+    teardown_errors = list(teardown_errors)
+    record["event"] = "FLR0416_CONTROLLER_FINAL"
+    record["teardown_errors"] = teardown_errors
+    record["qemu_process_gone"] = qemu_process_gone is True
+    record["postflight_verified"] = postflight_verified is True
+    record["qmp_quit_status"] = qmp_quit_status
+    qemu_identity = record.get("qemu_host_identity")
+    valid_qemu_identity = (
+        isinstance(qemu_identity, dict)
+        and isinstance(qemu_identity.get("pid"), int)
+        and qemu_identity["pid"] > 1
+        and re.fullmatch(r"[0-9]+", str(qemu_identity.get("start_token", ""))) is not None
+    )
+    record["teardown_verified"] = bool(
+        qemu_identity_verified is True
+        and valid_qemu_identity
+        and qemu_process_gone is True
+        and postflight_verified is True
+        and qmp_quit_status in (
+            "PASS",
+            "ALREADY_EXITED",
+            "FAILED_BUT_GONE",
+            "EXITED_DURING_TEARDOWN",
+        )
+        and not teardown_errors
+        and qmp_socket_absent is True
+    )
+    record["qmp_socket_absent"] = qmp_socket_absent
+    return record
+
+
+def qemu_identity_process_state(expected, pid_text, stat_text):
+    """Return SAME, GONE, or UNKNOWN for the recorded PID/start-time pair."""
+    if (
+        not isinstance(expected, dict)
+        or type(expected.get("pid")) is not int
+        or expected["pid"] <= 1
+        or re.fullmatch(r"[0-9]+", str(expected.get("start_token", ""))) is None
+        or not isinstance(pid_text, str)
+        or re.fullmatch(r"[0-9]+", pid_text.strip()) is None
+        or int(pid_text.strip()) != expected["pid"]
+    ):
+        return "UNKNOWN"
+    if stat_text is None:
+        return "GONE"
+    if not isinstance(stat_text, str):
+        return "UNKNOWN"
+    try:
+        stat_tail = stat_text.rsplit(")", 1)[1].split()
+    except IndexError:
+        return "UNKNOWN"
+    if len(stat_tail) <= 19 or re.fullmatch(r"[0-9]+", stat_tail[19]) is None:
+        return "UNKNOWN"
+    return "SAME" if stat_tail[19] == str(expected["start_token"]) else "GONE"
 
 
 def diagnostic_capture_evidence_complete(
@@ -380,8 +449,12 @@ class CaptureController:
         self.gdb_process = None
         self.status = "NOT_STARTED"
         self.errors = []
+        self.teardown_warnings = []
         self.qemu_identity_verified = False
         self.qemu_identity = None
+        self.qemu_process_gone = False
+        self.postflight_verified = False
+        self.qmp_quit_status = "NOT_ATTEMPTED"
         self._ack_deadline = None
         self._active_ack_stage = None
         self._prepared_ack_deadlines = {}
@@ -498,6 +571,38 @@ class CaptureController:
         elif current != self.qemu_identity:
             raise RuntimeError("recorded runqemu PID/start identity changed")
         return int(pid_text)
+
+    def _qemu_identity_state(self):
+        if not isinstance(self.qemu_identity, dict):
+            return "UNKNOWN"
+        pid_path = self.run_dir / "runqemu.pid"
+        try:
+            pid_text = pid_path.read_text(encoding="ascii")
+        except OSError:
+            return "UNKNOWN"
+        if re.fullmatch(r"[0-9]+", pid_text.strip()) is None:
+            return "UNKNOWN"
+        proc_stat = Path("/proc") / str(self.qemu_identity.get("pid")) / "stat"
+        try:
+            stat_text = proc_stat.read_text(encoding="ascii")
+        except FileNotFoundError:
+            stat_text = None
+        except OSError:
+            return "UNKNOWN"
+        return qemu_identity_process_state(self.qemu_identity, pid_text, stat_text)
+
+    def _wait_qemu_identity_gone(self, timeout_seconds=10):
+        deadline = time.monotonic() + timeout_seconds
+        while True:
+            state = self._qemu_identity_state()
+            if state == "GONE":
+                return True
+            if state != "SAME":
+                return False
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return False
+            time.sleep(min(0.1, remaining))
 
     def _serial(self, label, command, timeout_seconds=40, *, respect_deadline=True):
         if "\n" in command or "\r" in command or len(command) > SERIAL_COMMAND_LIMIT:
@@ -867,41 +972,20 @@ class CaptureController:
             content, metadata = self._capture_one(name)
             files[name] = content
             names.append(metadata)
-        video_status = "NOT_REQUESTED"
-        if frame_count >= 2:
-            ffmpeg = shutil.which("ffmpeg")
-            if ffmpeg is None:
-                video_status = "UNAVAILABLE_ffmpeg_missing"
-                self.errors.append("QMP-video-unavailable_ffmpeg-missing:" + stage)
-            else:
-                video_name = RUN_ID + "-qmp-" + stage + ".mp4"
-                video_path = self.run_dir / video_name
-                video_log = self.run_dir / (video_name + ".log")
-                if video_path.exists() or video_log.exists():
-                    raise RuntimeError("QMP video artifact already exists: " + video_name)
-                pattern = str(self.run_dir / (RUN_ID + "-qmp-" + stage + "-frame-%04d.ppm"))
-                result = subprocess.run(
-                    [ffmpeg, "-nostdin", "-hide_banner", "-loglevel", "error", "-framerate", "4", "-start_number", "0", "-i", pattern, "-frames:v", str(frame_count), "-pix_fmt", "yuv420p", "-n", str(video_path)],
-                    check=False,
-                    capture_output=True,
-                    text=True,
-                    timeout=self._bounded_timeout(45),
-                )
-                video_status = "PASS" if result.returncode == 0 and video_path.is_file() else "FAIL"
-                self._save_once(
-                    video_log.name,
-                    canonical_json({"event": "QMP_VIDEO_ENCODE", "status": video_status, "returncode": result.returncode, "stderr": result.stderr[-1000:]}).encode(),
-                )
-                if video_status == "PASS":
-                    files[video_name] = video_path.read_bytes()
-                else:
-                    self.errors.append("QMP-video-encode-failed:" + stage)
+        video_status = "PENDING_MAC_PREVIEW" if frame_count >= 2 else "NOT_REQUESTED"
         report = {
             "event": "QMP_CAPTURE_SET",
             "run_id": RUN_ID,
             "stage": stage,
             "still_and_frames": names,
             "video_status": video_status,
+            "video_preview": {
+                "status": video_status,
+                "transcode_host": "Mac",
+                "nominal_playback_fps": 4,
+                "requested_inter_frame_sleep_ms": 250,
+                "real_time_video": False,
+            } if frame_count >= 2 else None,
         }
         report_name = RUN_ID + "-qmp-" + stage + "-capture.json"
         report_payload = canonical_json(report).encode("utf-8")
@@ -1225,15 +1309,31 @@ class CaptureController:
         self._save_once(path.name, payload)
 
     def _qmp_quit_and_postflight(self):
-        if not self.qmp.is_socket():
-            self.errors.append("qmp-quit=SKIPPED_socket-absent")
+        qmp_path_present = self.qmp.exists() or self.qmp.is_symlink()
+        if qmp_path_present and not self.qmp.is_socket():
+            self.qmp_quit_status = "INVALID_SOCKET_PATH"
+            self.errors.append("qmp-quit=SKIPPED_path-not-socket")
+        elif not qmp_path_present:
+            state = self._qemu_identity_state()
+            if state == "GONE":
+                self.qmp_quit_status = "ALREADY_EXITED"
+            else:
+                self.qmp_quit_status = "SKIPPED_SOCKET_ABSENT_" + state
+                self.teardown_warnings.append("qmp-quit=SKIPPED_socket-absent-state=" + state)
         else:
             try:
                 self._verify_qemu_identity()
             except Exception as error:
-                self.errors.append(
-                    "qmp-quit=SKIPPED_identity-unverified:" + type(error).__name__
-                )
+                if self._qemu_identity_state() == "GONE":
+                    self.qmp_quit_status = "ALREADY_EXITED"
+                    self.teardown_warnings.append(
+                        "qmp-quit=identity-was-gone:" + type(error).__name__
+                    )
+                else:
+                    self.qmp_quit_status = "IDENTITY_UNVERIFIED"
+                    self.errors.append(
+                        "qmp-quit=SKIPPED_identity-unverified:" + type(error).__name__
+                    )
             else:
                 result = subprocess.run(
                     [str(self.harness), "qmp-quit", "--qmp", str(self.qmp)],
@@ -1246,9 +1346,16 @@ class CaptureController:
                     "FLR0416-qmp-quit.log",
                     (result.stdout + result.stderr).encode("utf-8"),
                 )
-                if result.returncode != 0:
-                    self.errors.append("qmp-quit=FAIL rc=" + str(result.returncode))
-        if self.qmp.exists():
+                self.qmp_quit_status = "PASS" if result.returncode == 0 else "FAILED"
+        self.qemu_process_gone = self._wait_qemu_identity_gone()
+        if not self.qemu_process_gone:
+            self.errors.append("qemu-process-identity-remains-or-unknown")
+        elif self.qmp_quit_status == "FAILED":
+            self.qmp_quit_status = "FAILED_BUT_GONE"
+            self.teardown_warnings.append("qmp-quit=FAIL_but-exact-process-identity-gone")
+        elif self.qmp_quit_status.startswith("SKIPPED_SOCKET_ABSENT_"):
+            self.qmp_quit_status = "EXITED_DURING_TEARDOWN"
+        if self.qmp.exists() or self.qmp.is_symlink():
             self.errors.append("qmp-socket-remains")
         result = subprocess.run(
             ["bash", str(self.start_script), "postflight"],
@@ -1261,7 +1368,11 @@ class CaptureController:
             "FLR0416-postflight.log",
             (result.stdout + result.stderr).encode("utf-8"),
         )
-        if result.returncode != 0:
+        expected_marker = "FLR0416_POSTFLIGHT=PASS image=FLR-0410-0001 qmp=absent target_owners=0 ports=free"
+        self.postflight_verified = (
+            result.returncode == 0 and expected_marker in result.stdout.splitlines()
+        )
+        if not self.postflight_verified:
             self.errors.append("postflight=FAIL rc=" + str(result.returncode))
 
     def _run_load_stage(self, result):
@@ -1467,6 +1578,7 @@ class CaptureController:
         finally:
             self._end_ack_window()
             self._prepared_ack_deadlines.clear()
+            teardown_error_start = len(self.errors)
             if self.qemu_identity_verified:
                 try:
                     self._qmp_quit_and_postflight()
@@ -1475,17 +1587,39 @@ class CaptureController:
             else:
                 self.errors.append("qmp-quit=SKIPPED_identity-unverified")
             result["errors"] = list(self.errors)
-            result["qmp_socket_absent"] = not self.qmp.exists()
+            result["qmp_socket_absent"] = not self.qmp.exists() and not self.qmp.is_symlink()
+            result["teardown_warnings"] = list(self.teardown_warnings)
             result["product_acceptance"] = "NOT_CLAIMED"
             result["completed_host_wall_ns"] = time.time_ns()
-            final_path = self.run_dir / "FLR0416-controller-final.json"
+            final_result = controller_final_record(
+                result,
+                qemu_identity_verified=self.qemu_identity_verified,
+                qemu_process_gone=self.qemu_process_gone,
+                postflight_verified=self.postflight_verified,
+                qmp_quit_status=self.qmp_quit_status,
+                teardown_errors=self.errors[teardown_error_start:],
+                qmp_socket_absent=result["qmp_socket_absent"],
+            )
             result["status"], cleanup_status = final_capture_status(
-                result["status"], result["errors"], result["qmp_socket_absent"]
+                result["status"],
+                result["errors"],
+                result["qmp_socket_absent"],
+                teardown_verified=final_result["teardown_verified"],
             )
             if cleanup_status != 0:
                 exit_code = 1
+            final_result = controller_final_record(
+                result,
+                qemu_identity_verified=self.qemu_identity_verified,
+                qemu_process_gone=self.qemu_process_gone,
+                postflight_verified=self.postflight_verified,
+                qmp_quit_status=self.qmp_quit_status,
+                teardown_errors=self.errors[teardown_error_start:],
+                qmp_socket_absent=result["qmp_socket_absent"],
+            )
+            final_path = self.run_dir / "FLR0416-controller-final.json"
             try:
-                self._save_once(final_path.name, canonical_json(result).encode("utf-8"))
+                self._save_once(final_path.name, canonical_json(final_result).encode("utf-8"))
             except Exception as error:
                 self.errors.append("final-result-write=" + type(error).__name__)
                 exit_code = 1
@@ -1694,6 +1828,69 @@ def build_abort(stage, identity, reason):
     ).encode("utf-8")
 
 
+def validate_bracket_samples(stage, identity, before, after):
+    """Apply the same identity, stage, clock, process, and counter rules at both ends."""
+    if stage not in ("load", "hit", "post"):
+        raise ValueError("unsupported QMP bracket stage")
+    expected = _validate_identity(identity)
+    samples = (before, after)
+    for sample in samples:
+        if (
+            not isinstance(sample, dict)
+            or sample.get("event") != "GUEST_RUNTIME_SNAPSHOT"
+            or sample.get("run_id") != RUN_ID
+            or sample.get("stage") != stage
+            or type(sample.get("guest_wall_ns")) is not int
+            or sample["guest_wall_ns"] < 0
+            or type(sample.get("guest_monotonic_ns")) is not int
+            or sample["guest_monotonic_ns"] < 0
+        ):
+            raise ValueError("guest clock or capture-stage sample is invalid")
+        if any(sample.get(key) != value for key, value in expected.items()):
+            raise ValueError("guest identity changed across QMP capture")
+        for observation_key, process_key, expected_comm in (
+            ("process_observation", "process", "flutter-auto"),
+            ("gdb_observation", "gdb_process", "gdb"),
+        ):
+            observation = sample.get(observation_key)
+            actual = observation.get("actual") if isinstance(observation, dict) else None
+            if (
+                not isinstance(observation, dict)
+                or observation.get("matches") is not True
+                or observation.get("state") != "LIVE"
+                or not isinstance(actual, dict)
+                or any(actual.get(key) != value for key, value in expected[process_key].items())
+                or actual.get("comm") != expected_comm
+                or not isinstance(actual.get("state"), str)
+                or actual["state"] in ("Z", "X")
+            ):
+                raise ValueError(observation_key + " is not the matching live process")
+        inferior_state = sample["process_observation"]["actual"]["state"]
+        if stage in ("load", "hit") and inferior_state not in ("T", "t"):
+            raise ValueError(stage + " capture bracket does not show the stopped inferior")
+        if stage == "post" and inferior_state in ("T", "t"):
+            raise ValueError("post-release capture bracket shows a stopped inferior")
+        present = sample.get("present")
+        kernel = sample.get("kernel")
+        if (
+            not isinstance(present, dict)
+            or any(type(present.get(key)) is not int or present[key] < 0 for key in ("begin", "return", "success"))
+            or not isinstance(kernel, dict)
+            or any(type(kernel.get(key)) is not int or kernel[key] < 0 for key in ("baseline", "current", "delta"))
+            or kernel["current"] < kernel["baseline"]
+            or kernel["delta"] != kernel["current"] - kernel["baseline"]
+        ):
+            raise ValueError("present or kernel counters are inconsistent")
+    first, last = samples
+    if last["guest_monotonic_ns"] < first["guest_monotonic_ns"]:
+        raise ValueError("guest monotonic time moved backwards across QMP capture")
+    if first["kernel"]["baseline"] != last["kernel"]["baseline"]:
+        raise ValueError("kernel fault baseline changed across QMP capture")
+    if any(last["present"][key] < first["present"][key] for key in ("begin", "return", "success")):
+        raise ValueError("present counter moved backwards across QMP capture")
+    return expected
+
+
 def build_bracket(
     stage,
     identity,
@@ -1720,55 +1917,7 @@ def build_bracket(
         raise ValueError("host wall interval is invalid")
     if host_wall_end_ns < host_wall_start_ns:
         raise ValueError("host wall interval is invalid")
-    for sample in (before, after):
-        if any(sample.get(key) != value for key, value in expected.items()):
-            raise ValueError("guest identity changed across QMP capture")
-        if not isinstance(sample.get("guest_wall_ns"), int) or not isinstance(
-            sample.get("guest_monotonic_ns"), int
-        ):
-            raise ValueError("guest clock sample is invalid")
-        for observation_key, process_key, expected_comm in (
-            ("process_observation", "process", "flutter-auto"),
-            ("gdb_observation", "gdb_process", "gdb"),
-        ):
-            observation = sample.get(observation_key)
-            actual = observation.get("actual") if isinstance(observation, dict) else None
-            if (
-                not isinstance(observation, dict)
-                or observation.get("matches") is not True
-                or observation.get("state") != "LIVE"
-                or not isinstance(actual, dict)
-                or any(actual.get(key) != value for key, value in expected[process_key].items())
-                or actual.get("comm") != expected_comm
-                or actual.get("state") in ("Z", "X")
-            ):
-                raise ValueError(observation_key + " is not the matching live process")
-            if (
-                stage == "post"
-                and sample is after
-                and observation_key == "process_observation"
-                and actual.get("state") in ("T", "t")
-            ):
-                raise ValueError("post-release inferior is still stopped")
-        present = sample.get("present")
-        kernel = sample.get("kernel")
-        if (
-            not isinstance(present, dict)
-            or any(
-                not isinstance(present.get(key), int) or present[key] < 0
-                for key in ("begin", "return", "success")
-            )
-            or not isinstance(kernel, dict)
-            or any(
-                not isinstance(kernel.get(key), int) or kernel[key] < 0
-                for key in ("baseline", "current", "delta")
-            )
-            or kernel["current"] < kernel["baseline"]
-        ):
-            raise ValueError("present or kernel counters are incomplete")
-    for key in ("begin", "return", "success"):
-        if after["present"][key] < before["present"][key]:
-            raise ValueError("present counter moved backwards across QMP capture")
+    validate_bracket_samples(stage, identity, before, after)
     if not isinstance(capture_hashes, dict) or any(
         re.fullmatch(r"[0-9a-f]{64}", value) is None
         for value in capture_hashes.values()
@@ -1799,6 +1948,7 @@ def build_bracket(
             "guest_after": after,
             "clock_origins_comparable": False,
             "capture_sha256": capture_hashes,
+            "verified": True,
         }
     ).encode("utf-8")
 

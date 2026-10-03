@@ -119,6 +119,9 @@ earlier FEngine Oops; those remain UNKNOWN.
 - One standard `scripts/handoff-fluorite-bundle.sh` transfer of the committed
   ticket/helper-only change set to the fixed Mini receiver, only after a
   read-only ownership check; no manual SCP/receiver update path.
+- Mac-side preview export of only allowlisted QMP screen frames after exact
+  QEMU teardown; raw PPMs and logs remain on Mini. The Mini host does not need
+  FFmpeg installed.
 
 ### Out of scope
 
@@ -179,6 +182,11 @@ earlier FEngine Oops; those remain UNKNOWN.
   full still, and exactly named eight PPM frames. A load-stage release likewise
   requires its QMP still and bracket record. No timeout auto-releases. Evidence
   gaps permit only an identity-matched controller abort.
+- [ ] After QEMU cleanup, the Mac exporter fetches only allowlisted PPM screen
+  captures and their capture metadata, verifies source hashes, and creates
+  local PNG/MP4 previews. Preview metadata records measured capture intervals,
+  the nominal 4-fps playback rate, and `real_time_video=false`; MP4 creation is
+  not evidence that the runtime or product passed. Raw PPMs/logs remain on Mini.
 - [ ] Exact app/GDB/QEMU cleanup, zero residual socket/ports, and unchanged
   postflight image hashes are recorded. No second QEMU/build or image mutation.
 - [ ] Facts/inferences/hypotheses/UNKNOWN, commands, screenshot/video refs, and
@@ -207,6 +215,10 @@ show ordering and association but cannot by itself prove a general cause.
 - Run/image identity, capture brackets, pixel hashes/ROI counts, and artifact
   role paths: pending.
 - Raw PPM and logs stay on Mini; local PNG/MP4 preview only from screen media.
+- Mini has no FFmpeg-compatible encoder. The runtime records
+  `PENDING_MAC_PREVIEW`; `scripts/export_flr0416_media_preview.py` validates a
+  hash-manifested screen-only archive and uses the Mac's existing FFmpeg after
+  teardown. Do not install packages on Mini for this diagnostic run.
 
 ## Plan / Do / Check / Act
 
@@ -234,17 +246,61 @@ show ordering and association but cannot by itself prove a general cause.
 
 ### Do
 
-- Pending implementation and one runtime experiment; every command/result will
-  be recorded in [the working log](../logs/2026-10-03-flr0416.md).
+- Implemented the typed first-hit observer, bounded capture controller, and
+  screen-only Mac preview exporter. A final controller record now separates
+  diagnostic status from verified QEMU/QMP teardown. Successful QMP brackets
+  explicitly carry `verified=true`; the exporter rechecks run/stage, load-ready
+  identity, process state, capture hashes, host time containment, guest time,
+  present counters, and kernel counters before labeling correlation verified.
+- The first formal Mini preflight stopped before QEMU with
+  `ffmpeg-unavailable-for-required-video`. Rather than install software on Mini,
+  encoding was removed from the runtime controller and deferred to Mac after
+  QEMU teardown. Mini remains the raw PPM evidence source; transfer is limited
+  to an exact screen-media allowlist plus controller-final metadata.
+- Review findings were closed before commit: producer and exporter now use the
+  same stage/identity/clock/process/present/kernel bracket validator, and clean
+  QEMU disappearance is separately verified by recorded PID/start-time,
+  QMP-socket absence, and the exact postflight success marker. `run()` preserves
+  PASS/0 only when the final teardown record verifies and returns
+  INCOMPLETE/nonzero otherwise.
+- No QEMU or product image/source operation has occurred in this iteration.
+  Commands/results are recorded in [the working log](../logs/2026-10-03-flr0416.md).
 
 ### Check
 
-- Pending; no QEMU or runtime result is claimed yet.
+- Latest focused suite: 82 tests PASS. Repository-wide suite: 331 tests PASS.
+- The focused suite includes a real local FFmpeg PNG/fragmented-MP4 synthetic
+  smoke and verifies nominal 4-fps playback is not represented as real time.
+- Fresh read-only Mini ownership/port scan: PASS, 254 `/proc` entries scanned,
+  zero disappeared/unresolved, zero relevant owners, and all three requested
+  ports free. Receiver is clean at `b13d6aa`; fixed build/TMPDIR directories
+  exist and the intended project layer is selected. No QEMU was started.
+- The local role file is absent and role variables are unset. The GPT-6.1 Sol
+  override was requested for judgment; the recommendation was to use only
+  previously verified transient roles after fresh checks. The response itself
+  could not verify model attribution. The standard helper's effective
+  `TOPDIR`/`TMPDIR` check and the full start preflight remain pending.
+- Post-edit canonical, privacy, runtime-checkpoint, diff, and shell-syntax gates
+  pass. The Markdown checker still reports the same 11 historical missing
+  targets; no new FLR-0416 link is missing.
+- Prior Mini preflight failed on missing FFmpeg before creating a run or QEMU;
+  this code revision has not yet been transferred or passed through the full
+  start-profile preflight.
+- QEMU/GDB smoke, live first-hit evidence, runtime pixels, and all product
+  acceptance gates remain UNKNOWN / NOT RUN.
 
 ### Act
 
-- Pending runtime evidence. No product goal completion claim is possible from
-  this diagnostic ticket.
+- Two rounds of read-only review findings were addressed; the final review found
+  no remaining blocker in this scope. GPT-6.1 Sol was requested by explicit
+  model override, but the reviewer could not verify model attribution. Commit
+  locally, use the standard bundle handoff after one more read-only Mini
+  ownership/receiver check, and repeat the full Mini start preflight.
+  Only if owner/image/resource gates pass should one unchanged FLR-0410 QEMU be
+  started; exact GDB 14.2 smoke must pass before Flutter.
+- This diagnostic ticket cannot complete the 3D product goal. Production
+  Sequoia material/texture/lighting, same-frame HUD, interaction/repaint
+  stability, five-minute present, and two-boot acceptance remain open.
 
 ## Unknowns
 

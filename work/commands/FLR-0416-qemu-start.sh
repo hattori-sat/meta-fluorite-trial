@@ -92,7 +92,6 @@ check_headroom() {
 if [ "$mode" = preflight ]; then
     { [ ! -e "$run_parent" ] && [ ! -L "$run_parent" ]; } || fail run-id-already-consumed
     check_headroom
-    command -v ffmpeg >/dev/null 2>&1 || fail ffmpeg-unavailable-for-required-video
     run_host_preflight
     echo 'FLR0416_QEMU_PREFLIGHT=PASS image=FLR-0410-0001 run_id=fresh headroom=PASS'
     exit 0
@@ -101,7 +100,6 @@ fi
 if [ "$mode" = prepare ]; then
     { [ ! -e "$run_parent" ] && [ ! -L "$run_parent" ]; } || fail run-id-already-consumed
     check_headroom
-    command -v ffmpeg >/dev/null 2>&1 || fail ffmpeg-unavailable-for-required-video
     run_host_preflight
     for source in "${stage_sources[@]}"; do
         source_path=$repo_root/$source
@@ -135,7 +133,6 @@ if [ "$mode" = capture ]; then
     [[ -d "$run_parent" && ! -L "$run_parent" && -d "$run_dir" && ! -L "$run_dir" ]] || fail staged-run-directory-missing
     [[ -S "$qmp" && ! -L "$qmp" ]] || fail exact-qmp-socket-not-live
     [[ -s "$run_dir/FLR0416-staged-files.sha256" && ! -L "$run_dir/FLR0416-staged-files.sha256" ]] || fail staged-file-manifest-missing
-    command -v ffmpeg >/dev/null 2>&1 || fail ffmpeg-unavailable-for-required-video
     test "$(sha256sum "$run_dir/qemu-runtime-harness.sh" | awk '{print $1}')" = 4b6160e0e52d4c38ae113f86f686059142469206cd0287f5d856bbe72d6504ed || fail harness-hash-mismatch
     test "$(sha256sum "$run_dir/qemu-pixel-capture.py" | awk '{print $1}')" = df826ef28df367d4de42225004f74ce3d2f016a8c2aea42275a8b13b5b233ef1 || fail qmp-capture-hash-mismatch
     for source in "${stage_sources[@]}"; do
@@ -193,7 +190,6 @@ runqemu_bin=${oe_init%/oe-init-build-env}/scripts/runqemu
 [ -x "$runqemu_bin" ] || fail runqemu-not-executable
 
 check_headroom
-command -v ffmpeg >/dev/null 2>&1 || fail ffmpeg-unavailable-for-required-video
 run_host_preflight
 "$harness" start --run-dir "$run_dir" --qmp "$qmp" --oe-init "$oe_init" --build-dir "$build_dir" --runqemu-bin "$runqemu_bin" --qemuboot "$qemuboot" --kernel "$kernel" --rootfs "$rootfs" --kernel-sha256 3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74 --rootfs-sha256 f8ed8f1194d13175fe91676fba24cdd8d564a69deb58d1bc0b7d91a87faeef08 --serial-port "$serial_port" --ssh-port "$ssh_port" --telnet-port "$telnet_port" --memory-mb "$memory_mb"
 echo 'FLR0416_QEMU_START=PASS image=FLR-0410-0001 memory_mb=6144'

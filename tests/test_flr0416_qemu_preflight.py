@@ -1,4 +1,5 @@
 import importlib.util
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -41,6 +42,16 @@ class FLR0416QemuPreflightTests(unittest.TestCase):
                 encoding="utf-8",
             )
         return root, mountinfo
+
+    def test_documented_qemuboot_hash_matches_the_enforced_candidate(self):
+        starter = STARTER.read_text(encoding="utf-8")
+        plan = (
+            Path(__file__).parents[1]
+            / "docs/superpowers/plans/2026-10-03-flr0416-first-hit-observer.md"
+        ).read_text(encoding="utf-8")
+        match = re.search(r'check_digest "\$qemuboot" ([0-9a-f]{64})', starter)
+        self.assertIsNotNone(match)
+        self.assertIn(match.group(1), plan)
 
     def test_process_scan_reports_other_uid_zombie_owner_explicitly(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -213,7 +224,7 @@ class FLR0416QemuPreflightTests(unittest.TestCase):
         self.assertIn('exec python3 "$repo_root/scripts/flr0416_live_capture.py"', source)
         self.assertIn("work/commands/flr0416_guest_snapshot.py", source)
         self.assertIn("FLR0416-staged-files.sha256", source)
-        self.assertIn("ffmpeg-unavailable-for-required-video", source)
+        self.assertNotIn("ffmpeg-unavailable-for-required-video", source)
         self.assertIn('"$serial_port"', source)
         self.assertIn('"$ssh_port"', source)
         self.assertIn('"$telnet_port"', source)

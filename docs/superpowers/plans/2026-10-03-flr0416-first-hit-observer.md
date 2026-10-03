@@ -35,7 +35,7 @@ the [GNU GDB manual](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Brea
   `f8ed8f1194d13175fe91676fba24cdd8d564a69deb58d1bc0b7d91a87faeef08`, kernel
   `3df534706393cae86cc81340c3f8c77a0be732ab6be494bc5c845cf2fe07bc74`, and
   qemuboot
-  `3872b66339ac3601c701f1b54cab5630796ccf5f0f95ebc4e7077210e89d107f`.
+  `3872b66339ac3601c704f1b54cab5630796ccf5f0f95ebc4e7077210e89d107f`.
 - FLR-0415 reached `libLLVM.so.18.1` VMA `0xb1d541` at runtime address
   `0x7fffefb4d541`, in `FEngine::loop` / `llvm::CmpInst::isOrdered()+1`.
 - FLR-0415's nested formatting failed after bounded registers/instructions/
@@ -132,6 +132,8 @@ product rendering or crash behavior.
   export, and exact-stop commands under `work/commands/`.
 - Create `tests/test_flr0416_gdb_observer.py` and
   `tests/test_flr0416_qemu_preflight.py`.
+- Create `scripts/export_flr0416_media_preview.py` and
+  `tests/test_flr0416_media_preview.py` for hash-checked Mac-only previews.
 - Create `work/tickets/FLR-0416-correlate-libllvm-hit-with-present-and-qmp.md`
   and `work/logs/2026-10-03-flr0416.md`; update `TASKS.md`.
 
@@ -144,7 +146,7 @@ or injected command results. Test the actual guest GDB command through its API
 smoke and the one runtime gate; introduce no mock of GDB internals or product
 engine.
 
-- [ ] **Step 1: Add focused unit tests first.** Cover executable map lookup
+- [x] **Step 1: Add focused unit tests first.** Cover executable map lookup
   (one exact mapping, no mapping, ambiguous overlap), deterministic JSON
   records, create-only durable files, controller ACK digest/identity/artifact
   checks including all bracket/still/eight-frame names, and controller abort
@@ -154,7 +156,7 @@ engine.
   constant create-only `HIT_BEGIN` before GDB reads, then independently records
   guest boot ID, PID/UID/start token/LWP/PC/caller resume PC/map line, and
   wall/monotonic clocks. No overwrite or silent fallback.
-- [ ] **Step 2: Implement the helper and typed temporary hardware breakpoint.**
+- [x] **Step 2: Implement the helper and typed temporary hardware breakpoint.**
   Preserve FLR-0415's exact Build-ID/PT_LOAD/load-bias check. Use the documented
   `gdb.BP_HARDWARE_BREAKPOINT` type and `temporary=True`; validate breakpoint
   type/address at load stop, but treat constructor success as intent only. In
@@ -165,7 +167,7 @@ engine.
   `gdb.execute`, change frames/threads, alter breakpoints, or alter inferior
   state from the callback. Capture the unwind return PC as a caller resume
   address, not as a proven call instruction.
-- [ ] **Step 3: Add controlled load and first-hit gates.** The load-catchpoint
+- [x] **Step 3: Add controlled load and first-hit gates.** The load-catchpoint
   command list only arms the typed breakpoint and disables the catchpoint; it
   contains no wait or `continue`. Let top-level `run` return at that load stop,
   verify identity/all-thread stop and emit `LOAD_READY`, then wait for the
@@ -179,7 +181,7 @@ engine.
   and accept only an identity-matched controller abort; never release on
   incomplete caller evidence. Missing record, timeout, or identity mismatch
   blocks release; timeout leads only to recorded exact abort/teardown.
-- [ ] **Step 4: Build small capture helpers.** Each snapshot emits one bounded
+- [x] **Step 4: Build small capture helpers.** Each snapshot emits one bounded
   structured record with run ID, guest boot ID, exact process identities/start tokens, GDB
   stop/running state, guest wall+monotonic clocks, cumulative **app-log** Vulkan
   present begin/return/success counts, and kernel-fault baseline/current. Keep
@@ -189,12 +191,15 @@ engine.
   report intervals/uncertainty rather than claiming simultaneous timestamps.
   Live PC/caller PC is available only at a controlled stop; leave it UNKNOWN
   while running. Capture QMP stills and one eight-frame sequence at the required
-  stages; store output/raw PPMs only under the one Mini run directory.
-- [ ] **Step 5: Run Mac offline tests and payload gates.** Python unit tests,
+  stages; store output/raw PPMs only under the one Mini run directory. Preserve
+  each frame's capture interval and SHA-256 in the record. Encode no video on
+  Mini: set `video_status=PENDING_MAC_PREVIEW`, separate from capture/ACK status.
+- [x] **Step 5: Run Mac offline tests and payload gates.** Python unit tests,
   `py_compile`, GDB command/Python block syntax checks, guest POSIX `sh -n`,
   one-line/4096-byte serial contract, base64 decode/hash round-trip, canonical,
-  privacy, diff, Markdown links, and checkpoint. Record historical link-check
-  failures without editing unrelated links.
+  privacy, diff, Markdown links, checkpoint, screen-only archive allowlist/hash
+  tests, and a real-Mac-FFmpeg synthetic PPM→PNG/fragmented-MP4 smoke. Record
+  historical link-check failures without editing unrelated links.
 
 ## Task 2 — one controlled same-image QEMU experiment
 
@@ -255,6 +260,14 @@ engine.
   wrapper/GDB/app identities, negotiate QMP quit through the existing harness,
   verify zero residual owners/socket/ports, and rehash the same rootfs/kernel/
   qemuboot. Keep all raw evidence on Mini.
+- [ ] **Step 7: Make the local visual preview only after QEMU teardown.** Run
+  `scripts/export_flr0416_media_preview.py` with the fixed host/evidence roles
+  and one unused local preview directory. It transfers only allowlisted QMP
+  stills, frame sequences, and capture metadata—not rootfs, kernel, or logs—
+  verifies the source SHA-256 manifest, and creates PNG/MP4 using Mac FFmpeg.
+  Sidecars retain measured capture intervals and label 4-fps playback as
+  nominal/non-real-time. Preserve raw PPMs on Mini; a preview or encoding pass
+  is not a product-render pass.
 
 ## Task 3 — classify and commit the diagnostic result
 

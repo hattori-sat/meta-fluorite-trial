@@ -59,6 +59,37 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
             names += [prefix + "qmp-hit-frame-%04d.ppm" % i for i in range(8)]
         return {name: ("media:" + name).encode() for name in names}
 
+    def test_capture_sequence_defers_video_to_mac_without_failing_capture(self):
+        with tempfile.TemporaryDirectory() as directory:
+            controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
+            controller.run_dir = Path(directory)
+            controller.errors = []
+            controller._save_once = lambda name, content: (controller.run_dir / name).write_bytes(content)
+
+            def capture(name):
+                return b"P6 synthetic frame", {
+                    "name": name,
+                    "status": "PASS",
+                    "format": "P6-PPM",
+                    "width": 1280,
+                    "height": 800,
+                    "size": 18,
+                    "sha256": hashlib.sha256(b"P6 synthetic frame").hexdigest(),
+                    "host_wall_ns": [100, 200],
+                    "host_monotonic_ns": [300, 400],
+                }
+
+            controller._capture_one = capture
+            with mock.patch("shutil.which", return_value=None):
+                files = controller._capture_sequence("hit", 2)
+
+        report_name = "flr0416-0001-qmp-hit-capture.json"
+        report = json.loads(files[report_name])
+        self.assertEqual("PENDING_MAC_PREVIEW", report["video_status"])
+        self.assertEqual(3, len(report["still_and_frames"]))
+        self.assertFalse(any(name.endswith(".mp4") for name in files))
+        self.assertEqual([], controller.errors)
+
     def test_payload_chunks_and_shell_commands_stay_inside_serial_contract(self):
         payload = bytes(range(256)) * 41
 
@@ -314,6 +345,9 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
     def test_bracket_rejects_reversed_host_interval_and_identity_change(self):
         sample = {
+            "event": "GUEST_RUNTIME_SNAPSHOT",
+            "run_id": MODULE.RUN_ID,
+            "stage": "load",
             "guest_boot_id": "boot-abc",
             "guest_wall_ns": 100,
             "guest_monotonic_ns": 200,
@@ -344,7 +378,9 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         record = MODULE.build_bracket(
             "load", self.identity, sample, sample, 10, 20, hashes, 100, 200
         )
-        self.assertEqual("QMP_CAPTURE_BRACKET", json.loads(record)["event"])
+        bracket = json.loads(record)
+        self.assertEqual("QMP_CAPTURE_BRACKET", bracket["event"])
+        self.assertTrue(bracket["verified"])
         with self.assertRaisesRegex(ValueError, "host interval"):
             MODULE.build_bracket("load", self.identity, sample, sample, 20, 10, hashes, 100, 200)
         changed = {**sample, "guest_boot_id": "other"}
@@ -353,6 +389,9 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
 
     def test_bracket_rejects_dead_identity_or_incomplete_capture_set(self):
         sample = {
+            "event": "GUEST_RUNTIME_SNAPSHOT",
+            "run_id": MODULE.RUN_ID,
+            "stage": "load",
             "guest_boot_id": self.identity["guest_boot_id"],
             "guest_wall_ns": 100,
             "guest_monotonic_ns": 200,
@@ -387,6 +426,60 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
                 100,
                 200,
             )
+
+    def test_verified_bracket_rejects_bad_time_counters_and_stage_process_state(self):
+        def snapshot(stage, monotonic, inferior_state):
+            return {
+                "event": "GUEST_RUNTIME_SNAPSHOT",
+                "run_id": MODULE.RUN_ID,
+                "stage": stage,
+                "guest_boot_id": self.identity["guest_boot_id"],
+                "process": self.identity["process"],
+                "gdb_process": self.identity["gdb_process"],
+                "guest_wall_ns": monotonic + 100,
+                "guest_monotonic_ns": monotonic,
+                "process_observation": {
+                    "state": "LIVE",
+                    "matches": True,
+                    "actual": {**self.identity["process"], "comm": "flutter-auto", "state": inferior_state},
+                },
+                "gdb_observation": {
+                    "state": "LIVE",
+                    "matches": True,
+                    "actual": {**self.identity["gdb_process"], "comm": "gdb", "state": "S"},
+                },
+                "present": {"begin": 5, "return": 4, "success": 4},
+                "kernel": {"baseline": 2, "current": 3, "delta": 1},
+            }
+
+        hashes = {
+            "flr0416-0001-qmp-hit-still.ppm": "a" * 64,
+            **{"flr0416-0001-qmp-hit-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
+        }
+        before = snapshot("hit", 200, "T")
+        after = snapshot("hit", 300, "T")
+        args = ("hit", self.identity, before, after, 100, 400, hashes, 100, 400)
+        self.assertTrue(json.loads(MODULE.build_bracket(*args))["verified"])
+
+        backward = {**after, "guest_monotonic_ns": 199}
+        with self.assertRaisesRegex(ValueError, "monotonic time moved backwards"):
+            MODULE.build_bracket("hit", self.identity, before, backward, 100, 400, hashes, 100, 400)
+
+        bad_delta = {**after, "kernel": {"baseline": 2, "current": 3, "delta": 0}}
+        with self.assertRaisesRegex(ValueError, "counters are inconsistent"):
+            MODULE.build_bracket("hit", self.identity, before, bad_delta, 100, 400, hashes, 100, 400)
+
+        running_hit = {**after, "process_observation": {**after["process_observation"], "actual": {**after["process_observation"]["actual"], "state": "S"}}}
+        with self.assertRaisesRegex(ValueError, "stopped inferior"):
+            MODULE.build_bracket("hit", self.identity, before, running_hit, 100, 400, hashes, 100, 400)
+
+        stopped_post_before = snapshot("post", 200, "T")
+        running_post_after = snapshot("post", 300, "S")
+        with self.assertRaisesRegex(ValueError, "post-release.*stopped"):
+            MODULE.build_bracket("post", self.identity, stopped_post_before, running_post_after, 100, 400, {
+                "flr0416-0001-qmp-post-still.ppm": "a" * 64,
+                **{"flr0416-0001-qmp-post-frame-%04d.ppm" % index: "b" * 64 for index in range(8)},
+            }, 100, 400)
 
     def test_ppm_validator_requires_complete_p6_rgb_raster(self):
         raster = bytes((0, 10, 32, 255, 1, 2))
@@ -511,6 +604,187 @@ class FLR0416LiveCaptureTests(unittest.TestCase):
         )
         self.assertEqual("DIAGNOSTIC_CAPTURE_INCOMPLETE", status)
         self.assertEqual(1, code)
+
+    def test_recorded_qemu_identity_disappearance_is_exact_and_fail_closed(self):
+        expected = {"pid": 200, "start_token": "300"}
+        stat_fields = ["S"] + ["0"] * 18 + ["300"]
+        same = "200 (runqemu) " + " ".join(stat_fields)
+        reused = "200 (unrelated) " + " ".join(["S"] + ["0"] * 18 + ["301"])
+        self.assertEqual("SAME", MODULE.qemu_identity_process_state(expected, "200\n", same))
+        self.assertEqual("GONE", MODULE.qemu_identity_process_state(expected, "200", reused))
+        self.assertEqual("GONE", MODULE.qemu_identity_process_state(expected, "200", None))
+        self.assertEqual("UNKNOWN", MODULE.qemu_identity_process_state(expected, "201", same))
+        self.assertEqual("UNKNOWN", MODULE.qemu_identity_process_state(expected, "200", "malformed"))
+
+    def test_already_exited_qemu_can_have_verified_postflight_without_qmp_quit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
+            controller.qmp = root / "qmp-0416.sock"
+            controller.run_dir = root
+            controller.start_script = root / "start.sh"
+            controller.harness = root / "harness.sh"
+            controller.qemu_identity = {"pid": 200, "start_token": "300"}
+            controller.qemu_identity_verified = True
+            controller.qemu_process_gone = False
+            controller.postflight_verified = False
+            controller.qmp_quit_status = "NOT_ATTEMPTED"
+            controller.errors = []
+            controller.teardown_warnings = []
+            controller._qemu_identity_state = lambda: "GONE"
+            controller._wait_qemu_identity_gone = lambda: True
+            controller._save_once = lambda name, payload: None
+            marker = "FLR0416_POSTFLIGHT=PASS image=FLR-0410-0001 qmp=absent target_owners=0 ports=free"
+            completed = subprocess.CompletedProcess([], 0, marker + "\n", "")
+            with mock.patch.object(MODULE.subprocess, "run", return_value=completed):
+                controller._qmp_quit_and_postflight()
+
+            self.assertEqual("ALREADY_EXITED", controller.qmp_quit_status)
+            self.assertTrue(controller.qemu_process_gone)
+            self.assertTrue(controller.postflight_verified)
+            self.assertEqual([], controller.errors)
+
+    def test_unknown_qemu_disappearance_never_counts_as_clean_teardown(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
+            controller.qmp = root / "qmp-0416.sock"
+            controller.run_dir = root
+            controller.start_script = root / "start.sh"
+            controller.qemu_identity = {"pid": 200, "start_token": "300"}
+            controller.qemu_identity_verified = True
+            controller.qemu_process_gone = False
+            controller.postflight_verified = False
+            controller.qmp_quit_status = "NOT_ATTEMPTED"
+            controller.errors = []
+            controller.teardown_warnings = []
+            controller._qemu_identity_state = lambda: "UNKNOWN"
+            controller._wait_qemu_identity_gone = lambda: False
+            controller._save_once = lambda name, payload: None
+            marker = "FLR0416_POSTFLIGHT=PASS image=FLR-0410-0001 qmp=absent target_owners=0 ports=free"
+            completed = subprocess.CompletedProcess([], 0, marker + "\n", "")
+            with mock.patch.object(MODULE.subprocess, "run", return_value=completed):
+                controller._qmp_quit_and_postflight()
+
+            self.assertFalse(controller.qemu_process_gone)
+            self.assertFalse(controller.errors == [])
+            self.assertTrue(controller.postflight_verified)
+
+    def _run_controller_with_teardown(self, qmp_status, *, process_gone=True):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            controller = MODULE.CaptureController.__new__(MODULE.CaptureController)
+            controller.run_dir = root
+            controller.qmp = root / "qmp-0416.sock"
+            controller.qemu_identity = {"pid": 200, "start_token": "300"}
+            controller.qemu_identity_verified = True
+            controller.qemu_process_gone = False
+            controller.postflight_verified = False
+            controller.qmp_quit_status = "NOT_ATTEMPTED"
+            controller.errors = []
+            controller.teardown_warnings = []
+            controller._prepared_ack_deadlines = {}
+            controller.post_release_seconds = 0
+            controller._check_layout = lambda: None
+            controller._record_result = lambda record: None
+            controller._guest_setup = lambda: None
+            controller._capture_one = lambda name: (b"ppm", {"sha256": "a" * 64})
+            controller._begin_ack_window = lambda stage: None
+            controller._end_ack_window = lambda: None
+            controller._launch_gdb = lambda: None
+            controller._run_load_stage = lambda result: result["stages"].update(
+                load_ready={"ready_valid": True}, load={"bracket_verified": True}
+            ) or True
+            controller._run_hit_stage = lambda result: result["stages"].update(
+                hit={"ready_valid": True, "bracket_verified": True}
+            ) or True
+            controller._guest_snapshot = lambda stage, allow_exited=False: {
+                "present": {"success": 1},
+                "kernel": {"delta": 0},
+            }
+            controller._capture_stage = lambda stage, frame_count: (
+                {"frame": b"frame"},
+                True,
+                None,
+                {"present": {"success": 2}, "kernel": {"delta": 0}},
+            )
+            controller._interrupt_and_wait = lambda: {
+                "event": "AFTER_CONTINUE_STOP_OR_EXIT"
+            }
+            controller._preserve_bounded_log = lambda: None
+            controller._analyze_post_frames = lambda files: {"status": "PASS"}
+
+            def teardown():
+                controller.qmp_quit_status = qmp_status
+                controller.qemu_process_gone = process_gone
+                controller.postflight_verified = True
+                if not process_gone:
+                    controller.errors.append("qemu-process-identity-remains-or-unknown")
+
+            controller._qmp_quit_and_postflight = teardown
+            saved = {}
+
+            def save_once(name, payload):
+                saved[name] = payload
+
+            controller._save_once = save_once
+            exit_code = controller.run()
+            final = json.loads(saved["FLR0416-controller-final.json"])
+            return exit_code, final
+
+    def test_run_exit_verdict_matches_clean_teardown_for_every_accepted_qmp_outcome(self):
+        for qmp_status in (
+            "PASS",
+            "ALREADY_EXITED",
+            "FAILED_BUT_GONE",
+            "EXITED_DURING_TEARDOWN",
+        ):
+            with self.subTest(qmp_status=qmp_status):
+                exit_code, final = self._run_controller_with_teardown(qmp_status)
+                self.assertEqual(0, exit_code)
+                self.assertEqual("DIAGNOSTIC_CAPTURE_PASS", final["status"])
+                self.assertTrue(final["teardown_verified"])
+
+    def test_run_unverified_teardown_is_incomplete_and_returns_nonzero(self):
+        exit_code, final = self._run_controller_with_teardown(
+            "PASS", process_gone=False
+        )
+        self.assertEqual(1, exit_code)
+        self.assertEqual("DIAGNOSTIC_CAPTURE_INCOMPLETE", final["status"])
+        self.assertFalse(final["teardown_verified"])
+
+    def test_final_record_separates_diagnostic_failure_from_verified_teardown(self):
+        diagnostic_failure = {
+            "run_id": MODULE.RUN_ID,
+            "image": "FLR-0410-0001",
+            "status": "DIAGNOSTIC_CAPTURE_FAIL",
+            "errors": ["target-boundary-unavailable"],
+            "qemu_host_identity": {"pid": 200, "start_token": "300"},
+            "product_acceptance": "NOT_CLAIMED",
+        }
+        final = MODULE.controller_final_record(
+            diagnostic_failure,
+            qemu_identity_verified=True,
+            qemu_process_gone=True,
+            postflight_verified=True,
+            qmp_quit_status="ALREADY_EXITED",
+            teardown_errors=[],
+            qmp_socket_absent=True,
+        )
+        self.assertTrue(final["teardown_verified"])
+        self.assertEqual("DIAGNOSTIC_CAPTURE_FAIL", final["status"])
+        self.assertEqual(["target-boundary-unavailable"], final["errors"])
+
+        unverified = MODULE.controller_final_record(
+            diagnostic_failure,
+            qemu_identity_verified=True,
+            qemu_process_gone=True,
+            postflight_verified=False,
+            qmp_quit_status="ALREADY_EXITED",
+            teardown_errors=["postflight=FAIL"],
+            qmp_socket_absent=True,
+        )
+        self.assertFalse(unverified["teardown_verified"])
         status, code = MODULE.final_capture_status(
             "DIAGNOSTIC_CAPTURE_PASS", [], False
         )
