@@ -9,6 +9,7 @@
 - Predecessor: [FLR-0418](FLR-0418-preserve-serial-wait-completion.md)
 - Candidate baseline: unchanged [FLR-0410-0001](../evidence/FLR-0410-0001.md)
 - Prior attempt: [FLR-0418-0001](../evidence/FLR-0418-0001.md), consumed; never retry
+- Runtime evidence: [FLR-0421-0001](../evidence/FLR-0421-0001.md), consumed; never retry
 - Working log: [FLR-0421 working log](../logs/2026-10-04-flr0421.md)
 - Execution plan: [FLR-0421 plan](../../docs/superpowers/plans/2026-10-04-flr0421-journal-cursor-evidence.md)
 
@@ -247,9 +248,9 @@ above. Emit redacted diagnostics, never raw journal text or cursor values.
   and Mini bundle-handoff contract targets all passed. The Markdown gate
   reports 55 missing evidence targets in historical tickets; a filtered check
   found no broken links in TASKS, FLR-0418/0421/0422, or the 0421 plan/log.
-- No bundle, BitBake, build, or QEMU attempt has been made. Record subsequent
-  commands and results here through the linked working log; do not duplicate
-  raw runtime logs here.
+- No product-image change, BitBake task, or image build was run. The standard
+  bundle handoff and one unchanged-image QEMU attempt are recorded in the
+  outcome section and linked working log; raw runtime logs remain on the Mini.
 
 ### Check
 
@@ -258,8 +259,8 @@ above. Emit redacted diagnostics, never raw journal text or cursor values.
 | Safe empty-cursor rule | Equal accepted; all changed/ambiguous values rejected | Equal-anchor accepted only with both exact probes; changed/duplicate/moved-anchor cases reject | 23 guest snapshot tests | PASS (local unit boundary) |
 | Bounded collector | Dual-pipe, byte/line/time caps; child reaped | Byte cap, line cap, timeout, concurrent pipes, and reap tests pass | Guest snapshot collector tests | PASS (local unit boundary) |
 | Privacy-safe evidence | Hash/classification only; no raw cursor/journal text | Guest output and host error decoder preserve allowlisted summaries and reject raw/unknown fields and reasons | Guest leak tests and 52 host capture tests | PASS (local unit boundary; runtime not yet observed) |
-| Full local repository gates | Run focused/full Python, MCP, shell, privacy, size, QEMU, Markdown, Devtool/bundle checks | Python 366/366 PASS; other code/contract checks PASS; Markdown reports 55 historical missing targets, none in current files | `make verify`, focused gate commands, filtered Markdown-link check | PASS WITH HISTORICAL FAILURES; staged checks pending |
-| Fresh Mini attempt | Exact image, new ID, post-release QMP if journal gate permits | Pending | FLR-0421-0001 evidence manifest | UNKNOWN |
+| Full local repository gates | Run focused/full Python, MCP, shell, privacy, size, QEMU, Markdown, Devtool/bundle checks | Python 366/366 PASS; privacy, file-size, runtime-log-slice, active-ticket checkpoint, and staged-whitespace checks PASS; Markdown reports 55 historical missing targets, with no errors in touched files | `make verify`, focused gates, and changed-file Markdown filter | PASS WITH HISTORICAL FAILURES; changed-file links PASS |
+| Fresh Mini attempt | Exact image, one new ID, post-release QMP only after every release gate passes | One exact unchanged-image run; load release accepted; hit release refused because caller mapping was UNKNOWN; no post-release capture; QMP quit and postflight passed | [FLR-0421-0001 evidence](../evidence/FLR-0421-0001.md) | FAIL-CLOSED / PARTIAL; no retry |
 | Product rendering | Real Sequoia and HUD acceptance | Not in this ticket; global goal remains open | Live QMP required | UNKNOWN |
 
 ### Act
@@ -268,6 +269,49 @@ above. Emit redacted diagnostics, never raw journal text or cursor values.
   journal boundary is resolved but product pixels remain absent or unstable,
   create a separate ticket based on the first observed renderer/present/
   composition boundary. Never turn a diagnostic bypass into a product fix.
+
+## FLR-0421-0001 outcome
+
+- The fixed bundle handoff updated the authoritative Mini receiver to
+  `604e3fbbf6ba9b4aae85d3cb59cd77ac32ea5009`; effective build roles and the
+  unchanged FLR-0410 kernel/rootfs/qemuboot hashes passed.
+- Immediate ownership/resource preflight and 12-file staging passed. One QEMU
+  run started. Guest load readiness and load-stage release acceptance passed,
+  so the journal cursor gate did not block this run.
+- At the next temporary hardware breakpoint, target PC/process identities and
+  the QMP bracket matched. `caller_mapping` was `UNKNOWN` with
+  `errors.caller_mapping=ValueError`; release was correctly blocked by
+  `caller_mapping_unknown`. The capture exited 1 after recording the abort.
+- The Mini-only hit still and eight-frame sequence are preserved. The still is
+  1280×800 P6 PPM, SHA-256
+  `f686a3c2769cb2bc59b362bdc1d956c2d1d128cbcbfa6ea45ffe2eb92b4a5265`.
+  Its frozen hit-boundary pixels are not a post-release product verdict. The
+  video preview remains pending; no media was copied to the Mac.
+- Present counters stayed `2/1/1` across the stopped hit bracket; kernel fault
+  delta was zero. Neither measurement establishes post-release progress.
+- QMP quit, exact cleanup, and postflight passed. No target owner or QMP socket
+  remained and all reserved ports were free. See the linked evidence manifest
+  for the bounded record and limits.
+
+### Evidence boundary and next discriminator
+
+The immediate failure is in the GDB evidence gate, not proven product code.
+The callback takes `gdb.selected_frame().older().pc()` and asks the resolver to
+find exactly one executable `/proc/PID/maps` range; see
+[`flr0416_gdb_callback.py`](../commands/flr0416_gdb_callback.py) and
+[`flr0416_gdb_observer.py`](../commands/flr0416_gdb_observer.py). The run saved
+the exception class but not its safe reason or same-stop map rows. Therefore:
+
+1. the caller frame/unwind may have produced an unusable PC; or
+2. the PC may be valid but no unique executable map range matched it, including
+   a non-executable, out-of-range, or interval-boundary case.
+
+Neither is confirmed. GPT-6.1 Sol advises replaying the exact caller PC against
+the exact hit-time map snapshot with a preserved match count and finite reason
+code. That snapshot was not saved, so it cannot be reconstructed from this
+run. [FLR-0423](FLR-0423-capture-caller-mapping-provenance.md) owns that
+separate provenance task. Keep this ticket In Progress: its post-release QMP
+success measure was not met, and the overall product goal remains open.
 
 ## Decision log
 
@@ -295,16 +339,19 @@ above. Emit redacted diagnostics, never raw journal text or cursor values.
 
 - Whether FLR-0418's returned cursor equaled the saved cursor; its output and
   anchor-probe results were not recorded and cannot be reconstructed.
-- Guest systemd version/build identity for FLR-0418; FLR-0421 must record the
-  version tied to the exact unchanged rootfs identity.
-- Whether FLR-0421's query passes, whether the load breakpoint can be released,
-  first present progression, live Sequoia/HUD pixels, kernel Oops, five-minute
-  stability, interaction/repaint behavior, and a second-boot reproduction.
+- Guest systemd version/build identity tied to the unchanged FLR-0410 rootfs.
+- The exact reason `caller_resume_pc` failed executable-map resolution and the
+  caller-frame unwind provenance; the same-stop map snapshot is absent.
+- Any post-release present progression, live Sequoia/HUD pixels, post-release
+  kernel Oops state, five-minute stability, interaction/repaint behavior, and a
+  second-boot reproduction.
 
 ## PDCA checker
 
 - Status: NOT CHECKED
 - Checked by:
-- Findings: Do not mark Done until the bounded parser/collector tests, the one
-  fresh-ID runtime/teardown boundary, and required repository gates are checked.
-  No product rendering acceptance is inferred from snapshot or harness success.
+- Findings: Unit and local repository checks passed, and the one authorized
+  fresh-ID runtime attempt plus teardown completed. The required post-release
+  QMP capture did not occur because the caller-map gate failed closed. Keep this
+  ticket In Progress; do not infer product rendering acceptance from snapshot,
+  GDB hit, or harness success. FLR-0423 is the separate next issue.
